@@ -43,7 +43,10 @@ data class PlaybackProgressEntity(
     val manualAudioUri: String? = null,
     val manualAudioName: String? = null,
     val manualSubtitleUri: String? = null,
-    val manualSubtitleName: String? = null
+    val manualSubtitleName: String? = null,
+    val playbackSpeed: Float = 1.0f,
+    val selectedAudioTrackId: String? = null,
+    val selectedSubtitleTrackId: String? = null
 )
 
 @Dao
@@ -93,7 +96,7 @@ typealias KinoDao = NegaiDao
         HiddenFolderEntity::class,
         PlaybackProgressEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 abstract class NegaiDatabase : RoomDatabase() {
@@ -111,6 +114,14 @@ abstract class NegaiDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE playback_progress ADD COLUMN playbackSpeed REAL NOT NULL DEFAULT 1.0")
+                db.execSQL("ALTER TABLE playback_progress ADD COLUMN selectedAudioTrackId TEXT DEFAULT NULL")
+                db.execSQL("ALTER TABLE playback_progress ADD COLUMN selectedSubtitleTrackId TEXT DEFAULT NULL")
+            }
+        }
+
         fun getInstance(context: Context): NegaiDatabase {
             return instance ?: synchronized(this) {
                 instance ?: Room.databaseBuilder(
@@ -118,7 +129,7 @@ abstract class NegaiDatabase : RoomDatabase() {
                     NegaiDatabase::class.java,
                     "negai_player_local.db"
                 )
-                    .addMigrations(MIGRATION_1_2)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                     .fallbackToDestructiveMigration()
                     .build()
                     .also { instance = it }

@@ -28,11 +28,18 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.PlaylistPlay
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AspectRatio
 import androidx.compose.material.icons.filled.Bedtime
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FastForward
+import androidx.compose.material.icons.filled.Fullscreen
+import androidx.compose.material.icons.filled.OpenInFull
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilledTonalButton
@@ -43,6 +50,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -195,7 +203,14 @@ internal fun PlayerQuickActionsBar(
                     horizontalArrangement = Arrangement.spacedBy(5.dp)
                 ) {
                     Icon(
-                        imageVector = action.iconVector(),
+                        imageVector = when (action) {
+                            PlayerQuickAction.SCALE -> when (scaleMode) {
+                                VideoScaleMode.FIT -> Icons.Default.AspectRatio
+                                VideoScaleMode.ZOOM -> Icons.Default.Fullscreen
+                                VideoScaleMode.STRETCH -> Icons.Default.OpenInFull
+                            }
+                            else -> action.iconVector()
+                        },
                         contentDescription = chipState.accessibilityLabel,
                         tint = chipState.iconTint,
                         modifier = Modifier.size(19.dp)
@@ -295,6 +310,7 @@ private fun resolveQuickChipVisuals(
             val speedStr = formatPlaybackSpeedLabel(playbackState.playbackSpeed)
             QuickChipVisualState(
                 accessibilityLabel = if (isEnglish) "Speed $speedStr" else "Скорость $speedStr",
+                counterBadge = speedStr,
                 iconTint = if (isModified) primary else Color.White,
                 containerColor = if (isModified) activePrimaryBg else neutralBg,
                 border = if (isModified) activeBorder else null,
@@ -735,111 +751,233 @@ internal fun SkipIntroConfigModalSheet(
 internal fun SpeedQuickModalSheet(
     playbackSpeed: Float,
     onSelectSpeed: (Float) -> Unit,
+    onSetDefaultSpeed: (Float) -> Unit = {},
     onDismiss: () -> Unit
 ) {
+    val sheetBg = playerPopupSheetContainerColor()
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        containerColor = PlayerPopupSheetContainerColor,
+        containerColor = sheetBg,
         scrimColor = PlayerPopupSheetScrimColor
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .padding(bottom = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+        CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Speed,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Text(
+                            tr("Скорость воспроизведения", "Playback Speed"),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
+
+                    Surface(
+                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.75f),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            text = formatPlaybackSpeedLabel(playbackSpeed),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                        )
+                    }
+                }
+
+                Slider(
+                    value = playbackSpeed,
+                    onValueChange = { raw ->
+                        val stepped = ((raw * 20f).roundToInt() / 20f).coerceIn(0.25f, 3.0f)
+                        onSelectSpeed(stepped)
+                    },
+                    valueRange = 0.25f..3.0f,
+                    modifier = Modifier.testTag("speed_sheet_slider")
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = {
+                            val next = (((playbackSpeed - 0.05f) * 20f).roundToInt() / 20f).coerceAtLeast(0.25f)
+                            onSelectSpeed(next)
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(Icons.Default.Remove, contentDescription = null, modifier = Modifier.size(15.dp))
+                        Spacer(modifier = Modifier.width(3.dp))
+                        Text("0.05x", style = MaterialTheme.typography.labelSmall)
+                    }
+
+                    FilledTonalButton(
+                        onClick = { onSelectSpeed(1.0f) },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(tr("1.0x Норма", "1.0x Normal"), style = MaterialTheme.typography.labelSmall)
+                    }
+
+                    OutlinedButton(
+                        onClick = {
+                            val next = (((playbackSpeed + 0.05f) * 20f).roundToInt() / 20f).coerceAtMost(3.0f)
+                            onSelectSpeed(next)
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(15.dp))
+                        Spacer(modifier = Modifier.width(3.dp))
+                        Text("0.05x", style = MaterialTheme.typography.labelSmall)
+                    }
+                }
+
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    listOf(0.5f, 0.75f, 1.0f, 1.25f, 1.5f, 1.75f, 2.0f, 2.5f, 3.0f).forEach { preset ->
+                        FilterChip(
+                            selected = abs(playbackSpeed - preset) < 0.02f,
+                            onClick = { onSelectSpeed(preset) },
+                            label = { Text(formatPlaybackSpeedLabel(preset), style = MaterialTheme.typography.labelSmall) },
+                            modifier = Modifier.testTag("speed_preset_chip_$preset")
+                        )
+                    }
+                }
+
+                Button(
+                    onClick = {
+                        onSetDefaultSpeed(playbackSpeed)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("set_default_speed_button")
+                ) {
+                    Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        tr("Сделать по умолчанию", "Set as default speed"),
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Dedicated Aspect Ratio / Scale Mode bottom sheet opened by long-pressing SCALE quick action.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun ScaleQuickModalSheet(
+    currentScaleMode: VideoScaleMode,
+    onSelectScaleMode: (VideoScaleMode) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val isEnglish = LocalIsEnglish.current
+    val sheetBg = playerPopupSheetContainerColor()
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = sheetBg,
+        scrimColor = PlayerPopupSheetScrimColor
+    ) {
+        CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Speed,
+                        imageVector = when (currentScaleMode) {
+                            VideoScaleMode.FIT -> Icons.Default.AspectRatio
+                            VideoScaleMode.ZOOM -> Icons.Default.Fullscreen
+                            VideoScaleMode.STRETCH -> Icons.Default.OpenInFull
+                        },
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(20.dp)
                     )
                     Text(
-                        tr("Скорость воспроизведения", "Playback Speed"),
+                        tr("Масштаб кадра", "Aspect Ratio"),
                         style = MaterialTheme.typography.titleMedium
                     )
                 }
 
-                Surface(
-                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.75f),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text(
-                        text = formatPlaybackSpeedLabel(playbackSpeed),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                    )
-                }
-            }
-
-            Slider(
-                value = playbackSpeed,
-                onValueChange = { raw ->
-                    val stepped = ((raw * 20f).roundToInt() / 20f).coerceIn(0.25f, 3.0f)
-                    onSelectSpeed(stepped)
-                },
-                valueRange = 0.25f..3.0f,
-                modifier = Modifier.testTag("speed_sheet_slider")
-            )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                OutlinedButton(
-                    onClick = {
-                        val next = (((playbackSpeed - 0.05f) * 20f).roundToInt() / 20f).coerceAtLeast(0.25f)
-                        onSelectSpeed(next)
-                    },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Icon(Icons.Default.Remove, contentDescription = null, modifier = Modifier.size(15.dp))
-                    Spacer(modifier = Modifier.width(3.dp))
-                    Text("0.05x", style = MaterialTheme.typography.labelSmall)
-                }
-
-                FilledTonalButton(
-                    onClick = { onSelectSpeed(1.0f) },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(tr("1.0x Норма", "1.0x Normal"), style = MaterialTheme.typography.labelSmall)
-                }
-
-                OutlinedButton(
-                    onClick = {
-                        val next = (((playbackSpeed + 0.05f) * 20f).roundToInt() / 20f).coerceAtMost(3.0f)
-                        onSelectSpeed(next)
-                    },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(15.dp))
-                    Spacer(modifier = Modifier.width(3.dp))
-                    Text("0.05x", style = MaterialTheme.typography.labelSmall)
-                }
-            }
-
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                listOf(0.5f, 0.75f, 1.0f, 1.25f, 1.5f, 1.75f, 2.0f, 2.5f, 3.0f).forEach { preset ->
-                    FilterChip(
-                        selected = abs(playbackSpeed - preset) < 0.02f,
-                        onClick = { onSelectSpeed(preset) },
-                        label = { Text(formatPlaybackSpeedLabel(preset), style = MaterialTheme.typography.labelSmall) },
-                        modifier = Modifier.testTag("speed_preset_chip_$preset")
-                    )
+                VideoScaleMode.entries.forEach { mode ->
+                    val selected = currentScaleMode == mode
+                    Card(
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (selected) {
+                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.65f)
+                            } else {
+                                playerPopupCardColor()
+                            }
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .clickable {
+                                onSelectScaleMode(mode)
+                                onDismiss()
+                            }
+                            .testTag("scale_sheet_option_${mode.id}")
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 12.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Icon(
+                                imageVector = when (mode) {
+                                    VideoScaleMode.FIT -> Icons.Default.AspectRatio
+                                    VideoScaleMode.ZOOM -> Icons.Default.Fullscreen
+                                    VideoScaleMode.STRETCH -> Icons.Default.OpenInFull
+                                },
+                                contentDescription = null,
+                                tint = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Text(
+                                text = mode.localizedTitle(isEnglish),
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+                                modifier = Modifier.weight(1f)
+                            )
+                            RadioButton(
+                                selected = selected,
+                                onClick = {
+                                    onSelectScaleMode(mode)
+                                    onDismiss()
+                                }
+                            )
+                        }
+                    }
                 }
             }
         }

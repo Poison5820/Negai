@@ -752,7 +752,6 @@ class PlayerEngine private constructor(
         // Persist any currently playing episode before replacing the playlist (e.g., when switching while in PiP)
         persistCurrentProgress()
         val safeIndex = startIndex.coerceIn(episodes.indices)
-        val player = ensureExoPlayer()
         ensurePlaybackServiceStarted()
 
         engineScope.launch {
@@ -761,7 +760,9 @@ class PlayerEngine private constructor(
             bluetoothConfiguredOffsetMs = settings.bluetoothAudioOffsetMs
             bluetoothSyncController.refreshRouteState()
             recalculateEffectiveAudioDelay(resyncIfPlaying = false)
-            if (settings.decoderMode != configuredDecoderMode) {
+            if (configuredDecoderMode == null) {
+                configuredDecoderMode = settings.decoderMode
+            } else if (settings.decoderMode != configuredDecoderMode) {
                 switchDecoderMode(settings.decoderMode)
             }
             val activePlayer = ensureExoPlayer()
@@ -829,8 +830,14 @@ class PlayerEngine private constructor(
             val sources = episodes.map { buildMediaSourceForEpisode(it) }
 
             val defaultSpd = settings.defaultPlaybackSpeed.coerceIn(0.25f, 3.0f)
-            basePlaybackSpeed = defaultSpd
-            activePlayer.playbackParameters = PlaybackParameters(defaultSpd)
+            val epSavedSpd = savedProgress?.playbackSpeed
+            val effectiveSpd = if (settings.rememberPerEpisodeSettings && epSavedSpd != null && epSavedSpd > 0f) {
+                epSavedSpd.coerceIn(0.25f, 3.0f)
+            } else {
+                defaultSpd
+            }
+            basePlaybackSpeed = effectiveSpd
+            activePlayer.playbackParameters = PlaybackParameters(effectiveSpd)
             val appliedBoost = audioBoostController.setBoostPercent(settings.defaultAudioBoostPercent)
             _positionMs.value = startPos
 
@@ -844,7 +851,7 @@ class PlayerEngine private constructor(
                     videoHeight = if (detectedVideoHeight > 0) detectedVideoHeight else it.videoHeight,
                     chapters = emptyList(),
                     sourceFrameRate = 0f,
-                    playbackSpeed = defaultSpd,
+                    playbackSpeed = effectiveSpd,
                     isTempSpeedBoostActive = false,
                     audioBoostPercent = appliedBoost,
                     audioDelayMs = 0L,
@@ -1570,6 +1577,17 @@ class PlayerEngine private constructor(
                 playbackSpeed = clamped,
                 isTempSpeedBoostActive = false
             )
+        }
+        val currentEp = _state.value.playlist.getOrNull(_state.value.currentEpisodeIndex)
+        if (currentEp != null) {
+            engineScope.launch {
+                repository.savePlaybackProgress(
+                    episode = currentEp,
+                    positionMs = (_exoPlayer?.currentPosition ?: _positionMs.value).coerceAtLeast(0L),
+                    durationMs = _state.value.durationMs,
+                    playbackSpeed = clamped
+                )
+            }
         }
     }
 

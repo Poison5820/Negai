@@ -623,6 +623,50 @@ internal fun PlaybackSettingsPage(
             testTag = "background_audio_switch"
         )
     }
+
+    SettingsSectionCard(
+        title = tr("Декодер видео", "Video Decoder"),
+        icon = Icons.Default.Memory
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            DecoderMode.entries.forEach { mode ->
+                val selected = settings.decoderMode == mode
+                Surface(
+                    color = if (selected) {
+                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f)
+                    } else {
+                        MaterialTheme.colorScheme.surfaceContainerLow
+                    },
+                    shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(
+                        1.dp,
+                        if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable { actions.onUpdateDecoderMode(mode) }
+                        .testTag("decoder_mode_${mode.id}")
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Text(
+                            text = mode.localizedTitle(isEnglish),
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+                            modifier = Modifier.weight(1f)
+                        )
+                        RadioButton(
+                            selected = selected,
+                            onClick = { actions.onUpdateDecoderMode(mode) }
+                        )
+                    }
+                }
+            }
+        }
+    }
 }
 
 // ============================================================================
@@ -816,70 +860,6 @@ internal fun VideoSettingsPage(
                         )
                     }
                 }
-            }
-        }
-    }
-
-    SettingsSectionCard(
-        title = tr("Декодер видео", "Video Decoder"),
-        icon = Icons.Default.Memory
-    ) {
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            DecoderMode.entries.forEach { mode ->
-                val selected = settings.decoderMode == mode
-                Surface(
-                    color = if (selected) {
-                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f)
-                    } else {
-                        MaterialTheme.colorScheme.surfaceContainerLow
-                    },
-                    shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(
-                        1.dp,
-                        if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .clickable { actions.onUpdateDecoderMode(mode) }
-                        .testTag("decoder_mode_${mode.id}")
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Text(
-                            text = mode.localizedTitle(isEnglish),
-                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                            modifier = Modifier.weight(1f)
-                        )
-                        RadioButton(
-                            selected = selected,
-                            onClick = { actions.onUpdateDecoderMode(mode) }
-                        )
-                    }
-                }
-            }
-        }
-
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-
-        Text(
-            text = tr("Масштаб кадра по умолчанию", "Default Aspect Ratio & Scale"),
-            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
-        )
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            VideoScaleMode.entries.forEach { scale ->
-                FilterChip(
-                    selected = settings.defaultScaleMode == scale,
-                    onClick = { actions.onUpdateDefaultScaleMode(scale) },
-                    label = { Text(scale.localizedTitle(isEnglish)) },
-                    modifier = Modifier.testTag("default_scale_${scale.name}")
-                )
             }
         }
     }
@@ -1994,5 +1974,29 @@ private fun friendlyMimeName(mime: String): String = when (mime) {
     "audio/vorbis" -> "Vorbis"
     "audio/raw" -> "PCM / RAW"
     else -> mime.substringAfter('/').uppercase()
+}
+
+// ============================================================================
+// 9. ПРОЧИЕ НАСТРОЙКИ / MISCELLANEOUS SETTINGS
+// ============================================================================
+@Composable
+internal fun MiscellaneousSettingsPage(
+    settings: PlayerSettings,
+    actions: SettingsActions
+) {
+    SettingsSectionCard(
+        title = tr("Память серий", "Per-Episode Memory"),
+        icon = Icons.Default.Memory
+    ) {
+        SettingToggleRow(
+            title = tr(
+                "Запоминать скорость, субтитры и аудио для серий",
+                "Remember speed, subtitles & audio per episode"
+            ),
+            checked = settings.rememberPerEpisodeSettings,
+            onCheckedChange = actions.onUpdateRememberPerEpisodeSettings,
+            testTag = "remember_per_episode_switch"
+        )
+    }
 }
 

@@ -954,12 +954,12 @@ private fun FoldersTabContent(
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = onSearchQueryChange,
-                placeholder = { Text("Поиск папок и серий…") },
+                placeholder = { Text(tr("Поиск папок и серий…", "Search folders & episodes…")) },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                 trailingIcon = {
                     if (searchQuery.isNotEmpty()) {
                         IconButton(onClick = { onSearchQueryChange("") }) {
-                            Icon(Icons.Default.Close, contentDescription = "Очистить поиск")
+                            Icon(Icons.Default.Close, contentDescription = tr("Очистить поиск", "Clear search"))
                         }
                     }
                 },

@@ -573,7 +573,8 @@ fun NegaiAppRoot(
                 onUpdateIgnoreNomediaFolders = { viewModel.setIgnoreNomediaFolders(it) },
                 onUpdateExcludeCameraAndScreenshots = { viewModel.setExcludeCameraAndScreenshots(it) },
                 onUpdateMinVideoSizeMb = { viewModel.setMinVideoSizeMb(it) },
-                onUpdateSkipDeleteConfirmation = { viewModel.setSkipDeleteConfirmation(it) }
+                onUpdateSkipDeleteConfirmation = { viewModel.setSkipDeleteConfirmation(it) },
+                onUpdateRememberPerEpisodeSettings = { viewModel.setRememberPerEpisodeSettings(it) }
             )
 
             val torrentsActions = TorrentsActions(

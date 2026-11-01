@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.PlayCircleOutline
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Subtitles
 import androidx.compose.material.icons.filled.Swipe
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -67,6 +68,7 @@ import com.example.model.SettingsCategory
 import com.example.model.SubtitleColorPreset
 import com.example.model.VideoScaleMode
 import com.example.ui.i18n.LocalIsEnglish
+import com.example.ui.i18n.localizedTitle
 import com.example.ui.i18n.tr
 import kotlin.math.roundToInt
 
@@ -136,7 +138,8 @@ data class SettingsActions(
     val onUpdateIgnoreNomediaFolders: (Boolean) -> Unit,
     val onUpdateExcludeCameraAndScreenshots: (Boolean) -> Unit,
     val onUpdateMinVideoSizeMb: (Int) -> Unit,
-    val onUpdateSkipDeleteConfirmation: (Boolean) -> Unit = {}
+    val onUpdateSkipDeleteConfirmation: (Boolean) -> Unit = {},
+    val onUpdateRememberPerEpisodeSettings: (Boolean) -> Unit = {}
 )
 
 @Composable
@@ -263,6 +266,11 @@ fun SettingsTabContent(
                         )
 
                         SettingsCategory.DEVICE_INFO -> DeviceInfoSettingsPage()
+
+                        SettingsCategory.MISCELLANEOUS -> MiscellaneousSettingsPage(
+                            settings = settings,
+                            actions = actions
+                        )
                     }
                 }
 
@@ -395,6 +403,7 @@ private fun SettingsCategory.icon(): ImageVector = when (this) {
     SettingsCategory.TORRENTS -> Icons.Default.Dns
     SettingsCategory.STORAGE -> Icons.Default.Storage
     SettingsCategory.DEVICE_INFO -> Icons.Default.Memory
+    SettingsCategory.MISCELLANEOUS -> Icons.Default.Tune
 }
 
 private fun categorySummary(
@@ -408,7 +417,7 @@ private fun categorySummary(
     SettingsCategory.APPEARANCE -> {
         val langTxt = settings.appLanguage.shortBadge
         val scaleTxt = "${settings.playerUiScalePercent}%"
-        "${settings.themeMode.title} • $langTxt • $scaleTxt"
+        "${settings.themeMode.localizedTitle(isEnglish)} • $langTxt • $scaleTxt"
     }
     SettingsCategory.PLAYBACK -> {
         if (isEnglish) {
@@ -477,6 +486,13 @@ private fun categorySummary(
             "Screen resolution, refresh rate (Hz) & HW/SW MediaCodec decoders"
         } else {
             "Разрешение экрана, герцовка (Гц) и аппаратные/программные декодеры"
+        }
+    }
+    SettingsCategory.MISCELLANEOUS -> {
+        if (isEnglish) {
+            if (settings.rememberPerEpisodeSettings) "Per-episode memory ON" else "Per-episode memory OFF"
+        } else {
+            if (settings.rememberPerEpisodeSettings) "Память серий вкл" else "Память серий выкл"
         }
     }
 }

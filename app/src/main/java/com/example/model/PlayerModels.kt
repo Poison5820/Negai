@@ -644,6 +644,7 @@ enum class SettingsCategory(
     AUDIO_AND_SUBTITLES("AUDIO_AND_SUBTITLES", "Аудио и субтитры", "Audio & Subtitles"),
     TORRENTS("TORRENTS", "Торренты", "Torrents"),
     STORAGE("STORAGE", "Хранилище", "Storage"),
+    MISCELLANEOUS("MISCELLANEOUS", "Прочие", "Miscellaneous"),
     DEVICE_INFO("DEVICE_INFO", "Об устройстве", "About Device");
 
     fun localizedTitle(isEnglish: Boolean): String = if (isEnglish) titleEn else title
@@ -750,7 +751,10 @@ data class PlayerSettings(
     val ignoreNomediaFolders: Boolean = true,
     val excludeCameraAndScreenshots: Boolean = false,
     val minVideoSizeMb: Int = 0,
-    val skipDeleteConfirmation: Boolean = false
+    val skipDeleteConfirmation: Boolean = false,
+
+    // Miscellaneous & Per-Episode Memory
+    val rememberPerEpisodeSettings: Boolean = true
 ) {
     val effectiveFrameInterpolationMode: FrameInterpolationMode
         get() = if (frameInterpolationEnabled && frameInterpolationMode != FrameInterpolationMode.OFF) {

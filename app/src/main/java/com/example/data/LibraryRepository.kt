@@ -654,7 +654,10 @@ class LibraryRepository private constructor(
         manualAudioUri: String? = null,
         manualAudioName: String? = null,
         manualSubtitleUri: String? = null,
-        manualSubtitleName: String? = null
+        manualSubtitleName: String? = null,
+        playbackSpeed: Float? = null,
+        selectedAudioTrackId: String? = null,
+        selectedSubtitleTrackId: String? = null
     ) {
         val existing = getSavedProgressForEpisode(episode)
         if (existing != null && existing.videoUri != episode.uri) {
@@ -683,13 +686,29 @@ class LibraryRepository private constructor(
             manualAudioUri = manualAudioUri ?: existing?.manualAudioUri,
             manualAudioName = manualAudioName ?: existing?.manualAudioName,
             manualSubtitleUri = manualSubtitleUri ?: existing?.manualSubtitleUri,
-            manualSubtitleName = manualSubtitleName ?: existing?.manualSubtitleName
+            manualSubtitleName = manualSubtitleName ?: existing?.manualSubtitleName,
+            playbackSpeed = playbackSpeed ?: existing?.playbackSpeed ?: 1.0f,
+            selectedAudioTrackId = selectedAudioTrackId ?: existing?.selectedAudioTrackId,
+            selectedSubtitleTrackId = selectedSubtitleTrackId ?: existing?.selectedSubtitleTrackId
         )
         dao.upsertProgress(entity)
         if (PlaybackResumeHelper.isLocalFileUri(episode.uri)) {
             preferencesRepository.setLastPlayedVideoUri(episode.uri)
             if (PlaybackResumeHelper.isMediaFileExists(appContext, episode.uri)) {
                 _lastPlayedFile.value = entity
+            }
+        }
+    }
+
+    suspend fun pruneMissingLocalProgress() = withContext(Dispatchers.IO) {
+        runCatching {
+            val all = dao.getAllProgressSnapshot()
+            for (item in all) {
+                if (PlaybackResumeHelper.isLocalFileUri(item.videoUri)) {
+                    if (!PlaybackResumeHelper.isMediaFileExists(appContext, item.videoUri)) {
+                        dao.deleteProgress(item.videoUri)
+                    }
+                }
             }
         }
     }

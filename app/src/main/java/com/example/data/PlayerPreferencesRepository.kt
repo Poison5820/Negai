@@ -114,6 +114,7 @@ class PlayerPreferencesRepository(private val context: Context) {
         val EXCLUDE_CAMERA_AND_SCREENSHOTS = booleanPreferencesKey("exclude_camera_and_screenshots")
         val MIN_VIDEO_SIZE_MB = intPreferencesKey("min_video_size_mb")
         val SKIP_DELETE_CONFIRMATION = booleanPreferencesKey("skip_delete_confirmation")
+        val REMEMBER_PER_EPISODE_SETTINGS = booleanPreferencesKey("remember_per_episode_settings")
     }
 
     val settingsFlow: Flow<PlayerSettings> = context.playerDataStore.data.map { prefs ->
@@ -327,7 +328,9 @@ class PlayerPreferencesRepository(private val context: Context) {
                     ?: (if (hasBoot && sp.contains("min_video_mb")) sp.getInt("min_video_mb", 0) else 0)
                 ).coerceIn(0, 500),
             skipDeleteConfirmation = prefs[Keys.SKIP_DELETE_CONFIRMATION]
-                ?: (if (hasBoot && sp.contains("skip_delete_confirm")) sp.getBoolean("skip_delete_confirm", false) else false)
+                ?: (if (hasBoot && sp.contains("skip_delete_confirm")) sp.getBoolean("skip_delete_confirm", false) else false),
+            rememberPerEpisodeSettings = prefs[Keys.REMEMBER_PER_EPISODE_SETTINGS]
+                ?: (if (hasBoot && sp.contains("remember_per_ep")) sp.getBoolean("remember_per_ep", true) else true)
         ).also { snapshot ->
             writeBootSettingsSnapshot(context, snapshot)
         }
@@ -703,6 +706,11 @@ class PlayerPreferencesRepository(private val context: Context) {
     suspend fun updateSkipDeleteConfirmation(skip: Boolean) {
         bootPrefs(context).edit().putBoolean("skip_delete_confirm", skip).apply()
         context.playerDataStore.edit { it[Keys.SKIP_DELETE_CONFIRMATION] = skip }
+    }
+
+    suspend fun updateRememberPerEpisodeSettings(remember: Boolean) {
+        bootPrefs(context).edit().putBoolean("remember_per_ep", remember).apply()
+        context.playerDataStore.edit { it[Keys.REMEMBER_PER_EPISODE_SETTINGS] = remember }
     }
 
     suspend fun updateTorrServerUrl(url: String) {

@@ -143,6 +143,7 @@ private enum class ActivePlayerSheet {
     FRAME_INTERPOLATION,
     ANIME4K,
     DECODER,
+    SCALE,
     EPISODES,
     CHAPTERS,
     AUDIO_BOOST,
@@ -929,7 +930,7 @@ fun PlayerScreen(
         LaunchedEffect(showHud) {
             hudAlphaAnim.animateTo(
                 targetValue = if (showHud) 1f else 0f,
-                animationSpec = tween(durationMillis = 80, easing = LinearOutSlowInEasing)
+                animationSpec = tween(durationMillis = 280, easing = LinearOutSlowInEasing)
             )
         }
 
@@ -1345,6 +1346,7 @@ fun PlayerScreen(
                         onLongPressAction = { action ->
                             interactionTick++
                             when (action) {
+                                PlayerQuickAction.SCALE -> activeSheet = ActivePlayerSheet.SCALE
                                 PlayerQuickAction.SKIP_INTRO -> activeSheet = ActivePlayerSheet.SKIP_INTRO_CONFIG
                                 PlayerQuickAction.ANIME4K -> activeSheet = ActivePlayerSheet.ANIME4K
                                 PlayerQuickAction.FRAME_INTERPOLATION -> activeSheet = ActivePlayerSheet.FRAME_INTERPOLATION
@@ -1381,6 +1383,13 @@ fun PlayerScreen(
                 ActivePlayerSheet.SPEED -> SpeedQuickModalSheet(
                     playbackSpeed = playbackState.playbackSpeed,
                     onSelectSpeed = onSelectSpeed,
+                    onSetDefaultSpeed = { speed -> onSelectSpeed(speed) },
+                    onDismiss = { activeSheet = ActivePlayerSheet.NONE }
+                )
+
+                ActivePlayerSheet.SCALE -> ScaleQuickModalSheet(
+                    currentScaleMode = scaleMode,
+                    onSelectScaleMode = onSelectScaleMode,
                     onDismiss = { activeSheet = ActivePlayerSheet.NONE }
                 )
 

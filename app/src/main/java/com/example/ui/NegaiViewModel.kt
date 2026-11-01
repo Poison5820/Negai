@@ -228,6 +228,7 @@ class NegaiViewModel(application: Application) : AndroidViewModel(application) {
     fun rescanLibrary() {
         viewModelScope.launch {
             repository.rescan(showIndicator = true)
+            repository.pruneMissingLocalProgress()
         }
     }
 
@@ -862,6 +863,12 @@ class NegaiViewModel(application: Application) : AndroidViewModel(application) {
     fun setSkipDeleteConfirmation(skip: Boolean) {
         viewModelScope.launch {
             repository.preferencesRepository.updateSkipDeleteConfirmation(skip)
+        }
+    }
+
+    fun setRememberPerEpisodeSettings(remember: Boolean) {
+        viewModelScope.launch {
+            repository.preferencesRepository.updateRememberPerEpisodeSettings(remember)
         }
     }
 
