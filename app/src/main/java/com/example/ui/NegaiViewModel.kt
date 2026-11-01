@@ -569,6 +569,12 @@ class NegaiViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun setAppUiScalePercent(percent: Int) {
+        viewModelScope.launch {
+            repository.preferencesRepository.updateAppUiScalePercent(percent)
+        }
+    }
+
     fun setPlayerUiScalePercent(percent: Int) {
         viewModelScope.launch {
             repository.preferencesRepository.updatePlayerUiScalePercent(percent)

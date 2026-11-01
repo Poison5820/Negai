@@ -116,11 +116,11 @@ class ExampleUnitTest {
     @Test
     fun oledThemes_defaultToPureBlack() {
         val defaultSettings = PlayerSettings()
-        assertEquals(AppThemeMode.OLED_BLACK, defaultSettings.themeMode)
-        assertTrue(defaultSettings.themeMode.isPureOled)
-        assertEquals(0xFF000000L, AppThemeMode.OLED_BLACK.previewBgArgb)
-        assertEquals(0xFF000000L, AppThemeMode.SAKURA_OLED.previewBgArgb)
-        assertEquals(AppThemeMode.SAKURA_OLED, AppThemeMode.fromId("sakura_oled"))
+        assertEquals(AppThemeMode.SYSTEM_AUTO, defaultSettings.themeMode)
+        assertTrue(AppThemeMode.OLED_PITCH_BLACK_DARK.isPureOled)
+        assertEquals(0xFF000000L, AppThemeMode.OLED_PITCH_BLACK_DARK.previewBgArgb)
+        assertEquals(0xFF000000L, AppThemeMode.SAKURA_PURPLE_DARK.previewBgArgb)
+        assertEquals(AppThemeMode.SAKURA_PURPLE_DARK, AppThemeMode.fromId("sakura_oled"))
     }
 
     @Test

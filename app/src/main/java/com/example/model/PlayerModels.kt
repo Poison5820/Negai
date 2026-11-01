@@ -10,57 +10,145 @@ enum class AppThemeMode(
     val isDark: Boolean,
     val isPureOled: Boolean,
     val previewBgArgb: Long,
-    val previewAccentArgb: Long
+    val previewAccentArgb: Long,
+    val pairGroup: String = ""
 ) {
-    OLED_BLACK(
-        id = "OLED_BLACK",
-        title = "Чистый OLED (#000000)",
-        subtitle = "Абсолютно чёрный фон с отключением субпикселей AMOLED и циановым акцентом",
+    SYSTEM_AUTO(
+        id = "SYSTEM_AUTO",
+        title = "Системная тема (Авто)",
+        subtitle = "Автоматическое переключение светлой и тёмной темы в зависимости от системы",
+        isDark = true,
+        isPureOled = true,
+        previewBgArgb = 0xFF0F172AL,
+        previewAccentArgb = 0xFF00E5FFL,
+        pairGroup = "SYSTEM"
+    ),
+    MATERIAL_YOU(
+        id = "MATERIAL_YOU",
+        title = "Material You (Динамическая)",
+        subtitle = "Динамические акценты обоев устройства Android 12+ с высокой контрастностью",
+        isDark = true,
+        isPureOled = true,
+        previewBgArgb = 0xFF0A0E1AL,
+        previewAccentArgb = 0xFF80D8FFL,
+        pairGroup = "MATERIAL"
+    ),
+    OLED_PITCH_BLACK_DARK(
+        id = "OLED_PITCH_BLACK_DARK",
+        title = "Чистый OLED (Тёмная)",
+        subtitle = "Абсолютно чёрный фон (#000000) с отключением субпикселей AMOLED и циановым акцентом",
         isDark = true,
         isPureOled = true,
         previewBgArgb = 0xFF000000L,
-        previewAccentArgb = 0xFF00E5FFL
+        previewAccentArgb = 0xFF00E5FFL,
+        pairGroup = "OLED_PITCH_BLACK"
     ),
-    SAKURA_OLED(
-        id = "SAKURA_OLED",
-        title = "Кибер-Сакура OLED (#000000)",
-        subtitle = "Чистый OLED-чёрный фон с неоново-малиновыми акцентами в аниме-стилистике",
-        isDark = true,
-        isPureOled = true,
-        previewBgArgb = 0xFF000000L,
-        previewAccentArgb = 0xFFFF4D8DL
+    OLED_PITCH_BLACK_LIGHT(
+        id = "OLED_PITCH_BLACK_LIGHT",
+        title = "Чистый OLED (Светлая)",
+        subtitle = "Высококонтрастная дневная светлая тема с циановыми акцентами",
+        isDark = false,
+        isPureOled = false,
+        previewBgArgb = 0xFFF8FAFCL,
+        previewAccentArgb = 0xFF00838FL,
+        pairGroup = "OLED_PITCH_BLACK"
     ),
-    OBSIDIAN_DARK(
-        id = "OBSIDIAN_DARK",
-        title = "Кино-Обсидиан (Тёмная)",
-        subtitle = "Мягкий глубокий графитово-синий оттенок домашнего кинотеатра",
+    DEEP_NAVY_DARK(
+        id = "DEEP_NAVY_DARK",
+        title = "Морской Океан (Тёмная)",
+        subtitle = "Глубокий сине-графитовый фон с неоново-лазурным акцентом",
         isDark = true,
         isPureOled = false,
         previewBgArgb = 0xFF0A0D14L,
-        previewAccentArgb = 0xFF00E5FFL
+        previewAccentArgb = 0xFF00E5FFL,
+        pairGroup = "DEEP_NAVY"
     ),
-    DAYLIGHT_LIGHT(
-        id = "DAYLIGHT_LIGHT",
-        title = "Светлая (Дневная)",
-        subtitle = "Высококонтрастная светлая палитра для яркого освещения",
+    DEEP_NAVY_LIGHT(
+        id = "DEEP_NAVY_LIGHT",
+        title = "Морской Океан (Светлая)",
+        subtitle = "Светлый небесно-голубой фон с глубинным сине-морским акцентом",
         isDark = false,
         isPureOled = false,
-        previewBgArgb = 0xFFF6F8FCL,
-        previewAccentArgb = 0xFF006876L
+        previewBgArgb = 0xFFF0F4FA1L,
+        previewAccentArgb = 0xFF0284C7L,
+        pairGroup = "DEEP_NAVY"
     ),
-    DYNAMIC_OLED(
-        id = "DYNAMIC_OLED",
-        title = "Material You + OLED (#000000)",
-        subtitle = "Системные акценты обоев Android 12+ на абсолютно чёрном OLED-фоне",
+    SAKURA_PURPLE_DARK(
+        id = "SAKURA_PURPLE_DARK",
+        title = "Кибер-Сакура (Тёмная)",
+        subtitle = "Чёрно-фиолетовый OLED фон с неоново-малиновым аниме-акцентом",
         isDark = true,
         isPureOled = true,
         previewBgArgb = 0xFF000000L,
-        previewAccentArgb = 0xFF80D8FFL
+        previewAccentArgb = 0xFFFF4D8DL,
+        pairGroup = "SAKURA_PURPLE"
+    ),
+    SAKURA_PURPLE_LIGHT(
+        id = "SAKURA_PURPLE_LIGHT",
+        title = "Кибер-Сакура (Светлая)",
+        subtitle = "Светлая нежно-розовая палитра с насыщенным аниме-малиновым акцентом",
+        isDark = false,
+        isPureOled = false,
+        previewBgArgb = 0xFFFFF1F5L,
+        previewAccentArgb = 0xFFE11D48L,
+        pairGroup = "SAKURA_PURPLE"
+    ),
+    CYBER_MINT_DARK(
+        id = "CYBER_MINT_DARK",
+        title = "Киберпанк Мята (Тёмная)",
+        subtitle = "Тёмный мятно-изумрудный фон с ярким неоново-зелёным акцентом",
+        isDark = true,
+        isPureOled = false,
+        previewBgArgb = 0xFF061412L,
+        previewAccentArgb = 0xFF00E676L,
+        pairGroup = "CYBER_MINT"
+    ),
+    CYBER_MINT_LIGHT(
+        id = "CYBER_MINT_LIGHT",
+        title = "Киберпанк Мята (Светлая)",
+        subtitle = "Светлый мятно-свежий фон с контрастным изумрудным акцентом",
+        isDark = false,
+        isPureOled = false,
+        previewBgArgb = 0xFFF0FDF4L,
+        previewAccentArgb = 0xFF059669L,
+        pairGroup = "CYBER_MINT"
+    ),
+    SLATE_GREY_DARK(
+        id = "SLATE_GREY_DARK",
+        title = "Стальной Графит (Тёмная)",
+        subtitle = "Тёмно-серый матовый фон со стальным индиго-акцентом",
+        isDark = true,
+        isPureOled = false,
+        previewBgArgb = 0xFF111827L,
+        previewAccentArgb = 0xFF6366F1L,
+        pairGroup = "SLATE_GREY"
+    ),
+    SLATE_GREY_LIGHT(
+        id = "SLATE_GREY_LIGHT",
+        title = "Стальной Графит (Светлая)",
+        subtitle = "Светлый графитовый бумажный фон с контрастным стальным акцентом",
+        isDark = false,
+        isPureOled = false,
+        previewBgArgb = 0xFFF8FAFC1L,
+        previewAccentArgb = 0xFF4F46E5L,
+        pairGroup = "SLATE_GREY"
     );
 
+    fun resolveModeFor(isSystemInDarkTheme: Boolean): AppThemeMode {
+        if (this != SYSTEM_AUTO) return this
+        return if (isSystemInDarkTheme) OLED_PITCH_BLACK_DARK else OLED_PITCH_BLACK_LIGHT
+    }
+
     companion object {
-        fun fromId(id: String): AppThemeMode =
-            entries.firstOrNull { it.id.equals(id, ignoreCase = true) } ?: OLED_BLACK
+        fun fromId(id: String): AppThemeMode = when {
+            id.equals("SYSTEM_AUTO", ignoreCase = true) -> SYSTEM_AUTO
+            id.equals("MATERIAL_YOU", ignoreCase = true) || id.equals("DYNAMIC_OLED", ignoreCase = true) -> MATERIAL_YOU
+            id.equals("OLED_BLACK", ignoreCase = true) -> OLED_PITCH_BLACK_DARK
+            id.equals("DAYLIGHT_LIGHT", ignoreCase = true) -> OLED_PITCH_BLACK_LIGHT
+            id.equals("OBSIDIAN_DARK", ignoreCase = true) -> DEEP_NAVY_DARK
+            id.equals("SAKURA_OLED", ignoreCase = true) -> SAKURA_PURPLE_DARK
+            else -> entries.firstOrNull { it.id.equals(id, ignoreCase = true) } ?: SYSTEM_AUTO
+        }
     }
 }
 
@@ -675,7 +763,7 @@ data class VideoChapter(
 data class PlayerSettings(
     // Appearance & Interface
     val appLanguage: AppLanguage = AppLanguage.SYSTEM,
-    val themeMode: AppThemeMode = AppThemeMode.OLED_BLACK,
+    val themeMode: AppThemeMode = AppThemeMode.SYSTEM_AUTO,
     val playerControlsTheme: PlayerControlsTheme = PlayerControlsTheme.CLASSIC_OLED,
     val compactUiMode: Boolean = true,
     val showEpisodeThumbnails: Boolean = true,
@@ -686,6 +774,7 @@ data class PlayerSettings(
     val episodeSortOption: EpisodeSortOption = EpisodeSortOption.EPISODE_NUMBER,
     val episodeSortAscending: Boolean = true,
     val quickActions: List<PlayerQuickAction> = QuickActionsSerializer.DEFAULT_ACTIONS,
+    val appUiScalePercent: Int = 100,
     val playerUiScalePercent: Int = 100,
     val playerAutoDpiScale: Boolean = true,
     val controlsAutoHideSeconds: Int = 4,

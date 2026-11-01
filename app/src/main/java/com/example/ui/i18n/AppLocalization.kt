@@ -226,19 +226,33 @@ fun SubtitleColorPreset.localizedLabel(isEnglish: Boolean): String = if (!isEngl
 }
 
 fun AppThemeMode.localizedTitle(isEnglish: Boolean): String = if (!isEnglish) title else when (this) {
-    AppThemeMode.OLED_BLACK -> "Pure OLED (#000000)"
-    AppThemeMode.SAKURA_OLED -> "Cyber Sakura OLED (#000000)"
-    AppThemeMode.OBSIDIAN_DARK -> "Cinema Obsidian (Dark)"
-    AppThemeMode.DAYLIGHT_LIGHT -> "Daylight (Light)"
-    AppThemeMode.DYNAMIC_OLED -> "Material You + OLED (#000000)"
+    AppThemeMode.SYSTEM_AUTO -> "System Auto"
+    AppThemeMode.MATERIAL_YOU -> "Material You (Dynamic)"
+    AppThemeMode.OLED_PITCH_BLACK_DARK -> "Pure OLED (Dark)"
+    AppThemeMode.OLED_PITCH_BLACK_LIGHT -> "Pure OLED (Light)"
+    AppThemeMode.DEEP_NAVY_DARK -> "Deep Navy (Dark)"
+    AppThemeMode.DEEP_NAVY_LIGHT -> "Deep Navy (Light)"
+    AppThemeMode.SAKURA_PURPLE_DARK -> "Cyber Sakura (Dark)"
+    AppThemeMode.SAKURA_PURPLE_LIGHT -> "Cyber Sakura (Light)"
+    AppThemeMode.CYBER_MINT_DARK -> "Cyber Mint (Dark)"
+    AppThemeMode.CYBER_MINT_LIGHT -> "Cyber Mint (Light)"
+    AppThemeMode.SLATE_GREY_DARK -> "Slate Grey (Dark)"
+    AppThemeMode.SLATE_GREY_LIGHT -> "Slate Grey (Light)"
 }
 
 fun AppThemeMode.localizedSubtitle(isEnglish: Boolean): String = if (!isEnglish) subtitle else when (this) {
-    AppThemeMode.OLED_BLACK -> "True black background turning off AMOLED subpixels with cyan accents"
-    AppThemeMode.SAKURA_OLED -> "Pure OLED black background with neon crimson anime accents"
-    AppThemeMode.OBSIDIAN_DARK -> "Soft deep graphite-blue home theater palette"
-    AppThemeMode.DAYLIGHT_LIGHT -> "High-contrast light palette for bright environments"
-    AppThemeMode.DYNAMIC_OLED -> "Android 12+ wallpaper accents on a pure OLED black background"
+    AppThemeMode.SYSTEM_AUTO -> "Automatically match system dark/light mode"
+    AppThemeMode.MATERIAL_YOU -> "Dynamic wallpaper accents from Android 12+"
+    AppThemeMode.OLED_PITCH_BLACK_DARK -> "True black background (#000000) with electric cyan accents"
+    AppThemeMode.OLED_PITCH_BLACK_LIGHT -> "High-contrast daylight theme with cyan accents"
+    AppThemeMode.DEEP_NAVY_DARK -> "Deep navy-graphite background with azure accents"
+    AppThemeMode.DEEP_NAVY_LIGHT -> "Sky blue background with deep navy accents"
+    AppThemeMode.SAKURA_PURPLE_DARK -> "Pure OLED black background with neon crimson anime accents"
+    AppThemeMode.SAKURA_PURPLE_LIGHT -> "Soft pink palette with vivid crimson accents"
+    AppThemeMode.CYBER_MINT_DARK -> "Dark mint-emerald background with neon green accents"
+    AppThemeMode.CYBER_MINT_LIGHT -> "Fresh mint background with contrast emerald accents"
+    AppThemeMode.SLATE_GREY_DARK -> "Dark slate matte background with steel indigo accents"
+    AppThemeMode.SLATE_GREY_LIGHT -> "Paper slate background with contrast steel accents"
 }
 
 fun PlayerControlsTheme.localizedTitle(isEnglish: Boolean): String = if (!isEnglish) title else when (this) {

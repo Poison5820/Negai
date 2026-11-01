@@ -229,12 +229,19 @@ fun PlayerScreen(
 
     var controlsVisible by rememberSaveable { mutableStateOf(true) }
     var isScreenLocked by rememberSaveable { mutableStateOf(false) }
+    var isOrientationLocked by rememberSaveable { mutableStateOf(false) }
     var lockedPillVisible by remember { mutableStateOf(false) }
     var orientationMode by rememberSaveable(settings.defaultPlayerOrientation) {
         mutableStateOf(settings.defaultPlayerOrientation)
     }
     var activeSheet by remember { mutableStateOf(ActivePlayerSheet.NONE) }
     var interactionTick by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(playbackState.currentEpisodeIndex) {
+        if (!isOrientationLocked) {
+            orientationMode = settings.defaultPlayerOrientation
+        }
+    }
 
     // Intercept Back: when locked, show unlock pill instead of accidentally exiting player!
     BackHandler(enabled = !isInPipMode) {
@@ -293,11 +300,15 @@ fun PlayerScreen(
 
     // Apply & dynamically update Activity screen orientation based on video aspect ratio
     DisposableEffect(orientationMode, playbackState.videoWidth, playbackState.videoHeight) {
-        val activity = context as? Activity
-        activity?.requestedOrientation = orientationMode.resolveActivityOrientation(
-            videoWidth = playbackState.videoWidth,
-            videoHeight = playbackState.videoHeight
-        )
+        val isNearEnd = playbackState.durationMs > 1000L &&
+            playbackState.currentPositionMs >= playbackState.durationMs - 1000L
+        if (!isNearEnd) {
+            val activity = context as? Activity
+            activity?.requestedOrientation = orientationMode.resolveActivityOrientation(
+                videoWidth = playbackState.videoWidth,
+                videoHeight = playbackState.videoHeight
+            )
+        }
         onDispose {}
     }
 
@@ -1287,6 +1298,7 @@ fun PlayerScreen(
                         settings = settings,
                         scaleMode = scaleMode,
                         orientationMode = orientationMode,
+                        isOrientationLocked = isOrientationLocked,
                         pipSupported = pipSupported,
                         onTriggerAction = { action ->
                             interactionTick++
@@ -1350,6 +1362,7 @@ fun PlayerScreen(
                                 PlayerQuickAction.SKIP_INTRO -> activeSheet = ActivePlayerSheet.SKIP_INTRO_CONFIG
                                 PlayerQuickAction.ANIME4K -> activeSheet = ActivePlayerSheet.ANIME4K
                                 PlayerQuickAction.FRAME_INTERPOLATION -> activeSheet = ActivePlayerSheet.FRAME_INTERPOLATION
+                                PlayerQuickAction.ORIENTATION -> isOrientationLocked = !isOrientationLocked
                                 else -> Unit
                             }
                         },

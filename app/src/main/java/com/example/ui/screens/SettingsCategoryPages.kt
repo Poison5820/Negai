@@ -264,7 +264,7 @@ internal fun AppearanceSettingsPage(
     }
 
     SettingsSectionCard(
-        title = tr("Масштаб интерфейса и автоскрытие", "UI Scale & HUD Auto-Hide"),
+        title = tr("Масштаб интерфейса приложения", "App UI Scale"),
         icon = Icons.Default.Tune
     ) {
         Row(
@@ -274,8 +274,71 @@ internal fun AppearanceSettingsPage(
         ) {
             Text(
                 text = tr(
-                    "Масштаб интерфейса и текста: ${settings.playerUiScalePercent}%",
-                    "App UI & Text Scale: ${settings.playerUiScalePercent}%"
+                    "Масштаб интерфейса приложения: ${settings.appUiScalePercent}%",
+                    "App UI & Text Scale: ${settings.appUiScalePercent}%"
+                ),
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+                modifier = Modifier.weight(1f)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            FilledTonalButton(
+                onClick = { actions.onUpdateAppUiScalePercent(100) },
+                enabled = settings.appUiScalePercent != 100,
+                shape = RoundedCornerShape(10.dp),
+                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                modifier = Modifier
+                    .height(34.dp)
+                    .testTag("reset_app_ui_scale_btn")
+            ) {
+                Icon(
+                    imageVector = Icons.Default.RestartAlt,
+                    contentDescription = tr("Сбросить масштаб до 100%", "Reset scale to 100%"),
+                    modifier = Modifier.size(15.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = "100%",
+                    style = MaterialTheme.typography.labelMedium,
+                    maxLines = 1
+                )
+            }
+        }
+
+        InstantSlider(
+            value = settings.appUiScalePercent.coerceIn(75, 140).toFloat(),
+            onValueChange = { actions.onUpdateAppUiScalePercent(it.roundToInt().coerceIn(75, 140)) },
+            valueRange = 75f..140f,
+            modifier = Modifier.testTag("settings_app_ui_scale_slider")
+        )
+
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            listOf(75, 85, 100, 115, 125, 140).forEach { pct ->
+                FilterChip(
+                    selected = settings.appUiScalePercent == pct,
+                    onClick = { actions.onUpdateAppUiScalePercent(pct) },
+                    label = { Text("${pct}%") },
+                    modifier = Modifier.testTag("app_scale_chip_$pct")
+                )
+            }
+        }
+    }
+
+    SettingsSectionCard(
+        title = tr("Масштаб проигрывателя (HUD)", "Player HUD Scale"),
+        icon = Icons.Default.Tune
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = tr(
+                    "Масштаб интерфейса плеера: ${settings.playerUiScalePercent}%",
+                    "Player HUD Scale: ${settings.playerUiScalePercent}%"
                 ),
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
                 modifier = Modifier.weight(1f)
@@ -319,8 +382,8 @@ internal fun AppearanceSettingsPage(
                 FilterChip(
                     selected = settings.playerUiScalePercent == pct,
                     onClick = { actions.onUpdatePlayerUiScalePercent(pct) },
-                    label = { Text("$pct%") },
-                    modifier = Modifier.testTag("settings_player_ui_scale_chip_$pct")
+                    label = { Text("${pct}%") },
+                    modifier = Modifier.testTag("player_scale_chip_$pct")
                 )
             }
         }
@@ -1859,6 +1922,24 @@ internal fun DeviceInfoSettingsPage() {
                     }
                 }
             }
+        }
+    }
+
+    SettingsSectionCard(
+        title = tr("Официальный репозиторий GitHub", "Official GitHub Repository"),
+        subtitle = tr("Исходный код, исправления и выпуски релизов", "Source code, bug reports & release updates"),
+        icon = Icons.Default.Language
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            DeviceInfoMetricRow(
+                label = tr("Репозиторий", "Repository"),
+                value = "https://github.com/Poison5820/Negai"
+            )
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            DeviceInfoMetricRow(
+                label = tr("Поддержка Obtainium", "Obtainium Support"),
+                value = tr("Да (Direct Release Updates)", "Yes (Direct Release Updates)")
+            )
         }
     }
 }

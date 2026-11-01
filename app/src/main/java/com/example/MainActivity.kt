@@ -115,11 +115,11 @@ class MainActivity : ComponentActivity() {
                 )
             }
             val baseDensity = androidx.compose.ui.platform.LocalDensity.current
-            val effectiveAppScale = com.example.ui.screens.rememberPlayerEffectiveScale(settings)
-            val scaledAppDensity = remember(baseDensity, effectiveAppScale) {
+            val appUiScale = (settings.appUiScalePercent / 100f).coerceIn(0.75f, 1.4f)
+            val scaledAppDensity = remember(baseDensity, appUiScale) {
                 androidx.compose.ui.unit.Density(
-                    density = baseDensity.density * effectiveAppScale,
-                    fontScale = baseDensity.fontScale * effectiveAppScale
+                    density = baseDensity.density * appUiScale,
+                    fontScale = baseDensity.fontScale * appUiScale
                 )
             }
             NegaiTheme(themeMode = settings.themeMode) {
@@ -523,6 +523,7 @@ fun NegaiAppRoot(
                 onUpdateShowEpisodeThumbnails = { viewModel.setShowEpisodeThumbnails(it) },
                 onUpdateShowEpisodesButtonInHud = { viewModel.setShowEpisodesButtonInHud(it) },
                 onUpdateShowHudBadges = { viewModel.setShowHudBadges(it) },
+                onUpdateAppUiScalePercent = { viewModel.setAppUiScalePercent(it) },
                 onUpdatePlayerUiScalePercent = { viewModel.setPlayerUiScalePercent(it) },
                 onUpdatePlayerAutoDpiScale = { viewModel.setPlayerAutoDpiScale(it) },
                 onUpdateControlsAutoHideSeconds = { viewModel.setControlsAutoHideSeconds(it) },

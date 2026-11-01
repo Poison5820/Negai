@@ -81,8 +81,10 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.NavigationRailItemDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -522,6 +524,13 @@ fun LibraryScreen(
                         windowInsets = WindowInsets.navigationBars,
                         containerColor = MaterialTheme.colorScheme.surfaceContainerLow
                     ) {
+                        val navBarColors = NavigationBarItemDefaults.colors(
+                            indicatorColor = MaterialTheme.colorScheme.primary,
+                            selectedIconColor = MaterialTheme.colorScheme.onPrimary,
+                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            selectedTextColor = MaterialTheme.colorScheme.primary,
+                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                         NavigationBarItem(
                             selected = currentTab == HomeTab.FOLDERS,
                             onClick = { onSelectTab(HomeTab.FOLDERS) },
@@ -532,6 +541,7 @@ fun LibraryScreen(
                                 )
                             },
                             label = { Text(stringResource(R.string.nav_folders)) },
+                            colors = navBarColors,
                             modifier = Modifier.testTag("nav_tab_folders")
                         )
                         NavigationBarItem(
@@ -544,6 +554,7 @@ fun LibraryScreen(
                                 )
                             },
                             label = { Text(stringResource(R.string.nav_recent)) },
+                            colors = navBarColors,
                             modifier = Modifier.testTag("nav_tab_recent")
                         )
                         NavigationBarItem(
@@ -556,6 +567,7 @@ fun LibraryScreen(
                                 )
                             },
                             label = { Text(stringResource(R.string.nav_torrents)) },
+                            colors = navBarColors,
                             modifier = Modifier.testTag("nav_tab_torrents")
                         )
                         NavigationBarItem(
@@ -568,6 +580,7 @@ fun LibraryScreen(
                                 )
                             },
                             label = { Text(stringResource(R.string.nav_settings)) },
+                            colors = navBarColors,
                             modifier = Modifier.testTag("nav_tab_settings")
                         )
                     }
@@ -585,6 +598,13 @@ fun LibraryScreen(
                         modifier = Modifier.fillMaxHeight()
                     ) {
                         Spacer(modifier = Modifier.height(12.dp))
+                        val railColors = NavigationRailItemDefaults.colors(
+                            indicatorColor = MaterialTheme.colorScheme.primary,
+                            selectedIconColor = MaterialTheme.colorScheme.onPrimary,
+                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            selectedTextColor = MaterialTheme.colorScheme.primary,
+                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                         NavigationRailItem(
                             selected = currentTab == HomeTab.FOLDERS,
                             onClick = { onSelectTab(HomeTab.FOLDERS) },
@@ -595,6 +615,7 @@ fun LibraryScreen(
                                 )
                             },
                             label = { Text(stringResource(R.string.nav_folders)) },
+                            colors = railColors,
                             modifier = Modifier.testTag("rail_tab_folders")
                         )
                         NavigationRailItem(
@@ -607,6 +628,7 @@ fun LibraryScreen(
                                 )
                             },
                             label = { Text(stringResource(R.string.nav_recent)) },
+                            colors = railColors,
                             modifier = Modifier.testTag("rail_tab_recent")
                         )
                         NavigationRailItem(
@@ -619,6 +641,7 @@ fun LibraryScreen(
                                 )
                             },
                             label = { Text(stringResource(R.string.nav_torrents)) },
+                            colors = railColors,
                             modifier = Modifier.testTag("rail_tab_torrents")
                         )
                         NavigationRailItem(
@@ -631,6 +654,7 @@ fun LibraryScreen(
                                 )
                             },
                             label = { Text(stringResource(R.string.nav_settings)) },
+                            colors = railColors,
                             modifier = Modifier.testTag("rail_tab_settings")
                         )
                     }

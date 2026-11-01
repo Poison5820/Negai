@@ -89,6 +89,7 @@ data class SettingsActions(
     val onUpdateShowEpisodesButtonInHud: (Boolean) -> Unit = {},
     val onUpdateShowHudBadges: (Boolean) -> Unit = {},
     val onUpdateQuickActions: (List<PlayerQuickAction>) -> Unit,
+    val onUpdateAppUiScalePercent: (Int) -> Unit = {},
     val onUpdatePlayerUiScalePercent: (Int) -> Unit = {},
     val onUpdatePlayerAutoDpiScale: (Boolean) -> Unit = {},
     val onUpdateControlsAutoHideSeconds: (Int) -> Unit = {},

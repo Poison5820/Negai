@@ -80,9 +80,9 @@ import kotlin.math.roundToInt
 internal fun playerPopupSheetContainerColor(): Color {
     val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
     return if (isDark) {
-        Color(0xFF0E131F).copy(alpha = 0.85f)
+        Color(0xFF090D16).copy(alpha = 0.68f)
     } else {
-        MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.94f)
+        MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.82f)
     }
 }
 
@@ -90,15 +90,26 @@ internal fun playerPopupSheetContainerColor(): Color {
 internal fun playerPopupCardColor(): Color {
     val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
     return if (isDark) {
-        Color(0xFF141B29).copy(alpha = 0.80f)
+        Color(0xFF101726).copy(alpha = 0.60f)
     } else {
-        MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.88f)
+        MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.78f)
     }
 }
 
-internal val PlayerPopupSheetContainerColor = Color(0xFF0E131F).copy(alpha = 0.75f)
-internal val PlayerPopupSheetScrimColor = Color.Black.copy(alpha = 0.28f)
-internal val PlayerPopupCardColor = Color(0xFF141B29).copy(alpha = 0.75f)
+@Composable
+internal fun playerPopupBorderStroke(): BorderStroke {
+    val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+    val strokeColor = if (isDark) {
+        MaterialTheme.colorScheme.primary.copy(alpha = 0.22f)
+    } else {
+        MaterialTheme.colorScheme.primary.copy(alpha = 0.30f)
+    }
+    return BorderStroke(0.5.dp, strokeColor)
+}
+
+internal val PlayerPopupSheetContainerColor = Color(0xFF090D16).copy(alpha = 0.68f)
+internal val PlayerPopupSheetScrimColor = Color.Black.copy(alpha = 0.22f)
+internal val PlayerPopupCardColor = Color(0xFF101726).copy(alpha = 0.60f)
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable

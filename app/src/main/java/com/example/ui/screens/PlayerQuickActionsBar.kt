@@ -34,6 +34,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.material.icons.filled.Fullscreen
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.OpenInFull
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Speed
@@ -108,6 +109,7 @@ internal fun PlayerQuickActionsBar(
     settings: PlayerSettings,
     scaleMode: VideoScaleMode,
     orientationMode: PlayerOrientationMode,
+    isOrientationLocked: Boolean = false,
     pipSupported: Boolean,
     onTriggerAction: (PlayerQuickAction) -> Unit,
     onLongPressAction: (PlayerQuickAction) -> Unit = {},
@@ -215,6 +217,14 @@ internal fun PlayerQuickActionsBar(
                         tint = chipState.iconTint,
                         modifier = Modifier.size(19.dp)
                     )
+                    if (action == PlayerQuickAction.ORIENTATION && isOrientationLocked) {
+                        Icon(
+                            imageVector = Icons.Default.Lock,
+                            contentDescription = null,
+                            tint = chipState.iconTint,
+                            modifier = Modifier.size(12.dp)
+                        )
+                    }
                     if (chipState.counterBadge != null) {
                         Text(
                             text = chipState.counterBadge,

@@ -1,101 +1,60 @@
-# negai v2.6 — План комплексных улучшений и полировки
+# Implementation Plan - Negai Applet Improvements
 
-План направлен на устранение оставшихся недочетов локализации, плавность анимаций, стабильный запуск воспроизведения без перезапусков, адаптацию Anime4K под разрешение экрана, индивидуальное запоминание дорожек для серий и переработку меню плеера и настроек.
+This plan outlines the architecture changes and bug fixes to improve theme contrast, add paired Light/Dark themes + Material You, fix bottom bar accent colors, introduce compact frosted glass popups, implement independent App/Player UI scaling, fix video orientation transitions with long-press lock, update GitHub repository links to `https://github.com/Poison5820/Negai`, and restructure the README with technical release notes.
 
-## Подтвержденные решения (Фаза 1)
-- **Индивидуальные настройки серий (скорость, звук, субтитры)**: Сохраняются в базе данных истории серий (`PlaybackProgressEntity`) с легкой отложенной проверкой и очисткой записей для удаленных файлов во время фонового сканирования, чтобы не нагружать устройство. В настройках добавляется переключатель запоминания в новом разделе «Прочие».
-- **Иконка масштаба кадра в плеере**: Одиночное касание циклично переключает режим, долгое нажатие открывает всплывающую шторку. Для каждого режима используется отдельный наглядный значок (`Fit` — вписать, `Crop` — обрезать, `Stretch` — растянуть, `16:9` — широкоформатный, `4:3` — классический, `1:1` — исходный). Настройка масштаба по умолчанию удаляется из общих настроек «Улучшения».
-- **Фиксация скорости по умолчанию**: В шторку скорости воспроизведения добавляется кнопка «Сделать скоростью по умолчанию» внизу шторки. Текущая скорость отображается прямо на кнопке быстрого действия (`1.25x`, `1.5x` и т.д.).
+## Proposed Changes
 
----
+### 1. Light Theme Contrast & Paired Light/Dark Theme Modes
+- **File**: `app/src/main/java/com/example/model/PlayerModels.kt`, `app/src/main/java/com/example/ui/theme/Theme.kt`
+- Fix readable content colors, card containers, and high-contrast text tokens for Light mode schemes in `NegaiTheme`.
+- Expand `AppThemeMode` enum to support:
+  - System Auto Dark/Light theme switching (`SYSTEM_AUTO`)
+  - Standalone Material You dynamic theme (`MATERIAL_YOU`)
+  - Paired themes with explicit Light and Dark options for OLED Pitch Black, Deep Navy, Anime Purple, Cyberpunk Mint, Slate Grey, and Sunset Amber.
+- **File**: `app/src/main/java/com/example/ui/screens/SettingsCategoryPages.kt`, `app/src/main/java/com/example/ui/screens/QuickThemeBottomSheet.kt`
+- Update theme selector UI to allow both system auto-switch and manual choice of paired Light/Dark variants.
 
-## 1. Архитектура и структура компонентов
+### 2. Accent-Colored Navigation Elements Across All Themes
+- **File**: `app/src/main/java/com/example/ui/screens/LibraryScreen.kt`
+- Update `NavigationBarItem` and `NavigationRailItem` color definitions so active indicator pills and selected icons/labels utilize the active theme's primary accent color across all themes (not just Material You).
 
-```
-┌────────────────────────────────────────────────────────────────────────┐
-│                        negai v2.6 System Layout                        │
-└────────────────────────────────────────────────────────────────────────┘
-                                    │
-    ┌───────────────────────────────┴──────────────────────────────┐
-    ▼                                                              ▼
-┌──────────────────────────────────────┐       ┌──────────────────────────────────────┐
-│            UI & Navigation           │       │             Data & Engine            │
-├──────────────────────────────────────┤       ├──────────────────────────────────────┤
-│ • FolderDetailScreen                 │       │ • PlayerEngine                       │
-│   - Top bar: Remove Hide & Delete    │       │   - Single-shot source preparation   │
-│   - Pure Folder Info Modal           │       │   - Prevent redundant player reload  │
-│ • PlayerScreen                       │       │ • Anime4KVideoSurface                │
-│   - Smooth HUD fade in/out           │       │   - Screen size cap (no overscaling) │
-│   - Scale button: icons + long-press │       │ • NegaiDatabase / Room Progress      │
-│   - Speed chip + unified modal sheet │       │   - per-episode speed, audio, subs   │
-│   - Orientation exit reset fix       │       │   - lightweight missing-file pruning │
-│ • SettingsTabScreen                  │       │ • PlayerPreferencesRepository        │
-│   - 9 categories (+ MISCELLANEOUS)   │       │   - rememberPerEpisodeSettings       │
-│   - Decoder moved to PLAYBACK        │       │   - defaultPlaybackSpeed sync        │
-│   - Clean EN/RU localization         │       │                                      │
-└──────────────────────────────────────┘       └──────────────────────────────────────┘
-```
+### 3. Compact Frosted Glass Popup Sheets & Dialogs
+- **File**: `app/src/main/java/com/example/ui/screens/PlayerControlSheets.kt`, `app/src/main/java/com/example/ui/screens/PlayerQuickActionsBar.kt`
+- Reduce internal padding and container dimensions of bottom sheets and modals.
+- Set ultra-thin accent borders (`0.5.dp` with low alpha).
+- Implement center-to-edge radial/linear gradient background brushes for a frosted glass effect (more transparent in center, slightly darker toward edges).
 
----
+### 4. Independent App UI Scale & Player HUD Scale
+- **File**: `app/src/main/java/com/example/model/PlayerModels.kt`, `app/src/main/java/com/example/data/PlayerPreferencesRepository.kt`, `app/src/main/java/com/example/ui/NegaiViewModel.kt`
+- Add `appUiScalePercent` (75%–140%) alongside `playerUiScalePercent` (75%–140%).
+- Apply `appUiScalePercent` to general app density (`LocalDensity` in `MainActivity.kt`) and `playerUiScalePercent` to player controls.
+- **File**: `app/src/main/java/com/example/ui/screens/SettingsCategoryPages.kt`
+- Add two independent slider rows with reset buttons in `AppearanceSettingsPage`.
 
-## 2. Детальный план работ по разделам
+### 5. Video Orientation Transitions & Long-Press Lock
+- **File**: `app/src/main/java/com/example/player/PlayerEngine.kt`, `app/src/main/java/com/example/ui/screens/PlayerScreen.kt`
+- **End-of-video flip fix**: Prevent aspect ratio calculation updates when playback reaches the final second of an episode or during buffering transitions.
+- **Orientation override & long-press lock**:
+  - Add `isOrientationLocked` state to player orientation.
+  - Tapping orientation button toggles orientation mode (`Auto` -> `Landscape` -> `Portrait`).
+  - Long-pressing orientation button locks/unlocks orientation lock.
+  - Display a lock badge on the orientation quick chip when locked.
+  - When unlocked, switching episodes automatically resets orientation to the next video's aspect ratio / default setting; when locked, manual orientation persists across playlist episodes.
 
-### 1. Полная локализация интерфейса (EN / RU)
-- **Поиск**: перевести плейсхолдер поиска папок и серий («Поиск папок и серий…» -> "Search folders & episodes…").
-- **Кнопки хранилища**: «Доп. папка» -> "Add folder" / "Extra folder", «Открыть файл» -> "Open file", «Открыть URL» -> "Open URL".
-- **Названия тем и карточки настроек**: обеспечить корректный показ названий тем («Системная», «Тёмная», «Светлая», «AMOLED») на английском до открытия карточки категории, а также всех подзаголовков в `SettingsCategoryPages.kt` и `SettingsTabScreen.kt`.
+### 6. Repository Link Updates & Obtainium Sync
+- **Files**: `README.md`, `app/src/main/java/com/example/ui/screens/SettingsCategoryPages.kt`, `app/src/main/java/com/example/model/AppVersionInfo.kt`, and obtainium link builders
+- Replace all legacy repository links with `https://github.com/Poison5820/Negai`.
 
-### 2. Anime4K: ограничение разрешения экраном и лаконичные бейджи
-- В `Anime4KVideoSurface.kt` определять физическое разрешение экрана устройства (`displayMetrics.widthPixels`, `heightPixels` с учетом ориентации).
-- Ограничивать максимальное разрешение текстуры апскейла размерами экрана, предотвращая перегрузку GPU рендерингом пикселей, превышающих физический дисплей.
-- На кнопке быстрого действия в плеере выводить короткий бейдж, соответствующий всплывающему меню (`RAW`, `A4K FAST`, `CNN x2`, `CNNX ULTRA`).
+### 7. Release Notes, Structured README & Git Hygiene
+- **File**: `README.md`
+- Restructure `README.md` into a structured technical format (Architecture, Features, Tech Stack, Build & Export Instructions).
+- Format version info and release notes in technical, structured language.
+- Ensure build artifacts and temporary files (such as `.aistudio`, `implementation_plan.md`, build outputs) are excluded from export.
 
-### 3. Устранение повторного перезапуска серии и черного кадра
-- В `PlayerEngine.kt` и `NegaiViewModel.kt` устранить повторный вызов `setMediaSources` / `prepare` при запуске воспроизведения.
-- Инициализировать аудиодорожки, внешние субтитры и сохраненную позицию в едином пакете при подготовке медиаисточника, исключая промежуточный сброс плеера.
-- Избегать повторной смены ориентации Activity при нулевых исходных габаритах видео `videoWidth == 0`, ожидая первого реального видеокадра.
+## Verification Plan
 
-### 4. Шторка звука: удаление Bluetooth-блока и сохранение ручной задержки
-- В `AudioModalSheet` (`PlayerControlSheets.kt`) убрать блок со статусом Bluetooth-устройства и статической задержкой.
-- Оставить удобный ползунок `InstantSlider` и кнопки тонкой ручной подстройки задержки звука (`-50мс`, `-10мс`, `0мс`, `+10мс`, `+50мс`).
+### Automated Unit Tests
+- Run `gradle :app:testDebugUnitTest` to verify theme state, preference persistence, and orientation logic tests.
 
-### 5. Плавная анимация интерфейса плеера (HUD)
-- Заменить резкое переключение видимости элементов управления на `AnimatedVisibility` с плавным переходом (`fadeIn(tween(220))` и `fadeOut(tween(260))`).
-- Обеспечить одинаково плавное скрытие/появление верхней панели, нижней панели быстрых действий и индикатора таймлайна.
-
-### 6. Папка серий: очистка верхней панели и чистое инфо о папке
-- В `FolderDetailScreen.kt` убрать из верхней панели кнопки «Удалить папку» и «Скрыть папку» (эти действия остаются в безопасном меню библиотеки).
-- В диалоге информации о папке отображать исключительно данные самой папки: название, путь, количество видеофайлов, суммарный размер на диске и общую продолжительность видео, исключив видеокодеки и битрейты.
-
-### 7. Масштаб кадра: долгое нажатие, иконки и удаление из общих настроек
-- В `PlayerScreen.kt` для кнопки масштаба кадра:
-  - Одиночное нажатие циклично переключает режим.
-  - Долгое нажатие открывает шторку выбора масштаба (`ScaleQuickModalSheet`).
-  - Для каждого режима масштаба отображается своя иконка (Fit, Crop, Stretch, 16:9, 4:3, 1:1).
-- Удалить настройку масштаба кадра из раздела «Улучшения» в настройках приложения.
-
-### 8. Шторка скорости: единый стиль, читаемость и фиксация по умолчанию
-- Применить единый контрастный стиль `playerPopupSheetContainerColor()` и `LocalContentColor` к шторке скорости.
-- Добавить кнопку «Сделать скоростью по умолчанию» внизу шторки.
-- Отображать текущую скорость на иконке/кнопке быстрого действия в плеере (например, `1.25x`).
-
-### 9. Индивидуальное запоминание настроек серий и раздел «Прочие»
-- В `PlaybackProgressEntity` и `PlayerPreferencesRepository` сохранять индивидуально для каждого файла:
-  - Выбранную аудиодорожку (встроенную или внешнюю)
-  - Выбранную дорожку субтитров
-  - Персональную скорость воспроизведения
-- При сканировании библиотеки проводить легкую проверку и очистку устаревших записей для файлов, которые были удалены пользователем с накопителя.
-- В настройках создать 9-й раздел «Прочие» (`MISCELLANEOUS`) с переключателем «Запоминать выбранную озвучку, субтитры и скорость для каждой серии».
-
-### 10. Исправление сдвига интерфейса вправо при выходе из воспроизведения
-- В `PlayerScreen.kt` и `MainActivity.kt` стабилизировать восстановление системных отступов (`WindowInsets`) и ориентации экрана при закрытии плеера, устраняя горизонтальное смещение основного макета.
-
-### 11. Перенос декодера в раздел «Воспроизведение»
-- Перенести блок настроек «Декодер видео» из «Улучшений» (`ENHANCEMENTS`) в раздел «Воспроизведение» (`PLAYBACK`).
-
----
-
-## 3. Критерии верификации
-1. Сборка проекта через `compile_applet` проходит без ошибок.
-2. Все модульные и Robolectric-тесты выполняются успешно.
-3. Проверка интерфейса: отсутствие непереведенных строк на английском, плавное появление HUD, стабильный запуск видео без моргания, работа всех шторок и новых настроек.
+### Compilation
+- Run `compile_applet` to confirm zero compilation errors.

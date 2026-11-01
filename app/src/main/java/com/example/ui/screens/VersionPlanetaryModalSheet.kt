@@ -226,6 +226,12 @@ fun VersionPlanetaryModalSheet(
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                Text(
+                    text = "https://github.com/Poison5820/Negai",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(top = 2.dp)
+                )
             }
 
             // Minimalist Planetary System Orbital Animation Card

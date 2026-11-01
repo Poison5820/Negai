@@ -49,6 +49,7 @@ class PlayerPreferencesRepository(private val context: Context) {
         val PLAYER_QUICK_ACTIONS_V3 = stringPreferencesKey("player_quick_actions_v3")
         val LEGACY_PLAYER_QUICK_ACTIONS_V2 = stringPreferencesKey("player_quick_actions_v2")
         val LEGACY_PLAYER_QUICK_ACTIONS_V1 = stringPreferencesKey("player_quick_actions")
+        val APP_UI_SCALE_PERCENT = intPreferencesKey("app_ui_scale_percent")
         val PLAYER_UI_SCALE_PERCENT = intPreferencesKey("player_ui_scale_percent")
         val PLAYER_AUTO_DPI_SCALE = booleanPreferencesKey("player_auto_dpi_scale")
         val CONTROLS_AUTO_HIDE_SECONDS = intPreferencesKey("controls_auto_hide_seconds")
@@ -168,7 +169,7 @@ class PlayerPreferencesRepository(private val context: Context) {
             themeMode = AppThemeMode.fromId(
                 prefs[Keys.THEME_MODE]
                     ?: (if (hasBoot) sp.getString("theme_mode", null) else null)
-                    ?: AppThemeMode.OLED_BLACK.id
+                    ?: AppThemeMode.SYSTEM_AUTO.id
             ),
             playerControlsTheme = PlayerControlsTheme.fromId(
                 prefs[Keys.PLAYER_CONTROLS_THEME]
@@ -188,6 +189,10 @@ class PlayerPreferencesRepository(private val context: Context) {
             episodeSortAscending = prefs[Keys.EPISODE_SORT_ASCENDING]
                 ?: (if (hasBoot && sp.contains("ep_sort_asc")) sp.getBoolean("ep_sort_asc", epSortOpt.defaultAscending) else epSortOpt.defaultAscending),
             quickActions = QuickActionsSerializer.parse(rawQuickActions),
+            appUiScalePercent = (
+                prefs[Keys.APP_UI_SCALE_PERCENT]
+                    ?: (if (hasBoot && sp.contains("app_ui_scale")) sp.getInt("app_ui_scale", 100) else 100)
+                ).coerceIn(75, 140),
             playerUiScalePercent = (
                 prefs[Keys.PLAYER_UI_SCALE_PERCENT]
                     ?: (if (hasBoot && sp.contains("player_ui_scale")) sp.getInt("player_ui_scale", 100) else 100)
@@ -443,6 +448,12 @@ class PlayerPreferencesRepository(private val context: Context) {
         context.playerDataStore.edit {
             it[Keys.PLAYER_QUICK_ACTIONS_V3] = serialized
         }
+    }
+
+    suspend fun updateAppUiScalePercent(percent: Int) {
+        val clamped = percent.coerceIn(75, 140)
+        bootPrefs(context).edit().putInt("app_ui_scale", clamped).apply()
+        context.playerDataStore.edit { it[Keys.APP_UI_SCALE_PERCENT] = clamped }
     }
 
     suspend fun updatePlayerUiScalePercent(percent: Int) {
@@ -796,7 +807,7 @@ class PlayerPreferencesRepository(private val context: Context) {
             val epSortOpt = EpisodeSortOption.fromId(sp.getString("ep_sort_opt", EpisodeSortOption.EPISODE_NUMBER.id) ?: EpisodeSortOption.EPISODE_NUMBER.id)
             return PlayerSettings(
                 appLanguage = AppLanguage.fromId(sp.getString("app_lang", AppLanguage.SYSTEM.id)),
-                themeMode = AppThemeMode.fromId(sp.getString("theme_mode", AppThemeMode.OLED_BLACK.id) ?: AppThemeMode.OLED_BLACK.id),
+                themeMode = AppThemeMode.fromId(sp.getString("theme_mode", AppThemeMode.SYSTEM_AUTO.id) ?: AppThemeMode.SYSTEM_AUTO.id),
                 playerControlsTheme = PlayerControlsTheme.fromId(
                     sp.getString("controls_theme", PlayerControlsTheme.CLASSIC_OLED.id) ?: PlayerControlsTheme.CLASSIC_OLED.id
                 ),
@@ -809,6 +820,7 @@ class PlayerPreferencesRepository(private val context: Context) {
                 episodeSortOption = epSortOpt,
                 episodeSortAscending = sp.getBoolean("ep_sort_asc", epSortOpt.defaultAscending),
                 quickActions = QuickActionsSerializer.parse(sp.getString("quick_actions_v3", null)),
+                appUiScalePercent = sp.getInt("app_ui_scale", 100).coerceIn(75, 140),
                 playerUiScalePercent = sp.getInt("player_ui_scale", 100).coerceIn(75, 140),
                 playerAutoDpiScale = true,
                 controlsAutoHideSeconds = sp.getInt("controls_hide_sec", 4).coerceIn(2, 15),
@@ -897,6 +909,7 @@ class PlayerPreferencesRepository(private val context: Context) {
                 .putString("ep_sort_opt", s.episodeSortOption.id)
                 .putBoolean("ep_sort_asc", s.episodeSortAscending)
                 .putString("quick_actions_v3", QuickActionsSerializer.serialize(s.quickActions))
+                .putInt("app_ui_scale", s.appUiScalePercent)
                 .putInt("player_ui_scale", s.playerUiScalePercent)
                 .putBoolean("player_auto_dpi", true)
                 .putInt("controls_hide_sec", s.controlsAutoHideSeconds)
