@@ -1,0 +1,8 @@
+{
+  "name": "negai",
+  "description": "Hardware 4K / HDR Video & Anime Player for Android with Anime4K upscaling, LTPO refresh rate, frame interpolation (MEMC), Bluetooth audio sync, and TorrServer.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
