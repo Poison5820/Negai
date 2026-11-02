@@ -360,25 +360,6 @@ fun FolderDetailScreen(
                                 contentDescription = tr("Сведения о папке", "Folder Info")
                             )
                         }
-                        IconButton(
-                            onClick = onHideFolder,
-                            modifier = Modifier.testTag("folder_detail_hide_button")
-                        ) {
-                            Icon(
-                                imageVector = Icons.Outlined.VisibilityOff,
-                                contentDescription = tr("Добавить папку в исключения", "Exclude folder")
-                            )
-                        }
-                        IconButton(
-                            onClick = requestDeleteEntireFolder,
-                            modifier = Modifier.testTag("folder_detail_delete_folder_button")
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.DeleteOutline,
-                                contentDescription = tr("Удалить папку с накопителя", "Delete folder from storage"),
-                                tint = MaterialTheme.colorScheme.error
-                            )
-                        }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.background
@@ -430,7 +411,7 @@ fun FolderDetailScreen(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .widthIn(max = 840.dp)
+                    .widthIn(max = 1200.dp)
                     .testTag("episode_list"),
                 contentPadding = PaddingValues(
                     start = if (compactMode) 12.dp else 16.dp,

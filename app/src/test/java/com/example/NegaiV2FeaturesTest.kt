@@ -23,10 +23,11 @@ import org.junit.Test
 class NegaiV2FeaturesTest {
 
     @Test
-    fun version2BuildConfig_and_frameInterpolationUserFacingLabels() {
-        assertEquals(6, BuildConfig.VERSION_CODE)
-        assertEquals("2.5", BuildConfig.VERSION_NAME)
-        assertEquals("v2.5", com.example.model.AppVersionInfo.BADGE_TEXT)
+    fun version3BuildConfig_and_frameInterpolationUserFacingLabels() {
+        assertEquals(7, BuildConfig.VERSION_CODE)
+        assertEquals("3.0", BuildConfig.VERSION_NAME)
+        assertEquals("app.negai.player", BuildConfig.APPLICATION_ID)
+        assertEquals("v3.0 Release", com.example.model.AppVersionInfo.BADGE_TEXT)
 
         assertEquals(com.example.model.AppLanguage.SYSTEM, com.example.model.AppLanguage.fromId("system"))
         assertEquals(com.example.model.AppLanguage.RU, com.example.model.AppLanguage.fromId("ru"))
@@ -34,6 +35,8 @@ class NegaiV2FeaturesTest {
         assertTrue(com.example.ui.i18n.resolveIsEnglish(com.example.model.AppLanguage.EN))
         assertFalse(com.example.ui.i18n.resolveIsEnglish(com.example.model.AppLanguage.RU))
 
+        assertFalse(FrameInterpolationMode.selectableModes.contains(FrameInterpolationMode.OFF))
+        assertEquals(4, FrameInterpolationMode.selectableModes.size)
         FrameInterpolationMode.entries.forEach { mode ->
             assertTrue(mode.title.isNotBlank())
             assertTrue(mode.badgeLabel.isNotBlank())
@@ -532,15 +535,16 @@ class NegaiV2FeaturesTest {
         assertFalse(voiceoverTags.any { it.contains("Субтитры", ignoreCase = true) })
         assertTrue(subtitleTags.contains("Субтитры / Sub"))
 
-        // 2. Simultaneous Anime4K + Frame Interpolation (MEMC) auto-downgrade to ANIME4K_FAST
+        // 2. Simultaneous Anime4K + Frame Interpolation (MEMC) preserves full user-selected preset and outputs perceptual luma in .a
         val heavySettings = PlayerSettings(
             anime4kEnabled = true,
             anime4kPreset = com.example.model.Anime4KPreset.ANIME4K_UPSCALE_CNNX,
             frameInterpolationEnabled = true,
             frameInterpolationMode = FrameInterpolationMode.MAX_FPS
         )
-        assertTrue(heavySettings.isAnime4kAutoDowngradedForMemc)
-        assertEquals(com.example.model.Anime4KPreset.ANIME4K_FAST, heavySettings.effectiveAnime4KPreset)
+        assertFalse(heavySettings.isAnime4kAutoDowngradedForMemc)
+        assertEquals(com.example.model.Anime4KPreset.ANIME4K_UPSCALE_CNNX, heavySettings.effectiveAnime4KPreset)
+        assertTrue(FrameInterpolationShaders.MEMC_SYNTHESIZE_FRAGMENT.contains("gl_FragColor = vec4(synthesized, synLuma);"))
 
         val nonMemcSettings = heavySettings.copy(
             frameInterpolationEnabled = false,

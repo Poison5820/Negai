@@ -92,6 +92,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -243,13 +244,30 @@ fun PlayerScreen(
         }
     }
 
+    val exitPlayerCleanly: () -> Unit = {
+        val activity = context as? Activity
+        if (activity != null) {
+            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+            activity.window?.let { win ->
+                val lp = win.attributes
+                lp.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
+                win.attributes = lp
+                WindowCompat.getInsetsController(win, view)
+                    .show(WindowInsetsCompat.Type.systemBars())
+            }
+            view.requestApplyInsets()
+        }
+        onSetTempSpeedBoost(false)
+        onBack()
+    }
+
     // Intercept Back: when locked, show unlock pill instead of accidentally exiting player!
     BackHandler(enabled = !isInPipMode) {
         if (isScreenLocked) {
             lockedPillVisible = true
             interactionTick++
         } else {
-            onBack()
+            exitPlayerCleanly()
         }
     }
 
@@ -298,16 +316,26 @@ fun PlayerScreen(
         onDispose { view.keepScreenOn = false }
     }
 
-    // Apply & dynamically update Activity screen orientation based on video aspect ratio
-    DisposableEffect(orientationMode, playbackState.videoWidth, playbackState.videoHeight) {
-        val isNearEnd = playbackState.durationMs > 1000L &&
-            playbackState.currentPositionMs >= playbackState.durationMs - 1000L
+    // Apply & dynamically update Activity screen orientation based on video aspect ratio,
+    // ignoring any pre-buffered dimension changes during the last 2.5s of an episode.
+    DisposableEffect(
+        orientationMode,
+        playbackState.currentEpisodeIndex,
+        playbackState.videoWidth,
+        playbackState.videoHeight
+    ) {
+        val livePosMs = positionMsFlow.value.coerceAtLeast(playbackState.currentPositionMs)
+        val isNearEnd = playbackState.durationMs > 2_500L &&
+            livePosMs >= (playbackState.durationMs - 2_500L)
         if (!isNearEnd) {
             val activity = context as? Activity
-            activity?.requestedOrientation = orientationMode.resolveActivityOrientation(
+            val targetOrientation = orientationMode.resolveActivityOrientation(
                 videoWidth = playbackState.videoWidth,
                 videoHeight = playbackState.videoHeight
             )
+            if (activity != null && activity.requestedOrientation != targetOrientation) {
+                activity.requestedOrientation = targetOrientation
+            }
         }
         onDispose {}
     }
@@ -315,19 +343,23 @@ fun PlayerScreen(
     DisposableEffect(Unit) {
         onDispose {
             val activity = context as? Activity
-            activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-            activity?.window?.let { win ->
-                val lp = win.attributes
-                lp.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
-                win.attributes = lp
+            if (activity != null) {
+                activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+                activity.window?.let { win ->
+                    val lp = win.attributes
+                    lp.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
+                    win.attributes = lp
+                    WindowCompat.getInsetsController(win, view)
+                        .show(WindowInsetsCompat.Type.systemBars())
+                }
+                view.requestApplyInsets()
             }
             latestOnSetTempSpeedBoost(false)
         }
     }
 
     // Fullscreen immersive mode: keep system bars permanently hidden while the player is active.
-    // Toggling system bars on tap causes heavy WindowManager layout stalls and visible screen freezes.
-    DisposableEffect(isInPipMode) {
+    DisposableEffect(isInPipMode, activeSheet) {
         val window = (context as? Activity)?.window
         if (window != null) {
             val controller = WindowCompat.getInsetsController(window, view)
@@ -337,13 +369,7 @@ fun PlayerScreen(
                 controller.hide(WindowInsetsCompat.Type.systemBars())
             }
         }
-        onDispose {
-            val windowRestore = (context as? Activity)?.window
-            if (windowRestore != null) {
-                WindowCompat.getInsetsController(windowRestore, view)
-                    .show(WindowInsetsCompat.Type.systemBars())
-            }
-        }
+        onDispose {}
     }
 
     val autoHideTimeoutMs = settings.controlsAutoHideSeconds.coerceIn(2, 15) * 1000L
@@ -929,7 +955,10 @@ fun PlayerScreen(
             }
         }
 
-        // 3. Full Player HUD (fast 100ms lightweight graphicsLayer transition, eliminates frame drops & freeze)
+        // 3. Full Player HUD:
+        // CRITICAL: Keep the HUD subtree permanently mounted in the Composition (when !isInPipMode)
+        // and animate only graphicsLayer.alpha. Unmounting and recreating the HUD on every tap
+        // was causing composition inflation spikes and a visible freeze when the HUD appeared.
         val showHud = controlsVisible &&
             !isScreenLocked &&
             !isInPipMode &&
@@ -941,11 +970,11 @@ fun PlayerScreen(
         LaunchedEffect(showHud) {
             hudAlphaAnim.animateTo(
                 targetValue = if (showHud) 1f else 0f,
-                animationSpec = tween(durationMillis = 280, easing = LinearOutSlowInEasing)
+                animationSpec = tween(durationMillis = 150, easing = LinearOutSlowInEasing)
             )
         }
 
-        if (showHud || hudAlphaAnim.value > 0.001f) {
+        if (!isInPipMode) {
             val isEnglish = LocalIsEnglish.current
             val currentConfigOrientation = LocalConfiguration.current.orientation
             val toggleOrientationOneTap: () -> Unit = {
@@ -964,12 +993,21 @@ fun PlayerScreen(
                     }
                 }
                 orientationMode = orientationMode.toggleLandscapePortrait(currentlyHorizontal)
+                isOrientationLocked = true
                 interactionTick++
             }
 
             Box(
                 modifier = Modifier
                     .fillMaxSize()
+                    .layout { measurable, constraints ->
+                        val placeable = measurable.measure(constraints)
+                        layout(placeable.width, placeable.height) {
+                            if (showHud || hudAlphaAnim.value > 0.01f) {
+                                placeable.placeRelative(0, 0)
+                            }
+                        }
+                    }
                     .graphicsLayer {
                         alpha = hudAlphaAnim.value
                     }
@@ -993,7 +1031,8 @@ fun PlayerScreen(
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     IconButton(
-                        onClick = onBack,
+                        onClick = { if (showHud) exitPlayerCleanly() },
+                        enabled = showHud,
                         modifier = Modifier.testTag("player_back_button")
                     ) {
                         Icon(

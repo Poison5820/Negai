@@ -98,6 +98,7 @@ fun QuickActionsCustomizerSheet(
         containerColor = PlayerPopupSheetContainerColor,
         scrimColor = PlayerPopupSheetScrimColor
     ) {
+        KeepPlayerSheetImmersive()
         Column(
             modifier = Modifier
                 .fillMaxWidth()

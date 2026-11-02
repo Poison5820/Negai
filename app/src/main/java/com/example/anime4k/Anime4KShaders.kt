@@ -64,7 +64,7 @@ object Anime4KShaders {
         }
     """
 
-    // Anime4K_Fast: 2-pass Luminance PushGrad + Highlight Clamp
+    // Anime4K_Fast: Contour-Preserving Deblur + Edge Crisping (protects original line thickness)
     const val ANIME4K_FAST_FINAL_FRAGMENT = """
         #ifdef GL_FRAGMENT_PRECISION_HIGH
         precision highp float;
@@ -78,15 +78,6 @@ object Anime4KShaders {
         uniform float uStrength;
         uniform float uSplitMode;
         uniform float uSplitPos;
-
-        vec4 pushLightest(vec4 cc, vec4 a, vec4 b, vec4 c, float str) {
-            float minRight = min(min(a.a, b.a), c.a);
-            if (minRight > cc.a) {
-                vec4 avg = (a + b + c) * 0.333333;
-                return mix(cc, avg, clamp(str * 0.48, 0.0, 0.85));
-            }
-            return cc;
-        }
 
         void main() {
             if (uSplitMode > 0.5 && vTexCoord.x < uSplitPos) {
@@ -113,19 +104,33 @@ object Anime4KShaders {
             vec4 bc = texture2D(uTex, vTexCoord + vec2( 0.0, -d.y));
             vec4 br = texture2D(uTex, vTexCoord + vec2( d.x, -d.y));
 
-            vec3 minCol = min(min(min(tl.rgb, tc.rgb), min(tr.rgb, ml.rgb)), min(min(mr.rgb, bl.rgb), min(bc.rgb, br.rgb)));
-            vec3 maxCol = max(max(max(tl.rgb, tc.rgb), max(tr.rgb, ml.rgb)), max(max(mr.rgb, bl.rgb), max(bc.rgb, br.rgb)));
+            vec3 minCol = min(cc.rgb, min(min(min(tl.rgb, tc.rgb), min(tr.rgb, ml.rgb)), min(min(mr.rgb, bl.rgb), min(bc.rgb, br.rgb))));
+            vec3 maxCol = max(cc.rgb, max(max(max(tl.rgb, tc.rgb), max(tr.rgb, ml.rgb)), max(max(mr.rgb, bl.rgb), max(bc.rgb, br.rgb))));
 
-            vec4 res = cc;
-            res = pushLightest(res, tl, tc, tr, uStrength);
-            res = pushLightest(res, bl, bc, br, uStrength);
-            res = pushLightest(res, tl, ml, bl, uStrength);
-            res = pushLightest(res, tr, mr, br, uStrength);
+            // Sobel gradient magnitude on luma (.a) to locate anime contours without eroding them
+            float gx = (tr.a + 2.0 * mr.a + br.a) - (tl.a + 2.0 * ml.a + bl.a);
+            float gy = (tl.a + 2.0 * tc.a + tr.a) - (bl.a + 2.0 * bc.a + br.a);
+            float gradMag = clamp(sqrt(gx * gx + gy * gy), 0.0, 1.0);
+            float edgeMask = smoothstep(0.025, 0.24, gradMag);
 
-            // Crisp ink-line darkening along local gradient valleys
-            vec3 lap = (tc.rgb + bc.rgb + ml.rgb + mr.rgb) * 0.25 - res.rgb;
-            vec3 sharpened = res.rgb - lap * (0.55 * uStrength);
-            vec3 clamped = clamp(sharpened, min(minCol, cc.rgb), max(maxCol, cc.rgb));
+            // Detect dark ink line valleys vs bright haloes:
+            // Neighborhood average luma
+            float avgLuma = (tc.a + bc.a + ml.a + mr.a) * 0.15 + (tl.a + tr.a + bl.a + br.a) * 0.10;
+            float lumaDiff = cc.a - avgLuma;
+
+            // Asymmetric contour restoration:
+            // - When cc.a < avgLuma (dark ink contour), reinforce darkness slightly to keep crisp line weight.
+            // - When cc.a > avgLuma (soft halo outside contour), gently deblur without eating into the dark line.
+            float gain = clamp(uStrength, 0.1, 1.5);
+            float darkLineReinforce = min(0.0, lumaDiff) * (0.62 * gain * edgeMask);
+            float haloClean = max(0.0, lumaDiff) * (0.34 * gain * edgeMask);
+
+            vec3 neighborCross = (tc.rgb + bc.rgb + ml.rgb + mr.rgb) * 0.25;
+            vec3 detail = cc.rgb - neighborCross;
+            vec3 sharpened = cc.rgb + detail * (0.42 * gain * edgeMask) + vec3(darkLineReinforce + haloClean * 0.35);
+
+            // Strict neighborhood min/max clamp eliminates ringing/overshoot
+            vec3 clamped = clamp(sharpened, minCol, maxCol);
             gl_FragColor = vec4(clamped, 1.0);
         }
     """

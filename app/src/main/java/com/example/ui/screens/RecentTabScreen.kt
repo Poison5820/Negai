@@ -111,7 +111,7 @@ internal fun RecentTabContent(
     LazyColumn(
         modifier = modifier
             .fillMaxWidth()
-            .widthIn(max = 840.dp)
+            .widthIn(max = 1200.dp)
             .testTag("recent_lazy_list"),
         contentPadding = PaddingValues(
             horizontal = if (compactMode) 12.dp else 16.dp,

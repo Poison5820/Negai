@@ -315,7 +315,11 @@ object FrameInterpolationShaders {
                 synthesized = mix(synthesized, vec3(0.15, 0.92, 1.0), 0.85);
             }
 
-            gl_FragColor = vec4(synthesized, 1.0);
+            // CRITICAL for MEMC + Anime4K simultaneous operation:
+            // All downstream Anime4K passes read channel .a as perceptual luminance (Y).
+            // If .a were 1.0 on synthesized frames, Anime4K would skip interpolated frames and flicker!
+            float synLuma = dot(synthesized, vec3(0.299, 0.587, 0.114));
+            gl_FragColor = vec4(synthesized, synLuma);
         }
     """
 }

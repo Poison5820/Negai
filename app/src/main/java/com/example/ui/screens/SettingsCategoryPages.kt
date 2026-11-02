@@ -84,6 +84,7 @@ import com.example.R
 import com.example.data.HiddenFolderEntity
 import com.example.data.LibraryRootEntity
 import com.example.model.Anime4KPreset
+import com.example.model.AppAccentColor
 import com.example.model.AppLanguage
 import com.example.model.AppThemeMode
 import com.example.model.DecoderMode
@@ -103,6 +104,7 @@ import com.example.ui.i18n.localizedShortTitle
 import com.example.ui.i18n.localizedSubtitle
 import com.example.ui.i18n.localizedTitle
 import com.example.ui.i18n.tr
+import com.example.ui.theme.autoContrastTextColor
 import kotlin.math.roundToInt
 
 import androidx.compose.foundation.layout.PaddingValues
@@ -149,12 +151,92 @@ internal fun AppearanceSettingsPage(
     }
 
     SettingsSectionCard(
-        title = tr("Цветовая тема OLED", "OLED Color Theme"),
+        title = tr("Режим темы (Фон)", "Base Theme Mode (Background)"),
         icon = Icons.Default.Palette
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            text = tr(
+                "Выберите режим фона: Светлая, Тёмная (#0C111B), OLED (#000000) или следование за системой Android.",
+                "Select base background mode: Light, Dark (#0C111B), OLED (#000000) or follow Android system schedule."
+            ),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
             AppThemeMode.entries.forEach { mode ->
                 val selected = settings.themeMode == mode
+                val bgColor = if (selected) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.surfaceContainerHigh
+                }
+                val textColor = if (selected) {
+                    autoContrastTextColor(bgColor)
+                } else {
+                    MaterialTheme.colorScheme.onSurface
+                }
+                Surface(
+                    color = bgColor,
+                    shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(
+                        width = if (selected) 1.5.dp else 1.dp,
+                        color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
+                    ),
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable { actions.onUpdateThemeMode(mode) }
+                        .testTag("theme_mode_option_${mode.id}")
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 9.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(14.dp)
+                                .clip(CircleShape)
+                                .background(Color(mode.previewBgArgb))
+                                .border(1.dp, Color(mode.previewAccentArgb), CircleShape)
+                        )
+                        Text(
+                            text = mode.localizedBadge(isEnglish),
+                            style = MaterialTheme.typography.labelLarge.copy(
+                                fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
+                            ),
+                            color = textColor
+                        )
+                    }
+                }
+            }
+        }
+        Text(
+            text = settings.themeMode.localizedSubtitle(isEnglish),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.Medium
+        )
+    }
+
+    SettingsSectionCard(
+        title = tr("Акцентный цвет (Палитра)", "Accent Color Palette"),
+        icon = Icons.Default.AutoAwesome
+    ) {
+        Text(
+            text = tr(
+                "Акцентный цвет применяется поверх выбранного режима темы с алгоритмическим автоконтрастом текста (WCAG 2.1).",
+                "Accent color applies on top of your selected base theme mode with algorithmic WCAG 2.1 text auto-contrast."
+            ),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            AppAccentColor.entries.forEach { accent ->
+                val selected = settings.accentColor == accent
                 Surface(
                     color = if (selected) {
                         MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f)
@@ -169,8 +251,8 @@ internal fun AppearanceSettingsPage(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(12.dp))
-                        .clickable { actions.onUpdateThemeMode(mode) }
-                        .testTag("theme_mode_option_${mode.id}")
+                        .clickable { actions.onUpdateAccentColor(accent) }
+                        .testTag("accent_color_option_${accent.id}")
                 ) {
                     Row(
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
@@ -181,25 +263,39 @@ internal fun AppearanceSettingsPage(
                             modifier = Modifier
                                 .size(30.dp)
                                 .clip(CircleShape)
-                                .background(Color(mode.previewBgArgb))
-                                .border(1.5.dp, Color(mode.previewAccentArgb), CircleShape),
+                                .background(Color(accent.primaryDarkHex))
+                                .border(1.5.dp, Color(accent.secondaryHex), CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(12.dp)
-                                    .clip(CircleShape)
-                                    .background(Color(mode.previewAccentArgb))
+                            if (accent.isDynamic) {
+                                Text(
+                                    text = "M",
+                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
+                                    color = autoContrastTextColor(Color(accent.primaryDarkHex))
+                                )
+                            } else {
+                                Box(
+                                    modifier = Modifier
+                                        .size(12.dp)
+                                        .clip(CircleShape)
+                                        .background(Color(accent.secondaryHex))
+                                )
+                            }
+                        }
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = accent.localizedTitle(isEnglish),
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+                            )
+                            Text(
+                                text = accent.localizedSubtitle(isEnglish),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
-                        Text(
-                            text = mode.localizedTitle(isEnglish),
-                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                            modifier = Modifier.weight(1f)
-                        )
                         RadioButton(
                             selected = selected,
-                            onClick = { actions.onUpdateThemeMode(mode) }
+                            onClick = { actions.onUpdateAccentColor(accent) }
                         )
                     }
                 }
@@ -884,12 +980,13 @@ internal fun VideoSettingsPage(
             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
         )
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            FrameInterpolationMode.entries.forEach { mode ->
-                val selected = if (mode == FrameInterpolationMode.OFF) {
-                    !settings.frameInterpolationEnabled
-                } else {
-                    settings.frameInterpolationEnabled && settings.frameInterpolationMode == mode
-                }
+            val activeMode = if (settings.frameInterpolationMode == FrameInterpolationMode.OFF) {
+                FrameInterpolationMode.MAX_FPS
+            } else {
+                settings.frameInterpolationMode
+            }
+            FrameInterpolationMode.selectableModes.forEach { mode ->
+                val selected = activeMode == mode
                 Surface(
                     color = if (selected) {
                         MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f)
@@ -912,11 +1009,17 @@ internal fun VideoSettingsPage(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Text(
-                            text = mode.localizedTitle(isEnglish),
-                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                            modifier = Modifier.weight(1f)
-                        )
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = mode.localizedTitle(isEnglish),
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+                            )
+                            Text(
+                                text = mode.localizedSubtitle(isEnglish),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                         RadioButton(
                             selected = selected,
                             onClick = { actions.onUpdateFrameInterpolationMode(mode) }

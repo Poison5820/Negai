@@ -58,6 +58,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -171,6 +172,8 @@ fun VersionPlanetaryModalSheet(
     var selectedOrbitIndex by rememberSaveable { mutableIntStateOf(0) }
     val selectedFeature = PLANETARY_FEATURES.getOrElse(selectedOrbitIndex) { PLANETARY_FEATURES.first() }
 
+    val uriHandler = LocalUriHandler.current
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
@@ -218,20 +221,37 @@ fun VersionPlanetaryModalSheet(
                     }
                 }
 
-                Text(
-                    text = tr(
-                        "Build #${AppVersionInfo.VERSION_CODE} • Release",
-                        "Build #${AppVersionInfo.VERSION_CODE} • Release"
-                    ),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = "https://github.com/Poison5820/Negai",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(top = 2.dp)
-                )
+                Surface(
+                    onClick = {
+                        runCatching { uriHandler.openUri(AppVersionInfo.GITHUB_REPO_URL) }
+                    },
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    shape = RoundedCornerShape(10.dp),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                    modifier = Modifier.testTag("planetary_github_repo_button")
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CloudDownload,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Text(
+                            text = tr(
+                                "GitHub • #${AppVersionInfo.VERSION_CODE}",
+                                "GitHub • #${AppVersionInfo.VERSION_CODE}"
+                            ),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
             }
 
             // Minimalist Planetary System Orbital Animation Card
@@ -453,7 +473,7 @@ fun VersionPlanetaryModalSheet(
                 }
             }
 
-            // Release v2.5 Changelog Card
+            // Release v3.0 Changelog Card
             Surface(
                 color = MaterialTheme.colorScheme.surfaceContainer,
                 shape = RoundedCornerShape(14.dp),
@@ -465,31 +485,27 @@ fun VersionPlanetaryModalSheet(
                     verticalArrangement = Arrangement.spacedBy(5.dp)
                 ) {
                     Text(
-                        text = tr("Что нового в релизе v2.5", "What's New in Release v2.5"),
+                        text = tr("Возможности релиза v3.0", "Release v3.0 Highlights"),
                         style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.primary
                     )
                     val notes = if (isEnglish) {
                         listOf(
-                            "• Clean icon-only bottom player buttons; episode counter badge (e.g. 1/12) on the Episodes button",
-                            "• Unified Audio Boost control inside the Audio menu",
-                            "• Chapters button moved above the timeline on the left with live chapter title (hidden when no chapters exist)",
-                            "• Custom Skip Intro interval + direct long-press configuration on the Skip Intro button",
-                            "• Automatic screen DPI scaling + smooth 75%–140% player UI & text scale slider",
-                            "• Configurable HUD auto-hide timeout (2–15s) and timer reset while scrolling bottom buttons",
-                            "• Reliable playback position persistence when closing PiP or switching episodes",
-                            "• Detailed torrent release sheet with full untruncated title, description, and file list"
+                            "• Simultaneous MEMC frame interpolation + Anime4K GLSL upscaling without frame luminance flickering",
+                            "• Refined Anime4K_Fast contour reconstruction that sharpens lines without over-smoothing or thinning",
+                            "• Separated 5 base theme badges (Light, Dark, OLED #000000, Auto, Auto OLED) and 7 accent palettes with WCAG 2.1 auto-contrast",
+                            "• Zero-lag player HUD appearance with persistent composition & immersive popup sheets without dropping system bars",
+                            "• Adaptive 20:9 landscape layout across Library, Folders, Recent, Torrents, and Settings",
+                            "• Audio Sync (±5,000 ms), 200% DSP Loudness Boost, embedded MKV/MP4 chapters, and direct P2P TorrServer streaming"
                         )
                     } else {
                         listOf(
-                            "• Чистые иконки без подписей на нижней панели плеера; возле кнопки серий — только счётчик (например, 1/12)",
-                            "• Усиление звука (DSP) объединено внутри меню Аудио",
-                            "• Кнопка глав вынесена слева над полосой прокрутки с названием текущей главы (скрыта, если глав нет)",
-                            "• Произвольный интервал пропуска опенинга и быстрая настройка долгим нажатием на кнопку пропуска",
-                            "• Автоучёт DPI экрана и плавный ползунок масштаба элементов и текста плеера (75%–140%)",
-                            "• Настройка времени автоскрытия элементов (2–15 сек) и сброс таймера при прокрутке нижних кнопок",
-                            "• Надёжное сохранение позиции в режиме PiP при закрытии окна или переходе к другой серии",
-                            "• Подробная карточка торрент-раздачи с полным названием, описанием и списком файлов"
+                            "• Одновременная работа интерполяции кадров MEMC и апскейлинга Anime4K без мерцания яркости кадров",
+                            "• Сбалансированный шейдер Anime4K_Fast с чётким восстановлением контуров без чрезмерного разглаживания и истончения линий",
+                            "• Раздельный выбор 5 режимов фона (Светлая, Тёмная, OLED #000000, Авто, Авто OLED) и 7 акцентных палитр с автоконтрастом текста WCAG 2.1",
+                            "• Мгновенное появление HUD плеера без фризов и вызов всплывающих меню без опускания системной шторки Android",
+                            "• Адаптивная верстка для экранов 20:9 в альбомном режиме во всех разделах приложения",
+                            "• Синхронизация звука (±5000 мс), усиление DSP до 200%, встроенные главы MKV/MP4 и стриминг торрентов через TorrServer"
                         )
                     }
                     notes.forEach { line ->

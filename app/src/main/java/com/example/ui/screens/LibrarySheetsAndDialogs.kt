@@ -69,6 +69,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.data.HiddenFolderEntity
+import com.example.model.AppAccentColor
 import com.example.model.AppLanguage
 import com.example.model.AppThemeMode
 import com.example.model.EpisodeSortOption
@@ -80,11 +81,14 @@ import com.example.ui.i18n.LocalIsEnglish
 import com.example.ui.i18n.localizedActiveBadge
 import com.example.ui.i18n.localizedActiveHint
 import com.example.ui.i18n.localizedAscBadge
+import com.example.ui.i18n.localizedBadge
 import com.example.ui.i18n.localizedDescBadge
 import com.example.ui.i18n.localizedShortLabel
 import com.example.ui.i18n.localizedSubtitle
 import com.example.ui.i18n.localizedTitle
 import com.example.ui.i18n.tr
+import com.example.ui.theme.autoContrastTextColor
+import androidx.compose.ui.text.font.FontWeight
 
 @Composable
 internal fun FolderSortHeaderBar(
@@ -594,9 +598,11 @@ private fun EpisodeSortOption.icon(): ImageVector = when (this) {
 @Composable
 internal fun QuickThemeBottomSheet(
     currentTheme: AppThemeMode,
+    currentAccentColor: AppAccentColor = AppAccentColor.CYAN,
     currentControlsTheme: PlayerControlsTheme = PlayerControlsTheme.CLASSIC_OLED,
     currentLanguage: AppLanguage = AppLanguage.SYSTEM,
     onSelectTheme: (AppThemeMode) -> Unit,
+    onSelectAccentColor: (AppAccentColor) -> Unit = {},
     onSelectControlsTheme: (PlayerControlsTheme) -> Unit = {},
     onSelectLanguage: (AppLanguage) -> Unit = {},
     onDismiss: () -> Unit
@@ -643,10 +649,77 @@ internal fun QuickThemeBottomSheet(
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Icon(Icons.Default.Palette, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                Text(tr("Темы оформления (OLED)", "App Themes (OLED)"), style = MaterialTheme.typography.titleLarge)
+                Text(tr("Режим темы (Фон)", "Base Theme Mode"), style = MaterialTheme.typography.titleLarge)
             }
-            AppThemeMode.entries.forEach { mode ->
-                val selected = currentTheme == mode
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                AppThemeMode.entries.forEach { mode ->
+                    val selected = currentTheme == mode
+                    val bgColor = if (selected) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.surfaceContainerHigh
+                    }
+                    val textColor = if (selected) {
+                        autoContrastTextColor(bgColor)
+                    } else {
+                        MaterialTheme.colorScheme.onSurface
+                    }
+                    Surface(
+                        color = bgColor,
+                        shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(
+                            width = if (selected) 1.5.dp else 1.dp,
+                            color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
+                        ),
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .clickable { onSelectTheme(mode) }
+                            .testTag("quick_theme_option_${mode.id}")
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 9.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(14.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(mode.previewBgArgb))
+                                    .border(1.dp, Color(mode.previewAccentArgb), CircleShape)
+                            )
+                            Text(
+                                text = mode.localizedBadge(isEnglish),
+                                style = MaterialTheme.typography.labelLarge.copy(
+                                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
+                                ),
+                                color = textColor
+                            )
+                        }
+                    }
+                }
+            }
+            Text(
+                text = currentTheme.localizedSubtitle(isEnglish),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            HorizontalDivider(
+                modifier = Modifier.padding(vertical = 2.dp),
+                color = MaterialTheme.colorScheme.outlineVariant
+            )
+
+            Text(
+                text = tr("Акцентный цвет (Палитра)", "Accent Color Palette"),
+                style = MaterialTheme.typography.titleMedium
+            )
+            AppAccentColor.entries.forEach { accent ->
+                val selected = currentAccentColor == accent
                 Surface(
                     color = if (selected) {
                         MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f)
@@ -661,38 +734,46 @@ internal fun QuickThemeBottomSheet(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(14.dp))
-                        .clickable { onSelectTheme(mode) }
-                        .testTag("quick_theme_option_${mode.id}")
+                        .clickable { onSelectAccentColor(accent) }
+                        .testTag("quick_accent_option_${accent.id}")
                 ) {
                     Row(
-                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(32.dp)
+                                .size(30.dp)
                                 .clip(CircleShape)
-                                .background(Color(mode.previewBgArgb))
-                                .border(1.5.dp, Color(mode.previewAccentArgb), CircleShape),
+                                .background(Color(accent.primaryDarkHex))
+                                .border(1.5.dp, Color(accent.secondaryHex), CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(12.dp)
-                                    .clip(CircleShape)
-                                    .background(Color(mode.previewAccentArgb))
-                            )
+                            if (accent.isDynamic) {
+                                Text(
+                                    text = "M",
+                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
+                                    color = autoContrastTextColor(Color(accent.primaryDarkHex))
+                                )
+                            } else {
+                                Box(
+                                    modifier = Modifier
+                                        .size(11.dp)
+                                        .clip(CircleShape)
+                                        .background(Color(accent.secondaryHex))
+                                )
+                            }
                         }
                         Column(modifier = Modifier.weight(1f)) {
-                            Text(mode.localizedTitle(isEnglish), style = MaterialTheme.typography.titleSmall)
+                            Text(accent.localizedTitle(isEnglish), style = MaterialTheme.typography.titleSmall)
                             Text(
-                                mode.localizedSubtitle(isEnglish),
+                                accent.localizedSubtitle(isEnglish),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
-                        RadioButton(selected = selected, onClick = { onSelectTheme(mode) })
+                        RadioButton(selected = selected, onClick = { onSelectAccentColor(accent) })
                     }
                 }
             }

@@ -11,6 +11,7 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.example.model.Anime4KPreset
+import com.example.model.AppAccentColor
 import com.example.model.AppLanguage
 import com.example.model.AppThemeMode
 import com.example.model.DecoderMode
@@ -37,6 +38,7 @@ class PlayerPreferencesRepository(private val context: Context) {
     private object Keys {
         val APP_LANGUAGE = stringPreferencesKey("app_language")
         val THEME_MODE = stringPreferencesKey("app_theme_mode")
+        val ACCENT_COLOR = stringPreferencesKey("app_accent_color")
         val PLAYER_CONTROLS_THEME = stringPreferencesKey("player_controls_theme")
         val COMPACT_UI_MODE = booleanPreferencesKey("compact_ui_mode")
         val SHOW_EPISODE_THUMBNAILS = booleanPreferencesKey("show_episode_thumbnails")
@@ -160,17 +162,21 @@ class PlayerPreferencesRepository(private val context: Context) {
             ?: (if (hasBoot) sp.getString("a4k_preset_v2", null) else null)
             ?: Anime4KPreset.OFF.id
 
+        val rawSavedThemeId = prefs[Keys.THEME_MODE]
+            ?: (if (hasBoot) sp.getString("theme_mode", null) else null)
+            ?: AppThemeMode.AUTO_OLED.id
+        val rawSavedAccentId = prefs[Keys.ACCENT_COLOR]
+            ?: (if (hasBoot) sp.getString("accent_color", null) else null)
+            ?: rawSavedThemeId
+
         PlayerSettings(
             appLanguage = AppLanguage.fromId(
                 prefs[Keys.APP_LANGUAGE]
                     ?: (if (hasBoot) sp.getString("app_lang", null) else null)
                     ?: AppLanguage.SYSTEM.id
             ),
-            themeMode = AppThemeMode.fromId(
-                prefs[Keys.THEME_MODE]
-                    ?: (if (hasBoot) sp.getString("theme_mode", null) else null)
-                    ?: AppThemeMode.SYSTEM_AUTO.id
-            ),
+            themeMode = AppThemeMode.fromId(rawSavedThemeId),
+            accentColor = AppAccentColor.fromId(rawSavedAccentId),
             playerControlsTheme = PlayerControlsTheme.fromId(
                 prefs[Keys.PLAYER_CONTROLS_THEME]
                     ?: (if (hasBoot) sp.getString("controls_theme", null) else null)
@@ -355,6 +361,11 @@ class PlayerPreferencesRepository(private val context: Context) {
     suspend fun updateThemeMode(mode: AppThemeMode) {
         bootPrefs(context).edit().putString("theme_mode", mode.id).apply()
         context.playerDataStore.edit { it[Keys.THEME_MODE] = mode.id }
+    }
+
+    suspend fun updateAccentColor(accent: AppAccentColor) {
+        bootPrefs(context).edit().putString("accent_color", accent.id).apply()
+        context.playerDataStore.edit { it[Keys.ACCENT_COLOR] = accent.id }
     }
 
     suspend fun updatePlayerControlsTheme(theme: PlayerControlsTheme) {
@@ -805,9 +816,12 @@ class PlayerPreferencesRepository(private val context: Context) {
             if (!sp.contains("theme_mode")) return PlayerSettings()
             val sortOpt = FolderSortOption.fromId(sp.getString("sort_opt", FolderSortOption.NAME.id) ?: FolderSortOption.NAME.id)
             val epSortOpt = EpisodeSortOption.fromId(sp.getString("ep_sort_opt", EpisodeSortOption.EPISODE_NUMBER.id) ?: EpisodeSortOption.EPISODE_NUMBER.id)
+            val savedThemeId = sp.getString("theme_mode", AppThemeMode.AUTO_OLED.id) ?: AppThemeMode.AUTO_OLED.id
+            val savedAccentId = sp.getString("accent_color", savedThemeId) ?: savedThemeId
             return PlayerSettings(
                 appLanguage = AppLanguage.fromId(sp.getString("app_lang", AppLanguage.SYSTEM.id)),
-                themeMode = AppThemeMode.fromId(sp.getString("theme_mode", AppThemeMode.SYSTEM_AUTO.id) ?: AppThemeMode.SYSTEM_AUTO.id),
+                themeMode = AppThemeMode.fromId(savedThemeId),
+                accentColor = AppAccentColor.fromId(savedAccentId),
                 playerControlsTheme = PlayerControlsTheme.fromId(
                     sp.getString("controls_theme", PlayerControlsTheme.CLASSIC_OLED.id) ?: PlayerControlsTheme.CLASSIC_OLED.id
                 ),
@@ -899,6 +913,7 @@ class PlayerPreferencesRepository(private val context: Context) {
             bootPrefs(context).edit()
                 .putString("app_lang", s.appLanguage.id)
                 .putString("theme_mode", s.themeMode.id)
+                .putString("accent_color", s.accentColor.id)
                 .putString("controls_theme", s.playerControlsTheme.id)
                 .putBoolean("compact_ui", true)
                 .putBoolean("show_thumbs", s.showEpisodeThumbnails)

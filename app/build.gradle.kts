@@ -13,11 +13,11 @@ android {
   compileSdk { version = release(36) { minorApiLevel = 1 } }
 
   defaultConfig {
-    applicationId = "com.aistudio.kino4k.egccnv"
+    applicationId = "app.negai.player"
     minSdk = 24
     targetSdk = 36
-    versionCode = 6
-    versionName = "2.5"
+    versionCode = 7
+    versionName = "3.0"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }

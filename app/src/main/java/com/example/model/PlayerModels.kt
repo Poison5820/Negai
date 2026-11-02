@@ -6,148 +6,240 @@ import androidx.compose.runtime.Immutable
 enum class AppThemeMode(
     val id: String,
     val title: String,
+    val titleEn: String,
+    val badgeTitleRu: String,
+    val badgeTitleEn: String,
     val subtitle: String,
+    val subtitleEn: String,
     val isDark: Boolean,
     val isPureOled: Boolean,
     val previewBgArgb: Long,
-    val previewAccentArgb: Long,
-    val pairGroup: String = ""
+    val previewAccentArgb: Long = 0xFF00E5FFL
 ) {
-    SYSTEM_AUTO(
-        id = "SYSTEM_AUTO",
-        title = "Системная тема (Авто)",
-        subtitle = "Автоматическое переключение светлой и тёмной темы в зависимости от системы",
+    LIGHT(
+        id = "LIGHT",
+        title = "Светлая",
+        titleEn = "Light",
+        badgeTitleRu = "Светлая",
+        badgeTitleEn = "Light",
+        subtitle = "Высококонтрастная дневная светлая тема",
+        subtitleEn = "High-contrast daylight light theme",
+        isDark = false,
+        isPureOled = false,
+        previewBgArgb = 0xFFF8FAFCL
+    ),
+    DARK(
+        id = "DARK",
+        title = "Тёмная",
+        titleEn = "Dark",
+        badgeTitleRu = "Тёмная",
+        badgeTitleEn = "Dark",
+        subtitle = "Мягкий тёмно-графитовый фон (#0C111B) для комфортного чтения",
+        subtitleEn = "Soft dark slate background (#0C111B) for comfortable viewing",
+        isDark = true,
+        isPureOled = false,
+        previewBgArgb = 0xFF0C111BL
+    ),
+    OLED(
+        id = "OLED",
+        title = "OLED",
+        titleEn = "OLED",
+        badgeTitleRu = "OLED",
+        badgeTitleEn = "OLED",
+        subtitle = "Абсолютно чёрный фон (#000000) с отключением субпикселей AMOLED",
+        subtitleEn = "Pure pitch-black background (#000000) turning off AMOLED subpixels",
         isDark = true,
         isPureOled = true,
-        previewBgArgb = 0xFF0F172AL,
-        previewAccentArgb = 0xFF00E5FFL,
-        pairGroup = "SYSTEM"
+        previewBgArgb = 0xFF000000L
     ),
-    MATERIAL_YOU(
-        id = "MATERIAL_YOU",
-        title = "Material You (Динамическая)",
-        subtitle = "Динамические акценты обоев устройства Android 12+ с высокой контрастностью",
+    AUTO(
+        id = "AUTO",
+        title = "Авто (Система)",
+        titleEn = "Auto (System)",
+        badgeTitleRu = "Авто",
+        badgeTitleEn = "Auto",
+        subtitle = "Следует системной теме Android (Светлая днём / Тёмная ночью)",
+        subtitleEn = "Follows Android system theme (Light by day / Dark at night)",
+        isDark = true,
+        isPureOled = false,
+        previewBgArgb = 0xFF0C111BL
+    ),
+    AUTO_OLED(
+        id = "AUTO_OLED",
+        title = "Авто OLED (Система)",
+        titleEn = "Auto OLED (System)",
+        badgeTitleRu = "Авто OLED",
+        badgeTitleEn = "Auto OLED",
+        subtitle = "Следует системе Android: Светлая днём и чисто чёрная OLED ночью",
+        subtitleEn = "Follows Android system: Light by day and pure black OLED at night",
         isDark = true,
         isPureOled = true,
-        previewBgArgb = 0xFF0A0E1AL,
-        previewAccentArgb = 0xFF80D8FFL,
-        pairGroup = "MATERIAL"
-    ),
-    OLED_PITCH_BLACK_DARK(
-        id = "OLED_PITCH_BLACK_DARK",
-        title = "Чистый OLED (Тёмная)",
-        subtitle = "Абсолютно чёрный фон (#000000) с отключением субпикселей AMOLED и циановым акцентом",
-        isDark = true,
-        isPureOled = true,
-        previewBgArgb = 0xFF000000L,
-        previewAccentArgb = 0xFF00E5FFL,
-        pairGroup = "OLED_PITCH_BLACK"
-    ),
-    OLED_PITCH_BLACK_LIGHT(
-        id = "OLED_PITCH_BLACK_LIGHT",
-        title = "Чистый OLED (Светлая)",
-        subtitle = "Высококонтрастная дневная светлая тема с циановыми акцентами",
-        isDark = false,
-        isPureOled = false,
-        previewBgArgb = 0xFFF8FAFCL,
-        previewAccentArgb = 0xFF00838FL,
-        pairGroup = "OLED_PITCH_BLACK"
-    ),
-    DEEP_NAVY_DARK(
-        id = "DEEP_NAVY_DARK",
-        title = "Морской Океан (Тёмная)",
-        subtitle = "Глубокий сине-графитовый фон с неоново-лазурным акцентом",
-        isDark = true,
-        isPureOled = false,
-        previewBgArgb = 0xFF0A0D14L,
-        previewAccentArgb = 0xFF00E5FFL,
-        pairGroup = "DEEP_NAVY"
-    ),
-    DEEP_NAVY_LIGHT(
-        id = "DEEP_NAVY_LIGHT",
-        title = "Морской Океан (Светлая)",
-        subtitle = "Светлый небесно-голубой фон с глубинным сине-морским акцентом",
-        isDark = false,
-        isPureOled = false,
-        previewBgArgb = 0xFFF0F4FA1L,
-        previewAccentArgb = 0xFF0284C7L,
-        pairGroup = "DEEP_NAVY"
-    ),
-    SAKURA_PURPLE_DARK(
-        id = "SAKURA_PURPLE_DARK",
-        title = "Кибер-Сакура (Тёмная)",
-        subtitle = "Чёрно-фиолетовый OLED фон с неоново-малиновым аниме-акцентом",
-        isDark = true,
-        isPureOled = true,
-        previewBgArgb = 0xFF000000L,
-        previewAccentArgb = 0xFFFF4D8DL,
-        pairGroup = "SAKURA_PURPLE"
-    ),
-    SAKURA_PURPLE_LIGHT(
-        id = "SAKURA_PURPLE_LIGHT",
-        title = "Кибер-Сакура (Светлая)",
-        subtitle = "Светлая нежно-розовая палитра с насыщенным аниме-малиновым акцентом",
-        isDark = false,
-        isPureOled = false,
-        previewBgArgb = 0xFFFFF1F5L,
-        previewAccentArgb = 0xFFE11D48L,
-        pairGroup = "SAKURA_PURPLE"
-    ),
-    CYBER_MINT_DARK(
-        id = "CYBER_MINT_DARK",
-        title = "Киберпанк Мята (Тёмная)",
-        subtitle = "Тёмный мятно-изумрудный фон с ярким неоново-зелёным акцентом",
-        isDark = true,
-        isPureOled = false,
-        previewBgArgb = 0xFF061412L,
-        previewAccentArgb = 0xFF00E676L,
-        pairGroup = "CYBER_MINT"
-    ),
-    CYBER_MINT_LIGHT(
-        id = "CYBER_MINT_LIGHT",
-        title = "Киберпанк Мята (Светлая)",
-        subtitle = "Светлый мятно-свежий фон с контрастным изумрудным акцентом",
-        isDark = false,
-        isPureOled = false,
-        previewBgArgb = 0xFFF0FDF4L,
-        previewAccentArgb = 0xFF059669L,
-        pairGroup = "CYBER_MINT"
-    ),
-    SLATE_GREY_DARK(
-        id = "SLATE_GREY_DARK",
-        title = "Стальной Графит (Тёмная)",
-        subtitle = "Тёмно-серый матовый фон со стальным индиго-акцентом",
-        isDark = true,
-        isPureOled = false,
-        previewBgArgb = 0xFF111827L,
-        previewAccentArgb = 0xFF6366F1L,
-        pairGroup = "SLATE_GREY"
-    ),
-    SLATE_GREY_LIGHT(
-        id = "SLATE_GREY_LIGHT",
-        title = "Стальной Графит (Светлая)",
-        subtitle = "Светлый графитовый бумажный фон с контрастным стальным акцентом",
-        isDark = false,
-        isPureOled = false,
-        previewBgArgb = 0xFFF8FAFC1L,
-        previewAccentArgb = 0xFF4F46E5L,
-        pairGroup = "SLATE_GREY"
+        previewBgArgb = 0xFF000000L
     );
 
-    fun resolveModeFor(isSystemInDarkTheme: Boolean): AppThemeMode {
-        if (this != SYSTEM_AUTO) return this
-        return if (isSystemInDarkTheme) OLED_PITCH_BLACK_DARK else OLED_PITCH_BLACK_LIGHT
+    fun localizedTitle(isEnglish: Boolean): String = if (isEnglish) titleEn else title
+    fun localizedBadge(isEnglish: Boolean): String = if (isEnglish) badgeTitleEn else badgeTitleRu
+    fun localizedSubtitle(isEnglish: Boolean): String = if (isEnglish) subtitleEn else subtitle
+
+    fun resolveModeFor(isSystemInDarkTheme: Boolean): AppThemeMode = when (this) {
+        AUTO -> if (isSystemInDarkTheme) DARK else LIGHT
+        AUTO_OLED -> if (isSystemInDarkTheme) OLED else LIGHT
+        else -> this
     }
 
+    fun resolveIsDark(isSystemInDarkTheme: Boolean): Boolean =
+        resolveModeFor(isSystemInDarkTheme).isDark
+
+    fun resolveIsPureOled(isSystemInDarkTheme: Boolean): Boolean =
+        resolveModeFor(isSystemInDarkTheme).isPureOled
+
     companion object {
-        fun fromId(id: String): AppThemeMode = when {
-            id.equals("SYSTEM_AUTO", ignoreCase = true) -> SYSTEM_AUTO
-            id.equals("MATERIAL_YOU", ignoreCase = true) || id.equals("DYNAMIC_OLED", ignoreCase = true) -> MATERIAL_YOU
-            id.equals("OLED_BLACK", ignoreCase = true) -> OLED_PITCH_BLACK_DARK
-            id.equals("DAYLIGHT_LIGHT", ignoreCase = true) -> OLED_PITCH_BLACK_LIGHT
-            id.equals("OBSIDIAN_DARK", ignoreCase = true) -> DEEP_NAVY_DARK
-            id.equals("SAKURA_OLED", ignoreCase = true) -> SAKURA_PURPLE_DARK
-            else -> entries.firstOrNull { it.id.equals(id, ignoreCase = true) } ?: SYSTEM_AUTO
+        fun fromId(id: String?): AppThemeMode {
+            val clean = id?.trim().orEmpty()
+            return when {
+                clean.equals("LIGHT", ignoreCase = true) ||
+                    clean.endsWith("_LIGHT", ignoreCase = true) -> LIGHT
+                clean.equals("DARK", ignoreCase = true) ||
+                    clean.startsWith("DEEP_NAVY", ignoreCase = true) ||
+                    clean.startsWith("CYBER_MINT", ignoreCase = true) ||
+                    clean.startsWith("SLATE_GREY", ignoreCase = true) ||
+                    clean.equals("OBSIDIAN_DARK", ignoreCase = true) -> DARK
+                clean.equals("OLED", ignoreCase = true) ||
+                    clean.startsWith("OLED_PITCH_BLACK", ignoreCase = true) ||
+                    clean.equals("OLED_BLACK", ignoreCase = true) ||
+                    clean.startsWith("SAKURA_PURPLE", ignoreCase = true) ||
+                    clean.equals("SAKURA_OLED", ignoreCase = true) -> OLED
+                clean.equals("AUTO", ignoreCase = true) -> AUTO
+                clean.equals("AUTO_OLED", ignoreCase = true) ||
+                    clean.equals("SYSTEM_AUTO", ignoreCase = true) ||
+                    clean.equals("MATERIAL_YOU", ignoreCase = true) ||
+                    clean.equals("DYNAMIC_OLED", ignoreCase = true) -> AUTO_OLED
+                else -> entries.firstOrNull { it.id.equals(clean, ignoreCase = true) } ?: AUTO_OLED
+            }
+        }
+    }
+}
+
+enum class AppAccentColor(
+    val id: String,
+    val titleRu: String,
+    val titleEn: String,
+    val subtitleRu: String,
+    val subtitleEn: String,
+    val darkPrimaryArgb: Long,
+    val lightPrimaryArgb: Long,
+    val darkSecondaryArgb: Long,
+    val lightSecondaryArgb: Long,
+    val isDynamicMonet: Boolean = false
+) {
+    MONET(
+        id = "MONET",
+        titleRu = "Monet (Material You)",
+        titleEn = "Monet (Material You)",
+        subtitleRu = "Динамический акцент из обоев Android 12+ с автоконтрастом текста",
+        subtitleEn = "Dynamic wallpaper accent on Android 12+ with auto-contrast text",
+        darkPrimaryArgb = 0xFF80D8FFL,
+        lightPrimaryArgb = 0xFF006684L,
+        darkSecondaryArgb = 0xFFB3E5FCL,
+        lightSecondaryArgb = 0xFF0277BDL,
+        isDynamicMonet = true
+    ),
+    CYAN(
+        id = "CYAN",
+        titleRu = "Неоновый Циан",
+        titleEn = "Electric Cyan",
+        subtitleRu = "Фирменный кристально-лазурный акцент Negai",
+        subtitleEn = "Signature crystal-cyan Negai accent",
+        darkPrimaryArgb = 0xFF00E5FFL,
+        lightPrimaryArgb = 0xFF006876L,
+        darkSecondaryArgb = 0xFF70F3FFL,
+        lightSecondaryArgb = 0xFF00838FL
+    ),
+    SAKURA(
+        id = "SAKURA",
+        titleRu = "Кибер-Сакура",
+        titleEn = "Cyber Sakura",
+        subtitleRu = "Насыщенный аниме-малиновый и нежно-розовый акцент",
+        subtitleEn = "Vibrant anime crimson and sakura pink accent",
+        darkPrimaryArgb = 0xFFFF4D8DL,
+        lightPrimaryArgb = 0xFFC2185BL,
+        darkSecondaryArgb = 0xFFFF80ABL,
+        lightSecondaryArgb = 0xFFD81B60L
+    ),
+    NAVY(
+        id = "NAVY",
+        titleRu = "Морской Океан",
+        titleEn = "Deep Navy",
+        subtitleRu = "Глубокий океанический лазурно-синий акцент",
+        subtitleEn = "Deep oceanic azure-blue accent",
+        darkPrimaryArgb = 0xFF38BDF8L,
+        lightPrimaryArgb = 0xFF0369A1L,
+        darkSecondaryArgb = 0xFF7DD3FCL,
+        lightSecondaryArgb = 0xFF0284C7L
+    ),
+    MINT(
+        id = "MINT",
+        titleRu = "Киберпанк Мята",
+        titleEn = "Cyber Mint",
+        subtitleRu = "Изумрудно-мятный неоновый акцент",
+        subtitleEn = "Emerald-mint neon accent",
+        darkPrimaryArgb = 0xFF00E676L,
+        lightPrimaryArgb = 0xFF047857L,
+        darkSecondaryArgb = 0xFF69F0AEL,
+        lightSecondaryArgb = 0xFF059669L
+    ),
+    SLATE(
+        id = "SLATE",
+        titleRu = "Стальной Графит",
+        titleEn = "Slate Indigo",
+        subtitleRu = "Сдержанный стальной индиго-фиолетовый акцент",
+        subtitleEn = "Refined steel indigo-violet accent",
+        darkPrimaryArgb = 0xFF818CF8L,
+        lightPrimaryArgb = 0xFF4338CAL,
+        darkSecondaryArgb = 0xFFA5B4FCL,
+        lightSecondaryArgb = 0xFF4F46E5L
+    ),
+    AMBER(
+        id = "AMBER",
+        titleRu = "Янтарный Закат",
+        titleEn = "Sunset Amber",
+        subtitleRu = "Тёплый золотисто-янтарный акцент",
+        subtitleEn = "Warm golden-amber accent",
+        darkPrimaryArgb = 0xFFFFB300L,
+        lightPrimaryArgb = 0xFFB45309L,
+        darkSecondaryArgb = 0xFFFFCA28L,
+        lightSecondaryArgb = 0xFFD97706L
+    );
+
+    val title: String get() = titleRu
+    val subtitle: String get() = subtitleRu
+    val primaryDarkHex: Long get() = darkPrimaryArgb
+    val secondaryHex: Long get() = darkSecondaryArgb
+    val isDynamic: Boolean get() = isDynamicMonet
+
+    fun localizedTitle(isEnglish: Boolean): String = if (isEnglish) titleEn else titleRu
+    fun localizedSubtitle(isEnglish: Boolean): String = if (isEnglish) subtitleEn else subtitleRu
+
+    companion object {
+        fun fromId(id: String?): AppAccentColor {
+            val clean = id?.trim().orEmpty()
+            return when {
+                clean.equals("MONET", ignoreCase = true) ||
+                    clean.equals("MATERIAL_YOU", ignoreCase = true) ||
+                    clean.equals("DYNAMIC_OLED", ignoreCase = true) -> MONET
+                clean.equals("SAKURA", ignoreCase = true) ||
+                    clean.startsWith("SAKURA_", ignoreCase = true) -> SAKURA
+                clean.equals("NAVY", ignoreCase = true) ||
+                    clean.startsWith("DEEP_NAVY", ignoreCase = true) -> NAVY
+                clean.equals("MINT", ignoreCase = true) ||
+                    clean.startsWith("CYBER_MINT", ignoreCase = true) -> MINT
+                clean.equals("SLATE", ignoreCase = true) ||
+                    clean.startsWith("SLATE_GREY", ignoreCase = true) -> SLATE
+                clean.equals("AMBER", ignoreCase = true) -> AMBER
+                clean.equals("CYAN", ignoreCase = true) ||
+                    clean.startsWith("OLED_PITCH_BLACK", ignoreCase = true) -> CYAN
+                else -> entries.firstOrNull { it.id.equals(clean, ignoreCase = true) } ?: CYAN
+            }
         }
     }
 }
@@ -168,9 +260,9 @@ enum class Anime4KPreset(
     ),
     ANIME4K_FAST(
         id = "Anime4K_Fast",
-        title = "Anime4K_Fast (ThinLines + Deblur)",
+        title = "Anime4K_Fast (Deblur + Резкость)",
         badgeLabel = "A4K FAST",
-        description = "Быстрое утончение контуров и устранение мыла при минимальной нагрузке на GPU.",
+        description = "Деликатное повышение чёткости контуров и устранение мыла с сохранением оригинальной толщины рисовки.",
         passCount = 2
     ),
     ANIME4K_UPSCALE_CNN(
@@ -189,6 +281,9 @@ enum class Anime4KPreset(
     );
 
     companion object {
+        val selectablePresets: List<Anime4KPreset>
+            get() = listOf(ANIME4K_FAST, ANIME4K_UPSCALE_CNN, ANIME4K_UPSCALE_CNNX)
+
         fun fromId(id: String): Anime4KPreset =
             entries.firstOrNull { it.id.equals(id, ignoreCase = true) } ?: OFF
     }
@@ -253,6 +348,9 @@ enum class FrameInterpolationMode(
         get() = this != OFF
 
     companion object {
+        val selectableModes: List<FrameInterpolationMode>
+            get() = listOf(CINEMA, SMOOTH_60, MAX_FPS, ANIME)
+
         fun fromId(id: String): FrameInterpolationMode {
             if (id.equals("MEMC_MAX", ignoreCase = true) || id.equals("MAX_FPS", ignoreCase = true)) return MAX_FPS
             return entries.firstOrNull { it.id.equals(id, ignoreCase = true) } ?: OFF
@@ -677,10 +775,12 @@ enum class SleepTimerPreset(
 }
 
 object AppVersionInfo {
-    const val VERSION_NAME = "2.5"
-    const val VERSION_CODE = 6
-    const val BADGE_TEXT = "v2.5"
-    const val RELEASE_TAG = "v2.5"
+    const val VERSION_NAME = "3.0"
+    const val VERSION_CODE = 7
+    const val BADGE_TEXT = "v3.0 Release"
+    const val RELEASE_TAG = "v3.0"
+    const val GITHUB_REPO_URL = "https://github.com/Poison5820/Negai"
+    const val OBTAINIUM_ADD_URL = "https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/Poison5820/Negai"
 }
 
 enum class AppLanguage(
@@ -763,7 +863,8 @@ data class VideoChapter(
 data class PlayerSettings(
     // Appearance & Interface
     val appLanguage: AppLanguage = AppLanguage.SYSTEM,
-    val themeMode: AppThemeMode = AppThemeMode.SYSTEM_AUTO,
+    val themeMode: AppThemeMode = AppThemeMode.AUTO_OLED,
+    val accentColor: AppAccentColor = AppAccentColor.CYAN,
     val playerControlsTheme: PlayerControlsTheme = PlayerControlsTheme.CLASSIC_OLED,
     val compactUiMode: Boolean = true,
     val showEpisodeThumbnails: Boolean = true,
@@ -853,16 +954,13 @@ data class PlayerSettings(
         }
 
     val isAnime4kAutoDowngradedForMemc: Boolean
-        get() = anime4kEnabled &&
-            effectiveFrameInterpolationMode.isEnabled &&
-            (anime4kPreset == Anime4KPreset.ANIME4K_UPSCALE_CNN ||
-                anime4kPreset == Anime4KPreset.ANIME4K_UPSCALE_CNNX)
+        get() = false
 
     val effectiveAnime4KPreset: Anime4KPreset
-        get() = when {
-            !anime4kEnabled || anime4kPreset == Anime4KPreset.OFF -> Anime4KPreset.OFF
-            isAnime4kAutoDowngradedForMemc -> Anime4KPreset.ANIME4K_FAST
-            else -> anime4kPreset
+        get() = if (!anime4kEnabled || anime4kPreset == Anime4KPreset.OFF) {
+            Anime4KPreset.OFF
+        } else {
+            anime4kPreset
         }
 }
 

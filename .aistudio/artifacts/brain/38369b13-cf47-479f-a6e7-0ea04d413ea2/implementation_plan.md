@@ -1,60 +1,104 @@
-# Implementation Plan - Negai Applet Improvements
+# Negai v3.0 Release — Архитектурное обновление, графический конвейер и система тем
 
-This plan outlines the architecture changes and bug fixes to improve theme contrast, add paired Light/Dark themes + Material You, fix bottom bar accent colors, introduce compact frosted glass popups, implement independent App/Player UI scaling, fix video orientation transitions with long-press lock, update GitHub repository links to `https://github.com/Poison5820/Negai`, and restructure the README with technical release notes.
+Масштабное обновление до **Negai v3.0 Release**: разделение базового режима темы и акцентных палитр с алгоритмическим автоконтрастом текста, устранение микрофризов HUD плеера и мерцания при совместной работе MEMC + Anime4K, исправление переворота ориентации и смещения экрана при выходе, полная адаптация под альбомные экраны 20:9, выделение переводов в единые словари и выпуск двуязычной технической документации.
 
-## Proposed Changes
+---
 
-### 1. Light Theme Contrast & Paired Light/Dark Theme Modes
-- **File**: `app/src/main/java/com/example/model/PlayerModels.kt`, `app/src/main/java/com/example/ui/theme/Theme.kt`
-- Fix readable content colors, card containers, and high-contrast text tokens for Light mode schemes in `NegaiTheme`.
-- Expand `AppThemeMode` enum to support:
-  - System Auto Dark/Light theme switching (`SYSTEM_AUTO`)
-  - Standalone Material You dynamic theme (`MATERIAL_YOU`)
-  - Paired themes with explicit Light and Dark options for OLED Pitch Black, Deep Navy, Anime Purple, Cyberpunk Mint, Slate Grey, and Sunset Amber.
-- **File**: `app/src/main/java/com/example/ui/screens/SettingsCategoryPages.kt`, `app/src/main/java/com/example/ui/screens/QuickThemeBottomSheet.kt`
-- Update theme selector UI to allow both system auto-switch and manual choice of paired Light/Dark variants.
+## User Review & Critical Decisions
 
-### 2. Accent-Colored Navigation Elements Across All Themes
-- **File**: `app/src/main/java/com/example/ui/screens/LibraryScreen.kt`
-- Update `NavigationBarItem` and `NavigationRailItem` color definitions so active indicator pills and selected icons/labels utilize the active theme's primary accent color across all themes (not just Material You).
+> [!IMPORTANT]
+> Решения, подтвержденные пользователем в ходе уточнения требований:
 
-### 3. Compact Frosted Glass Popup Sheets & Dialogs
-- **File**: `app/src/main/java/com/example/ui/screens/PlayerControlSheets.kt`, `app/src/main/java/com/example/ui/screens/PlayerQuickActionsBar.kt`
-- Reduce internal padding and container dimensions of bottom sheets and modals.
-- Set ultra-thin accent borders (`0.5.dp` with low alpha).
-- Implement center-to-edge radial/linear gradient background brushes for a frosted glass effect (more transparent in center, slightly darker toward edges).
+- **Идентификатор пакета (`applicationId`)**: Утвержден `app.negai.player` (версия релиза `3.0`, сборка `#7`).
+- **Система цветовых тем**: Разделена на **5 бейджей базового режима фона** (`Светлая`, `Тёмная`, `OLED`, `Авто`, `Авто OLED`) и **отдельный выбор акцентного цвета** (`Monet / Material You`, `Electric Cyan`, `Deep Navy`, `Sakura Purple`, `Cyber Mint`, `Slate Indigo`, `Sunset Amber`).
+- **Двуязычная документация**: Два связанных технических файла — `README.md` (EN) и `README.ru.md` (RU) с переключением языка в шапке, логотипом приложения по центру под заголовком и лаконичным позиционированием («Видеоплеер для Android с акцентом на аниме» / «Android video player tailored for anime»).
 
-### 4. Independent App UI Scale & Player HUD Scale
-- **File**: `app/src/main/java/com/example/model/PlayerModels.kt`, `app/src/main/java/com/example/data/PlayerPreferencesRepository.kt`, `app/src/main/java/com/example/ui/NegaiViewModel.kt`
-- Add `appUiScalePercent` (75%–140%) alongside `playerUiScalePercent` (75%–140%).
-- Apply `appUiScalePercent` to general app density (`LocalDensity` in `MainActivity.kt`) and `playerUiScalePercent` to player controls.
-- **File**: `app/src/main/java/com/example/ui/screens/SettingsCategoryPages.kt`
-- Add two independent slider rows with reset buttons in `AppearanceSettingsPage`.
+---
 
-### 5. Video Orientation Transitions & Long-Press Lock
-- **File**: `app/src/main/java/com/example/player/PlayerEngine.kt`, `app/src/main/java/com/example/ui/screens/PlayerScreen.kt`
-- **End-of-video flip fix**: Prevent aspect ratio calculation updates when playback reaches the final second of an episode or during buffering transitions.
-- **Orientation override & long-press lock**:
-  - Add `isOrientationLocked` state to player orientation.
-  - Tapping orientation button toggles orientation mode (`Auto` -> `Landscape` -> `Portrait`).
-  - Long-pressing orientation button locks/unlocks orientation lock.
-  - Display a lock badge on the orientation quick chip when locked.
-  - When unlocked, switching episodes automatically resets orientation to the next video's aspect ratio / default setting; when locked, manual orientation persists across playlist episodes.
+## 1. Overview & Core Concept
 
-### 6. Repository Link Updates & Obtainium Sync
-- **Files**: `README.md`, `app/src/main/java/com/example/ui/screens/SettingsCategoryPages.kt`, `app/src/main/java/com/example/model/AppVersionInfo.kt`, and obtainium link builders
-- Replace all legacy repository links with `https://github.com/Poison5820/Negai`.
+- **Что делает обновление**: Доводит видеоплеер **Negai** до стабильного релиза **v3.0**, устраняя ошибки предыдущих итераций, перерабатывая рендеринг шейдеров и анимаций HUD без просадок FPS, внедряя математический расчёт контрастности текста для любых сочетаний фона и акцента, а также адаптируя интерфейс библиотеки и настроек под широкие экраны `20:9` в горизонтальном положении.
+- **Целевая аудитория**: Пользователи Android-устройств (включая дисплеи 120–165 Гц AMOLED и ультраширокие экраны 20:9), смотрящие локальные релизы и потоки с аппаратным апскейлом Anime4K и кадровой интерполяцией.
+- **Ключевая ценность**: Мгновенный отклик интерфейса плеера без выгрузки дерева компонентов, отсутствие мерцаний и искажений контуров в шейдерах, безупречная читаемость текста на любой теме и чистота кодовой базы без утечек памяти.
 
-### 7. Release Notes, Structured README & Git Hygiene
-- **File**: `README.md`
-- Restructure `README.md` into a structured technical format (Architecture, Features, Tech Stack, Build & Export Instructions).
-- Format version info and release notes in technical, structured language.
-- Ensure build artifacts and temporary files (such as `.aistudio`, `implementation_plan.md`, build outputs) are excluded from export.
+---
 
-## Verification Plan
+## 2. User Experience & Visual Design
 
-### Automated Unit Tests
-- Run `gradle :app:testDebugUnitTest` to verify theme state, preference persistence, and orientation logic tests.
+### Ключевые пользовательские сценарии
+1. **Настройка темы и автоконтраст**:
+   - В настройках внешнего вида и в быстрой шторке тем пользователь выбирает один из **5 бейджей режима фона** (`Светлая`, `Тёмная`, `OLED #000000`, `Авто (Светлая/Тёмная)`, `Авто OLED (Светлая/OLED)`).
+   - Ниже в отдельной сетке выбирается **Акцентный цвет** (`Monet`, `Electric Cyan`, `Sakura`, `Deep Navy`, `Cyber Mint`, `Slate Indigo`, `Sunset Amber`).
+   - Все текстовые метки, бейджи, чипы, карточки и активные индикаторы автоматически вычисляют относительную яркость (WCAG Relative Luminance) подложки и подстраивают яркость и насыщенность текста для гарантированного контраста не ниже `4.5:1` (для основного текста `>= 7.0:1`).
+2. **Мгновенный HUD плеера и всплывающие шторки без системной шторки Android**:
+   - При касании экрана в плеере интерфейс больше не выгружается и не создаётся заново в памяти: дерево HUD остаётся скомпилированным, а плавное появление/скрытие управляется на уровне графического слоя (`graphicsLayer`) с блокировкой нажатий в скрытом состоянии.
+   - Вызов любого всплывающего окна в плеере сохраняет полноэкранный иммерсивный режим (`WindowInsetsCompat.Type.systemBars()` остаются скрытыми в окне диалога), поэтому верхняя шторка уведомлений Android никогда не опускается и не вызывает лагов.
+3. **Стабильная ориентация между сериями и чистый выход жестом «Назад»**:
+   - При доигрывании серии до конца предбуферизация следующей серии не вызывает преждевременного переворота экрана на последней секунде — новые габариты видео применяются строго в момент фактического переключения эпизода.
+   - При выходе из плеера (в том числе системным свайпом «Назад») ориентация и системные отступы (`WindowInsets`) сбрасываются синхронно без двойного учёта выреза камеры, исключая сдвиг интерфейса вправо.
+4. **Адаптивный альбомный режим (20:9) вне плеера**:
+   - Боковая панель `NavigationRail` поддерживает вертикальную прокрутку и компактные отступы, чтобы все 4 раздела навигации помещались по высоте на узких экранах `20:9`.
+   - Экраны папок, недавних, торрентов и настроек используют адаптивную ширину на весь доступный экран без обрезания карточек и диалогов по высоте.
+5. **Чистое меню папки и карточка сведений о папке**:
+   - Внутри открытой папки из верхней панели убраны кнопки удаления и скрытия папки.
+   - Нажатие на иконку информации о папке открывает только сводку самой папки (имя, путь, число серий, просмотрено, общий объём, суммарная длительность, дата изменения) без фиктивных видеопотоков и кодеков.
+6. **Планетарное окно версии v3.0**:
+   - Из заголовка убрана необработанная текстовая ссылка; добавлена аккуратная интерактивная капсула перехода в репозиторий GitHub и описание релиза v3.0.
 
-### Compilation
-- Run `compile_applet` to confirm zero compilation errors.
+---
+
+## 3. Key Product Decisions & Trade-Offs
+
+- **Решение 1: Постоянно удерживаемый слой HUD вместо условной композиции**
+  - *Выбранный подход*: Управлять прозрачностью HUD через `graphicsLayer { alpha = ... }` и перехватом касаний в фазе отрисовки/ввода без удаления узлов из дерева Compose, а также исключить переключение аппаратного режима герцовки окна при каждом появлении кнопок.
+  - *Почему*: Полное удаление и повторная инициализация десятков кнопок, иконок и списков при каждом тапе по экрану вызывали микрофриз в 1–3 кадра.
+- **Решение 2: Сохранение яркостного канала (Luma `.a`) в шейдере MEMC для конвейера Anime4K**
+  - *Выбранный подход*: Записывать перцептивную яркость `dot(synthesized, vec3(0.299, 0.587, 0.114))` в альфа-канал выходного буфера `MEMC_SYNTHESIZE_FRAGMENT`, а также сбалансировать коэффициенты градиентного пуша в `ANIME4K_FAST_FINAL_FRAGMENT`.
+  - *Почему*: Ранее `MEMC_SYNTHESIZE_FRAGMENT` записывал `1.0` в альфа-канал на промежуточных кадрах, а на опорных кадрах (`t = 0` и `t = 1`) возвращал исходный буфер с яркостью в `.a`. Из-за этого шейдеры Anime4K, читающие градиенты из `.a`, работали только на опорных кадрах и выключались на интерполированных, вызывая заметное мерцание. Одновременно смягчение агрессивного осветления контуров в `Anime4K_Fast` предотвращает истончение рисовки.
+- **Решение 3: Алгоритмический автоконтраст цветовой схемы**
+  - *Выбранный подход*: Генератор `ColorScheme` вычисляет контраст по формуле относительной яркости WCAG 2.1 для каждой пары `(container, onContainer)` и `(background/surface, primary/secondary/onSurface)`, автоматически корректируя тон (HSL Lightness & Saturation) текста и акцентных элементов на светлом, тёмном и чисто чёрном OLED фоне.
+  - *Почему*: Гарантирует читаемость текста на всех 35 комбинациях (5 базовых режимов × 7 акцентных палитр, включая динамический Monet).
+- **Решение 4: Исключение пункта «Выключена» из списка режимов интерполяции**
+  - *Выбранный подход*: Оставить управление включением/выключением MEMC за отдельным главным переключателем (`Switch`), а в списке пресетов отображать только активные режимы (`Плавный 60 FPS`, `Высокий 120 FPS`, `Максимум Гц`, `Кино 2x`).
+  - *Почему*: Убирает дублирование состояния между ползунком включения и радиокнопками.
+
+---
+
+## 4. Technical Architecture & Data Strategy
+
+### Архитектура рендеринга, темизации и локализации (v3.0)
+
+```
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                            Negai v3.0 Architecture                           │
+│                         (Package ID: app.negai.player)                       │
+└───────────────────────────────────────┬──────────────────────────────────────┘
+                                        │
+        ┌───────────────────────────────┼───────────────────────────────┐
+        ▼                               ▼                               ▼
+┌───────────────────────┐   ┌───────────────────────┐   ┌───────────────────────┐
+│  Theme & Contrast Engine│   │ Video & GLSL Pipeline │   │  UI & i18n Subsystem  │
+├───────────────────────┤   ├───────────────────────┤   ├───────────────────────┤
+│ • 5 Base Theme Badges:│   │ • OES Luma Extract    │   │ • Persistent HUD Tree │
+│   Light / Dark / OLED │   │         │             │   │   (Draw-phase alpha,  │
+│   Auto / Auto OLED    │   │         ▼             │   │    zero re-inflate)   │
+│ • 7 Accent Palettes:  │   │ • MEMC Optical Flow   │   │ • Immersive Dialogs   │
+│   Monet, Cyan, Navy,  │   │   (Outputs RGB+Luma.a │   │   (No Android status  │
+│   Sakura, Mint,       │   │    on ALL subframes)  │   │    bar drop on sheet) │
+│   Slate, Amber        │   │         │             │   │ • 20:9 Landscape UI:  │
+│ • WCAG Auto-Contrast: │   │         ▼             │   │   Scrollable NavRail, │
+│   Dynamic luminance   │   │ • Anime4K Pass:       │   │   single-pass insets  │
+│   solver for text &   │   │   Balanced Fast/CNN   │   │ • Dedicated RU / EN   │
+│   containers (>=4.5:1)│   │   capped to screen px │   │   string dictionaries │
+└───────────────────────┘   └───────────────────────┘   └───────────────────────┘
+```
+
+### Ключевые потоки состояния и управление ресурсами
+1. **Переход между сериями с разной ориентацией**:
+   - Когда `ExoPlayer` приближается к концу текущего видео и декодирует заголовок следующего элемента плейлиста, `PlayerEngine` буферизует изменение `VideoSize` до фактического события `onMediaItemTransition`.
+   - В `PlayerScreen` эффект смены `requestedOrientation` подписан на актуальный индекс серии и подтверждённые габариты текущего кадра; при включённом замке ориентации (`isOrientationLocked`) ручной режим сохраняется.
+2. **Очистка ресурсов и защита от утечек памяти**:
+   - При закрытии плеера (`exitPlayer()`) освобождаются FBO-текстуры и шейдерные программы OpenGL ES, останавливается цикл `Choreographer`, очищается кэш превью неактивных вкладок, а `MediaMetadataRetriever` / `MediaExtractor` гарантированно закрываются в блоках `finally`.
+   - Удаляются неиспользуемые свойства, устаревшие константы и мёртвые ветки кода.
+3. **Централизованная локализация (RU / EN)**:
+   - Строковые ресурсы интерфейса объединяются в выделенных языковых словарях (`StringsRu` / `StringsEn`) и `strings.xml`, обеспечивая 100% перевод всех элементов поиска, кнопок выбора папок, карточек настроек до и после раскрытия, а также всплывающих шторок.

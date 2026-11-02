@@ -46,16 +46,27 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
+import android.view.WindowManager
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogWindowProvider
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import com.example.model.Anime4KPreset
 import com.example.model.DecoderMode
 import com.example.model.EpisodeItem
@@ -107,6 +118,34 @@ internal fun playerPopupBorderStroke(): BorderStroke {
     return BorderStroke(0.5.dp, strokeColor)
 }
 
+private tailrec fun Context.findHostActivityWindow(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findHostActivityWindow()
+    else -> null
+}
+
+/**
+ * Keeps the Android status bar and navigation bar hidden inside any player ModalBottomSheet
+ * so opening a popup menu never drops the system notification shade or causes window-inset jank.
+ */
+@Composable
+internal fun KeepPlayerSheetImmersive() {
+    val view = LocalView.current
+    val context = LocalContext.current
+    SideEffect {
+        val dialogWindow = (view.parent as? DialogWindowProvider)?.window
+        val activityWindow = context.findHostActivityWindow()?.window
+        listOfNotNull(dialogWindow, activityWindow).forEach { win ->
+            WindowCompat.setDecorFitsSystemWindows(win, false)
+            win.clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN)
+            val controller = WindowCompat.getInsetsController(win, win.decorView)
+            controller.systemBarsBehavior =
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            controller.hide(WindowInsetsCompat.Type.systemBars())
+        }
+    }
+}
+
 internal val PlayerPopupSheetContainerColor = Color(0xFF090D16).copy(alpha = 0.68f)
 internal val PlayerPopupSheetScrimColor = Color.Black.copy(alpha = 0.22f)
 internal val PlayerPopupCardColor = Color(0xFF101726).copy(alpha = 0.60f)
@@ -140,6 +179,7 @@ fun AudioTracksModalSheet(
         containerColor = sheetBg,
         scrimColor = PlayerPopupSheetScrimColor
     ) {
+        KeepPlayerSheetImmersive()
         CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
             Column(
                 modifier = Modifier
@@ -394,6 +434,7 @@ fun SubtitleControlModalSheet(
         containerColor = sheetBg,
         scrimColor = PlayerPopupSheetScrimColor
     ) {
+        KeepPlayerSheetImmersive()
         CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
             Column(
                 modifier = Modifier
@@ -647,6 +688,7 @@ fun Anime4KControlModalSheet(
         containerColor = sheetBg,
         scrimColor = PlayerPopupSheetScrimColor
     ) {
+        KeepPlayerSheetImmersive()
         CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
             Column(
                 modifier = Modifier
@@ -875,6 +917,7 @@ fun DecoderAndVideoModalSheet(
         containerColor = sheetBg,
         scrimColor = PlayerPopupSheetScrimColor
     ) {
+        KeepPlayerSheetImmersive()
         CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
             Column(
                 modifier = Modifier

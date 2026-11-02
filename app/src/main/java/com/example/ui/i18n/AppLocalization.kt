@@ -16,6 +16,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import com.example.model.Anime4KPreset
+import com.example.model.AppAccentColor
 import com.example.model.AppLanguage
 import com.example.model.AppThemeMode
 import com.example.model.DecoderMode
@@ -164,7 +165,7 @@ fun DecoderMode.localizedDescription(isEnglish: Boolean): String = if (!isEnglis
 
 fun Anime4KPreset.localizedTitle(isEnglish: Boolean): String = if (!isEnglish) title else when (this) {
     Anime4KPreset.OFF -> "Off (Original)"
-    Anime4KPreset.ANIME4K_FAST -> "Anime4K_Fast (ThinLines + Deblur)"
+    Anime4KPreset.ANIME4K_FAST -> "Anime4K_Fast (Balanced)"
     Anime4KPreset.ANIME4K_UPSCALE_CNN -> "Anime4K_Upscale_CNN"
     Anime4KPreset.ANIME4K_UPSCALE_CNNX -> "Anime4K_Upscale_CNNX"
 }
@@ -173,7 +174,7 @@ fun Anime4KPreset.localizedSubtitle(isEnglish: Boolean): String = localizedDescr
 
 fun Anime4KPreset.localizedDescription(isEnglish: Boolean): String = if (!isEnglish) description else when (this) {
     Anime4KPreset.OFF -> "Direct hardware decoder output without GPU post-processing."
-    Anime4KPreset.ANIME4K_FAST -> "Fast line thinning and deblurring with minimal GPU load."
+    Anime4KPreset.ANIME4K_FAST -> "Balanced contour restoration & gentle deblur without thinning lines; minimal GPU load."
     Anime4KPreset.ANIME4K_UPSCALE_CNN -> "Balanced neural GLSL upscaling: CReLU line reconstruction and halo suppression."
     Anime4KPreset.ANIME4K_UPSCALE_CNNX -> "Maximum clarity: deep Sobel gradient reconstruction, dense CNNX convolution, and subpixel anti-aliasing."
 }
@@ -225,34 +226,58 @@ fun SubtitleColorPreset.localizedLabel(isEnglish: Boolean): String = if (!isEngl
     SubtitleColorPreset.SAKURA -> "Sakura Pink"
 }
 
+fun AppThemeMode.localizedBadge(isEnglish: Boolean): String = when (this) {
+    AppThemeMode.LIGHT -> if (isEnglish) "Light" else "Светлая"
+    AppThemeMode.DARK -> if (isEnglish) "Dark" else "Тёмная"
+    AppThemeMode.OLED -> "OLED"
+    AppThemeMode.AUTO -> if (isEnglish) "Auto" else "Авто"
+    AppThemeMode.AUTO_OLED -> if (isEnglish) "Auto OLED" else "Авто OLED"
+}
+
 fun AppThemeMode.localizedTitle(isEnglish: Boolean): String = if (!isEnglish) title else when (this) {
-    AppThemeMode.SYSTEM_AUTO -> "System Auto"
-    AppThemeMode.MATERIAL_YOU -> "Material You (Dynamic)"
-    AppThemeMode.OLED_PITCH_BLACK_DARK -> "Pure OLED (Dark)"
-    AppThemeMode.OLED_PITCH_BLACK_LIGHT -> "Pure OLED (Light)"
-    AppThemeMode.DEEP_NAVY_DARK -> "Deep Navy (Dark)"
-    AppThemeMode.DEEP_NAVY_LIGHT -> "Deep Navy (Light)"
-    AppThemeMode.SAKURA_PURPLE_DARK -> "Cyber Sakura (Dark)"
-    AppThemeMode.SAKURA_PURPLE_LIGHT -> "Cyber Sakura (Light)"
-    AppThemeMode.CYBER_MINT_DARK -> "Cyber Mint (Dark)"
-    AppThemeMode.CYBER_MINT_LIGHT -> "Cyber Mint (Light)"
-    AppThemeMode.SLATE_GREY_DARK -> "Slate Grey (Dark)"
-    AppThemeMode.SLATE_GREY_LIGHT -> "Slate Grey (Light)"
+    AppThemeMode.LIGHT -> "Light"
+    AppThemeMode.DARK -> "Dark"
+    AppThemeMode.OLED -> "OLED"
+    AppThemeMode.AUTO -> "Auto"
+    AppThemeMode.AUTO_OLED -> "Auto OLED"
 }
 
 fun AppThemeMode.localizedSubtitle(isEnglish: Boolean): String = if (!isEnglish) subtitle else when (this) {
-    AppThemeMode.SYSTEM_AUTO -> "Automatically match system dark/light mode"
-    AppThemeMode.MATERIAL_YOU -> "Dynamic wallpaper accents from Android 12+"
-    AppThemeMode.OLED_PITCH_BLACK_DARK -> "True black background (#000000) with electric cyan accents"
-    AppThemeMode.OLED_PITCH_BLACK_LIGHT -> "High-contrast daylight theme with cyan accents"
-    AppThemeMode.DEEP_NAVY_DARK -> "Deep navy-graphite background with azure accents"
-    AppThemeMode.DEEP_NAVY_LIGHT -> "Sky blue background with deep navy accents"
-    AppThemeMode.SAKURA_PURPLE_DARK -> "Pure OLED black background with neon crimson anime accents"
-    AppThemeMode.SAKURA_PURPLE_LIGHT -> "Soft pink palette with vivid crimson accents"
-    AppThemeMode.CYBER_MINT_DARK -> "Dark mint-emerald background with neon green accents"
-    AppThemeMode.CYBER_MINT_LIGHT -> "Fresh mint background with contrast emerald accents"
-    AppThemeMode.SLATE_GREY_DARK -> "Dark slate matte background with steel indigo accents"
-    AppThemeMode.SLATE_GREY_LIGHT -> "Paper slate background with contrast steel accents"
+    AppThemeMode.LIGHT -> "High-contrast daylight surfaces (#F6F8FC)"
+    AppThemeMode.DARK -> "Deep graphite-navy dark background (#0C111B)"
+    AppThemeMode.OLED -> "True pitch-black background (#000000) for AMOLED displays"
+    AppThemeMode.AUTO -> "Follows system schedule (Light / Dark #0C111B)"
+    AppThemeMode.AUTO_OLED -> "Follows system schedule (Light / True OLED #000000)"
+}
+
+fun AppAccentColor.localizedTitle(isEnglish: Boolean): String = if (!isEnglish) title else when (this) {
+    AppAccentColor.MONET -> "Monet (Dynamic)"
+    AppAccentColor.CYAN -> "Electric Cyan"
+    AppAccentColor.SAKURA -> "Cyber Sakura"
+    AppAccentColor.NAVY -> "Deep Navy"
+    AppAccentColor.MINT -> "Cyber Mint"
+    AppAccentColor.SLATE -> "Slate Indigo"
+    AppAccentColor.AMBER -> "Sunset Amber"
+}
+
+fun AppAccentColor.localizedSubtitle(isEnglish: Boolean): String = if (!isEnglish) subtitle else when (this) {
+    AppAccentColor.MONET -> "System wallpaper color palette (Android 12+)"
+    AppAccentColor.CYAN -> "Signature Negai electric cyan & neon violet"
+    AppAccentColor.SAKURA -> "Anime sakura crimson & warm coral"
+    AppAccentColor.NAVY -> "Sapphire blue & crisp ice highlights"
+    AppAccentColor.MINT -> "Emerald mint & turquoise glow"
+    AppAccentColor.SLATE -> "Refined indigo violet & cool lavender"
+    AppAccentColor.AMBER -> "Warm sunset gold & amber highlights"
+}
+
+fun AppAccentColor.localizedBadge(isEnglish: Boolean): String = when (this) {
+    AppAccentColor.MONET -> "Monet"
+    AppAccentColor.CYAN -> "Cyan"
+    AppAccentColor.SAKURA -> "Sakura"
+    AppAccentColor.NAVY -> "Navy"
+    AppAccentColor.MINT -> "Mint"
+    AppAccentColor.SLATE -> "Indigo"
+    AppAccentColor.AMBER -> "Amber"
 }
 
 fun PlayerControlsTheme.localizedTitle(isEnglish: Boolean): String = if (!isEnglish) title else when (this) {

@@ -361,57 +361,6 @@ object VideoStreamInfoExtractor {
             "Папка с видео"
         }
 
-        val sampleEpisode = folder.episodes.firstOrNull()
-        val videoStream = sampleEpisode?.let { ep ->
-            val ext = ep.fileName.substringAfterLast('.', "").lowercase(Locale.ROOT)
-            val codec = inferVideoCodecFromFileName(ep.fileName, ext)
-            val w = ep.videoWidth
-            val h = ep.videoHeight
-            VideoStreamTechnicalInfo(
-                codecName = codec,
-                mimeType = inferVideoMimeFromCodec(codec),
-                profileLevel = inferProfileLevel(codec, ""),
-                width = w,
-                height = h,
-                resolutionBadge = resolveResolutionBadge(w, h, ep.fileName),
-                aspectRatioLabel = formatAspectRatio(w, h),
-                frameRateLabel = "23.976 к/с",
-                colorAndHdrLabel = resolveColorAndHdrLabel(0, 0, false, ep.fileName),
-                bitrateLabel = if (overallBrBps > 0L) formatBitrate(overallBrBps) else "VBR"
-            )
-        }
-
-        val extAudioList = folder.episodes
-            .flatMap { it.autoAudioTracks }
-            .distinctBy { it.sourceFolderName.ifBlank { it.displayName } }
-            .take(8)
-            .mapIndexed { idx, track ->
-                AudioStreamTechnicalInfo(
-                    index = idx + 1,
-                    title = track.sourceFolderName.ifBlank { track.displayName },
-                    codecName = track.extension.uppercase(Locale.ROOT).ifBlank { "MKA / AAC" },
-                    channelsLabel = "2.0 / 5.1",
-                    sampleRateLabel = "48.0 кГц",
-                    bitrateLabel = "Автопривязка (${folder.totalAutoAudioCount} ф.)",
-                    language = "Внешняя озвучка",
-                    isExternal = true
-                )
-            }
-
-        val extSubList = folder.episodes
-            .flatMap { it.autoSubtitleTracks }
-            .distinctBy { it.sourceFolderName.ifBlank { it.format.label } }
-            .take(8)
-            .mapIndexed { idx, sub ->
-                SubtitleStreamTechnicalInfo(
-                    index = idx + 1,
-                    title = sub.sourceFolderName.ifBlank { sub.displayName },
-                    formatName = sub.format.label,
-                    language = "Автопривязка (${folder.totalAutoSubCount} ф.)",
-                    isExternal = true
-                )
-            }
-
         return DetailedMediaFileInfo(
             isFolder = true,
             displayName = folder.name,
@@ -427,9 +376,9 @@ object VideoStreamInfoExtractor {
             episodeCount = folder.episodes.size,
             watchedCount = folder.watchedCount,
             chaptersCount = 0,
-            videoStream = videoStream,
-            audioStreams = extAudioList,
-            subtitleStreams = extSubList
+            videoStream = null,
+            audioStreams = emptyList(),
+            subtitleStreams = emptyList()
         )
     }
 

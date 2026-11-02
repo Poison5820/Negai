@@ -546,6 +546,7 @@ internal fun SkipIntroConfigModalSheet(
         scrimColor = PlayerPopupSheetScrimColor,
         modifier = Modifier.testTag("skip_intro_config_modal_sheet")
     ) {
+        KeepPlayerSheetImmersive()
         CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
             Column(
                 modifier = Modifier
@@ -770,6 +771,7 @@ internal fun SpeedQuickModalSheet(
         containerColor = sheetBg,
         scrimColor = PlayerPopupSheetScrimColor
     ) {
+        KeepPlayerSheetImmersive()
         CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
             Column(
                 modifier = Modifier
@@ -909,6 +911,7 @@ internal fun ScaleQuickModalSheet(
         containerColor = sheetBg,
         scrimColor = PlayerPopupSheetScrimColor
     ) {
+        KeepPlayerSheetImmersive()
         CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
             Column(
                 modifier = Modifier
@@ -1010,6 +1013,7 @@ internal fun EpisodesQuickModalSheet(
         containerColor = PlayerPopupSheetContainerColor,
         scrimColor = PlayerPopupSheetScrimColor
     ) {
+        KeepPlayerSheetImmersive()
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -1133,6 +1137,7 @@ internal fun AudioBoostQuickModalSheet(
         containerColor = PlayerPopupSheetContainerColor,
         scrimColor = PlayerPopupSheetScrimColor
     ) {
+        KeepPlayerSheetImmersive()
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -1173,6 +1178,7 @@ internal fun SleepTimerQuickModalSheet(
         containerColor = PlayerPopupSheetContainerColor,
         scrimColor = PlayerPopupSheetScrimColor
     ) {
+        KeepPlayerSheetImmersive()
         Column(
             modifier = Modifier
                 .fillMaxWidth()

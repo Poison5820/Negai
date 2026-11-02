@@ -160,7 +160,7 @@ fun TorrentsTabContent(
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
-            .widthIn(max = 840.dp)
+            .widthIn(max = 1200.dp)
             .testTag("torrents_lazy_list"),
         contentPadding = PaddingValues(
             horizontal = if (settings.compactUiMode) 12.dp else 16.dp,

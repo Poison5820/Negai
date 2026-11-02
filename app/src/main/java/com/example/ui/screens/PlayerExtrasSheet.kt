@@ -282,6 +282,7 @@ fun PlayerToolsModalSheet(
         containerColor = sheetBg,
         scrimColor = PlayerPopupSheetScrimColor
     ) {
+        KeepPlayerSheetImmersive()
         CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
             Column(
                 modifier = Modifier

@@ -212,6 +212,10 @@ class PlayerEngine private constructor(
     @Volatile
     private var detectedVideoHeight: Int = 0
     @Volatile
+    private var pendingNextVideoWidth: Int = 0
+    @Volatile
+    private var pendingNextVideoHeight: Int = 0
+    @Volatile
     private var lastFramePtsUs: Long = C.TIME_UNSET
     @Volatile
     private var smoothedPtsDeltaUs: Float = 0f
@@ -322,6 +326,21 @@ class PlayerEngine private constructor(
                 val swapped = videoSize.unappliedRotationDegrees == 90 || videoSize.unappliedRotationDegrees == 270
                 val finalW = if (swapped) displayH else displayW
                 val finalH = if (swapped) displayW else displayH
+
+                val player = _exoPlayer
+                val dur = player?.duration?.takeIf { it != C.TIME_UNSET && it > 0L } ?: _state.value.durationMs
+                val pos = player?.currentPosition?.coerceAtLeast(0L) ?: _positionMs.value
+                val isNearEpisodeEnd = dur > 2_500L && pos >= (dur - 2_500L)
+                if (isNearEpisodeEnd && _state.value.videoWidth > 0 && _state.value.videoHeight > 0) {
+                    // ExoPlayer pre-renders the next playlist item ~1-2s before the current item finishes.
+                    // Defer applying the new dimensions until onMediaItemTransition so orientation never flips early!
+                    pendingNextVideoWidth = finalW
+                    pendingNextVideoHeight = finalH
+                    return
+                }
+
+                pendingNextVideoWidth = 0
+                pendingNextVideoHeight = 0
                 detectedVideoWidth = finalW
                 detectedVideoHeight = finalH
                 _state.update {
@@ -373,20 +392,27 @@ class PlayerEngine private constructor(
                 _positionMs.value = pos
                 lastKnownDurationForTrackedEpisodeMs = currentDur
 
+                val newEp = playlist[idx]
+                val nextW = pendingNextVideoWidth.takeIf { it > 0 } ?: newEp.videoWidth
+                val nextH = pendingNextVideoHeight.takeIf { it > 0 } ?: newEp.videoHeight
+                pendingNextVideoWidth = 0
+                pendingNextVideoHeight = 0
+                detectedVideoWidth = nextW
+                detectedVideoHeight = nextH
+
                 _state.update {
                     it.copy(
                         currentEpisodeIndex = idx,
                         currentPositionMs = pos,
                         durationMs = currentDur,
+                        videoWidth = if (nextW > 0) nextW else it.videoWidth,
+                        videoHeight = if (nextH > 0) nextH else it.videoHeight,
                         chapters = emptyList(),
                         abLoopStartMs = null,
                         abLoopEndMs = null,
                         errorMessage = null
                     )
                 }
-                val newEp = playlist[idx]
-                detectedVideoWidth = newEp.videoWidth
-                detectedVideoHeight = newEp.videoHeight
                 lastFramePtsUs = C.TIME_UNSET
                 ptsSampleCount = 0
                 onEpisodeActivated(newEp)

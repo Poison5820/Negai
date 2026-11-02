@@ -2,6 +2,7 @@ package com.example.ui.theme
 
 import android.app.Activity
 import android.os.Build
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
@@ -12,261 +13,18 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
+import com.example.model.AppAccentColor
 import com.example.model.AppThemeMode
-
-// 1. Pure #000000 AMOLED / OLED Theme (Electric Cyan)
-private val PureOledCyanScheme = darkColorScheme(
-    primary = ElectricCyan,
-    onPrimary = Color(0xFF002A32),
-    primaryContainer = Color(0xFF002B33),
-    onPrimaryContainer = OnElectricCyanContainer,
-    secondary = SakuraCoral,
-    onSecondary = Color.White,
-    secondaryContainer = Color(0xFF440B22),
-    onSecondaryContainer = OnSakuraCoralContainer,
-    tertiary = AmberHighlight,
-    onTertiary = Color(0xFF2B1D00),
-    tertiaryContainer = AmberContainer,
-    onTertiaryContainer = OnAmberContainer,
-    background = Color.Black,
-    onBackground = Color(0xFFF5F8FF),
-    surface = Color.Black,
-    onSurface = Color(0xFFF5F8FF),
-    surfaceVariant = Color(0xFF0D1118),
-    onSurfaceVariant = Color(0xFFB0BCD6),
-    surfaceContainerLowest = Color.Black,
-    surfaceContainerLow = Color(0xFF05070B),
-    surfaceContainer = Color(0xFF0B0E15),
-    surfaceContainerHigh = Color(0xFF121722),
-    surfaceContainerHighest = Color(0xFF1A2232),
-    outline = Color(0xFF2B364C),
-    outlineVariant = Color(0xFF1A2232)
-)
-
-private val OledLightCyanScheme = lightColorScheme(
-    primary = Color(0xFF00838F),
-    onPrimary = Color.White,
-    primaryContainer = Color(0xFFB2EBF2),
-    onPrimaryContainer = Color(0xFF00363A),
-    secondary = Color(0xFF00ACC1),
-    onSecondary = Color.White,
-    secondaryContainer = Color(0xFFE0F7FA),
-    onSecondaryContainer = Color(0xFF004D40),
-    background = Color(0xFFF8FAFC),
-    onBackground = Color(0xFF0F172A),
-    surface = Color.White,
-    onSurface = Color(0xFF0F172A),
-    surfaceVariant = Color(0xFFF1F5F9),
-    onSurfaceVariant = Color(0xFF334155),
-    surfaceContainerLowest = Color.White,
-    surfaceContainerLow = Color(0xFFF8FAFC),
-    surfaceContainer = Color(0xFFE2E8F0),
-    surfaceContainerHigh = Color(0xFFCBD5E1),
-    surfaceContainerHighest = Color(0xFF94A3B8),
-    outline = Color(0xFF64748B),
-    outlineVariant = Color(0xFFCBD5E1)
-)
-
-// 2. Cyber-Sakura Pure #000000 OLED Theme
-private val PureOledSakuraScheme = darkColorScheme(
-    primary = SakuraCoral,
-    onPrimary = Color.White,
-    primaryContainer = Color(0xFF4D0D27),
-    onPrimaryContainer = Color(0xFFFFD9E3),
-    secondary = ElectricCyan,
-    onSecondary = Color(0xFF002A32),
-    secondaryContainer = Color(0xFF00313A),
-    onSecondaryContainer = OnElectricCyanContainer,
-    tertiary = Color(0xFFC792EA),
-    onTertiary = Color(0xFF290942),
-    background = Color.Black,
-    onBackground = Color(0xFFFFF5F8),
-    surface = Color.Black,
-    onSurface = Color(0xFFFFF5F8),
-    surfaceVariant = Color(0xFF130B14),
-    onSurfaceVariant = Color(0xFFD6B4C6),
-    surfaceContainerLowest = Color.Black,
-    surfaceContainerLow = Color(0xFF080409),
-    surfaceContainer = Color(0xFF100912),
-    surfaceContainerHigh = Color(0xFF19101C),
-    surfaceContainerHighest = Color(0xFF241729),
-    outline = Color(0xFF3E2645),
-    outlineVariant = Color(0xFF26172B)
-)
-
-private val SakuraLightScheme = lightColorScheme(
-    primary = Color(0xFFE11D48),
-    onPrimary = Color.White,
-    primaryContainer = Color(0xFFFFD1DC),
-    onPrimaryContainer = Color(0xFF4C0519),
-    secondary = Color(0xFFBE123C),
-    onSecondary = Color.White,
-    secondaryContainer = Color(0xFFFFE4E6),
-    onSecondaryContainer = Color(0xFF881337),
-    background = Color(0xFFFFF1F5),
-    onBackground = Color(0xFF1F0914),
-    surface = Color.White,
-    onSurface = Color(0xFF1F0914),
-    surfaceVariant = Color(0xFFFFE4E6),
-    onSurfaceVariant = Color(0xFF881337),
-    surfaceContainerLowest = Color.White,
-    surfaceContainerLow = Color(0xFFFFF1F5),
-    surfaceContainer = Color(0xFFFECDD3),
-    surfaceContainerHigh = Color(0xFFFDA4AF),
-    surfaceContainerHighest = Color(0xFFF43F5E),
-    outline = Color(0xFFE11D48),
-    outlineVariant = Color(0xFFFECDD3)
-)
-
-// 3. Obsidian Cinema Dark Theme
-private val ObsidianDarkScheme = darkColorScheme(
-    primary = ElectricCyan,
-    onPrimary = Color(0xFF002A32),
-    primaryContainer = ElectricCyanContainer,
-    onPrimaryContainer = OnElectricCyanContainer,
-    secondary = SakuraCoral,
-    onSecondary = Color.White,
-    secondaryContainer = SakuraCoralContainer,
-    onSecondaryContainer = OnSakuraCoralContainer,
-    tertiary = AmberHighlight,
-    onTertiary = Color(0xFF2B1D00),
-    tertiaryContainer = AmberContainer,
-    onTertiaryContainer = OnAmberContainer,
-    background = ObsidianBg,
-    onBackground = TextPrimaryDark,
-    surface = ObsidianSurface,
-    onSurface = TextPrimaryDark,
-    surfaceVariant = ObsidianSurfaceHigh,
-    onSurfaceVariant = TextSecondaryDark,
-    surfaceContainerLowest = Color(0xFF07090E),
-    surfaceContainerLow = ObsidianSurface,
-    surfaceContainer = ObsidianSurfaceHigh,
-    surfaceContainerHigh = ObsidianSurfaceHighest,
-    surfaceContainerHighest = Color(0xFF2C374F),
-    outline = OutlineDark,
-    outlineVariant = Color(0xFF232C40)
-)
-
-private val DeepNavyLightScheme = lightColorScheme(
-    primary = Color(0xFF0284C7),
-    onPrimary = Color.White,
-    primaryContainer = Color(0xFFE0F2FE),
-    onPrimaryContainer = Color(0xFF0369A1),
-    secondary = Color(0xFF0369A1),
-    onSecondary = Color.White,
-    secondaryContainer = Color(0xFFBAE6FD),
-    onSecondaryContainer = Color(0xFF075985),
-    background = Color(0xFFF0F4FA),
-    onBackground = Color(0xFF0F172A),
-    surface = Color.White,
-    onSurface = Color(0xFF0F172A),
-    surfaceVariant = Color(0xFFE2E8F0),
-    onSurfaceVariant = Color(0xFF334155),
-    surfaceContainerLowest = Color.White,
-    surfaceContainerLow = Color(0xFFF0F4FA),
-    surfaceContainer = Color(0xFFE2E8F0),
-    surfaceContainerHigh = Color(0xFFCBD5E1),
-    surfaceContainerHighest = Color(0xFF94A3B8),
-    outline = Color(0xFF64748B),
-    outlineVariant = Color(0xFFCBD5E1)
-)
-
-// 4. Cyber Mint Theme
-private val CyberMintDarkScheme = darkColorScheme(
-    primary = Color(0xFF00E676),
-    onPrimary = Color(0xFF003819),
-    primaryContainer = Color(0xFF005227),
-    onPrimaryContainer = Color(0xFFB9F6CA),
-    secondary = Color(0xFF69F0AE),
-    onSecondary = Color(0xFF003819),
-    background = Color(0xFF061412),
-    onBackground = Color(0xFFE8F5E9),
-    surface = Color(0xFF0A1F1C),
-    onSurface = Color(0xFFE8F5E9),
-    surfaceVariant = Color(0xFF112E2A),
-    onSurfaceVariant = Color(0xFFA7F3D0),
-    surfaceContainerLow = Color(0xFF0A1F1C),
-    surfaceContainer = Color(0xFF112E2A),
-    surfaceContainerHigh = Color(0xFF1A403A),
-    surfaceContainerHighest = Color(0xFF23524B),
-    outline = Color(0xFF00E676),
-    outlineVariant = Color(0xFF112E2A)
-)
-
-private val CyberMintLightScheme = lightColorScheme(
-    primary = Color(0xFF059669),
-    onPrimary = Color.White,
-    primaryContainer = Color(0xFFD1FAE5),
-    onPrimaryContainer = Color(0xFF064E3B),
-    secondary = Color(0xFF10B981),
-    onSecondary = Color.White,
-    secondaryContainer = Color(0xFFA7F3D0),
-    onSecondaryContainer = Color(0xFF065F46),
-    background = Color(0xFFF0FDF4),
-    onBackground = Color(0xFF022C22),
-    surface = Color.White,
-    onSurface = Color(0xFF022C22),
-    surfaceVariant = Color(0xFFDCFCE7),
-    onSurfaceVariant = Color(0xFF065F46),
-    surfaceContainerLowest = Color.White,
-    surfaceContainerLow = Color(0xFFF0FDF4),
-    surfaceContainer = Color(0xFFBBF7D0),
-    surfaceContainerHigh = Color(0xFF86EFAC),
-    surfaceContainerHighest = Color(0xFF4ADE80),
-    outline = Color(0xFF059669),
-    outlineVariant = Color(0xFFBBF7D0)
-)
-
-// 5. Slate Grey Theme
-private val SlateGreyDarkScheme = darkColorScheme(
-    primary = Color(0xFF6366F1),
-    onPrimary = Color.White,
-    primaryContainer = Color(0xFF312E81),
-    onPrimaryContainer = Color(0xFFE0E7FF),
-    secondary = Color(0xFF818CF8),
-    onSecondary = Color(0xFF1E1B4B),
-    background = Color(0xFF111827),
-    onBackground = Color(0xFFF9FAFB),
-    surface = Color(0xFF1F2937),
-    onSurface = Color(0xFFF9FAFB),
-    surfaceVariant = Color(0xFF374151),
-    onSurfaceVariant = Color(0xFFD1D5DB),
-    surfaceContainerLow = Color(0xFF1F2937),
-    surfaceContainer = Color(0xFF374151),
-    surfaceContainerHigh = Color(0xFF4B5563),
-    surfaceContainerHighest = Color(0xFF6B7280),
-    outline = Color(0xFF6366F1),
-    outlineVariant = Color(0xFF374151)
-)
-
-private val SlateGreyLightScheme = lightColorScheme(
-    primary = Color(0xFF4F46E5),
-    onPrimary = Color.White,
-    primaryContainer = Color(0xFFE0E7FF),
-    onPrimaryContainer = Color(0xFF1E1B4B),
-    secondary = Color(0xFF6366F1),
-    onSecondary = Color.White,
-    secondaryContainer = Color(0xFFC7D2FE),
-    onSecondaryContainer = Color(0xFF312E81),
-    background = Color(0xFFF8FAFC),
-    onBackground = Color(0xFF0F172A),
-    surface = Color.White,
-    onSurface = Color(0xFF0F172A),
-    surfaceVariant = Color(0xFFE0E7FF),
-    onSurfaceVariant = Color(0xFF3730A3),
-    surfaceContainerLowest = Color.White,
-    surfaceContainerLow = Color(0xFFF8FAFC),
-    surfaceContainer = Color(0xFFC7D2FE),
-    surfaceContainerHigh = Color(0xFFA5B4FC),
-    surfaceContainerHighest = Color(0xFF818CF8),
-    outline = Color(0xFF4F46E5),
-    outlineVariant = Color(0xFFC7D2FE)
-)
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.pow
 
 val NegaiShapes = Shapes(
     extraSmall = RoundedCornerShape(8.dp),
@@ -278,45 +36,321 @@ val NegaiShapes = Shapes(
 
 val KinoShapes = NegaiShapes
 
+/**
+ * Computes WCAG 2.1 relative luminance in [0.0, 1.0].
+ */
+fun Color.wcagRelativeLuminance(): Float {
+    fun channelLuminance(c: Float): Float {
+        val v = c.coerceIn(0f, 1f)
+        return if (v <= 0.03928f) v / 12.92f else ((v + 0.055f) / 1.055f).pow(2.4f)
+    }
+    val r = channelLuminance(red)
+    val g = channelLuminance(green)
+    val b = channelLuminance(blue)
+    return 0.2126f * r + 0.7152f * g + 0.0722f * b
+}
+
+/**
+ * Computes WCAG 2.1 contrast ratio in [1.0, 21.0] between two colors.
+ */
+fun wcagContrastRatio(fg: Color, bg: Color): Float {
+    val l1 = fg.wcagRelativeLuminance()
+    val l2 = bg.wcagRelativeLuminance()
+    val lighter = max(l1, l2)
+    val darker = min(l1, l2)
+    return (lighter + 0.05f) / (darker + 0.05f)
+}
+
+/**
+ * Algorithmically adjusts [this] foreground color's lightness & saturation against [background]
+ * until it meets or exceeds [minContrast] (default 4.5:1 WCAG AA).
+ */
+fun Color.ensureReadableOn(
+    background: Color,
+    minContrast: Float = 4.5f
+): Color {
+    if (wcagContrastRatio(this, background) >= minContrast) return this
+    val bgLum = background.wcagRelativeLuminance()
+    // Determine whether we should pull toward a tinted near-white or near-dark color
+    val lightTarget = lerp(this, Color(0xFFF8FAFC), 0.88f)
+    val darkTarget = lerp(this, Color(0xFF060911), 0.90f)
+    val preferLight = bgLum < 0.36f
+    val primaryTarget = if (preferLight) lightTarget else darkTarget
+    val fallbackPole = if (preferLight) Color.White else Color(0xFF05070B)
+
+    // Binary search along the interpolation curve to preserve hue & saturation as much as possible
+    var low = 0f
+    var high = 1f
+    var best = fallbackPole
+    for (i in 0 until 10) {
+        val mid = (low + high) * 0.5f
+        val candidate = lerp(this, primaryTarget, mid)
+        if (wcagContrastRatio(candidate, background) >= minContrast) {
+            best = candidate
+            high = mid
+        } else {
+            low = mid
+        }
+    }
+    if (wcagContrastRatio(best, background) >= minContrast) return best
+
+    // Final guarantee toward pure white/black pole if needed
+    var low2 = 0f
+    var high2 = 1f
+    for (i in 0 until 8) {
+        val mid = (low2 + high2) * 0.5f
+        val candidate = lerp(primaryTarget, fallbackPole, mid)
+        if (wcagContrastRatio(candidate, background) >= minContrast) {
+            best = candidate
+            high2 = mid
+        } else {
+            low2 = mid
+        }
+    }
+    return best
+}
+
+@JvmName("computeAutoContrastTextColor")
+fun autoContrastTextColor(
+    background: Color,
+    minContrast: Float = 4.8f
+): Color = background.autoContrastTextColor(minContrast)
+
+/**
+ * Computes an optimal, hue-harmonized text/icon color on top of [this] background surface/accent.
+ */
+fun Color.autoContrastTextColor(
+    minContrast: Float = 4.8f
+): Color {
+    val bgLum = wcagRelativeLuminance()
+    // Slightly tint the text color with the underlying accent hue for visual harmony
+    val darkInk = lerp(Color(0xFF05080F), this, 0.14f)
+    val lightInk = lerp(Color(0xFFF8FAFC), this, 0.10f)
+
+    val darkContrast = wcagContrastRatio(darkInk, this)
+    val lightContrast = wcagContrastRatio(lightInk, this)
+
+    val chosen = when {
+        bgLum > 0.34f && darkContrast >= minContrast -> darkInk
+        bgLum <= 0.34f && lightContrast >= minContrast -> lightInk
+        darkContrast >= lightContrast -> darkInk
+        else -> lightInk
+    }
+    return chosen.ensureReadableOn(this, minContrast)
+}
+
+/**
+ * Builds a complete Material 3 [ColorScheme] from the separated [AppThemeMode] (5 modes)
+ * and [AppAccentColor] (7 accents including Monet), applying algorithmic WCAG 2.1 auto-contrast
+ * to all foreground/container pairs.
+ */
+fun buildNegaiColorScheme(
+    themeMode: AppThemeMode,
+    accentColor: AppAccentColor,
+    isSystemInDarkTheme: Boolean,
+    dynamicDark: ColorScheme? = null,
+    dynamicLight: ColorScheme? = null
+): ColorScheme {
+    val resolvedMode = themeMode.resolveModeFor(isSystemInDarkTheme)
+    val isDark = resolvedMode.isDark
+    val isPureOled = resolvedMode.isPureOled
+
+    val monetScheme = if (accentColor == AppAccentColor.MONET) {
+        if (isDark) dynamicDark else dynamicLight
+    } else {
+        null
+    }
+
+    val rawPrimary = monetScheme?.primary
+        ?: Color(if (isDark) accentColor.darkPrimaryArgb else accentColor.lightPrimaryArgb)
+    val rawSecondary = monetScheme?.secondary
+        ?: Color(if (isDark) accentColor.darkSecondaryArgb else accentColor.lightSecondaryArgb)
+    val rawTertiary = monetScheme?.tertiary
+        ?: if (isDark) Color(0xFFFFCA28) else Color(0xFFD97706)
+
+    // Base background & surface hierarchy:
+    // - LIGHT: Crisp daylight surfaces (#F8FAFC / #FFFFFF)
+    // - DARK: Soft slate-graphite (#0C111B / #111827)
+    // - OLED: Pure pitch-black (#000000)
+    val background: Color
+    val surface: Color
+    val surfaceVariant: Color
+    val surfaceContainerLowest: Color
+    val surfaceContainerLow: Color
+    val surfaceContainer: Color
+    val surfaceContainerHigh: Color
+    val surfaceContainerHighest: Color
+    val rawOnBg: Color
+    val rawOnSurfaceVariant: Color
+    val outline: Color
+    val outlineVariant: Color
+
+    when {
+        !isDark -> {
+            background = Color(0xFFF8FAFC)
+            surface = Color(0xFFFFFFFF)
+            surfaceVariant = lerp(Color(0xFFEFF4F9), rawPrimary, 0.06f)
+            surfaceContainerLowest = Color(0xFFFFFFFF)
+            surfaceContainerLow = lerp(Color(0xFFF1F5F9), rawPrimary, 0.03f)
+            surfaceContainer = lerp(Color(0xFFE2E8F0), rawPrimary, 0.05f)
+            surfaceContainerHigh = lerp(Color(0xFFCBD5E1), rawPrimary, 0.06f)
+            surfaceContainerHighest = lerp(Color(0xFFB8C4D4), rawPrimary, 0.08f)
+            rawOnBg = Color(0xFF0F172A)
+            rawOnSurfaceVariant = Color(0xFF334155)
+            outline = Color(0xFF64748B).ensureReadableOn(background, 3.2f)
+            outlineVariant = Color(0xFFCBD5E1)
+        }
+        isPureOled -> {
+            background = Color.Black
+            surface = Color.Black
+            surfaceVariant = lerp(Color(0xFF0D121C), rawPrimary, 0.08f)
+            surfaceContainerLowest = Color.Black
+            surfaceContainerLow = lerp(Color(0xFF06090F), rawPrimary, 0.04f)
+            surfaceContainer = lerp(Color(0xFF0B101A), rawPrimary, 0.06f)
+            surfaceContainerHigh = lerp(Color(0xFF121926), rawPrimary, 0.08f)
+            surfaceContainerHighest = lerp(Color(0xFF1B2436), rawPrimary, 0.10f)
+            rawOnBg = Color(0xFFF8FAFC)
+            rawOnSurfaceVariant = Color(0xFFCBD5E1)
+            outline = lerp(Color(0xFF334155), rawPrimary, 0.22f)
+            outlineVariant = Color(0xFF1E293B)
+        }
+        else -> {
+            // DARK (Non-OLED): Soft slate-obsidian background (#0C111B) clearly distinct from #000000 OLED
+            background = Color(0xFF0C111B)
+            surface = Color(0xFF111827)
+            surfaceVariant = lerp(Color(0xFF1E293B), rawPrimary, 0.08f)
+            surfaceContainerLowest = Color(0xFF080C14)
+            surfaceContainerLow = lerp(Color(0xFF131C2E), rawPrimary, 0.04f)
+            surfaceContainer = lerp(Color(0xFF182338), rawPrimary, 0.06f)
+            surfaceContainerHigh = lerp(Color(0xFF1F2D46), rawPrimary, 0.08f)
+            surfaceContainerHighest = lerp(Color(0xFF293A56), rawPrimary, 0.10f)
+            rawOnBg = Color(0xFFF3F6FC)
+            rawOnSurfaceVariant = Color(0xFFCBD5E1)
+            outline = lerp(Color(0xFF3B4A66), rawPrimary, 0.22f)
+            outlineVariant = Color(0xFF253147)
+        }
+    }
+
+    // Ensure primary & secondary accents themselves are readable when used as text/icons on surfaces
+    val primary = rawPrimary.ensureReadableOn(surface, if (isDark) 4.5f else 4.2f)
+    val secondary = rawSecondary.ensureReadableOn(surface, if (isDark) 4.3f else 4.0f)
+    val tertiary = rawTertiary.ensureReadableOn(surface, 4.0f)
+
+    // Compute balanced containers from the surface + accent
+    val primaryContainer = monetScheme?.primaryContainer
+        ?: if (isDark) lerp(surfaceContainerHigh, primary, 0.28f) else lerp(Color.White, primary, 0.18f)
+    val secondaryContainer = monetScheme?.secondaryContainer
+        ?: if (isDark) lerp(surfaceContainerHigh, secondary, 0.25f) else lerp(Color.White, secondary, 0.16f)
+    val tertiaryContainer = monetScheme?.tertiaryContainer
+        ?: if (isDark) lerp(surfaceContainerHigh, tertiary, 0.24f) else lerp(Color.White, tertiary, 0.16f)
+
+    // Algorithmic auto-contrast for every "on*" role
+    val onPrimary = primary.autoContrastTextColor(minContrast = 4.8f)
+    val onPrimaryContainer = (monetScheme?.onPrimaryContainer ?: primary)
+        .ensureReadableOn(primaryContainer, minContrast = 4.8f)
+
+    val onSecondary = secondary.autoContrastTextColor(minContrast = 4.8f)
+    val onSecondaryContainer = (monetScheme?.onSecondaryContainer ?: secondary)
+        .ensureReadableOn(secondaryContainer, minContrast = 4.8f)
+
+    val onTertiary = tertiary.autoContrastTextColor(minContrast = 4.8f)
+    val onTertiaryContainer = (monetScheme?.onTertiaryContainer ?: tertiary)
+        .ensureReadableOn(tertiaryContainer, minContrast = 4.8f)
+
+    val onBackground = rawOnBg.ensureReadableOn(background, minContrast = 7.0f)
+    val onSurface = rawOnBg.ensureReadableOn(surface, minContrast = 7.0f)
+    val onSurfaceVariant = rawOnSurfaceVariant
+        .ensureReadableOn(surfaceVariant, minContrast = 4.8f)
+        .ensureReadableOn(surfaceContainer, minContrast = 4.8f)
+
+    return if (isDark) {
+        darkColorScheme(
+            primary = primary,
+            onPrimary = onPrimary,
+            primaryContainer = primaryContainer,
+            onPrimaryContainer = onPrimaryContainer,
+            secondary = secondary,
+            onSecondary = onSecondary,
+            secondaryContainer = secondaryContainer,
+            onSecondaryContainer = onSecondaryContainer,
+            tertiary = tertiary,
+            onTertiary = onTertiary,
+            tertiaryContainer = tertiaryContainer,
+            onTertiaryContainer = onTertiaryContainer,
+            background = background,
+            onBackground = onBackground,
+            surface = surface,
+            onSurface = onSurface,
+            surfaceVariant = surfaceVariant,
+            onSurfaceVariant = onSurfaceVariant,
+            surfaceContainerLowest = surfaceContainerLowest,
+            surfaceContainerLow = surfaceContainerLow,
+            surfaceContainer = surfaceContainer,
+            surfaceContainerHigh = surfaceContainerHigh,
+            surfaceContainerHighest = surfaceContainerHighest,
+            outline = outline,
+            outlineVariant = outlineVariant
+        )
+    } else {
+        lightColorScheme(
+            primary = primary,
+            onPrimary = onPrimary,
+            primaryContainer = primaryContainer,
+            onPrimaryContainer = onPrimaryContainer,
+            secondary = secondary,
+            onSecondary = onSecondary,
+            secondaryContainer = secondaryContainer,
+            onSecondaryContainer = onSecondaryContainer,
+            tertiary = tertiary,
+            onTertiary = onTertiary,
+            tertiaryContainer = tertiaryContainer,
+            onTertiaryContainer = onTertiaryContainer,
+            background = background,
+            onBackground = onBackground,
+            surface = surface,
+            onSurface = onSurface,
+            surfaceVariant = surfaceVariant,
+            onSurfaceVariant = onSurfaceVariant,
+            surfaceContainerLowest = surfaceContainerLowest,
+            surfaceContainerLow = surfaceContainerLow,
+            surfaceContainer = surfaceContainer,
+            surfaceContainerHigh = surfaceContainerHigh,
+            surfaceContainerHighest = surfaceContainerHighest,
+            outline = outline,
+            outlineVariant = outlineVariant
+        )
+    }
+}
+
 @Composable
 fun NegaiTheme(
-    themeMode: AppThemeMode = AppThemeMode.SYSTEM_AUTO,
+    themeMode: AppThemeMode = AppThemeMode.AUTO_OLED,
+    accentColor: AppAccentColor = AppAccentColor.CYAN,
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
-    val systemInDark = androidx.compose.foundation.isSystemInDarkTheme()
+    val systemInDark = isSystemInDarkTheme()
+    val isDark = themeMode.resolveIsDark(systemInDark)
 
-    val effectiveMode = if (themeMode == AppThemeMode.SYSTEM_AUTO) {
-        if (systemInDark) AppThemeMode.OLED_PITCH_BLACK_DARK else AppThemeMode.OLED_PITCH_BLACK_LIGHT
+    val dynamicDark = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && accentColor == AppAccentColor.MONET) {
+        dynamicDarkColorScheme(context)
     } else {
-        themeMode
+        null
+    }
+    val dynamicLight = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && accentColor == AppAccentColor.MONET) {
+        dynamicLightColorScheme(context)
+    } else {
+        null
     }
 
-    val isDark = when (themeMode) {
-        AppThemeMode.SYSTEM_AUTO -> systemInDark
-        AppThemeMode.MATERIAL_YOU -> systemInDark
-        else -> effectiveMode.isDark
-    }
-
-    val colorScheme: ColorScheme = when (effectiveMode) {
-        AppThemeMode.SYSTEM_AUTO -> if (systemInDark) PureOledCyanScheme else OledLightCyanScheme
-        AppThemeMode.MATERIAL_YOU -> {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                if (systemInDark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-            } else {
-                if (systemInDark) PureOledCyanScheme else OledLightCyanScheme
-            }
-        }
-        AppThemeMode.OLED_PITCH_BLACK_DARK -> PureOledCyanScheme
-        AppThemeMode.OLED_PITCH_BLACK_LIGHT -> OledLightCyanScheme
-        AppThemeMode.DEEP_NAVY_DARK -> ObsidianDarkScheme
-        AppThemeMode.DEEP_NAVY_LIGHT -> DeepNavyLightScheme
-        AppThemeMode.SAKURA_PURPLE_DARK -> PureOledSakuraScheme
-        AppThemeMode.SAKURA_PURPLE_LIGHT -> SakuraLightScheme
-        AppThemeMode.CYBER_MINT_DARK -> CyberMintDarkScheme
-        AppThemeMode.CYBER_MINT_LIGHT -> CyberMintLightScheme
-        AppThemeMode.SLATE_GREY_DARK -> SlateGreyDarkScheme
-        AppThemeMode.SLATE_GREY_LIGHT -> SlateGreyLightScheme
+    val colorScheme = remember(themeMode, accentColor, systemInDark, dynamicDark, dynamicLight) {
+        buildNegaiColorScheme(
+            themeMode = themeMode,
+            accentColor = accentColor,
+            isSystemInDarkTheme = systemInDark,
+            dynamicDark = dynamicDark,
+            dynamicLight = dynamicLight
+        )
     }
 
     val view = LocalView.current
@@ -339,8 +373,11 @@ fun NegaiTheme(
 
 @Composable
 fun Kino4KTheme(
-    themeMode: AppThemeMode = AppThemeMode.SYSTEM_AUTO,
+    themeMode: AppThemeMode = AppThemeMode.AUTO_OLED,
+    accentColor: AppAccentColor = AppAccentColor.CYAN,
     content: @Composable () -> Unit
-) = NegaiTheme(themeMode = themeMode, content = content)
-
-
+) = NegaiTheme(
+    themeMode = themeMode,
+    accentColor = accentColor,
+    content = content
+)

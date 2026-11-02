@@ -107,6 +107,7 @@ fun FrameInterpolationModalSheet(
         containerColor = sheetBg,
         scrimColor = PlayerPopupSheetScrimColor
     ) {
+        KeepPlayerSheetImmersive()
         CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
             Column(
                 modifier = Modifier
@@ -296,8 +297,13 @@ fun FrameInterpolationModalSheet(
                 style = MaterialTheme.typography.bodyMedium
             )
 
-            FrameInterpolationMode.entries.forEach { mode ->
-                val selected = effectiveMode == mode
+            val selectedMode = if (interpolationMode == FrameInterpolationMode.OFF) {
+                FrameInterpolationMode.MAX_FPS
+            } else {
+                interpolationMode
+            }
+            FrameInterpolationMode.selectableModes.forEach { mode ->
+                val selected = selectedMode == mode
                 Card(
                     shape = RoundedCornerShape(12.dp),
                     colors = CardDefaults.cardColors(
@@ -395,6 +401,7 @@ fun EpisodesModalSheet(
         containerColor = sheetBg,
         scrimColor = PlayerPopupSheetScrimColor
     ) {
+        KeepPlayerSheetImmersive()
         CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
             Column(
                 modifier = Modifier
@@ -655,6 +662,7 @@ fun ChaptersModalSheet(
         containerColor = sheetBg,
         scrimColor = PlayerPopupSheetScrimColor
     ) {
+        KeepPlayerSheetImmersive()
         CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
             Column(
                 modifier = Modifier

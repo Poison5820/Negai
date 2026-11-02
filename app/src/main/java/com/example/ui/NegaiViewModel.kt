@@ -12,6 +12,7 @@ import com.example.data.LibraryRootEntity
 import com.example.data.PlaybackProgressEntity
 import com.example.data.PlaybackResumeHelper
 import com.example.model.Anime4KPreset
+import com.example.model.AppAccentColor
 import com.example.model.AppLanguage
 import com.example.model.AppThemeMode
 import com.example.model.DecoderMode
@@ -494,6 +495,12 @@ class NegaiViewModel(application: Application) : AndroidViewModel(application) {
     fun setThemeMode(mode: AppThemeMode) {
         viewModelScope.launch {
             repository.preferencesRepository.updateThemeMode(mode)
+        }
+    }
+
+    fun setAccentColor(accent: AppAccentColor) {
+        viewModelScope.launch {
+            repository.preferencesRepository.updateAccentColor(accent)
         }
     }
 

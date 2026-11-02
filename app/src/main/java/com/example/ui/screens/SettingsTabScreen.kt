@@ -55,6 +55,7 @@ import androidx.compose.ui.unit.dp
 import com.example.data.HiddenFolderEntity
 import com.example.data.LibraryRootEntity
 import com.example.model.Anime4KPreset
+import com.example.model.AppAccentColor
 import com.example.model.AppLanguage
 import com.example.model.AppThemeMode
 import com.example.model.DecoderMode
@@ -68,6 +69,7 @@ import com.example.model.SettingsCategory
 import com.example.model.SubtitleColorPreset
 import com.example.model.VideoScaleMode
 import com.example.ui.i18n.LocalIsEnglish
+import com.example.ui.i18n.localizedBadge
 import com.example.ui.i18n.localizedTitle
 import com.example.ui.i18n.tr
 import kotlin.math.roundToInt
@@ -83,6 +85,7 @@ data class SettingsActions(
     val onResetAllSettings: () -> Unit,
     val onUpdateAppLanguage: (AppLanguage) -> Unit = {},
     val onUpdateThemeMode: (AppThemeMode) -> Unit,
+    val onUpdateAccentColor: (AppAccentColor) -> Unit = {},
     val onUpdatePlayerControlsTheme: (PlayerControlsTheme) -> Unit = {},
     val onUpdateCompactUiMode: (Boolean) -> Unit = {},
     val onUpdateShowEpisodeThumbnails: (Boolean) -> Unit,
@@ -174,7 +177,7 @@ fun SettingsTabContent(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .widthIn(max = 840.dp)
+                .widthIn(max = 1200.dp)
         ) {
             Surface(
                 color = MaterialTheme.colorScheme.background,
@@ -303,7 +306,7 @@ private fun SettingsCategoryHub(
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
-            .widthIn(max = 840.dp)
+            .widthIn(max = 1200.dp)
             .testTag("settings_lazy_list"),
         contentPadding = PaddingValues(
             horizontal = if (settings.compactUiMode) 12.dp else 16.dp,
@@ -418,7 +421,7 @@ private fun categorySummary(
     SettingsCategory.APPEARANCE -> {
         val langTxt = settings.appLanguage.shortBadge
         val scaleTxt = "${settings.playerUiScalePercent}%"
-        "${settings.themeMode.localizedTitle(isEnglish)} • $langTxt • $scaleTxt"
+        "${settings.themeMode.localizedBadge(isEnglish)} • ${settings.accentColor.localizedTitle(isEnglish)} • $langTxt • $scaleTxt"
     }
     SettingsCategory.PLAYBACK -> {
         if (isEnglish) {

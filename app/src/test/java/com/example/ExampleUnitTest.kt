@@ -114,13 +114,36 @@ class ExampleUnitTest {
     }
 
     @Test
-    fun oledThemes_defaultToPureBlack() {
+    fun oledThemes_and_accentColors_with_wcagAutoContrast_workAccurately() {
         val defaultSettings = PlayerSettings()
-        assertEquals(AppThemeMode.SYSTEM_AUTO, defaultSettings.themeMode)
-        assertTrue(AppThemeMode.OLED_PITCH_BLACK_DARK.isPureOled)
-        assertEquals(0xFF000000L, AppThemeMode.OLED_PITCH_BLACK_DARK.previewBgArgb)
-        assertEquals(0xFF000000L, AppThemeMode.SAKURA_PURPLE_DARK.previewBgArgb)
-        assertEquals(AppThemeMode.SAKURA_PURPLE_DARK, AppThemeMode.fromId("sakura_oled"))
+        assertEquals(AppThemeMode.AUTO_OLED, defaultSettings.themeMode)
+        assertEquals(com.example.model.AppAccentColor.CYAN, defaultSettings.accentColor)
+        assertEquals(5, AppThemeMode.entries.size)
+        assertEquals(7, com.example.model.AppAccentColor.entries.size)
+
+        assertTrue(AppThemeMode.OLED.isPureOled)
+        assertTrue(AppThemeMode.AUTO_OLED.resolveIsPureOled(isSystemInDarkTheme = true))
+        org.junit.Assert.assertFalse(AppThemeMode.AUTO_OLED.resolveIsPureOled(isSystemInDarkTheme = false))
+        org.junit.Assert.assertFalse(AppThemeMode.DARK.isPureOled)
+        assertEquals(0xFF000000L, AppThemeMode.OLED.previewBgArgb)
+        assertEquals(0xFF0C111BL, AppThemeMode.DARK.previewBgArgb)
+
+        // Legacy ID migration
+        assertEquals(AppThemeMode.OLED, AppThemeMode.fromId("oled_pitch_black"))
+        assertEquals(AppThemeMode.OLED, AppThemeMode.fromId("sakura_oled"))
+        assertEquals(AppThemeMode.DARK, AppThemeMode.fromId("deep_navy"))
+        assertEquals(AppThemeMode.LIGHT, AppThemeMode.fromId("SAKURA_PURPLE_LIGHT"))
+        assertEquals(com.example.model.AppAccentColor.SAKURA, com.example.model.AppAccentColor.fromId("sakura_oled"))
+        assertEquals(com.example.model.AppAccentColor.NAVY, com.example.model.AppAccentColor.fromId("deep_navy"))
+        assertEquals(com.example.model.AppAccentColor.MONET, com.example.model.AppAccentColor.fromId("material_you"))
+
+        // WCAG 2.1 auto-contrast verification across bright & dark surfaces
+        val brightCyan = androidx.compose.ui.graphics.Color(0xFF00E5FF)
+        val deepNavy = androidx.compose.ui.graphics.Color(0xFF0C111B)
+        val textOnBright = com.example.ui.theme.autoContrastTextColor(brightCyan)
+        val textOnDark = com.example.ui.theme.autoContrastTextColor(deepNavy)
+        assertTrue(com.example.ui.theme.wcagContrastRatio(textOnBright, brightCyan) >= 4.5f)
+        assertTrue(com.example.ui.theme.wcagContrastRatio(textOnDark, deepNavy) >= 4.5f)
     }
 
     @Test

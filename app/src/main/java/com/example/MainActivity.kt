@@ -81,7 +81,6 @@ class MainActivity : ComponentActivity() {
             val refreshPlan = remember(
                 displayRefreshInfo,
                 isPlayerOpen,
-                isPlayerUiActive,
                 playbackState.isPlaying,
                 playbackState.sourceFrameRate,
                 playbackState.playbackSpeed,
@@ -98,15 +97,18 @@ class MainActivity : ComponentActivity() {
                     highRefreshRateEnabled = settings.highRefreshRateEnabled,
                     ltpoAdaptiveEnabled = settings.ltpoAdaptiveRefreshEnabled,
                     interpolationMode = settings.effectiveFrameInterpolationMode,
-                    isControlsOrUiActive = isPlayerUiActive
+                    // Never toggle display refresh mode or surface frame rate on simple HUD taps
+                    isControlsOrUiActive = false
                 )
             }
 
             var targetDisplayHz by remember {
                 mutableFloatStateOf(refreshPlan.targetDisplayHz)
             }
-            LaunchedEffect(settings.themeMode) {
-                window.setBackgroundDrawable(ColorDrawable(settings.themeMode.previewBgArgb.toInt()))
+            val systemInDark = androidx.compose.foundation.isSystemInDarkTheme()
+            LaunchedEffect(settings.themeMode, systemInDark) {
+                val resolved = settings.themeMode.resolveModeFor(systemInDark)
+                window.setBackgroundDrawable(ColorDrawable(resolved.previewBgArgb.toInt()))
             }
             LaunchedEffect(settings.highRefreshRateEnabled, isPlayerOpen) {
                 targetDisplayHz = DisplayRefreshRateController.applyWindowRefreshPlan(
@@ -122,7 +124,10 @@ class MainActivity : ComponentActivity() {
                     fontScale = baseDensity.fontScale * appUiScale
                 )
             }
-            NegaiTheme(themeMode = settings.themeMode) {
+            NegaiTheme(
+                themeMode = settings.themeMode,
+                accentColor = settings.accentColor
+            ) {
                 ProvideAppLocalization(appLanguage = settings.appLanguage) {
                     androidx.compose.runtime.CompositionLocalProvider(
                         androidx.compose.ui.platform.LocalDensity provides scaledAppDensity
@@ -518,6 +523,7 @@ fun NegaiAppRoot(
                 onResetAllSettings = { viewModel.resetAllSettings() },
                 onUpdateAppLanguage = { viewModel.setAppLanguage(it) },
                 onUpdateThemeMode = { viewModel.setThemeMode(it) },
+                onUpdateAccentColor = { viewModel.setAccentColor(it) },
                 onUpdatePlayerControlsTheme = { viewModel.setPlayerControlsTheme(it) },
                 onUpdateCompactUiMode = { viewModel.setCompactUiMode(it) },
                 onUpdateShowEpisodeThumbnails = { viewModel.setShowEpisodeThumbnails(it) },

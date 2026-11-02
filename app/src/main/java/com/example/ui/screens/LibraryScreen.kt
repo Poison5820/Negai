@@ -34,6 +34,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
@@ -594,69 +595,78 @@ fun LibraryScreen(
             ) {
                 if (isWideScreen) {
                     NavigationRail(
+                        windowInsets = WindowInsets(0, 0, 0, 0),
                         containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
                         modifier = Modifier.fillMaxHeight()
                     ) {
-                        Spacer(modifier = Modifier.height(12.dp))
-                        val railColors = NavigationRailItemDefaults.colors(
-                            indicatorColor = MaterialTheme.colorScheme.primary,
-                            selectedIconColor = MaterialTheme.colorScheme.onPrimary,
-                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            selectedTextColor = MaterialTheme.colorScheme.primary,
-                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        NavigationRailItem(
-                            selected = currentTab == HomeTab.FOLDERS,
-                            onClick = { onSelectTab(HomeTab.FOLDERS) },
-                            icon = {
-                                Icon(
-                                    if (currentTab == HomeTab.FOLDERS) Icons.Filled.Folder else Icons.Outlined.Folder,
-                                    contentDescription = stringResource(R.string.nav_folders)
-                                )
-                            },
-                            label = { Text(stringResource(R.string.nav_folders)) },
-                            colors = railColors,
-                            modifier = Modifier.testTag("rail_tab_folders")
-                        )
-                        NavigationRailItem(
-                            selected = currentTab == HomeTab.RECENT,
-                            onClick = { onSelectTab(HomeTab.RECENT) },
-                            icon = {
-                                Icon(
-                                    if (currentTab == HomeTab.RECENT) Icons.Filled.History else Icons.Outlined.History,
-                                    contentDescription = stringResource(R.string.nav_recent)
-                                )
-                            },
-                            label = { Text(stringResource(R.string.nav_recent)) },
-                            colors = railColors,
-                            modifier = Modifier.testTag("rail_tab_recent")
-                        )
-                        NavigationRailItem(
-                            selected = currentTab == HomeTab.TORRENTS,
-                            onClick = { onSelectTab(HomeTab.TORRENTS) },
-                            icon = {
-                                Icon(
-                                    if (currentTab == HomeTab.TORRENTS) Icons.Filled.CloudDownload else Icons.Outlined.CloudDownload,
-                                    contentDescription = stringResource(R.string.nav_torrents)
-                                )
-                            },
-                            label = { Text(stringResource(R.string.nav_torrents)) },
-                            colors = railColors,
-                            modifier = Modifier.testTag("rail_tab_torrents")
-                        )
-                        NavigationRailItem(
-                            selected = currentTab == HomeTab.SETTINGS,
-                            onClick = { onSelectTab(HomeTab.SETTINGS) },
-                            icon = {
-                                Icon(
-                                    if (currentTab == HomeTab.SETTINGS) Icons.Filled.Settings else Icons.Outlined.Settings,
-                                    contentDescription = stringResource(R.string.nav_settings)
-                                )
-                            },
-                            label = { Text(stringResource(R.string.nav_settings)) },
-                            colors = railColors,
-                            modifier = Modifier.testTag("rail_tab_settings")
-                        )
+                        Column(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .verticalScroll(rememberScrollState())
+                                .padding(vertical = 4.dp),
+                            verticalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterVertically),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            val railColors = NavigationRailItemDefaults.colors(
+                                indicatorColor = MaterialTheme.colorScheme.primary,
+                                selectedIconColor = MaterialTheme.colorScheme.onPrimary,
+                                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                selectedTextColor = MaterialTheme.colorScheme.primary,
+                                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            NavigationRailItem(
+                                selected = currentTab == HomeTab.FOLDERS,
+                                onClick = { onSelectTab(HomeTab.FOLDERS) },
+                                icon = {
+                                    Icon(
+                                        if (currentTab == HomeTab.FOLDERS) Icons.Filled.Folder else Icons.Outlined.Folder,
+                                        contentDescription = stringResource(R.string.nav_folders)
+                                    )
+                                },
+                                label = { Text(stringResource(R.string.nav_folders), maxLines = 1) },
+                                colors = railColors,
+                                modifier = Modifier.testTag("rail_tab_folders")
+                            )
+                            NavigationRailItem(
+                                selected = currentTab == HomeTab.RECENT,
+                                onClick = { onSelectTab(HomeTab.RECENT) },
+                                icon = {
+                                    Icon(
+                                        if (currentTab == HomeTab.RECENT) Icons.Filled.History else Icons.Outlined.History,
+                                        contentDescription = stringResource(R.string.nav_recent)
+                                    )
+                                },
+                                label = { Text(stringResource(R.string.nav_recent), maxLines = 1) },
+                                colors = railColors,
+                                modifier = Modifier.testTag("rail_tab_recent")
+                            )
+                            NavigationRailItem(
+                                selected = currentTab == HomeTab.TORRENTS,
+                                onClick = { onSelectTab(HomeTab.TORRENTS) },
+                                icon = {
+                                    Icon(
+                                        if (currentTab == HomeTab.TORRENTS) Icons.Filled.CloudDownload else Icons.Outlined.CloudDownload,
+                                        contentDescription = stringResource(R.string.nav_torrents)
+                                    )
+                                },
+                                label = { Text(stringResource(R.string.nav_torrents), maxLines = 1) },
+                                colors = railColors,
+                                modifier = Modifier.testTag("rail_tab_torrents")
+                            )
+                            NavigationRailItem(
+                                selected = currentTab == HomeTab.SETTINGS,
+                                onClick = { onSelectTab(HomeTab.SETTINGS) },
+                                icon = {
+                                    Icon(
+                                        if (currentTab == HomeTab.SETTINGS) Icons.Filled.Settings else Icons.Outlined.Settings,
+                                        contentDescription = stringResource(R.string.nav_settings)
+                                    )
+                                },
+                                label = { Text(stringResource(R.string.nav_settings), maxLines = 1) },
+                                colors = railColors,
+                                modifier = Modifier.testTag("rail_tab_settings")
+                            )
+                        }
                     }
                 }
 
@@ -769,10 +779,14 @@ fun LibraryScreen(
     if (showQuickThemeSheet) {
         QuickThemeBottomSheet(
             currentTheme = settings.themeMode,
+            currentAccentColor = settings.accentColor,
             currentControlsTheme = settings.playerControlsTheme,
             currentLanguage = settings.appLanguage,
             onSelectTheme = { mode ->
                 effectiveSettingsActions.onUpdateThemeMode(mode)
+            },
+            onSelectAccentColor = { accent ->
+                effectiveSettingsActions.onUpdateAccentColor(accent)
             },
             onSelectControlsTheme = { controlsTheme ->
                 effectiveSettingsActions.onUpdatePlayerControlsTheme(controlsTheme)
@@ -955,7 +969,7 @@ private fun FoldersTabContent(
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
-            .widthIn(max = 840.dp)
+            .widthIn(max = 1200.dp)
             .testTag("folders_lazy_list"),
         contentPadding = PaddingValues(
             horizontal = if (compactMode) 12.dp else 16.dp,
