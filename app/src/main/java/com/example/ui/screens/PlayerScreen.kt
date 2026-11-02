@@ -108,6 +108,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.anime4k.Anime4KVideoSurface
 import com.example.model.Anime4KPreset
+import com.example.model.AudioDeArtifactMode
 import com.example.model.DecoderMode
 import com.example.model.FrameInterpolationMode
 import com.example.model.PlaybackEndMode
@@ -183,6 +184,8 @@ fun PlayerScreen(
     onSelectAudio: (AudioTrackUiOption) -> Unit,
     onPickExternalAudio: () -> Unit,
     onSetAudioBoostPercent: (Int) -> Unit,
+    onSelectAudioDeArtifactMode: (AudioDeArtifactMode) -> Unit = {},
+    onToggleAutoDeArtifactLowBitrate: (Boolean) -> Unit = {},
     onAdjustAudioDelay: (Long) -> Unit = {},
     onSetAudioDelay: (Long) -> Unit = {},
     onResyncAudio: () -> Unit = {},
@@ -1394,16 +1397,28 @@ fun PlayerScreen(
                                 PlayerQuickAction.FILE_INFO -> activeSheet = ActivePlayerSheet.FILE_INFO
                             }
                         },
-                        onLongPressAction = { action ->
+                        onLongPressAction = {
                             interactionTick++
-                            when (action) {
-                                PlayerQuickAction.SCALE -> activeSheet = ActivePlayerSheet.SCALE
-                                PlayerQuickAction.SKIP_INTRO -> activeSheet = ActivePlayerSheet.SKIP_INTRO_CONFIG
-                                PlayerQuickAction.ANIME4K -> activeSheet = ActivePlayerSheet.ANIME4K
-                                PlayerQuickAction.FRAME_INTERPOLATION -> activeSheet = ActivePlayerSheet.FRAME_INTERPOLATION
-                                PlayerQuickAction.ORIENTATION -> isOrientationLocked = !isOrientationLocked
-                                else -> Unit
-                            }
+                        },
+                        onSelectAudio = onSelectAudio,
+                        onSelectAudioDeArtifactMode = onSelectAudioDeArtifactMode,
+                        onSelectSubtitle = onSelectSubtitle,
+                        onSelectSpeed = onSelectSpeed,
+                        onSelectFrameInterpolationMode = onSelectFrameInterpolationMode,
+                        onToggleFrameInterpolation = onToggleFrameInterpolation,
+                        onSelectAnime4KPreset = onSelectAnime4KPreset,
+                        onToggleAnime4KEnabled = onToggleAnime4KEnabled,
+                        onSelectDecoderMode = onSelectDecoderMode,
+                        onSelectScaleMode = onSelectScaleMode,
+                        onSetSleepTimer = onSetSleepTimer,
+                        onMarkAbPointA = onMarkAbPointA,
+                        onMarkAbPointB = onMarkAbPointB,
+                        onClearAbLoop = onClearAbLoop,
+                        onUpdateSkipIntroSeconds = onUpdateSkipIntroSeconds,
+                        onSeekByMs = onSeekByMs,
+                        onSelectOrientationMode = { mode ->
+                            isOrientationLocked = false
+                            orientationMode = mode
                         },
                         onOpenCustomizer = {
                             interactionTick++
@@ -1448,6 +1463,10 @@ fun PlayerScreen(
                 ActivePlayerSheet.AUDIO -> AudioTracksModalSheet(
                     audioOptions = playbackState.audioTrackOptions,
                     audioBoostPercent = playbackState.audioBoostPercent,
+                    audioDeArtifactMode = playbackState.audioDeArtifactMode,
+                    autoDeArtifactLowBitrate = playbackState.autoDeArtifactLowBitrate,
+                    activeAudioBitrateKbps = playbackState.activeAudioBitrateKbps,
+                    isAudioDeArtifactActive = playbackState.isAudioDeArtifactActive,
                     audioDelayMs = playbackState.audioDelayMs,
                     effectiveAudioDelayMs = playbackState.effectiveAudioDelayMs,
                     bluetoothRoute = playbackState.bluetoothAudioRoute,
@@ -1458,6 +1477,8 @@ fun PlayerScreen(
                     onToggleBluetoothAutoSync = onToggleBluetoothAutoSync,
                     onSelectAudio = onSelectAudio,
                     onSetAudioBoostPercent = onSetAudioBoostPercent,
+                    onSelectAudioDeArtifactMode = onSelectAudioDeArtifactMode,
+                    onToggleAutoDeArtifactLowBitrate = onToggleAutoDeArtifactLowBitrate,
                     onAdjustAudioDelayMs = onAdjustAudioDelay,
                     onSetAudioDelayMs = onSetAudioDelay,
                     onResyncAudio = onResyncAudio,

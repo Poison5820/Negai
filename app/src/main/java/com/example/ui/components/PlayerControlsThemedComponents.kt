@@ -1928,118 +1928,126 @@ fun PlayerControlsThemeSelectorSection(
         }
 
         if (compactChipsOnly) {
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                PlayerControlsTheme.entries.forEach { theme ->
-                    val isSelected = selectedTheme == theme
-                    Surface(
-                        color = if (isSelected) {
-                            MaterialTheme.colorScheme.primaryContainer
-                        } else {
-                            MaterialTheme.colorScheme.surfaceContainer
-                        },
-                        shape = RoundedCornerShape(12.dp),
-                        border = BorderStroke(
-                            1.dp,
-                            if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
-                        ),
-                        modifier = Modifier
-                            .defaultMinSize(minHeight = 48.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .clickable { onSelectTheme(theme) }
-                            .testTag("controls_theme_chip_${theme.id}")
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                PlayerControlsTheme.entries.chunked(2).forEach { rowThemes ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Tune,
-                                contentDescription = null,
-                                tint = if (isSelected) {
-                                    MaterialTheme.colorScheme.primary
-                                } else {
-                                    MaterialTheme.colorScheme.onSurfaceVariant
-                                },
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Text(
-                                text = theme.localizedTitle(isEnglish),
-                                style = MaterialTheme.typography.labelLarge,
+                        rowThemes.forEach { theme ->
+                            val isSelected = selectedTheme == theme
+                            Surface(
                                 color = if (isSelected) {
-                                    MaterialTheme.colorScheme.onPrimaryContainer
+                                    MaterialTheme.colorScheme.primaryContainer
                                 } else {
-                                    MaterialTheme.colorScheme.onSurface
+                                    MaterialTheme.colorScheme.surfaceContainer
                                 },
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
+                                shape = RoundedCornerShape(12.dp),
+                                border = BorderStroke(
+                                    1.dp,
+                                    if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
+                                ),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .defaultMinSize(minHeight = 46.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .clickable { onSelectTheme(theme) }
+                                    .testTag("controls_theme_chip_${theme.id}")
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 9.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Tune,
+                                        contentDescription = null,
+                                        tint = if (isSelected) {
+                                            MaterialTheme.colorScheme.primary
+                                        } else {
+                                            MaterialTheme.colorScheme.onSurfaceVariant
+                                        },
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Text(
+                                        text = theme.localizedTitle(isEnglish),
+                                        style = MaterialTheme.typography.labelLarge,
+                                        color = if (isSelected) {
+                                            MaterialTheme.colorScheme.onPrimaryContainer
+                                        } else {
+                                            MaterialTheme.colorScheme.onSurface
+                                        },
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
+                        }
+                        if (rowThemes.size == 1) {
+                            Spacer(modifier = Modifier.weight(1f))
                         }
                     }
                 }
             }
         } else {
-            PlayerControlsTheme.entries.forEach { theme ->
-                val isSelected = selectedTheme == theme
-                Surface(
-                    color = if (isSelected) {
-                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f)
-                    } else {
-                        Color.Transparent
-                    },
-                    shape = RoundedCornerShape(14.dp),
-                    border = BorderStroke(
-                        1.dp,
-                        if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(14.dp))
-                        .clickable { onSelectTheme(theme) }
-                        .testTag("controls_theme_option_${theme.id}")
-                ) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                PlayerControlsTheme.entries.chunked(2).forEach { rowThemes ->
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 12.dp, vertical = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        rowThemes.forEach { theme ->
+                            val isSelected = selectedTheme == theme
+                            Surface(
+                                color = if (isSelected) {
+                                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f)
+                                } else {
+                                    MaterialTheme.colorScheme.surfaceContainerLow
+                                },
+                                shape = RoundedCornerShape(12.dp),
+                                border = BorderStroke(
+                                    1.dp,
+                                    if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
+                                ),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .clickable { onSelectTheme(theme) }
+                                    .testTag("controls_theme_option_${theme.id}")
                             ) {
-                                Text(
-                                    text = theme.localizedTitle(isEnglish),
-                                    style = MaterialTheme.typography.titleSmall
-                                )
-                                Surface(
-                                    color = MaterialTheme.colorScheme.surfaceContainerHighest,
-                                    shape = RoundedCornerShape(6.dp)
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 10.dp, vertical = 9.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                                 ) {
-                                    Text(
-                                        text = theme.localizedBadge(isEnglish),
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 1.dp)
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = theme.localizedTitle(isEnglish),
+                                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                        Text(
+                                            text = theme.localizedBadge(isEnglish),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
+                                    RadioButton(
+                                        selected = isSelected,
+                                        onClick = { onSelectTheme(theme) },
+                                        modifier = Modifier.size(20.dp)
                                     )
                                 }
                             }
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                text = theme.localizedSubtitle(isEnglish),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
                         }
-                        RadioButton(
-                            selected = isSelected,
-                            onClick = { onSelectTheme(theme) }
-                        )
+                        if (rowThemes.size == 1) {
+                            Spacer(modifier = Modifier.weight(1f))
+                        }
                     }
                 }
             }

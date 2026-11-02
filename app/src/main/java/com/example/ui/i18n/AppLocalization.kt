@@ -19,6 +19,7 @@ import com.example.model.Anime4KPreset
 import com.example.model.AppAccentColor
 import com.example.model.AppLanguage
 import com.example.model.AppThemeMode
+import com.example.model.AudioDeArtifactMode
 import com.example.model.DecoderMode
 import com.example.model.EpisodeSortOption
 import com.example.model.FolderSortOption
@@ -224,6 +225,35 @@ fun SubtitleColorPreset.localizedLabel(isEnglish: Boolean): String = if (!isEngl
     SubtitleColorPreset.MINT -> "Mint"
     SubtitleColorPreset.AMBER -> "Amber"
     SubtitleColorPreset.SAKURA -> "Sakura Pink"
+}
+
+fun AudioDeArtifactMode.localizedTitle(isEnglish: Boolean): String = when (this) {
+    AudioDeArtifactMode.OFF -> if (isEnglish) "Off" else title
+    AudioDeArtifactMode.SOFT -> if (isEnglish) "Soft" else title
+    AudioDeArtifactMode.STANDARD -> if (isEnglish) "Standard" else title
+    AudioDeArtifactMode.AGGRESSIVE -> if (isEnglish) "Aggressive" else title
+}
+
+fun AudioDeArtifactMode.localizedSubtitle(isEnglish: Boolean): String = when (this) {
+    AudioDeArtifactMode.OFF -> if (isEnglish) {
+        "No additional DSP restoration filter for compressed audio"
+    } else subtitle
+    AudioDeArtifactMode.SOFT -> if (isEnglish) {
+        "Gentle smoothing of high-frequency ringing and quantization artifacts"
+    } else subtitle
+    AudioDeArtifactMode.STANDARD -> if (isEnglish) {
+        "Balanced restoration for low-bitrate AAC/MP3/Opus and soft de-clipping"
+    } else subtitle
+    AudioDeArtifactMode.AGGRESSIVE -> if (isEnglish) {
+        "Maximum suppression of metallic ringing and harmonic restoration (≤ 96 kbps)"
+    } else subtitle
+}
+
+fun AudioDeArtifactMode.localizedBadge(isEnglish: Boolean): String = when (this) {
+    AudioDeArtifactMode.OFF -> if (isEnglish) "Off" else shortBadge
+    AudioDeArtifactMode.SOFT -> if (isEnglish) "Soft" else shortBadge
+    AudioDeArtifactMode.STANDARD -> if (isEnglish) "Standard" else shortBadge
+    AudioDeArtifactMode.AGGRESSIVE -> if (isEnglish) "Aggr." else shortBadge
 }
 
 fun AppThemeMode.localizedBadge(isEnglish: Boolean): String = when (this) {

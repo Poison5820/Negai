@@ -2,8 +2,11 @@ package com.example.ui.screens
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,13 +18,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -36,6 +39,7 @@ import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.OpenInFull
+import androidx.compose.material.icons.filled.PowerSettingsNew
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material3.Button
@@ -44,13 +48,14 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
@@ -59,8 +64,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -68,14 +76,21 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
 import com.example.model.Anime4KPreset
+import com.example.model.AudioDeArtifactMode
+import com.example.model.DecoderMode
 import com.example.model.EpisodeItem
 import com.example.model.FrameInterpolationMode
 import com.example.model.PlayerOrientationMode
@@ -83,13 +98,16 @@ import com.example.model.PlayerQuickAction
 import com.example.model.PlayerSettings
 import com.example.model.SleepTimerPreset
 import com.example.model.VideoScaleMode
+import com.example.player.AudioTrackUiOption
 import com.example.player.PlaybackRuntimeState
+import com.example.player.SubtitleTrackUiOption
 import com.example.ui.components.InstantSlider
 import com.example.ui.components.ResolutionBadgeChip
 import com.example.ui.components.formatTimeMs
 import com.example.ui.i18n.LocalIsEnglish
 import com.example.ui.i18n.localizedBadge
 import com.example.ui.i18n.localizedShortLabel
+import com.example.ui.i18n.localizedShortTitle
 import com.example.ui.i18n.localizedTitle
 import com.example.ui.i18n.tr
 import java.util.Locale
@@ -97,9 +115,38 @@ import kotlin.math.abs
 import kotlin.math.roundToInt
 
 /**
- * Dynamic, customizable bottom quick-actions bar in the video player HUD.
- * All buttons are clean icon-only pills except EPISODES, which displays the episode counter (e.g. 1/12).
- * Scrolling or touching the bar resets and holds the HUD auto-hide timer.
+ * Item inside a Hold-and-Swipe Mini Pop-up Menu above a bottom bar button.
+ * The last item in every menu is the technical disable/reset option ("Откл." / "Off").
+ */
+internal data class QuickHoldMenuItem(
+    val id: String,
+    val label: String,
+    val badge: String? = null,
+    val isSelected: Boolean = false,
+    val isOffOption: Boolean = false,
+    val onSelect: () -> Unit
+)
+
+private val LEFT_ZONE_CANONICAL_ORDER = listOf(
+    PlayerQuickAction.AUDIO,
+    PlayerQuickAction.SUBTITLES,
+    PlayerQuickAction.SPEED
+)
+
+private val CENTER_ZONE_CANONICAL_ORDER = listOf(
+    PlayerQuickAction.FRAME_INTERPOLATION,
+    PlayerQuickAction.ANIME4K
+)
+
+/**
+ * 3-Zone bottom quick-actions bar in the video player HUD:
+ * - Left zone: AUDIO, SUBTITLES, SPEED
+ * - Center zone: FRAME_INTERPOLATION | ANIME4K (separated by a vertical divider)
+ * - Right zone: DECODER (visible by default) + all remaining enabled actions + customize button.
+ *
+ * Holding any button opens a compact vertical mini pop-up menu directly above that button.
+ * Without lifting the finger, dragging up/down highlights options and releasing applies the choice.
+ * At the bottom of every mini-menu is "Откл." ("Off").
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -113,39 +160,105 @@ internal fun PlayerQuickActionsBar(
     pipSupported: Boolean,
     onTriggerAction: (PlayerQuickAction) -> Unit,
     onLongPressAction: (PlayerQuickAction) -> Unit = {},
+    onSelectAudio: (AudioTrackUiOption) -> Unit = {},
+    onSelectAudioDeArtifactMode: (AudioDeArtifactMode) -> Unit = {},
+    onSelectSubtitle: (SubtitleTrackUiOption) -> Unit = {},
+    onSelectSpeed: (Float) -> Unit = {},
+    onSelectFrameInterpolationMode: (FrameInterpolationMode) -> Unit = {},
+    onToggleFrameInterpolation: (Boolean) -> Unit = {},
+    onSelectAnime4KPreset: (Anime4KPreset) -> Unit = {},
+    onToggleAnime4KEnabled: (Boolean) -> Unit = {},
+    onSelectDecoderMode: (DecoderMode) -> Unit = {},
+    onSelectScaleMode: (VideoScaleMode) -> Unit = {},
+    onSetSleepTimer: (SleepTimerPreset) -> Unit = {},
+    onMarkAbPointA: () -> Unit = {},
+    onMarkAbPointB: () -> Unit = {},
+    onClearAbLoop: () -> Unit = {},
+    onUpdateSkipIntroSeconds: (Int) -> Unit = {},
+    onSeekByMs: (Long) -> Unit = {},
+    onSelectOrientationMode: (PlayerOrientationMode) -> Unit = {},
     onOpenCustomizer: () -> Unit,
     onUserInteraction: () -> Unit = {},
     onScrollStateChanged: (Boolean) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    val isEnglish = LocalIsEnglish.current
     val visibleActions = remember(quickActions, pipSupported) {
-        quickActions.filter { action ->
+        val filtered = quickActions.filter { action ->
             action != PlayerQuickAction.CHAPTERS &&
                 action != PlayerQuickAction.AUDIO_BOOST &&
                 (action != PlayerQuickAction.PIP || pipSupported)
         }
-    }
-
-    val listState = rememberLazyListState()
-    LaunchedEffect(listState.isScrollInProgress) {
-        onScrollStateChanged(listState.isScrollInProgress)
-        if (listState.isScrollInProgress) {
-            onUserInteraction()
-        }
-    }
-    LaunchedEffect(listState.firstVisibleItemIndex, listState.firstVisibleItemScrollOffset) {
-        if (listState.isScrollInProgress) {
-            onUserInteraction()
+        // Guarantee DECODER is shown by default in the right zone unless explicitly customized out
+        if (filtered.isEmpty()) {
+            PlayerQuickAction.defaultActions
+        } else {
+            filtered
         }
     }
 
-    val chipGap = if (settings.compactUiMode) 6.dp else 8.dp
+    val leftActions = remember(visibleActions) {
+        LEFT_ZONE_CANONICAL_ORDER.filter { it in visibleActions }
+    }
+    val centerActions = remember(visibleActions) {
+        CENTER_ZONE_CANONICAL_ORDER.filter { it in visibleActions }
+    }
+    val rightActions = remember(visibleActions) {
+        val rawRight = visibleActions.filter {
+            it !in LEFT_ZONE_CANONICAL_ORDER && it !in CENTER_ZONE_CANONICAL_ORDER
+        }
+        // Put DECODER first in the right zone so it is always immediately visible
+        val decoderFirst = rawRight.filter { it == PlayerQuickAction.DECODER } +
+            rawRight.filterNot { it == PlayerQuickAction.DECODER }
+        decoderFirst
+    }
+
+    var activeHoldAction by remember { mutableStateOf<PlayerQuickAction?>(null) }
+    var hoveredMenuIndex by remember { mutableIntStateOf(-1) }
+
+    val rightScrollState = rememberScrollState()
+    LaunchedEffect(rightScrollState.isScrollInProgress) {
+        onScrollStateChanged(rightScrollState.isScrollInProgress)
+        if (rightScrollState.isScrollInProgress) {
+            onUserInteraction()
+        }
+    }
+
+    val chipGap = if (settings.compactUiMode) 5.dp else 6.dp
     val buttonShape = RoundedCornerShape(12.dp)
     val accentFree = settings.playerControlsTheme.isAccentFree
     val frameless = settings.playerControlsTheme.isFrameless
 
-    LazyRow(
-        state = listState,
+    val buildMenuForAction: (PlayerQuickAction) -> List<QuickHoldMenuItem> = { action ->
+        buildHoldMenuItemsForAction(
+            action = action,
+            isEnglish = isEnglish,
+            playbackState = playbackState,
+            settings = settings,
+            scaleMode = scaleMode,
+            orientationMode = orientationMode,
+            onTriggerAction = onTriggerAction,
+            onSelectAudio = onSelectAudio,
+            onSelectAudioDeArtifactMode = onSelectAudioDeArtifactMode,
+            onSelectSubtitle = onSelectSubtitle,
+            onSelectSpeed = onSelectSpeed,
+            onSelectFrameInterpolationMode = onSelectFrameInterpolationMode,
+            onToggleFrameInterpolation = onToggleFrameInterpolation,
+            onSelectAnime4KPreset = onSelectAnime4KPreset,
+            onToggleAnime4KEnabled = onToggleAnime4KEnabled,
+            onSelectDecoderMode = onSelectDecoderMode,
+            onSelectScaleMode = onSelectScaleMode,
+            onSetSleepTimer = onSetSleepTimer,
+            onMarkAbPointA = onMarkAbPointA,
+            onMarkAbPointB = onMarkAbPointB,
+            onClearAbLoop = onClearAbLoop,
+            onUpdateSkipIntroSeconds = onUpdateSkipIntroSeconds,
+            onSeekByMs = onSeekByMs,
+            onSelectOrientationMode = onSelectOrientationMode
+        )
+    }
+
+    Row(
         modifier = modifier
             .fillMaxWidth()
             .pointerInput(Unit) {
@@ -158,87 +271,149 @@ internal fun PlayerQuickActionsBar(
                     }
                 }
             }
+            .padding(horizontal = 2.dp)
             .testTag("player_quick_actions_row"),
-        horizontalArrangement = Arrangement.spacedBy(chipGap, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically,
-        contentPadding = PaddingValues(horizontal = 2.dp)
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        items(
-            items = visibleActions,
-            key = { it.id }
-        ) { action ->
-            val chipState = resolveQuickChipVisuals(
-                action = action,
-                playbackState = playbackState,
-                settings = settings,
-                scaleMode = scaleMode,
-                orientationMode = orientationMode
-            )
+        // 1. LEFT ZONE: Audio, Subtitles, Speed
+        Row(
+            modifier = Modifier.testTag("player_quick_actions_left_zone"),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(chipGap, Alignment.Start)
+        ) {
+            leftActions.forEach { action ->
+                QuickActionHoldButton(
+                    action = action,
+                    playbackState = playbackState,
+                    settings = settings,
+                    scaleMode = scaleMode,
+                    orientationMode = orientationMode,
+                    isOrientationLocked = isOrientationLocked,
+                    buttonShape = buttonShape,
+                    isHoldMenuOpen = activeHoldAction == action,
+                    hoveredMenuIndex = if (activeHoldAction == action) hoveredMenuIndex else -1,
+                    buildMenuItems = { buildMenuForAction(action) },
+                    onOpenHoldMenu = { initialIdx ->
+                        onUserInteraction()
+                        activeHoldAction = action
+                        hoveredMenuIndex = initialIdx
+                        onLongPressAction(action)
+                    },
+                    onUpdateHoveredIndex = { idx ->
+                        onUserInteraction()
+                        hoveredMenuIndex = idx
+                    },
+                    onDismissHoldMenu = {
+                        activeHoldAction = null
+                        hoveredMenuIndex = -1
+                    },
+                    onClick = {
+                        onUserInteraction()
+                        activeHoldAction = null
+                        onTriggerAction(action)
+                    }
+                )
+            }
+        }
 
-            Surface(
-                color = chipState.containerColor,
-                shape = buttonShape,
-                border = chipState.border,
+        // 2. CENTER ZONE: Interpolator | Anime4K with vertical divider
+        if (centerActions.isNotEmpty()) {
+            Row(
                 modifier = Modifier
-                    .animateItem()
-                    .defaultMinSize(minWidth = 42.dp, minHeight = 36.dp)
-                    .clip(buttonShape)
-                    .combinedClickable(
+                    .padding(horizontal = 4.dp)
+                    .testTag("player_quick_actions_center_zone"),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(chipGap, Alignment.CenterHorizontally)
+            ) {
+                centerActions.forEachIndexed { idx, action ->
+                    if (idx > 0) {
+                        Box(
+                            modifier = Modifier
+                                .width(1.dp)
+                                .height(22.dp)
+                                .background(Color.White.copy(alpha = 0.36f))
+                                .testTag("player_center_quick_actions_divider")
+                        )
+                    }
+                    QuickActionHoldButton(
+                        action = action,
+                        playbackState = playbackState,
+                        settings = settings,
+                        scaleMode = scaleMode,
+                        orientationMode = orientationMode,
+                        isOrientationLocked = isOrientationLocked,
+                        buttonShape = buttonShape,
+                        isHoldMenuOpen = activeHoldAction == action,
+                        hoveredMenuIndex = if (activeHoldAction == action) hoveredMenuIndex else -1,
+                        buildMenuItems = { buildMenuForAction(action) },
+                        onOpenHoldMenu = { initialIdx ->
+                            onUserInteraction()
+                            activeHoldAction = action
+                            hoveredMenuIndex = initialIdx
+                            onLongPressAction(action)
+                        },
+                        onUpdateHoveredIndex = { newIdx ->
+                            onUserInteraction()
+                            hoveredMenuIndex = newIdx
+                        },
+                        onDismissHoldMenu = {
+                            activeHoldAction = null
+                            hoveredMenuIndex = -1
+                        },
                         onClick = {
                             onUserInteraction()
+                            activeHoldAction = null
                             onTriggerAction(action)
-                        },
-                        onLongClick = {
-                            onUserInteraction()
-                            onLongPressAction(action)
                         }
                     )
-                    .semantics { contentDescription = chipState.accessibilityLabel }
-                    .testTag(chipState.testTag)
-            ) {
-                Row(
-                    modifier = Modifier.padding(
-                        horizontal = if (chipState.counterBadge != null) 10.dp else 11.dp,
-                        vertical = 8.dp
-                    ),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(5.dp)
-                ) {
-                    Icon(
-                        imageVector = when (action) {
-                            PlayerQuickAction.SCALE -> when (scaleMode) {
-                                VideoScaleMode.FIT -> Icons.Default.AspectRatio
-                                VideoScaleMode.ZOOM -> Icons.Default.Fullscreen
-                                VideoScaleMode.STRETCH -> Icons.Default.OpenInFull
-                            }
-                            else -> action.iconVector()
-                        },
-                        contentDescription = chipState.accessibilityLabel,
-                        tint = chipState.iconTint,
-                        modifier = Modifier.size(19.dp)
-                    )
-                    if (action == PlayerQuickAction.ORIENTATION && isOrientationLocked) {
-                        Icon(
-                            imageVector = Icons.Default.Lock,
-                            contentDescription = null,
-                            tint = chipState.iconTint,
-                            modifier = Modifier.size(12.dp)
-                        )
-                    }
-                    if (chipState.counterBadge != null) {
-                        Text(
-                            text = chipState.counterBadge,
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            color = Color.White,
-                            maxLines = 1
-                        )
-                    }
                 }
             }
         }
 
-        item(key = "customize_quick_actions_btn") {
+        // 3. RIGHT ZONE: Decoder (default visible) + remaining actions + Customize button
+        Row(
+            modifier = Modifier
+                .weight(1f, fill = false)
+                .horizontalScroll(rightScrollState)
+                .testTag("player_quick_actions_right_zone"),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(chipGap, Alignment.End)
+        ) {
+            rightActions.forEach { action ->
+                QuickActionHoldButton(
+                    action = action,
+                    playbackState = playbackState,
+                    settings = settings,
+                    scaleMode = scaleMode,
+                    orientationMode = orientationMode,
+                    isOrientationLocked = isOrientationLocked,
+                    buttonShape = buttonShape,
+                    isHoldMenuOpen = activeHoldAction == action,
+                    hoveredMenuIndex = if (activeHoldAction == action) hoveredMenuIndex else -1,
+                    buildMenuItems = { buildMenuForAction(action) },
+                    onOpenHoldMenu = { initialIdx ->
+                        onUserInteraction()
+                        activeHoldAction = action
+                        hoveredMenuIndex = initialIdx
+                        onLongPressAction(action)
+                    },
+                    onUpdateHoveredIndex = { newIdx ->
+                        onUserInteraction()
+                        hoveredMenuIndex = newIdx
+                    },
+                    onDismissHoldMenu = {
+                        activeHoldAction = null
+                        hoveredMenuIndex = -1
+                    },
+                    onClick = {
+                        onUserInteraction()
+                        activeHoldAction = null
+                        onTriggerAction(action)
+                    }
+                )
+            }
+
             val customizeDesc = tr("Настроить быстрые клавиши плеера", "Customize player quick actions")
             val customizeBorder = when {
                 frameless -> null
@@ -250,7 +425,7 @@ internal fun PlayerQuickActionsBar(
                 shape = buttonShape,
                 border = customizeBorder,
                 modifier = Modifier
-                    .defaultMinSize(minWidth = 42.dp, minHeight = 36.dp)
+                    .defaultMinSize(minWidth = 38.dp, minHeight = 36.dp)
                     .clip(buttonShape)
                     .clickable {
                         onUserInteraction()
@@ -260,17 +435,623 @@ internal fun PlayerQuickActionsBar(
                     .testTag("player_customize_quick_actions_button")
             ) {
                 Box(
-                    modifier = Modifier.padding(horizontal = 11.dp, vertical = 8.dp),
+                    modifier = Modifier.padding(horizontal = 9.dp, vertical = 8.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Edit,
                         contentDescription = customizeDesc,
                         tint = if (accentFree) Color.White.copy(alpha = 0.88f) else MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(17.dp)
                     )
                 }
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun QuickActionHoldButton(
+    action: PlayerQuickAction,
+    playbackState: PlaybackRuntimeState,
+    settings: PlayerSettings,
+    scaleMode: VideoScaleMode,
+    orientationMode: PlayerOrientationMode,
+    isOrientationLocked: Boolean,
+    buttonShape: RoundedCornerShape,
+    isHoldMenuOpen: Boolean,
+    hoveredMenuIndex: Int,
+    buildMenuItems: () -> List<QuickHoldMenuItem>,
+    onOpenHoldMenu: (Int) -> Unit,
+    onUpdateHoveredIndex: (Int) -> Unit,
+    onDismissHoldMenu: () -> Unit,
+    onClick: () -> Unit
+) {
+    val isEnglish = LocalIsEnglish.current
+    val density = LocalDensity.current
+    val stepPx = with(density) { 36.dp.toPx().coerceAtLeast(24f) }
+
+    val chipState = resolveQuickChipVisuals(
+        action = action,
+        playbackState = playbackState,
+        settings = settings,
+        scaleMode = scaleMode,
+        orientationMode = orientationMode
+    )
+
+    val currentBuildMenuItems by rememberUpdatedState(buildMenuItems)
+    val currentOnOpenHoldMenu by rememberUpdatedState(onOpenHoldMenu)
+    val currentOnUpdateHoveredIndex by rememberUpdatedState(onUpdateHoveredIndex)
+    val currentOnDismissHoldMenu by rememberUpdatedState(onDismissHoldMenu)
+    var cumulativeDragY by remember { mutableFloatStateOf(0f) }
+    var totalAbsDrag by remember { mutableFloatStateOf(0f) }
+
+    Box(contentAlignment = Alignment.TopCenter) {
+        if (isHoldMenuOpen) {
+            val menuItems = currentBuildMenuItems()
+            if (menuItems.isNotEmpty()) {
+                val popupOffsetY = with(density) {
+                    -((menuItems.size * 38 + 38).coerceAtMost(310)).dp.roundToPx()
+                }
+                Popup(
+                    alignment = Alignment.TopCenter,
+                    offset = IntOffset(0, popupOffsetY),
+                    onDismissRequest = currentOnDismissHoldMenu,
+                    properties = PopupProperties(
+                        focusable = false,
+                        dismissOnBackPress = true,
+                        dismissOnClickOutside = true,
+                        clippingEnabled = true
+                    )
+                ) {
+                    QuickActionHoldMiniPopupCard(
+                        action = action,
+                        title = action.localizedShortTitle(isEnglish),
+                        items = menuItems,
+                        hoveredIndex = hoveredMenuIndex,
+                        onSelectItem = { item ->
+                            item.onSelect()
+                            currentOnDismissHoldMenu()
+                        }
+                    )
+                }
+            }
+        }
+
+        Surface(
+            color = chipState.containerColor,
+            shape = buttonShape,
+            border = chipState.border,
+            modifier = Modifier
+                .defaultMinSize(minWidth = 38.dp, minHeight = 36.dp)
+                .clip(buttonShape)
+                .pointerInput(action) {
+                    detectDragGesturesAfterLongPress(
+                        onDragStart = {
+                            val items = currentBuildMenuItems()
+                            cumulativeDragY = 0f
+                            totalAbsDrag = 0f
+                            val selectedIdx = items.indexOfFirst { it.isSelected }
+                                .takeIf { it >= 0 } ?: items.lastIndex.coerceAtLeast(0)
+                            currentOnOpenHoldMenu(selectedIdx)
+                        },
+                        onDrag = { change, dragAmount ->
+                            change.consume()
+                            val items = currentBuildMenuItems()
+                            if (items.isNotEmpty()) {
+                                cumulativeDragY += dragAmount.y
+                                totalAbsDrag += abs(dragAmount.y)
+                                // Sliding finger UP (negative Y) moves up from the bottom "Откл." item
+                                val stepsUp = ((-cumulativeDragY) / stepPx).roundToInt()
+                                val targetIndex = (items.lastIndex - stepsUp).coerceIn(0, items.lastIndex)
+                                currentOnUpdateHoveredIndex(targetIndex)
+                            }
+                        },
+                        onDragEnd = {
+                            val items = currentBuildMenuItems()
+                            if (totalAbsDrag >= stepPx * 0.35f && hoveredMenuIndex in items.indices) {
+                                items[hoveredMenuIndex].onSelect()
+                                currentOnDismissHoldMenu()
+                            }
+                        },
+                        onDragCancel = {
+                            // Keep popup open on cancel if user didn't drag
+                        }
+                    )
+                }
+                .combinedClickable(
+                    onClick = onClick,
+                    onLongClick = {
+                        val items = currentBuildMenuItems()
+                        val selectedIdx = items.indexOfFirst { it.isSelected }
+                            .takeIf { it >= 0 } ?: items.lastIndex.coerceAtLeast(0)
+                        currentOnOpenHoldMenu(selectedIdx)
+                    }
+                )
+                .semantics { contentDescription = chipState.accessibilityLabel }
+                .testTag(chipState.testTag)
+        ) {
+            Row(
+                modifier = Modifier.padding(
+                    horizontal = if (chipState.counterBadge != null) 9.dp else 10.dp,
+                    vertical = 8.dp
+                ),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Icon(
+                    imageVector = when (action) {
+                        PlayerQuickAction.SCALE -> when (scaleMode) {
+                            VideoScaleMode.FIT -> Icons.Default.AspectRatio
+                            VideoScaleMode.ZOOM -> Icons.Default.Fullscreen
+                            VideoScaleMode.STRETCH -> Icons.Default.OpenInFull
+                        }
+                        else -> action.iconVector()
+                    },
+                    contentDescription = chipState.accessibilityLabel,
+                    tint = chipState.iconTint,
+                    modifier = Modifier.size(18.dp)
+                )
+                if (action == PlayerQuickAction.ORIENTATION && isOrientationLocked) {
+                    Icon(
+                        imageVector = Icons.Default.Lock,
+                        contentDescription = null,
+                        tint = chipState.iconTint,
+                        modifier = Modifier.size(12.dp)
+                    )
+                }
+                if (chipState.counterBadge != null) {
+                    Text(
+                        text = chipState.counterBadge,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color.White,
+                        maxLines = 1
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun QuickActionHoldMiniPopupCard(
+    action: PlayerQuickAction,
+    title: String,
+    items: List<QuickHoldMenuItem>,
+    hoveredIndex: Int,
+    onSelectItem: (QuickHoldMenuItem) -> Unit
+) {
+    Surface(
+        color = Color(0xF2101520),
+        shape = RoundedCornerShape(14.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.50f)),
+        shadowElevation = 10.dp,
+        modifier = Modifier
+            .widthIn(min = 168.dp, max = 240.dp)
+            .testTag("quick_hold_mini_menu_${action.id}")
+    ) {
+        Column(
+            modifier = Modifier
+                .heightIn(max = 290.dp)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 6.dp, vertical = 6.dp),
+            verticalArrangement = Arrangement.spacedBy(3.dp)
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+            )
+            items.forEachIndexed { index, item ->
+                val isHovered = index == hoveredIndex
+                if (item.isOffOption && index > 0) {
+                    HorizontalDivider(
+                        color = Color.White.copy(alpha = 0.14f),
+                        modifier = Modifier.padding(vertical = 2.dp)
+                    )
+                }
+                val bgColor = when {
+                    isHovered && item.isOffOption -> MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.85f)
+                    isHovered -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.90f)
+                    item.isSelected -> Color.White.copy(alpha = 0.16f)
+                    else -> Color.Transparent
+                }
+                val textColor = when {
+                    isHovered && item.isOffOption -> MaterialTheme.colorScheme.onErrorContainer
+                    isHovered -> MaterialTheme.colorScheme.onPrimaryContainer
+                    item.isOffOption -> Color(0xFFFFB4AB)
+                    item.isSelected -> MaterialTheme.colorScheme.primary
+                    else -> Color.White
+                }
+                Surface(
+                    color = bgColor,
+                    shape = RoundedCornerShape(9.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(9.dp))
+                        .clickable { onSelectItem(item) }
+                        .testTag("quick_hold_item_${action.id}_${item.id}")
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            if (item.isOffOption) {
+                                Icon(
+                                    imageVector = Icons.Default.PowerSettingsNew,
+                                    contentDescription = null,
+                                    tint = textColor,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                            } else if (item.isSelected) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = null,
+                                    tint = textColor,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                            } else {
+                                Spacer(modifier = Modifier.size(14.dp))
+                            }
+                            Text(
+                                text = item.label,
+                                style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp),
+                                fontWeight = if (isHovered || item.isSelected || item.isOffOption) {
+                                    FontWeight.SemiBold
+                                } else {
+                                    FontWeight.Normal
+                                },
+                                color = textColor,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                        if (!item.badge.isNullOrBlank()) {
+                            Surface(
+                                color = Color.White.copy(alpha = 0.14f),
+                                shape = RoundedCornerShape(5.dp)
+                            ) {
+                                Text(
+                                    text = item.badge,
+                                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                                    color = textColor,
+                                    modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+private fun buildHoldMenuItemsForAction(
+    action: PlayerQuickAction,
+    isEnglish: Boolean,
+    playbackState: PlaybackRuntimeState,
+    settings: PlayerSettings,
+    scaleMode: VideoScaleMode,
+    orientationMode: PlayerOrientationMode,
+    onTriggerAction: (PlayerQuickAction) -> Unit,
+    onSelectAudio: (AudioTrackUiOption) -> Unit,
+    onSelectAudioDeArtifactMode: (AudioDeArtifactMode) -> Unit,
+    onSelectSubtitle: (SubtitleTrackUiOption) -> Unit,
+    onSelectSpeed: (Float) -> Unit,
+    onSelectFrameInterpolationMode: (FrameInterpolationMode) -> Unit,
+    onToggleFrameInterpolation: (Boolean) -> Unit,
+    onSelectAnime4KPreset: (Anime4KPreset) -> Unit,
+    onToggleAnime4KEnabled: (Boolean) -> Unit,
+    onSelectDecoderMode: (DecoderMode) -> Unit,
+    onSelectScaleMode: (VideoScaleMode) -> Unit,
+    onSetSleepTimer: (SleepTimerPreset) -> Unit,
+    onMarkAbPointA: () -> Unit,
+    onMarkAbPointB: () -> Unit,
+    onClearAbLoop: () -> Unit,
+    onUpdateSkipIntroSeconds: (Int) -> Unit,
+    onSeekByMs: (Long) -> Unit,
+    onSelectOrientationMode: (PlayerOrientationMode) -> Unit
+): List<QuickHoldMenuItem> {
+    val offText = if (isEnglish) "Off" else "Откл."
+    return when (action) {
+        PlayerQuickAction.FRAME_INTERPOLATION -> {
+            val activeMode = settings.effectiveFrameInterpolationMode
+            val modes = listOf(
+                FrameInterpolationMode.ANIME,
+                FrameInterpolationMode.MAX_FPS,
+                FrameInterpolationMode.SMOOTH_60,
+                FrameInterpolationMode.CINEMA
+            )
+            modes.map { mode ->
+                QuickHoldMenuItem(
+                    id = mode.id,
+                    label = mode.localizedTitle(isEnglish),
+                    badge = mode.localizedBadge(isEnglish),
+                    isSelected = activeMode == mode,
+                    onSelect = { onSelectFrameInterpolationMode(mode) }
+                )
+            } + QuickHoldMenuItem(
+                id = "OFF",
+                label = offText,
+                badge = "RAW",
+                isSelected = activeMode == FrameInterpolationMode.OFF,
+                isOffOption = true,
+                onSelect = { onToggleFrameInterpolation(false) }
+            )
+        }
+
+        PlayerQuickAction.ANIME4K -> {
+            val activePreset = settings.effectiveAnime4KPreset
+            val presets = listOf(
+                Anime4KPreset.ANIME4K_UPSCALE_CNNX,
+                Anime4KPreset.ANIME4K_UPSCALE_CNN,
+                Anime4KPreset.ANIME4K_FAST
+            )
+            presets.map { preset ->
+                QuickHoldMenuItem(
+                    id = preset.id,
+                    label = preset.localizedShortLabel(isEnglish),
+                    badge = preset.badgeLabel,
+                    isSelected = activePreset == preset,
+                    onSelect = { onSelectAnime4KPreset(preset) }
+                )
+            } + QuickHoldMenuItem(
+                id = "OFF",
+                label = offText,
+                badge = "RAW",
+                isSelected = activePreset == Anime4KPreset.OFF,
+                isOffOption = true,
+                onSelect = { onToggleAnime4KEnabled(false) }
+            )
+        }
+
+        PlayerQuickAction.DECODER -> {
+            val current = playbackState.activeDecoderMode
+            listOf(
+                DecoderMode.SOFTWARE_PREFER,
+                DecoderMode.HW_STRICT,
+                DecoderMode.HW_PLUS
+            ).map { mode ->
+                QuickHoldMenuItem(
+                    id = mode.id,
+                    label = mode.localizedTitle(isEnglish),
+                    badge = mode.shortBadge,
+                    isSelected = current == mode,
+                    onSelect = { onSelectDecoderMode(mode) }
+                )
+            } + QuickHoldMenuItem(
+                id = "OFF",
+                label = offText,
+                badge = "HW+",
+                isSelected = false,
+                isOffOption = true,
+                onSelect = { onSelectDecoderMode(DecoderMode.HW_PLUS) }
+            )
+        }
+
+        PlayerQuickAction.SPEED -> {
+            val current = playbackState.playbackSpeed
+            val speeds = listOf(2.0f, 1.5f, 1.25f, 0.75f)
+            speeds.map { spd ->
+                val lbl = formatPlaybackSpeedLabel(spd)
+                QuickHoldMenuItem(
+                    id = lbl,
+                    label = lbl,
+                    isSelected = abs(current - spd) < 0.03f,
+                    onSelect = { onSelectSpeed(spd) }
+                )
+            } + QuickHoldMenuItem(
+                id = "OFF",
+                label = offText,
+                badge = "1.0x",
+                isSelected = abs(current - 1.0f) < 0.03f,
+                isOffOption = true,
+                onSelect = { onSelectSpeed(1.0f) }
+            )
+        }
+
+        PlayerQuickAction.SUBTITLES -> {
+            val tracks = playbackState.subtitleTrackOptions.filter { it.id != "off" }
+            val offOpt = playbackState.subtitleTrackOptions.firstOrNull { it.id == "off" }
+            tracks.take(6).map { opt ->
+                QuickHoldMenuItem(
+                    id = opt.id,
+                    label = opt.label,
+                    badge = opt.badge,
+                    isSelected = opt.isSelected,
+                    onSelect = { onSelectSubtitle(opt) }
+                )
+            } + QuickHoldMenuItem(
+                id = "OFF",
+                label = offText,
+                isSelected = playbackState.selectedSubtitleId == "off",
+                isOffOption = true,
+                onSelect = {
+                    if (offOpt != null) {
+                        onSelectSubtitle(offOpt)
+                    } else {
+                        onTriggerAction(PlayerQuickAction.SUBTITLES)
+                    }
+                }
+            )
+        }
+
+        PlayerQuickAction.AUDIO -> {
+            val trackItems = playbackState.audioTrackOptions.take(4).map { opt ->
+                QuickHoldMenuItem(
+                    id = opt.id,
+                    label = opt.label,
+                    badge = opt.badge,
+                    isSelected = opt.isSelected,
+                    onSelect = { onSelectAudio(opt) }
+                )
+            }
+            val dspModes = listOf(
+                AudioDeArtifactMode.AGGRESSIVE,
+                AudioDeArtifactMode.STANDARD,
+                AudioDeArtifactMode.SOFT
+            ).map { mode ->
+                val dspPrefix = if (isEnglish) "DSP: " else "Очистка: "
+                QuickHoldMenuItem(
+                    id = "dsp_${mode.id}",
+                    label = "$dspPrefix${mode.localizedTitle(isEnglish)}",
+                    badge = mode.localizedBadge(isEnglish),
+                    isSelected = playbackState.audioDeArtifactMode == mode,
+                    onSelect = { onSelectAudioDeArtifactMode(mode) }
+                )
+            }
+            trackItems + dspModes + QuickHoldMenuItem(
+                id = "OFF",
+                label = offText,
+                badge = if (isEnglish) "DSP Off" else "Без очистки",
+                isSelected = playbackState.audioDeArtifactMode == AudioDeArtifactMode.OFF,
+                isOffOption = true,
+                onSelect = { onSelectAudioDeArtifactMode(AudioDeArtifactMode.OFF) }
+            )
+        }
+
+        PlayerQuickAction.SCALE -> {
+            listOf(VideoScaleMode.STRETCH, VideoScaleMode.ZOOM).map { mode ->
+                QuickHoldMenuItem(
+                    id = mode.id,
+                    label = mode.localizedTitle(isEnglish),
+                    badge = mode.localizedShortLabel(isEnglish),
+                    isSelected = scaleMode == mode,
+                    onSelect = { onSelectScaleMode(mode) }
+                )
+            } + QuickHoldMenuItem(
+                id = "OFF",
+                label = offText,
+                badge = VideoScaleMode.FIT.localizedShortLabel(isEnglish),
+                isSelected = scaleMode == VideoScaleMode.FIT,
+                isOffOption = true,
+                onSelect = { onSelectScaleMode(VideoScaleMode.FIT) }
+            )
+        }
+
+        PlayerQuickAction.SLEEP_TIMER -> {
+            listOf(
+                SleepTimerPreset.END_OF_EPISODE,
+                SleepTimerPreset.MIN_60,
+                SleepTimerPreset.MIN_45,
+                SleepTimerPreset.MIN_30,
+                SleepTimerPreset.MIN_15
+            ).map { preset ->
+                QuickHoldMenuItem(
+                    id = preset.id,
+                    label = preset.localizedTitle(isEnglish),
+                    isSelected = playbackState.sleepTimerPreset == preset,
+                    onSelect = { onSetSleepTimer(preset) }
+                )
+            } + QuickHoldMenuItem(
+                id = "OFF",
+                label = offText,
+                isSelected = playbackState.sleepTimerPreset == SleepTimerPreset.OFF,
+                isOffOption = true,
+                onSelect = { onSetSleepTimer(SleepTimerPreset.OFF) }
+            )
+        }
+
+        PlayerQuickAction.AB_LOOP -> {
+            listOf(
+                QuickHoldMenuItem(
+                    id = "POINT_B",
+                    label = if (isEnglish) "Set Point B" else "Точка B",
+                    badge = playbackState.abLoopEndMs?.let { formatTimeMs(it) },
+                    isSelected = playbackState.abLoopEndMs != null,
+                    onSelect = onMarkAbPointB
+                ),
+                QuickHoldMenuItem(
+                    id = "POINT_A",
+                    label = if (isEnglish) "Set Point A" else "Точка A",
+                    badge = playbackState.abLoopStartMs?.let { formatTimeMs(it) },
+                    isSelected = playbackState.abLoopStartMs != null,
+                    onSelect = onMarkAbPointA
+                ),
+                QuickHoldMenuItem(
+                    id = "OFF",
+                    label = offText,
+                    isSelected = playbackState.abLoopStartMs == null && playbackState.abLoopEndMs == null,
+                    isOffOption = true,
+                    onSelect = onClearAbLoop
+                )
+            )
+        }
+
+        PlayerQuickAction.SKIP_INTRO -> {
+            val secUnit = if (isEnglish) "s" else "с"
+            listOf(120, 90, 85, 75, 60).map { sec ->
+                QuickHoldMenuItem(
+                    id = "skip_$sec",
+                    label = "+$sec $secUnit",
+                    isSelected = settings.skipIntroSeconds == sec,
+                    onSelect = {
+                        onUpdateSkipIntroSeconds(sec)
+                        onSeekByMs(sec * 1000L)
+                    }
+                )
+            } + QuickHoldMenuItem(
+                id = "OFF",
+                label = offText,
+                isSelected = false,
+                isOffOption = true,
+                onSelect = {}
+            )
+        }
+
+        PlayerQuickAction.ORIENTATION -> {
+            listOf(
+                PlayerOrientationMode.PORTRAIT,
+                PlayerOrientationMode.LANDSCAPE,
+                PlayerOrientationMode.VIDEO_ASPECT
+            ).map { mode ->
+                QuickHoldMenuItem(
+                    id = mode.id,
+                    label = mode.localizedTitle(isEnglish),
+                    badge = mode.localizedBadge(isEnglish),
+                    isSelected = orientationMode == mode,
+                    onSelect = { onSelectOrientationMode(mode) }
+                )
+            } + QuickHoldMenuItem(
+                id = "OFF",
+                label = offText,
+                badge = PlayerOrientationMode.AUTO.localizedBadge(isEnglish),
+                isSelected = orientationMode == PlayerOrientationMode.AUTO,
+                isOffOption = true,
+                onSelect = { onSelectOrientationMode(PlayerOrientationMode.AUTO) }
+            )
+        }
+
+        else -> {
+            listOf(
+                QuickHoldMenuItem(
+                    id = "OPEN",
+                    label = action.localizedTitle(isEnglish),
+                    isSelected = true,
+                    onSelect = { onTriggerAction(action) }
+                ),
+                QuickHoldMenuItem(
+                    id = "OFF",
+                    label = offText,
+                    isSelected = false,
+                    isOffOption = true,
+                    onSelect = {}
+                )
+            )
         }
     }
 }
@@ -329,9 +1110,13 @@ private fun resolveQuickChipVisuals(
         }
 
         PlayerQuickAction.AUDIO -> {
-            val modified = playbackState.audioDelayMs != 0L || playbackState.audioBoostPercent > 100
+            val deArtifactActive = playbackState.isAudioDeArtifactActive &&
+                playbackState.audioDeArtifactMode != AudioDeArtifactMode.OFF
+            val modified = playbackState.audioDelayMs != 0L ||
+                playbackState.audioBoostPercent > 100 ||
+                deArtifactActive
             QuickChipVisualState(
-                accessibilityLabel = if (isEnglish) "Audio & Boost" else "Аудио и усиление",
+                accessibilityLabel = if (isEnglish) "Audio & Restoration" else "Аудио и очистка",
                 iconTint = primary,
                 containerColor = if (modified) activePrimaryBg else neutralBg,
                 border = if (modified) activeBorder else null,
@@ -351,10 +1136,14 @@ private fun resolveQuickChipVisuals(
         }
 
         PlayerQuickAction.DECODER -> {
+            val badge = playbackState.activeDecoderMode.shortBadge
+            val isCustom = playbackState.activeDecoderMode != DecoderMode.HW_PLUS
             QuickChipVisualState(
-                accessibilityLabel = (if (isEnglish) "Decoder " else "Декодер ") + playbackState.activeDecoderMode.shortBadge,
+                accessibilityLabel = (if (isEnglish) "Decoder " else "Декодер ") + badge,
+                counterBadge = badge,
                 iconTint = primary,
-                containerColor = neutralBg,
+                containerColor = if (isCustom) activePrimaryBg else neutralBg,
+                border = if (isCustom) activeBorder else null,
                 testTag = "player_open_decoder_sheet_chip"
             )
         }

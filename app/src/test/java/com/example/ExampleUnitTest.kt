@@ -258,9 +258,9 @@ class ExampleUnitTest {
         val defaults = QuickActionsSerializer.parse(null)
         assertTrue(PlayerQuickAction.SPEED in defaults)
         assertTrue(PlayerQuickAction.AUDIO in defaults)
+        assertTrue(PlayerQuickAction.DECODER in defaults)
         assertTrue(PlayerQuickAction.CHAPTERS !in defaults)
         assertTrue(PlayerQuickAction.AUDIO_BOOST !in defaults)
-        assertTrue(PlayerQuickAction.DECODER !in defaults)
 
         // Add new button (e.g. SLEEP_TIMER) without duplicates
         val withSleep = QuickActionsSerializer.addAction(defaults, PlayerQuickAction.SLEEP_TIMER)

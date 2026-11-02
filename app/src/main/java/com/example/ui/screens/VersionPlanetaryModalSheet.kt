@@ -129,13 +129,13 @@ private val PLANETARY_FEATURES = listOf(
     ),
     PlanetaryFeatureOrbit(
         index = 2,
-        badge = "DSP • ±5s Sync",
-        titleRu = "Аудиосинхронизация ±5 с и авто-подхват озвучек",
-        titleEn = "Audio Sync ±5s, DSP Boost & Auto-Matching",
-        subtitleRu = "Регулировка задержки звука с шагом ±50/250 мс, ресинхронизация потока, усиление до 200% и внешние .mka/.flac",
-        subtitleEn = "Fine ±50/250ms audio delay adjustment, instant stream resync, 200% DSP boost & external .mka/.flac",
-        specsRu = "PCM AudioProcessor • +12 дБ • Авто-привязка папок",
-        specsEn = "PCM AudioProcessor • +12 dB • Smart folder matching",
+        badge = "DSP • De-Artifact",
+        titleRu = "Очистка звука De-Artifact DSP и синхронизация ±5 с",
+        titleEn = "Audio De-Artifact DSP, ±5s Sync & Boost",
+        subtitleRu = "3-уровневая очистка сжатых дорожек AAC/MP3/Opus от ВЧ-звона и клиппинга, сдвиг ±5 с и усиление до 200%",
+        subtitleEn = "3-level low-bitrate audio de-ringing, harmonic exciter & soft-knee de-clipper, ±5s sync & 200% boost",
+        specsRu = "De-Artifact DSP (Мягкий/Стандарт/Агрессивный) • Авто ≤128 кбит/с",
+        specsEn = "De-Artifact DSP (Soft/Standard/Aggressive) • Auto ≤128 kbps",
         color = Color(0xFF69F0AE),
         orbitRadiusFraction = 0.68f,
         speedMultiplier = -0.8f,
@@ -473,7 +473,7 @@ fun VersionPlanetaryModalSheet(
                 }
             }
 
-            // Release v3.0 Changelog Card
+            // Release v3.1 Pre-release Changelog Card
             Surface(
                 color = MaterialTheme.colorScheme.surfaceContainer,
                 shape = RoundedCornerShape(14.dp),
@@ -485,27 +485,25 @@ fun VersionPlanetaryModalSheet(
                     verticalArrangement = Arrangement.spacedBy(5.dp)
                 ) {
                     Text(
-                        text = tr("Возможности релиза v3.0", "Release v3.0 Highlights"),
+                        text = tr("Возможности пре-релиза v3.1-pre1", "Release v3.1 Pre-release Highlights"),
                         style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.primary
                     )
                     val notes = if (isEnglish) {
                         listOf(
-                            "• Simultaneous MEMC frame interpolation + Anime4K GLSL upscaling without frame luminance flickering",
-                            "• Refined Anime4K_Fast contour reconstruction that sharpens lines without over-smoothing or thinning",
-                            "• Separated 5 base theme badges (Light, Dark, OLED #000000, Auto, Auto OLED) and 7 accent palettes with WCAG 2.1 auto-contrast",
-                            "• Zero-lag player HUD appearance with persistent composition & immersive popup sheets without dropping system bars",
-                            "• Adaptive 20:9 landscape layout across Library, Folders, Recent, Torrents, and Settings",
-                            "• Audio Sync (±5,000 ms), 200% DSP Loudness Boost, embedded MKV/MP4 chapters, and direct P2P TorrServer streaming"
+                            "• Real-time Audio De-Artifact DSP with 3 levels (Soft, Standard, Aggressive) + Auto for low-bitrate tracks (≤ 128 kbps)",
+                            "• Redesigned 3-zone player bottom bar: Left (Audio, Subtitles, Speed), Center (MEMC | Anime4K with vertical divider), Right (Decoder + tools)",
+                            "• Hold-and-swipe mini pop-up menus on every bottom bar button with 'Off' («Откл.») at the bottom",
+                            "• Decoder button enabled by default in the right section of the player bottom bar",
+                            "• Compact 2-column grid layout and reduced horizontal margins in Settings for themes, accents, badges, and modes"
                         )
                     } else {
                         listOf(
-                            "• Одновременная работа интерполяции кадров MEMC и апскейлинга Anime4K без мерцания яркости кадров",
-                            "• Сбалансированный шейдер Anime4K_Fast с чётким восстановлением контуров без чрезмерного разглаживания и истончения линий",
-                            "• Раздельный выбор 5 режимов фона (Светлая, Тёмная, OLED #000000, Авто, Авто OLED) и 7 акцентных палитр с автоконтрастом текста WCAG 2.1",
-                            "• Мгновенное появление HUD плеера без фризов и вызов всплывающих меню без опускания системной шторки Android",
-                            "• Адаптивная верстка для экранов 20:9 в альбомном режиме во всех разделах приложения",
-                            "• Синхронизация звука (±5000 мс), усиление DSP до 200%, встроенные главы MKV/MP4 и стриминг торрентов через TorrServer"
+                            "• Очистка звука от искажений сжатия (De-Artifact DSP) с 3 уровнями (Мягкий, Стандарт, Агрессивный) и авто-режимом для низкого битрейта (≤ 128 кбит/с)",
+                            "• Новая 3-зонная нижняя панель плеера: слева (Аудио, Субтитры, Скорость), по центру (Интерполятор | Anime4K с вертикальным разделителем), справа (Декодер и остальные кнопки)",
+                            "• Мини-меню по удержанию на всех кнопках нижней панели с выбором режима свайпом без отрыва пальца и пунктом «Откл.» внизу",
+                            "• Кнопка «Декодер» включена по умолчанию в правой части нижней панели плеера",
+                            "• Уменьшены боковые отступы в настройках, а темы, акцентные цвета и режимы организованы в 2 компактных столбца"
                         )
                     }
                     notes.forEach { line ->

@@ -440,6 +440,8 @@ fun NegaiAppRoot(
                     )
                 },
                 onSetAudioBoostPercent = { pct -> viewModel.playerEngine.setAudioBoostPercent(pct) },
+                onSelectAudioDeArtifactMode = { mode -> viewModel.setAudioDeArtifactMode(mode) },
+                onToggleAutoDeArtifactLowBitrate = { enabled -> viewModel.setAutoDeArtifactLowBitrate(enabled) },
                 onAdjustAudioDelay = { delta -> viewModel.adjustAudioDelay(delta) },
                 onSetAudioDelay = { ms -> viewModel.setAudioDelay(ms) },
                 onResyncAudio = { viewModel.resyncAudioStream() },
@@ -563,6 +565,8 @@ fun NegaiAppRoot(
                 onUpdateAutoBindAudio = { viewModel.setAutoBindAudio(it) },
                 onUpdatePreferExternalAudioOnStart = { viewModel.setPreferExternalAudioOnStart(it) },
                 onUpdateDefaultAudioBoostPercent = { viewModel.setDefaultAudioBoostPercent(it) },
+                onUpdateAudioDeArtifactMode = { viewModel.setAudioDeArtifactMode(it) },
+                onUpdateAutoDeArtifactLowBitrate = { viewModel.setAutoDeArtifactLowBitrate(it) },
                 onUpdateBluetoothAudioAutoSync = { viewModel.setBluetoothAudioAutoSync(it) },
                 onUpdateBluetoothAudioOffsetMs = { viewModel.setBluetoothAudioOffsetMs(it) },
                 onUpdateAutoBindSubs = { viewModel.setAutoBindSubtitles(it) },

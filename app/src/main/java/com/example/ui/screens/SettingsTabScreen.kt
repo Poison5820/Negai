@@ -58,6 +58,7 @@ import com.example.model.Anime4KPreset
 import com.example.model.AppAccentColor
 import com.example.model.AppLanguage
 import com.example.model.AppThemeMode
+import com.example.model.AudioDeArtifactMode
 import com.example.model.DecoderMode
 import com.example.model.FrameInterpolationMode
 import com.example.model.PlaybackEndMode
@@ -125,6 +126,8 @@ data class SettingsActions(
     val onUpdateAutoBindAudio: (Boolean) -> Unit,
     val onUpdatePreferExternalAudioOnStart: (Boolean) -> Unit,
     val onUpdateDefaultAudioBoostPercent: (Int) -> Unit,
+    val onUpdateAudioDeArtifactMode: (AudioDeArtifactMode) -> Unit = {},
+    val onUpdateAutoDeArtifactLowBitrate: (Boolean) -> Unit = {},
     val onUpdateBluetoothAudioAutoSync: (Boolean) -> Unit = {},
     val onUpdateBluetoothAudioOffsetMs: (Long) -> Unit = {},
     val onUpdateAutoBindSubs: (Boolean) -> Unit,
@@ -221,10 +224,10 @@ fun SettingsTabContent(
                     .weight(1f)
                     .testTag("settings_category_detail_list"),
                 contentPadding = PaddingValues(
-                    horizontal = if (settings.compactUiMode) 12.dp else 16.dp,
-                    vertical = if (settings.compactUiMode) 6.dp else 10.dp
+                    horizontal = if (settings.compactUiMode) 8.dp else 10.dp,
+                    vertical = if (settings.compactUiMode) 6.dp else 8.dp
                 ),
-                verticalArrangement = Arrangement.spacedBy(if (settings.compactUiMode) 10.dp else 14.dp)
+                verticalArrangement = Arrangement.spacedBy(if (settings.compactUiMode) 8.dp else 10.dp)
             ) {
                 item(key = activeCategory.id) {
                     when (activeCategory) {
@@ -309,8 +312,8 @@ private fun SettingsCategoryHub(
             .widthIn(max = 1200.dp)
             .testTag("settings_lazy_list"),
         contentPadding = PaddingValues(
-            horizontal = if (settings.compactUiMode) 12.dp else 16.dp,
-            vertical = if (settings.compactUiMode) 8.dp else 12.dp
+            horizontal = if (settings.compactUiMode) 8.dp else 10.dp,
+            vertical = if (settings.compactUiMode) 6.dp else 10.dp
         ),
         verticalArrangement = Arrangement.spacedBy(if (settings.compactUiMode) 8.dp else 10.dp)
     ) {
@@ -343,8 +346,8 @@ private fun SettingsCategoryHub(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(
-                            horizontal = if (settings.compactUiMode) 12.dp else 16.dp,
-                            vertical = if (settings.compactUiMode) 11.dp else 14.dp
+                            horizontal = if (settings.compactUiMode) 10.dp else 12.dp,
+                            vertical = if (settings.compactUiMode) 10.dp else 12.dp
                         ),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -448,10 +451,11 @@ private fun categorySummary(
     }
     SettingsCategory.AUDIO_AND_SUBTITLES -> {
         val colorLabel = SubtitleColorPreset.fromArgb(settings.subtitleColorArgb).label
+        val dspBadge = settings.audioDeArtifactMode.localizedBadge(isEnglish)
         if (isEnglish) {
-            "Auto BT Sync • Boost ${settings.defaultAudioBoostPercent}% • ${settings.subtitleFontSizeSp.roundToInt()} sp • $colorLabel"
+            "De-Artifact: $dspBadge • Boost ${settings.defaultAudioBoostPercent}% • ${settings.subtitleFontSizeSp.roundToInt()} sp • $colorLabel"
         } else {
-            "Авто-BT синхр. • Усиление ${settings.defaultAudioBoostPercent}% • ${settings.subtitleFontSizeSp.roundToInt()} sp • $colorLabel"
+            "Очистка: $dspBadge • Усиление ${settings.defaultAudioBoostPercent}% • ${settings.subtitleFontSizeSp.roundToInt()} sp • $colorLabel"
         }
     }
     SettingsCategory.TORRENTS -> {

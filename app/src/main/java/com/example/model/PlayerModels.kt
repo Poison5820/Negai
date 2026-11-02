@@ -458,6 +458,43 @@ enum class DecoderMode(
     }
 }
 
+enum class AudioDeArtifactMode(
+    val id: String,
+    val title: String,
+    val subtitle: String,
+    val shortBadge: String
+) {
+    OFF(
+        id = "OFF",
+        title = "Откл.",
+        subtitle = "Без дополнительной DSP-фильтрации сжатого звука",
+        shortBadge = "Откл."
+    ),
+    SOFT(
+        id = "SOFT",
+        title = "Мягкий",
+        subtitle = "Деликатное сглаживание высокочастотного звона и артефактов квантования",
+        shortBadge = "Мягкий"
+    ),
+    STANDARD(
+        id = "STANDARD",
+        title = "Стандарт",
+        subtitle = "Оптимальная очистка искажений низкобитрейтного AAC/MP3/Opus и мягкий де-клиппинг",
+        shortBadge = "Стандарт"
+    ),
+    AGGRESSIVE(
+        id = "AGGRESSIVE",
+        title = "Агрессивный",
+        subtitle = "Максимальное подавление металлического песка и восстановление гармоник (≤ 96 кбит/с)",
+        shortBadge = "Агрессив."
+    );
+
+    companion object {
+        fun fromId(id: String?): AudioDeArtifactMode =
+            entries.firstOrNull { it.id.equals(id?.trim(), ignoreCase = true) } ?: STANDARD
+    }
+}
+
 enum class VideoScaleMode(
     val id: String,
     val title: String,
@@ -775,10 +812,10 @@ enum class SleepTimerPreset(
 }
 
 object AppVersionInfo {
-    const val VERSION_NAME = "3.0"
-    const val VERSION_CODE = 7
-    const val BADGE_TEXT = "v3.0 Release"
-    const val RELEASE_TAG = "v3.0"
+    const val VERSION_NAME = "3.1-pre1"
+    const val VERSION_CODE = 8
+    const val BADGE_TEXT = "v3.1 Pre-release"
+    const val RELEASE_TAG = "v3.1-pre1"
     const val GITHUB_REPO_URL = "https://github.com/Poison5820/Negai"
     const val OBTAINIUM_ADD_URL = "https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/Poison5820/Negai"
 }
@@ -918,6 +955,8 @@ data class PlayerSettings(
     val defaultAudioBoostPercent: Int = 100,
     val bluetoothAudioAutoSync: Boolean = true,
     val bluetoothAudioOffsetMs: Long = 0L,
+    val audioDeArtifactMode: AudioDeArtifactMode = AudioDeArtifactMode.STANDARD,
+    val autoDeArtifactLowBitrate: Boolean = true,
 
     // Subtitles
     val autoBindExternalSubtitles: Boolean = true,

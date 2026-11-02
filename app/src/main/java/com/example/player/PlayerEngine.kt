@@ -37,6 +37,7 @@ import androidx.media3.session.SessionToken
 import com.example.data.LibraryRepository
 import com.example.data.MediaAutoMatcher
 import com.example.data.PlaybackResumeHelper
+import com.example.model.AudioDeArtifactMode
 import com.example.model.DecoderMode
 import com.example.model.EpisodeItem
 import com.example.model.ExternalAudioTrack
@@ -75,7 +76,8 @@ data class AudioTrackUiOption(
     val groupIndex: Int,
     val trackIndex: Int,
     val isSelected: Boolean,
-    val isExternal: Boolean
+    val isExternal: Boolean,
+    val bitrateKbps: Int = 0
 )
 
 @Immutable
@@ -114,6 +116,10 @@ data class PlaybackRuntimeState(
     val activeSubtitleCues: List<SubtitleCue> = emptyList(),
     val audioBoostPercent: Int = 100,
     val audioDelayMs: Long = 0L,
+    val audioDeArtifactMode: AudioDeArtifactMode = AudioDeArtifactMode.STANDARD,
+    val autoDeArtifactLowBitrate: Boolean = true,
+    val activeAudioBitrateKbps: Int = 0,
+    val isAudioDeArtifactActive: Boolean = true,
     val bluetoothAudioRoute: BluetoothAudioRouteState = BluetoothAudioRouteState(),
     val bluetoothAutoSyncEnabled: Boolean = true,
     val bluetoothConfiguredOffsetMs: Long = BluetoothAudioSyncController.DEFAULT_BT_OFFSET_MS,
@@ -551,6 +557,14 @@ class PlayerEngine private constructor(
                 }
             }
         }
+
+        override fun onAudioInputFormatChanged(
+            eventTime: AnalyticsListener.EventTime,
+            format: Format,
+            decoderReuseEvaluation: androidx.media3.exoplayer.DecoderReuseEvaluation?
+        ) {
+            updateDetectedAudioFormat(format)
+        }
     }
 
     init {
@@ -561,12 +575,17 @@ class PlayerEngine private constructor(
         highRefreshOrInterpActive = boot.highRefreshRateEnabled || boot.effectiveFrameInterpolationMode.isEnabled
         bluetoothAutoSyncEnabled = boot.bluetoothAudioAutoSync
         bluetoothConfiguredOffsetMs = boot.bluetoothAudioOffsetMs
+        audioDelayProcessor.deArtifactMode = boot.audioDeArtifactMode
+        audioDelayProcessor.autoDeArtifactLowBitrate = boot.autoDeArtifactLowBitrate
         _state.update {
             it.copy(
                 activeDecoderMode = boot.decoderMode,
                 playbackEndMode = boot.playbackEndMode,
                 bluetoothAutoSyncEnabled = boot.bluetoothAudioAutoSync,
-                bluetoothConfiguredOffsetMs = boot.bluetoothAudioOffsetMs
+                bluetoothConfiguredOffsetMs = boot.bluetoothAudioOffsetMs,
+                audioDeArtifactMode = boot.audioDeArtifactMode,
+                autoDeArtifactLowBitrate = boot.autoDeArtifactLowBitrate,
+                isAudioDeArtifactActive = audioDelayProcessor.isDeArtifactCurrentlyActive
             )
         }
         recalculateEffectiveAudioDelay(resyncIfPlaying = false)
@@ -580,6 +599,15 @@ class PlayerEngine private constructor(
                 enableEmbeddedChapters = s.enableEmbeddedChapters
                 bluetoothAutoSyncEnabled = s.bluetoothAudioAutoSync
                 bluetoothConfiguredOffsetMs = s.bluetoothAudioOffsetMs
+                audioDelayProcessor.deArtifactMode = s.audioDeArtifactMode
+                audioDelayProcessor.autoDeArtifactLowBitrate = s.autoDeArtifactLowBitrate
+                _state.update {
+                    it.copy(
+                        audioDeArtifactMode = s.audioDeArtifactMode,
+                        autoDeArtifactLowBitrate = s.autoDeArtifactLowBitrate,
+                        isAudioDeArtifactActive = audioDelayProcessor.isDeArtifactCurrentlyActive
+                    )
+                }
                 latestTorrServerBaseUrl = TorrServerClient.normalizeBaseUrl(s.torrServerUrl)
                 latestTorrServerAuthHeader = TorrServerClient.buildBasicAuthHeader(
                     s.torrServerUsername,
@@ -1070,6 +1098,7 @@ class PlayerEngine private constructor(
         }
 
         val audioOptions = mutableListOf<AudioTrackUiOption>()
+        var selectedAudioFormat: Format? = null
         audioGroups.forEachIndexed { audioSeqIndex, (rawGroupIndex, group) ->
             val isExt = audioSeqIndex >= embeddedAudioCount && extAudioList.isNotEmpty()
             val extMeta = if (isExt) extAudioList.getOrNull(audioSeqIndex - embeddedAudioCount) else null
@@ -1077,15 +1106,21 @@ class PlayerEngine private constructor(
             for (tIdx in 0 until group.length) {
                 val format = group.getTrackFormat(tIdx)
                 val selected = group.isTrackSelected(tIdx)
+                if (selected) {
+                    selectedAudioFormat = format
+                }
+                val bitrateKbps = if (format.bitrate > 0) (format.bitrate / 1000).coerceAtLeast(1) else 0
                 val label = if (extMeta != null) {
                     extMeta.formattedLabel
                 } else {
                     buildEmbeddedTrackLabel(format, audioSeqIndex + 1, "Аудиодорожка")
                 }
+                val codecShort = format.sampleMimeType?.substringAfter('/')?.uppercase() ?: "ВСТРОЕННАЯ"
+                val bitrateSuffix = if (bitrateKbps > 0) " • ${bitrateKbps}k" else ""
                 val badge = when {
-                    extMeta != null && extMeta.isAutoMatched -> "АВТО • ${extMeta.extension.uppercase()}"
-                    extMeta != null -> "ВНЕШ • ${extMeta.extension.uppercase()}"
-                    else -> (format.sampleMimeType?.substringAfter('/')?.uppercase() ?: "ВСТРОЕННАЯ")
+                    extMeta != null && extMeta.isAutoMatched -> "АВТО • ${extMeta.extension.uppercase()}$bitrateSuffix"
+                    extMeta != null -> "ВНЕШ • ${extMeta.extension.uppercase()}$bitrateSuffix"
+                    else -> "$codecShort$bitrateSuffix"
                 }
                 audioOptions.add(
                     AudioTrackUiOption(
@@ -1095,11 +1130,13 @@ class PlayerEngine private constructor(
                         groupIndex = rawGroupIndex,
                         trackIndex = tIdx,
                         isSelected = selected,
-                        isExternal = isExt
+                        isExternal = isExt,
+                        bitrateKbps = bitrateKbps
                     )
                 )
             }
         }
+        selectedAudioFormat?.let { updateDetectedAudioFormat(it) }
 
         val currentSubId = _state.value.selectedSubtitleId
         val subOptions = mutableListOf<SubtitleTrackUiOption>()
@@ -1645,6 +1682,54 @@ class PlayerEngine private constructor(
     fun setAudioBoostPercent(percent: Int) {
         val applied = audioBoostController.setBoostPercent(percent)
         _state.update { it.copy(audioBoostPercent = applied) }
+    }
+
+    fun setAudioDeArtifactMode(mode: AudioDeArtifactMode) {
+        audioDelayProcessor.deArtifactMode = mode
+        _state.update {
+            it.copy(
+                audioDeArtifactMode = mode,
+                isAudioDeArtifactActive = audioDelayProcessor.isDeArtifactCurrentlyActive
+            )
+        }
+        engineScope.launch {
+            repository.preferencesRepository.updateAudioDeArtifactMode(mode)
+        }
+    }
+
+    fun setAutoDeArtifactLowBitrate(enabled: Boolean) {
+        audioDelayProcessor.autoDeArtifactLowBitrate = enabled
+        _state.update {
+            it.copy(
+                autoDeArtifactLowBitrate = enabled,
+                isAudioDeArtifactActive = audioDelayProcessor.isDeArtifactCurrentlyActive
+            )
+        }
+        engineScope.launch {
+            repository.preferencesRepository.updateAutoDeArtifactLowBitrate(enabled)
+        }
+    }
+
+    private fun updateDetectedAudioFormat(format: Format) {
+        val rawBitrate = format.bitrate
+        val kbps = if (rawBitrate > 0) (rawBitrate / 1000).coerceAtLeast(1) else 0
+        val mime = format.sampleMimeType.orEmpty().lowercase()
+        val isLosslessCodec = mime.contains("flac") || mime.contains("raw") || mime.contains("pcm") ||
+            mime.contains("truehd") || mime.contains("alac")
+        // Consider low-bitrate when reported bitrate <= 132 kbps, or when a lossy stereo/mono stream
+        // (AAC/MP3/Opus/Vorbis in MKV/MKA) omits container bitrate metadata.
+        val isLowBitrate = when {
+            isLosslessCodec -> false
+            kbps > 0 -> kbps <= AudioDelayProcessor.LOW_BITRATE_THRESHOLD_KBPS
+            else -> format.channelCount in 1..2
+        }
+        audioDelayProcessor.isLowBitrateStream = isLowBitrate
+        _state.update {
+            it.copy(
+                activeAudioBitrateKbps = kbps,
+                isAudioDeArtifactActive = audioDelayProcessor.isDeArtifactCurrentlyActive
+            )
+        }
     }
 
     fun adjustAudioDelayMs(deltaMs: Long) {

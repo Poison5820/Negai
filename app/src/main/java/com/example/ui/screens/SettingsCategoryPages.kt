@@ -87,6 +87,7 @@ import com.example.model.Anime4KPreset
 import com.example.model.AppAccentColor
 import com.example.model.AppLanguage
 import com.example.model.AppThemeMode
+import com.example.model.AudioDeArtifactMode
 import com.example.model.DecoderMode
 import com.example.model.FrameInterpolationMode
 import com.example.model.PlaybackEndMode
@@ -133,20 +134,22 @@ internal fun AppearanceSettingsPage(
         title = tr("Язык интерфейса", "Interface Language"),
         icon = Icons.Default.Language
     ) {
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            AppLanguage.entries.forEach { lang ->
-                val selected = settings.appLanguage == lang
-                FilterChip(
-                    selected = selected,
-                    onClick = { actions.onUpdateAppLanguage(lang) },
-                    label = { Text(lang.localizedTitle(isEnglish)) },
-                    modifier = Modifier.testTag("settings_language_chip_${lang.id}")
-                )
-            }
+        TwoColumnSettingsGrid(items = AppLanguage.entries) { lang ->
+            val selected = settings.appLanguage == lang
+            FilterChip(
+                selected = selected,
+                onClick = { actions.onUpdateAppLanguage(lang) },
+                label = {
+                    Text(
+                        text = lang.localizedTitle(isEnglish),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("settings_language_chip_${lang.id}")
+            )
         }
     }
 
@@ -162,55 +165,54 @@ internal fun AppearanceSettingsPage(
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            AppThemeMode.entries.forEach { mode ->
-                val selected = settings.themeMode == mode
-                val bgColor = if (selected) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.surfaceContainerHigh
-                }
-                val textColor = if (selected) {
-                    autoContrastTextColor(bgColor)
-                } else {
-                    MaterialTheme.colorScheme.onSurface
-                }
-                Surface(
-                    color = bgColor,
-                    shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(
-                        width = if (selected) 1.5.dp else 1.dp,
-                        color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
-                    ),
+        TwoColumnSettingsGrid(items = AppThemeMode.entries) { mode ->
+            val selected = settings.themeMode == mode
+            val bgColor = if (selected) {
+                MaterialTheme.colorScheme.primary
+            } else {
+                MaterialTheme.colorScheme.surfaceContainerHigh
+            }
+            val textColor = if (selected) {
+                autoContrastTextColor(bgColor)
+            } else {
+                MaterialTheme.colorScheme.onSurface
+            }
+            Surface(
+                color = bgColor,
+                shape = RoundedCornerShape(12.dp),
+                border = BorderStroke(
+                    width = if (selected) 1.5.dp else 1.dp,
+                    color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .clickable { actions.onUpdateThemeMode(mode) }
+                    .testTag("theme_mode_option_${mode.id}")
+            ) {
+                Row(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .clickable { actions.onUpdateThemeMode(mode) }
-                        .testTag("theme_mode_option_${mode.id}")
+                        .fillMaxWidth()
+                        .padding(horizontal = 10.dp, vertical = 9.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 9.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(14.dp)
-                                .clip(CircleShape)
-                                .background(Color(mode.previewBgArgb))
-                                .border(1.dp, Color(mode.previewAccentArgb), CircleShape)
-                        )
-                        Text(
-                            text = mode.localizedBadge(isEnglish),
-                            style = MaterialTheme.typography.labelLarge.copy(
-                                fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
-                            ),
-                            color = textColor
-                        )
-                    }
+                    Box(
+                        modifier = Modifier
+                            .size(14.dp)
+                            .clip(CircleShape)
+                            .background(Color(mode.previewBgArgb))
+                            .border(1.dp, Color(mode.previewAccentArgb), CircleShape)
+                    )
+                    Text(
+                        text = mode.localizedBadge(isEnglish),
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
+                        ),
+                        color = textColor,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
             }
         }
@@ -234,70 +236,75 @@ internal fun AppearanceSettingsPage(
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            AppAccentColor.entries.forEach { accent ->
-                val selected = settings.accentColor == accent
-                Surface(
-                    color = if (selected) {
-                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f)
-                    } else {
-                        MaterialTheme.colorScheme.surfaceContainerLow
-                    },
-                    shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(
-                        width = if (selected) 1.5.dp else 1.dp,
-                        color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
-                    ),
+        TwoColumnSettingsGrid(items = AppAccentColor.entries) { accent ->
+            val selected = settings.accentColor == accent
+            Surface(
+                color = if (selected) {
+                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f)
+                } else {
+                    MaterialTheme.colorScheme.surfaceContainerLow
+                },
+                shape = RoundedCornerShape(12.dp),
+                border = BorderStroke(
+                    width = if (selected) 1.5.dp else 1.dp,
+                    color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .clickable { actions.onUpdateAccentColor(accent) }
+                    .testTag("accent_color_option_${accent.id}")
+            ) {
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .clickable { actions.onUpdateAccentColor(accent) }
-                        .testTag("accent_color_option_${accent.id}")
+                        .padding(horizontal = 10.dp, vertical = 9.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    Box(
+                        modifier = Modifier
+                            .size(26.dp)
+                            .clip(CircleShape)
+                            .background(Color(accent.primaryDarkHex))
+                            .border(1.5.dp, Color(accent.secondaryHex), CircleShape),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(30.dp)
-                                .clip(CircleShape)
-                                .background(Color(accent.primaryDarkHex))
-                                .border(1.5.dp, Color(accent.secondaryHex), CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            if (accent.isDynamic) {
-                                Text(
-                                    text = "M",
-                                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
-                                    color = autoContrastTextColor(Color(accent.primaryDarkHex))
-                                )
-                            } else {
-                                Box(
-                                    modifier = Modifier
-                                        .size(12.dp)
-                                        .clip(CircleShape)
-                                        .background(Color(accent.secondaryHex))
-                                )
-                            }
-                        }
-                        Column(modifier = Modifier.weight(1f)) {
+                        if (accent.isDynamic) {
                             Text(
-                                text = accent.localizedTitle(isEnglish),
-                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+                                text = "M",
+                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
+                                color = autoContrastTextColor(Color(accent.primaryDarkHex))
                             )
-                            Text(
-                                text = accent.localizedSubtitle(isEnglish),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                        } else {
+                            Box(
+                                modifier = Modifier
+                                    .size(10.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(accent.secondaryHex))
                             )
                         }
-                        RadioButton(
-                            selected = selected,
-                            onClick = { actions.onUpdateAccentColor(accent) }
+                    }
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = accent.localizedTitle(isEnglish),
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Text(
+                            text = accent.localizedSubtitle(isEnglish),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
+                    RadioButton(
+                        selected = selected,
+                        onClick = { actions.onUpdateAccentColor(accent) },
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
             }
         }
@@ -568,41 +575,42 @@ internal fun PlaybackSettingsPage(
             text = tr("Действие по окончании серии", "Action When Episode Ends"),
             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
         )
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            PlaybackEndMode.entries.forEach { mode ->
-                val selected = settings.playbackEndMode == mode
-                Surface(
-                    color = if (selected) {
-                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f)
-                    } else {
-                        MaterialTheme.colorScheme.surfaceContainerLow
-                    },
-                    shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(
-                        1.dp,
-                        if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .clickable { actions.onUpdatePlaybackEndMode(mode) }
-                        .testTag("playback_end_mode_${mode.id}")
+        TwoColumnSettingsGrid(items = PlaybackEndMode.entries) { mode ->
+            val selected = settings.playbackEndMode == mode
+            Surface(
+                color = if (selected) {
+                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f)
+                } else {
+                    MaterialTheme.colorScheme.surfaceContainerLow
+                },
+                shape = RoundedCornerShape(12.dp),
+                border = BorderStroke(
+                    1.dp,
+                    if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .clickable { actions.onUpdatePlaybackEndMode(mode) }
+                    .testTag("playback_end_mode_${mode.id}")
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 9.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Text(
-                            text = mode.localizedTitle(isEnglish),
-                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                            modifier = Modifier.weight(1f)
-                        )
-                        RadioButton(
-                            selected = selected,
-                            onClick = { actions.onUpdatePlaybackEndMode(mode) }
-                        )
-                    }
+                    Text(
+                        text = mode.localizedTitle(isEnglish),
+                        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
+                    RadioButton(
+                        selected = selected,
+                        onClick = { actions.onUpdatePlaybackEndMode(mode) },
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
             }
         }
@@ -787,41 +795,42 @@ internal fun PlaybackSettingsPage(
         title = tr("Декодер видео", "Video Decoder"),
         icon = Icons.Default.Memory
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            DecoderMode.entries.forEach { mode ->
-                val selected = settings.decoderMode == mode
-                Surface(
-                    color = if (selected) {
-                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f)
-                    } else {
-                        MaterialTheme.colorScheme.surfaceContainerLow
-                    },
-                    shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(
-                        1.dp,
-                        if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .clickable { actions.onUpdateDecoderMode(mode) }
-                        .testTag("decoder_mode_${mode.id}")
+        TwoColumnSettingsGrid(items = DecoderMode.entries) { mode ->
+            val selected = settings.decoderMode == mode
+            Surface(
+                color = if (selected) {
+                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f)
+                } else {
+                    MaterialTheme.colorScheme.surfaceContainerLow
+                },
+                shape = RoundedCornerShape(12.dp),
+                border = BorderStroke(
+                    1.dp,
+                    if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .clickable { actions.onUpdateDecoderMode(mode) }
+                    .testTag("decoder_mode_${mode.id}")
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 9.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Text(
-                            text = mode.localizedTitle(isEnglish),
-                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                            modifier = Modifier.weight(1f)
-                        )
-                        RadioButton(
-                            selected = selected,
-                            onClick = { actions.onUpdateDecoderMode(mode) }
-                        )
-                    }
+                    Text(
+                        text = mode.localizedTitle(isEnglish),
+                        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
+                    RadioButton(
+                        selected = selected,
+                        onClick = { actions.onUpdateDecoderMode(mode) },
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
             }
         }
@@ -903,41 +912,42 @@ internal fun GesturesSettingsPage(
         title = tr("Ориентация экрана при запуске видео", "Default Video Screen Orientation"),
         icon = Icons.Default.ScreenRotation
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            PlayerOrientationMode.entries.forEach { mode ->
-                val selected = settings.defaultPlayerOrientation == mode
-                Surface(
-                    color = if (selected) {
-                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f)
-                    } else {
-                        MaterialTheme.colorScheme.surfaceContainerLow
-                    },
-                    shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(
-                        1.dp,
-                        if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .clickable { actions.onUpdateDefaultPlayerOrientation(mode) }
-                        .testTag("orientation_mode_${mode.id}")
+        TwoColumnSettingsGrid(items = PlayerOrientationMode.entries) { mode ->
+            val selected = settings.defaultPlayerOrientation == mode
+            Surface(
+                color = if (selected) {
+                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f)
+                } else {
+                    MaterialTheme.colorScheme.surfaceContainerLow
+                },
+                shape = RoundedCornerShape(12.dp),
+                border = BorderStroke(
+                    1.dp,
+                    if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .clickable { actions.onUpdateDefaultPlayerOrientation(mode) }
+                    .testTag("orientation_mode_${mode.id}")
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 9.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Text(
-                            text = mode.localizedTitle(isEnglish),
-                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                            modifier = Modifier.weight(1f)
-                        )
-                        RadioButton(
-                            selected = selected,
-                            onClick = { actions.onUpdateDefaultPlayerOrientation(mode) }
-                        )
-                    }
+                    Text(
+                        text = mode.localizedTitle(isEnglish),
+                        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
+                    RadioButton(
+                        selected = selected,
+                        onClick = { actions.onUpdateDefaultPlayerOrientation(mode) },
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
             }
         }
@@ -979,52 +989,55 @@ internal fun VideoSettingsPage(
             text = tr("Профиль интерполяции кадров", "Frame Interpolation Profile"),
             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
         )
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            val activeMode = if (settings.frameInterpolationMode == FrameInterpolationMode.OFF) {
-                FrameInterpolationMode.MAX_FPS
-            } else {
-                settings.frameInterpolationMode
-            }
-            FrameInterpolationMode.selectableModes.forEach { mode ->
-                val selected = activeMode == mode
-                Surface(
-                    color = if (selected) {
-                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f)
-                    } else {
-                        MaterialTheme.colorScheme.surfaceContainerLow
-                    },
-                    shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(
-                        1.dp,
-                        if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .clickable { actions.onUpdateFrameInterpolationMode(mode) }
-                        .testTag("settings_interpolation_mode_${mode.id}")
+        val activeMode = if (settings.frameInterpolationMode == FrameInterpolationMode.OFF) {
+            FrameInterpolationMode.MAX_FPS
+        } else {
+            settings.frameInterpolationMode
+        }
+        TwoColumnSettingsGrid(items = FrameInterpolationMode.selectableModes) { mode ->
+            val selected = activeMode == mode
+            Surface(
+                color = if (selected) {
+                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f)
+                } else {
+                    MaterialTheme.colorScheme.surfaceContainerLow
+                },
+                shape = RoundedCornerShape(12.dp),
+                border = BorderStroke(
+                    1.dp,
+                    if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .clickable { actions.onUpdateFrameInterpolationMode(mode) }
+                    .testTag("settings_interpolation_mode_${mode.id}")
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 9.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = mode.localizedTitle(isEnglish),
-                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
-                            )
-                            Text(
-                                text = mode.localizedSubtitle(isEnglish),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        RadioButton(
-                            selected = selected,
-                            onClick = { actions.onUpdateFrameInterpolationMode(mode) }
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = mode.localizedTitle(isEnglish),
+                            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Text(
+                            text = mode.localizedSubtitle(isEnglish),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
+                    RadioButton(
+                        selected = selected,
+                        onClick = { actions.onUpdateFrameInterpolationMode(mode) },
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
             }
         }
@@ -1041,47 +1054,48 @@ internal fun VideoSettingsPage(
             testTag = "anime4k_enable_switch"
         )
 
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Anime4KPreset.entries.filter { it != Anime4KPreset.OFF }.forEach { preset ->
-                val selected = settings.anime4kPreset == preset && settings.anime4kEnabled
-                Surface(
-                    color = if (selected) {
-                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f)
-                    } else {
-                        MaterialTheme.colorScheme.surfaceContainerLow
-                    },
-                    shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(
-                        1.dp,
-                        if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .clickable {
+        TwoColumnSettingsGrid(items = Anime4KPreset.entries.filter { it != Anime4KPreset.OFF }) { preset ->
+            val selected = settings.anime4kPreset == preset && settings.anime4kEnabled
+            Surface(
+                color = if (selected) {
+                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f)
+                } else {
+                    MaterialTheme.colorScheme.surfaceContainerLow
+                },
+                shape = RoundedCornerShape(12.dp),
+                border = BorderStroke(
+                    1.dp,
+                    if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .clickable {
+                        actions.onUpdateAnime4KPreset(preset)
+                        if (!settings.anime4kEnabled) actions.onUpdateAnime4KEnabled(true)
+                    }
+                    .testTag("anime4k_preset_${preset.name}")
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 9.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = preset.localizedTitle(isEnglish),
+                        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
+                    RadioButton(
+                        selected = selected,
+                        onClick = {
                             actions.onUpdateAnime4KPreset(preset)
                             if (!settings.anime4kEnabled) actions.onUpdateAnime4KEnabled(true)
-                        }
-                        .testTag("anime4k_preset_${preset.name}")
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Text(
-                            text = preset.localizedTitle(isEnglish),
-                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                            modifier = Modifier.weight(1f)
-                        )
-                        RadioButton(
-                            selected = selected,
-                            onClick = {
-                                actions.onUpdateAnime4KPreset(preset)
-                                if (!settings.anime4kEnabled) actions.onUpdateAnime4KEnabled(true)
-                            }
-                        )
-                    }
+                        },
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
             }
         }
@@ -1118,6 +1132,7 @@ internal fun AudioSettingsPage(
     settings: PlayerSettings,
     actions: SettingsActions
 ) {
+    val isEnglish = LocalIsEnglish.current
     val boostPresets = listOf(100, 125, 150, 175, 200)
     val fineTuneOffsetMs = if (settings.bluetoothAudioOffsetMs == BluetoothAudioSyncController.DEFAULT_BT_OFFSET_MS) {
         0L
@@ -1141,6 +1156,86 @@ internal fun AudioSettingsPage(
             checked = settings.preferExternalAudioOnStart,
             onCheckedChange = actions.onUpdatePreferExternalAudioOnStart,
             testTag = "prefer_external_audio_switch"
+        )
+    }
+
+    SettingsSectionCard(
+        title = tr("Очистка от искажений сжатия (De-Artifact DSP)", "Low-Bitrate Audio De-Artifact DSP"),
+        subtitle = tr(
+            "Подавление ВЧ-звона, восстановление гармоник голоса и деклиппер для сжатых дорожек AAC/MP3/Opus",
+            "Dynamic high-frequency de-ringing, harmonic voice exciter & soft-knee de-clipper for compressed tracks"
+        ),
+        icon = Icons.Default.AutoAwesome
+    ) {
+        TwoColumnSettingsGrid(
+            items = listOf(
+                AudioDeArtifactMode.SOFT,
+                AudioDeArtifactMode.STANDARD,
+                AudioDeArtifactMode.AGGRESSIVE,
+                AudioDeArtifactMode.OFF
+            )
+        ) { mode ->
+            val selected = settings.audioDeArtifactMode == mode
+            Surface(
+                color = if (selected) {
+                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f)
+                } else {
+                    MaterialTheme.colorScheme.surfaceContainerLow
+                },
+                shape = RoundedCornerShape(12.dp),
+                border = BorderStroke(
+                    1.dp,
+                    if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .clickable { actions.onUpdateAudioDeArtifactMode(mode) }
+                    .testTag("settings_audio_de_artifact_${mode.id}")
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 9.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = mode.localizedTitle(isEnglish),
+                            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Text(
+                            text = mode.localizedSubtitle(isEnglish),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    RadioButton(
+                        selected = selected,
+                        onClick = { actions.onUpdateAudioDeArtifactMode(mode) },
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+        }
+
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+        SettingToggleRow(
+            title = tr(
+                "Авто для низкого битрейта (≤ 128 кбит/с)",
+                "Auto-enable only for low bitrate (≤ 128 kbps)"
+            ),
+            subtitle = tr(
+                "Автоматически пропускать фильтр на дорожках FLAC и высокого битрейта (> 132 кбит/с)",
+                "Automatically bypass DSP on FLAC/lossless and high-bitrate tracks (> 132 kbps)"
+            ),
+            checked = settings.autoDeArtifactLowBitrate,
+            onCheckedChange = actions.onUpdateAutoDeArtifactLowBitrate,
+            testTag = "auto_de_artifact_low_bitrate_switch"
         )
     }
 
@@ -1372,25 +1467,27 @@ internal fun SubtitlesSettingsPage(
         )
 
         Text(stringResource(R.string.subtitle_color_label), style = MaterialTheme.typography.bodyMedium)
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            SubtitleColorPreset.entries.forEach { preset ->
-                FilterChip(
-                    selected = settings.subtitleColorArgb == preset.argb,
-                    onClick = { actions.onUpdateSubtitleColor(preset.argb) },
-                    label = { Text(preset.localizedLabel(isEnglish)) },
-                    leadingIcon = {
-                        Box(
-                            modifier = Modifier
-                                .size(12.dp)
-                                .clip(CircleShape)
-                                .background(Color(preset.argb))
-                        )
-                    }
-                )
-            }
+        TwoColumnSettingsGrid(items = SubtitleColorPreset.entries) { preset ->
+            FilterChip(
+                selected = settings.subtitleColorArgb == preset.argb,
+                onClick = { actions.onUpdateSubtitleColor(preset.argb) },
+                label = {
+                    Text(
+                        text = preset.localizedLabel(isEnglish),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                },
+                leadingIcon = {
+                    Box(
+                        modifier = Modifier
+                            .size(12.dp)
+                            .clip(CircleShape)
+                            .background(Color(preset.argb))
+                    )
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
         }
 
         SettingToggleRow(
@@ -1671,6 +1768,35 @@ internal fun StorageSettingsPage(
 // SHARED BUILDING BLOCKS
 // ============================================================================
 @Composable
+internal fun <T> TwoColumnSettingsGrid(
+    items: List<T>,
+    modifier: Modifier = Modifier,
+    itemContent: @Composable (T) -> Unit
+) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        items.chunked(2).forEach { rowItems ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                rowItems.forEach { item ->
+                    Box(modifier = Modifier.weight(1f)) {
+                        itemContent(item)
+                    }
+                }
+                if (rowItems.size == 1) {
+                    Spacer(modifier = Modifier.weight(1f))
+                }
+            }
+        }
+    }
+}
+
+@Composable
 internal fun SettingsSectionCard(
     title: String,
     subtitle: String? = null,
@@ -1678,7 +1804,7 @@ internal fun SettingsSectionCard(
     content: @Composable () -> Unit
 ) {
     Card(
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(14.dp),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainer
@@ -1686,12 +1812,12 @@ internal fun SettingsSectionCard(
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Icon(
                     imageVector = icon,

@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-3.0_Release-00E5FF?style=flat-square" alt="Version 3.0 Release" />
+  <img src="https://img.shields.io/badge/version-3.1_Pre--release-00E5FF?style=flat-square" alt="Version 3.1 Pre-release" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/Kotlin-2.x_%7C_Jetpack_Compose-7F52FF?style=flat-square&logo=kotlin" alt="Kotlin & Compose" />
@@ -38,8 +38,9 @@
 - **LTPO & High Refresh Rate Cadence**: Automatic display refresh rate matching (`24Hz`, `48Hz`, `60Hz`, `90Hz`, `120Hz`) with harmonic cadence locking.
 - **Aspect-Aware Orientation**: Automatic landscape/portrait switching per video aspect ratio, manual 1-tap orientation lock preserved across episode transitions, and buffered video-size transitions that prevent premature screen rotation before an episode ends.
 
-### 2. Multi-Track Audio, Subtitles & Chapters
+### 2. Multi-Track Audio, De-Artifact DSP, Subtitles & Chapters
 - **Automatic Companion Track Binding**: Recursive scanner automatically pairs external `.mka`, `.aac`, `.flac`, `.mp3`, `.ogg` audio tracks and `.ass`, `.ssa`, `.srt`, `.vtt` subtitle files from nested voiceover/subtitle folders (`RUS/`, `Audio/`, `Dub/`, `Subs/`) by episode number.
+- **Low-Bitrate Audio De-Artifact DSP**: Real-time 3-stage PCM restoration pipeline (`Soft`, `Standard`, `Aggressive`, `Off` + `Auto ≤ 128 kbps`) featuring dynamic high-frequency de-ringing, warm harmonic voice presence restoration, and cubic soft-knee de-clipping for compressed AAC/MP3/Opus voiceover tracks.
 - **Audio Synchronization & Bluetooth Compensation**:
   - Manual audio delay adjustment from **-5000 ms to +5000 ms** using non-destructive `MediaClock` offset for negative delays and PCM ring buffering for positive delays.
   - Automatic Bluetooth A2DP / LE Audio latency compensation with real-time Gaming Mode (~45 ms) detection.

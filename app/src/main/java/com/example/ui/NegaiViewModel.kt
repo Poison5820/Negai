@@ -15,6 +15,7 @@ import com.example.model.Anime4KPreset
 import com.example.model.AppAccentColor
 import com.example.model.AppLanguage
 import com.example.model.AppThemeMode
+import com.example.model.AudioDeArtifactMode
 import com.example.model.DecoderMode
 import com.example.model.EpisodeItem
 import com.example.model.EpisodeSortOption
@@ -801,6 +802,14 @@ class NegaiViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             repository.preferencesRepository.updateBluetoothAudioOffsetMs(offsetMs)
         }
+    }
+
+    fun setAudioDeArtifactMode(mode: AudioDeArtifactMode) {
+        playerEngine.setAudioDeArtifactMode(mode)
+    }
+
+    fun setAutoDeArtifactLowBitrate(enabled: Boolean) {
+        playerEngine.setAutoDeArtifactLowBitrate(enabled)
     }
 
     fun adjustAudioDelay(deltaMs: Long) {

@@ -148,9 +148,10 @@ enum class QuickBarPreset(
             PlayerQuickAction.AUDIO,
             PlayerQuickAction.SUBTITLES,
             PlayerQuickAction.SPEED,
-            PlayerQuickAction.SCALE,
             PlayerQuickAction.FRAME_INTERPOLATION,
             PlayerQuickAction.ANIME4K,
+            PlayerQuickAction.DECODER,
+            PlayerQuickAction.SCALE,
             PlayerQuickAction.FILE_INFO,
             PlayerQuickAction.TOOLS
         )
@@ -161,11 +162,12 @@ enum class QuickBarPreset(
         actions = listOf(
             PlayerQuickAction.AUDIO,
             PlayerQuickAction.SUBTITLES,
-            PlayerQuickAction.SKIP_INTRO,
             PlayerQuickAction.SPEED,
-            PlayerQuickAction.SCALE,
             PlayerQuickAction.FRAME_INTERPOLATION,
             PlayerQuickAction.ANIME4K,
+            PlayerQuickAction.DECODER,
+            PlayerQuickAction.SKIP_INTRO,
+            PlayerQuickAction.SCALE,
             PlayerQuickAction.FILE_INFO,
             PlayerQuickAction.TOOLS
         )
@@ -177,8 +179,9 @@ enum class QuickBarPreset(
             PlayerQuickAction.AUDIO,
             PlayerQuickAction.SUBTITLES,
             PlayerQuickAction.SPEED,
-            PlayerQuickAction.FILE_INFO,
-            PlayerQuickAction.TOOLS
+            PlayerQuickAction.FRAME_INTERPOLATION,
+            PlayerQuickAction.ANIME4K,
+            PlayerQuickAction.DECODER
         )
     ),
     PRO(
@@ -188,9 +191,10 @@ enum class QuickBarPreset(
             PlayerQuickAction.AUDIO,
             PlayerQuickAction.SUBTITLES,
             PlayerQuickAction.SPEED,
-            PlayerQuickAction.SCALE,
             PlayerQuickAction.FRAME_INTERPOLATION,
             PlayerQuickAction.ANIME4K,
+            PlayerQuickAction.DECODER,
+            PlayerQuickAction.SCALE,
             PlayerQuickAction.SKIP_INTRO,
             PlayerQuickAction.AB_LOOP,
             PlayerQuickAction.SLEEP_TIMER,

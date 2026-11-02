@@ -68,6 +68,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.example.model.Anime4KPreset
+import com.example.model.AudioDeArtifactMode
 import com.example.model.DecoderMode
 import com.example.model.EpisodeItem
 import com.example.model.PlayerSettings
@@ -80,6 +81,7 @@ import com.example.player.SubtitleTrackUiOption
 import com.example.ui.components.InstantSlider
 import com.example.ui.components.formatDelaySeconds
 import com.example.ui.i18n.LocalIsEnglish
+import com.example.ui.i18n.localizedBadge
 import com.example.ui.i18n.localizedDescription
 import com.example.ui.i18n.localizedLabel
 import com.example.ui.i18n.localizedSubtitle
@@ -155,6 +157,10 @@ internal val PlayerPopupCardColor = Color(0xFF101726).copy(alpha = 0.60f)
 fun AudioTracksModalSheet(
     audioOptions: List<AudioTrackUiOption>,
     audioBoostPercent: Int,
+    audioDeArtifactMode: AudioDeArtifactMode = AudioDeArtifactMode.STANDARD,
+    autoDeArtifactLowBitrate: Boolean = true,
+    activeAudioBitrateKbps: Int = 0,
+    isAudioDeArtifactActive: Boolean = false,
     audioDelayMs: Long = 0L,
     effectiveAudioDelayMs: Long = audioDelayMs,
     bluetoothRoute: BluetoothAudioRouteState = BluetoothAudioRouteState(),
@@ -165,6 +171,8 @@ fun AudioTracksModalSheet(
     onToggleBluetoothAutoSync: (Boolean) -> Unit = {},
     onSelectAudio: (AudioTrackUiOption) -> Unit,
     onSetAudioBoostPercent: (Int) -> Unit,
+    onSelectAudioDeArtifactMode: (AudioDeArtifactMode) -> Unit = {},
+    onToggleAutoDeArtifactLowBitrate: (Boolean) -> Unit = {},
     onAdjustAudioDelayMs: (Long) -> Unit = {},
     onSetAudioDelayMs: (Long) -> Unit = {},
     onResyncAudio: () -> Unit = {},
@@ -288,6 +296,156 @@ fun AudioTracksModalSheet(
                     }
                 }
             }
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 2.dp))
+
+            // Audio De-Artifact / Compression Restoration DSP Section
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        tr(
+                            "Очистка от искажений сжатия (De-Artifact DSP)",
+                            "Audio Compression De-Artifact DSP"
+                        ),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    val bitrateHint = if (activeAudioBitrateKbps > 0) {
+                        tr(
+                            "Поток: $activeAudioBitrateKbps кбит/с • ${if (isAudioDeArtifactActive) "Фильтр активен" else "Байпас (без изменений)"}",
+                            "Stream: $activeAudioBitrateKbps kbps • ${if (isAudioDeArtifactActive) "DSP Active" else "Bypass"}"
+                        )
+                    } else {
+                        tr(
+                            "Подавление ВЧ-звона и восстановление тембра голоса в AAC/MP3/Opus",
+                            "De-ringing, harmonic exciter & soft-knee de-clipper for low-bitrate tracks"
+                        )
+                    }
+                    Text(
+                        text = bitrateHint,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (isAudioDeArtifactActive) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        }
+                    )
+                }
+                Surface(
+                    color = if (isAudioDeArtifactActive) {
+                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.75f)
+                    } else {
+                        Color.White.copy(alpha = 0.10f)
+                    },
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = audioDeArtifactMode.localizedBadge(isEnglish),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (isAudioDeArtifactActive) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        },
+                        modifier = Modifier
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                            .testTag("audio_de_artifact_status_badge")
+                    )
+                }
+            }
+
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                listOf(
+                    AudioDeArtifactMode.SOFT,
+                    AudioDeArtifactMode.STANDARD,
+                    AudioDeArtifactMode.AGGRESSIVE,
+                    AudioDeArtifactMode.OFF
+                ).chunked(2).forEach { rowModes ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        rowModes.forEach { mode ->
+                            val selected = audioDeArtifactMode == mode
+                            Surface(
+                                color = if (selected) {
+                                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.65f)
+                                } else {
+                                    cardBg
+                                },
+                                shape = RoundedCornerShape(10.dp),
+                                border = BorderStroke(
+                                    1.dp,
+                                    if (selected) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.14f)
+                                ),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .clickable { onSelectAudioDeArtifactMode(mode) }
+                                    .testTag("sheet_audio_de_artifact_${mode.id}")
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    RadioButton(
+                                        selected = selected,
+                                        onClick = { onSelectAudioDeArtifactMode(mode) },
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Text(
+                                        text = mode.localizedTitle(isEnglish),
+                                        style = MaterialTheme.typography.labelMedium,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onToggleAutoDeArtifactLowBitrate(!autoDeArtifactLowBitrate) }
+                    .padding(vertical = 2.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = tr(
+                            "Авто для низкого битрейта (≤ 128 кбит/с)",
+                            "Auto-enable only for low bitrate (≤ 128 kbps)"
+                        ),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    Text(
+                        text = tr(
+                            "Не затрагивать FLAC/lossless и дорожки высокого битрейта (> 132 кбит/с)",
+                            "Bypass DSP on FLAC/lossless and high-bitrate tracks (> 132 kbps)"
+                        ),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Switch(
+                    checked = autoDeArtifactLowBitrate,
+                    onCheckedChange = onToggleAutoDeArtifactLowBitrate,
+                    modifier = Modifier.testTag("sheet_auto_de_artifact_low_bitrate_switch")
+                )
+            }
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 2.dp))
+
             // Audio Synchronization & Manual Fine-Tune Offset Controls
             Row(
                 modifier = Modifier.fillMaxWidth(),

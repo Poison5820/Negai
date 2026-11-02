@@ -14,6 +14,7 @@ import com.example.model.Anime4KPreset
 import com.example.model.AppAccentColor
 import com.example.model.AppLanguage
 import com.example.model.AppThemeMode
+import com.example.model.AudioDeArtifactMode
 import com.example.model.DecoderMode
 import com.example.model.EpisodeSortOption
 import com.example.model.FolderSortOption
@@ -48,6 +49,7 @@ class PlayerPreferencesRepository(private val context: Context) {
         val FOLDER_SORT_ASCENDING = booleanPreferencesKey("folder_sort_ascending")
         val EPISODE_SORT_OPTION = stringPreferencesKey("episode_sort_option")
         val EPISODE_SORT_ASCENDING = booleanPreferencesKey("episode_sort_ascending")
+        val PLAYER_QUICK_ACTIONS_V4 = stringPreferencesKey("player_quick_actions_v4")
         val PLAYER_QUICK_ACTIONS_V3 = stringPreferencesKey("player_quick_actions_v3")
         val LEGACY_PLAYER_QUICK_ACTIONS_V2 = stringPreferencesKey("player_quick_actions_v2")
         val LEGACY_PLAYER_QUICK_ACTIONS_V1 = stringPreferencesKey("player_quick_actions")
@@ -96,6 +98,8 @@ class PlayerPreferencesRepository(private val context: Context) {
         val DEFAULT_AUDIO_BOOST_PERCENT = intPreferencesKey("default_audio_boost_percent")
         val BLUETOOTH_AUDIO_AUTO_SYNC = booleanPreferencesKey("bluetooth_audio_auto_sync")
         val BLUETOOTH_AUDIO_OFFSET_MS = longPreferencesKey("bluetooth_audio_fine_offset_ms")
+        val AUDIO_DE_ARTIFACT_MODE = stringPreferencesKey("audio_de_artifact_mode")
+        val AUTO_DE_ARTIFACT_LOW_BITRATE = booleanPreferencesKey("auto_de_artifact_low_bitrate")
 
         val AUTO_BIND_SUBS = booleanPreferencesKey("auto_bind_external_subtitles")
         val SUB_FONT_SIZE = floatPreferencesKey("subtitle_font_size_sp")
@@ -134,10 +138,8 @@ class PlayerPreferencesRepository(private val context: Context) {
                 ?: (if (hasBoot) sp.getString("ep_sort_opt", null) else null)
                 ?: EpisodeSortOption.EPISODE_NUMBER.id
         )
-        val rawQuickActions = prefs[Keys.PLAYER_QUICK_ACTIONS_V3]
-            ?: prefs[Keys.LEGACY_PLAYER_QUICK_ACTIONS_V2]
-            ?: prefs[Keys.LEGACY_PLAYER_QUICK_ACTIONS_V1]
-            ?: (if (hasBoot) sp.getString("quick_actions_v3", null) else null)
+        val rawQuickActions = prefs[Keys.PLAYER_QUICK_ACTIONS_V4]
+            ?: (if (hasBoot) sp.getString("quick_actions_v4", null) else null)
 
         val rawOrientation = prefs[Keys.DEFAULT_PLAYER_ORIENTATION_V2]
             ?: prefs[Keys.LEGACY_DEFAULT_PLAYER_ORIENTATION_V1]
@@ -288,6 +290,13 @@ class PlayerPreferencesRepository(private val context: Context) {
                 prefs[Keys.BLUETOOTH_AUDIO_OFFSET_MS]
                     ?: (if (hasBoot && sp.contains("bt_fine_offset_ms")) sp.getLong("bt_fine_offset_ms", 0L) else 0L)
                 ).coerceIn(-300L, 300L),
+            audioDeArtifactMode = AudioDeArtifactMode.fromId(
+                prefs[Keys.AUDIO_DE_ARTIFACT_MODE]
+                    ?: (if (hasBoot) sp.getString("audio_de_artifact_mode", null) else null)
+                    ?: AudioDeArtifactMode.STANDARD.id
+            ),
+            autoDeArtifactLowBitrate = prefs[Keys.AUTO_DE_ARTIFACT_LOW_BITRATE]
+                ?: (if (hasBoot && sp.contains("auto_de_artifact_low_bitrate")) sp.getBoolean("auto_de_artifact_low_bitrate", true) else true),
 
             autoBindExternalSubtitles = prefs[Keys.AUTO_BIND_SUBS]
                 ?: (if (hasBoot && sp.contains("auto_bind_subs")) sp.getBoolean("auto_bind_subs", true) else true),
@@ -455,9 +464,9 @@ class PlayerPreferencesRepository(private val context: Context) {
 
     suspend fun updateQuickActions(actions: List<PlayerQuickAction>) {
         val serialized = QuickActionsSerializer.serialize(actions)
-        bootPrefs(context).edit().putString("quick_actions_v3", serialized).apply()
+        bootPrefs(context).edit().putString("quick_actions_v4", serialized).apply()
         context.playerDataStore.edit {
-            it[Keys.PLAYER_QUICK_ACTIONS_V3] = serialized
+            it[Keys.PLAYER_QUICK_ACTIONS_V4] = serialized
         }
     }
 
@@ -686,6 +695,16 @@ class PlayerPreferencesRepository(private val context: Context) {
         context.playerDataStore.edit { it[Keys.BLUETOOTH_AUDIO_OFFSET_MS] = clamped }
     }
 
+    suspend fun updateAudioDeArtifactMode(mode: AudioDeArtifactMode) {
+        bootPrefs(context).edit().putString("audio_de_artifact_mode", mode.id).apply()
+        context.playerDataStore.edit { it[Keys.AUDIO_DE_ARTIFACT_MODE] = mode.id }
+    }
+
+    suspend fun updateAutoDeArtifactLowBitrate(enabled: Boolean) {
+        bootPrefs(context).edit().putBoolean("auto_de_artifact_low_bitrate", enabled).apply()
+        context.playerDataStore.edit { it[Keys.AUTO_DE_ARTIFACT_LOW_BITRATE] = enabled }
+    }
+
     suspend fun updateAutoBindSubtitles(enabled: Boolean) {
         bootPrefs(context).edit().putBoolean("auto_bind_subs", enabled).apply()
         context.playerDataStore.edit { it[Keys.AUTO_BIND_SUBS] = enabled }
@@ -833,7 +852,7 @@ class PlayerPreferencesRepository(private val context: Context) {
                 folderSortAscending = sp.getBoolean("sort_asc", sortOpt.defaultAscending),
                 episodeSortOption = epSortOpt,
                 episodeSortAscending = sp.getBoolean("ep_sort_asc", epSortOpt.defaultAscending),
-                quickActions = QuickActionsSerializer.parse(sp.getString("quick_actions_v3", null)),
+                quickActions = QuickActionsSerializer.parse(sp.getString("quick_actions_v4", null)),
                 appUiScalePercent = sp.getInt("app_ui_scale", 100).coerceIn(75, 140),
                 playerUiScalePercent = sp.getInt("player_ui_scale", 100).coerceIn(75, 140),
                 playerAutoDpiScale = true,
@@ -885,6 +904,10 @@ class PlayerPreferencesRepository(private val context: Context) {
                 defaultAudioBoostPercent = sp.getInt("default_audio_boost", 100).coerceIn(100, 200),
                 bluetoothAudioAutoSync = true,
                 bluetoothAudioOffsetMs = sp.getLong("bt_fine_offset_ms", 0L).coerceIn(-300L, 300L),
+                audioDeArtifactMode = AudioDeArtifactMode.fromId(
+                    sp.getString("audio_de_artifact_mode", AudioDeArtifactMode.STANDARD.id)
+                ),
+                autoDeArtifactLowBitrate = sp.getBoolean("auto_de_artifact_low_bitrate", true),
 
                 autoBindExternalSubtitles = sp.getBoolean("auto_bind_subs", true),
                 subtitleFontSizeSp = sp.getFloat("sub_font_size", 21f).coerceIn(13f, 42f),
@@ -923,7 +946,7 @@ class PlayerPreferencesRepository(private val context: Context) {
                 .putBoolean("sort_asc", s.folderSortAscending)
                 .putString("ep_sort_opt", s.episodeSortOption.id)
                 .putBoolean("ep_sort_asc", s.episodeSortAscending)
-                .putString("quick_actions_v3", QuickActionsSerializer.serialize(s.quickActions))
+                .putString("quick_actions_v4", QuickActionsSerializer.serialize(s.quickActions))
                 .putInt("app_ui_scale", s.appUiScalePercent)
                 .putInt("player_ui_scale", s.playerUiScalePercent)
                 .putBoolean("player_auto_dpi", true)
@@ -958,6 +981,8 @@ class PlayerPreferencesRepository(private val context: Context) {
                 .putInt("default_audio_boost", s.defaultAudioBoostPercent)
                 .putBoolean("bt_auto_sync", true)
                 .putLong("bt_fine_offset_ms", s.bluetoothAudioOffsetMs)
+                .putString("audio_de_artifact_mode", s.audioDeArtifactMode.id)
+                .putBoolean("auto_de_artifact_low_bitrate", s.autoDeArtifactLowBitrate)
                 .putBoolean("auto_bind_subs", s.autoBindExternalSubtitles)
                 .putFloat("sub_font_size", s.subtitleFontSizeSp)
                 .putLong("sub_color_argb", s.subtitleColorArgb)

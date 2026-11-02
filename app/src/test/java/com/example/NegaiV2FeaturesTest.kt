@@ -24,10 +24,10 @@ class NegaiV2FeaturesTest {
 
     @Test
     fun version3BuildConfig_and_frameInterpolationUserFacingLabels() {
-        assertEquals(7, BuildConfig.VERSION_CODE)
-        assertEquals("3.0", BuildConfig.VERSION_NAME)
+        assertEquals(8, BuildConfig.VERSION_CODE)
+        assertEquals("3.1-pre1", BuildConfig.VERSION_NAME)
         assertEquals("app.negai.player", BuildConfig.APPLICATION_ID)
-        assertEquals("v3.0 Release", com.example.model.AppVersionInfo.BADGE_TEXT)
+        assertEquals("v3.1 Pre-release", com.example.model.AppVersionInfo.BADGE_TEXT)
 
         assertEquals(com.example.model.AppLanguage.SYSTEM, com.example.model.AppLanguage.fromId("system"))
         assertEquals(com.example.model.AppLanguage.RU, com.example.model.AppLanguage.fromId("ru"))
@@ -310,12 +310,26 @@ class NegaiV2FeaturesTest {
         assertEquals(PlayerQuickAction.AUDIO, defaultActions[0])
         assertEquals(PlayerQuickAction.SUBTITLES, defaultActions[1])
         assertEquals(PlayerQuickAction.SPEED, defaultActions[2])
-        assertEquals(PlayerQuickAction.SCALE, defaultActions[3])
+        assertEquals(PlayerQuickAction.FRAME_INTERPOLATION, defaultActions[3])
+        assertEquals(PlayerQuickAction.ANIME4K, defaultActions[4])
+        assertEquals(PlayerQuickAction.DECODER, defaultActions[5])
+        assertTrue(defaultActions.contains(PlayerQuickAction.DECODER))
+        assertTrue(defaultActions.contains(PlayerQuickAction.SCALE))
         assertFalse(defaultActions.contains(PlayerQuickAction.EPISODES))
         assertFalse(defaultActions.contains(PlayerQuickAction.CHAPTERS))
         assertFalse(defaultActions.contains(PlayerQuickAction.AUDIO_BOOST))
-        assertFalse(defaultActions.contains(PlayerQuickAction.DECODER))
         assertTrue(defaultActions.contains(PlayerQuickAction.FILE_INFO))
+
+        // Verify AudioDeArtifactMode 3 levels + Off & real-time PCM16 DSP restoration
+        assertEquals(com.example.model.AudioDeArtifactMode.STANDARD, PlayerSettings().audioDeArtifactMode)
+        assertTrue(PlayerSettings().autoDeArtifactLowBitrate)
+        val dspProc = com.example.player.AudioDelayProcessor()
+        dspProc.deArtifactMode = com.example.model.AudioDeArtifactMode.OFF
+        assertFalse(dspProc.isDeArtifactCurrentlyActive)
+        dspProc.deArtifactMode = com.example.model.AudioDeArtifactMode.SOFT
+        assertTrue(dspProc.isDeArtifactCurrentlyActive)
+        dspProc.deArtifactMode = com.example.model.AudioDeArtifactMode.AGGRESSIVE
+        assertTrue(dspProc.isDeArtifactCurrentlyActive)
 
         // Verify negative audio delay uses MediaClock offset instead of dropping PCM samples
         val processor = com.example.player.AudioDelayProcessor()
