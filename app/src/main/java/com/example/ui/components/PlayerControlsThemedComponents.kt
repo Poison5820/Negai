@@ -80,9 +80,14 @@ import com.example.ui.i18n.localizedSubtitle
 import com.example.ui.i18n.localizedTitle
 import com.example.ui.i18n.tr
 
+import androidx.compose.ui.graphics.lerp
+import com.example.ui.theme.ensureReadableOn
+
 /**
- * Compact badge displaying video resolution ("4K", "1440p", "1080p", "720p", etc.)
- * next to video items in folder lists, player playlists, and recent history.
+ * Compact frosted-glass badge displaying video resolution ("4K", "1440p", "1080p", "720p", etc.)
+ * next to video items in the player HUD, folder lists, player playlists, and recent history.
+ * Preserves resolution-tier color (4K/8K primary, 1080p/1440p secondary, SD/720p neutral)
+ * while applying a multi-layer frosted glass surface and specular border.
  */
 @Composable
 fun ResolutionBadgeChip(
@@ -94,39 +99,66 @@ fun ResolutionBadgeChip(
     val isUltraHd = normalized == "8K" || normalized == "4K"
     val isHighDef = normalized == "1440P" || normalized == "1080P"
 
+    val baseGlass = Color(0xC40B1220)
+    val rawTierColor = when {
+        isUltraHd -> MaterialTheme.colorScheme.primary
+        isHighDef -> MaterialTheme.colorScheme.secondary
+        else -> Color(0xFFCBD5E1)
+    }
+    val readableTierColor = rawTierColor.ensureReadableOn(baseGlass, minContrast = 5.4f)
+
     val containerColor = when {
-        isUltraHd -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.90f)
-        isHighDef -> MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.85f)
-        else -> MaterialTheme.colorScheme.surfaceContainerHighest
+        isUltraHd -> lerp(baseGlass, readableTierColor, 0.28f).copy(alpha = 0.82f)
+        isHighDef -> lerp(baseGlass, readableTierColor, 0.22f).copy(alpha = 0.80f)
+        else -> baseGlass.copy(alpha = 0.76f)
     }
     val contentColor = when {
-        isUltraHd -> MaterialTheme.colorScheme.primary
-        isHighDef -> MaterialTheme.colorScheme.onSecondaryContainer
-        else -> MaterialTheme.colorScheme.onSurfaceVariant
+        isUltraHd -> readableTierColor
+        isHighDef -> lerp(readableTierColor, Color.White, 0.22f)
+        else -> Color(0xFFE2E8F0)
     }
-    val borderStroke = when {
-        isUltraHd -> BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.65f))
-        isHighDef -> BorderStroke(1.dp, MaterialTheme.colorScheme.secondary.copy(alpha = 0.35f))
-        else -> BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f))
-    }
+    val borderStroke = BorderStroke(
+        width = 0.9.dp,
+        brush = Brush.verticalGradient(
+            colors = listOf(
+                Color.White.copy(alpha = 0.45f),
+                readableTierColor.copy(alpha = if (isUltraHd) 0.78f else if (isHighDef) 0.62f else 0.38f),
+                Color.White.copy(alpha = 0.18f)
+            )
+        )
+    )
+    val shape = RoundedCornerShape(if (compact) 6.dp else 7.dp)
 
     Surface(
         color = containerColor,
-        shape = RoundedCornerShape(if (compact) 5.dp else 6.dp),
+        shape = shape,
         border = borderStroke,
+        shadowElevation = if (compact) 2.dp else 6.dp,
         modifier = modifier
     ) {
-        Text(
-            text = badge,
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = if (isUltraHd || isHighDef) FontWeight.Bold else FontWeight.Medium,
-            color = contentColor,
-            maxLines = 1,
-            modifier = Modifier.padding(
-                horizontal = if (compact) 5.dp else 6.dp,
-                vertical = if (compact) 1.5.dp else 2.dp
+        Box(
+            modifier = Modifier.background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        Color.White.copy(alpha = 0.18f),
+                        readableTierColor.copy(alpha = if (isUltraHd || isHighDef) 0.10f else 0.04f),
+                        Color.Transparent
+                    )
+                )
             )
-        )
+        ) {
+            Text(
+                text = badge,
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = if (isUltraHd || isHighDef) FontWeight.Bold else FontWeight.SemiBold,
+                color = contentColor,
+                maxLines = 1,
+                modifier = Modifier.padding(
+                    horizontal = if (compact) 5.5.dp else 7.dp,
+                    vertical = if (compact) 1.5.dp else 2.5.dp
+                )
+            )
+        }
     }
 }
 

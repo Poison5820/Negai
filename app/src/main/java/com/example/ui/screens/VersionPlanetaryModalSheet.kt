@@ -486,37 +486,47 @@ fun VersionPlanetaryModalSheet(
                 }
             }
 
-            // Release v3.1 Pre-release Changelog Card
+            // Official Release v3.1 Changelog Card (relative to v3.1-pre1)
             Surface(
                 color = MaterialTheme.colorScheme.surfaceContainerLowest,
                 shape = RoundedCornerShape(14.dp),
                 border = BorderStroke(0.8.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.42f)),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("release_v3_1_changelog_card")
             ) {
                 Column(
                     modifier = Modifier.padding(14.dp),
                     verticalArrangement = Arrangement.spacedBy(5.dp)
                 ) {
                     Text(
-                        text = tr("Возможности пре-релиза v3.1-pre1", "Release v3.1 Pre-release Highlights"),
+                        text = tr(
+                            "Релиз v3.1 — Что нового относительно v3.1-pre1",
+                            "Release v3.1 — What's New since v3.1-pre1"
+                        ),
                         style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.primary
                     )
                     val notes = if (isEnglish) {
                         listOf(
-                            "• Real-time Audio De-Artifact DSP with 3 levels (Soft, Standard, Aggressive) + Auto for low-bitrate tracks (≤ 128 kbps)",
-                            "• Redesigned 3-zone player bottom bar: Left (Audio, Subtitles, Speed), Center (MEMC | Anime4K with vertical divider), Right (Decoder + tools)",
-                            "• Hold-and-swipe mini pop-up menus on every bottom bar button with 'Off' («Откл.») at the bottom",
-                            "• Decoder button enabled by default in the right section of the player bottom bar",
-                            "• Compact 2-column grid layout and reduced horizontal margins in Settings for themes, accents, badges, and modes"
+                            "• Unified Frosted Glass design with accent tint and horizontal compactness (440 dp) for all player pop-ups, sheets, and HUD overlays",
+                            "• Frosted Glass styling for the Skip Intro ('+85s Opening') button, top player HUD buttons, and color-coded video resolution badge (4K / 1080p / 720p)",
+                            "• Direct finger-position tracking in hold mini-menus: selection follows finger height over the menu & button so 'Off' («Откл.») at the bottom is effortless to select",
+                            "• Orientation button force-locks only on long-press (with Lock icon & accent highlight); single tap rotates without overriding global orientation settings across episodes",
+                            "• Pinned compact top header in Folders tab: 'Continue Watching' button and compact Search bar stay fixed at the top when scrolling large folder lists",
+                            "• Video frame thumbnails in Watch History extracted automatically via Coil VideoFrameDecoder with timestamp badges",
+                            "• Includes all v3.1-pre1 core upgrades: 3-level Audio De-Artifact DSP, 3-zone bottom bar with centered MEMC | Anime4K, and 2-column Settings cards"
                         )
                     } else {
                         listOf(
-                            "• Очистка звука от искажений сжатия (De-Artifact DSP) с 3 уровнями (Мягкий, Стандарт, Агрессивный) и авто-режимом для низкого битрейта (≤ 128 кбит/с)",
-                            "• Новая 3-зонная нижняя панель плеера: слева (Аудио, Субтитры, Скорость), по центру (Интерполятор | Anime4K с вертикальным разделителем), справа (Декодер и остальные кнопки)",
-                            "• Мини-меню по удержанию на всех кнопках нижней панели с выбором режима свайпом без отрыва пальца и пунктом «Откл.» внизу",
-                            "• Кнопка «Декодер» включена по умолчанию в правой части нижней панели плеера",
-                            "• Уменьшены боковые отступы в настройках, а темы, акцентные цвета и режимы организованы в 2 компактных столбца"
+                            "• Единый стиль матового стекла (Frosted Glass) с акцентным оттенком и компактной шириной (440 dp) для всех всплывающих окон и индикаторов плеера",
+                            "• Адаптация кнопки пропуска опенинга («+85с Опенинг»), верхних кнопок плеера и цветного значка разрешения видео (4K / 1080p / 720p) под матовое стекло",
+                            "• Ориентация мини-меню непосредственно по положению пальца над интерфейсом — режим «Откл.» внизу выбирается легко без упора в нижний край экрана",
+                            "• Принудительная блокировка поворота экрана только по удержанию кнопки ориентации (с иконкой замка и акцентной подсветкой); одиночное нажатие не ломает глобальную настройку между сериями",
+                            "• Закреплённая компактная шапка в главном меню папок: компактная кнопка «Продолжить» и поиск остаются на месте при прокрутке больших списков папок",
+                            "• Отображение видео-миниатюр кадра в «Истории» с отметкой времени (при наличии доступа к кадру видео)",
+                            "• Включает все нововведения v3.1-pre1: 3-уровневую очистку звука De-Artifact DSP, 3-зонную нижнюю панель (MEMC | Anime4K по центру) и двухколоночные блоки настроек"
                         )
                     }
                     notes.forEach { line ->

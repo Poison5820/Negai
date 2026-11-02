@@ -52,6 +52,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.material.icons.filled.FastRewind
 import androidx.compose.material.icons.filled.Forward10
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.Pause
@@ -92,11 +93,14 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -735,21 +739,28 @@ fun PlayerScreen(
                 .padding(top = 56.dp, start = 14.dp, end = 14.dp)
         ) {
             val resumedPos = playbackState.resumedFromPositionMs ?: 0L
+            val bannerAccent = MaterialTheme.colorScheme.primary.ensureReadableOn(
+                PlayerFrostedGlassBaseColor,
+                minContrast = 5.4f
+            )
             Surface(
-                color = Color(0xFF0E131F).copy(alpha = 0.65f),
+                color = PlayerFrostedGlassBaseColor,
                 shape = RoundedCornerShape(16.dp),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.48f)),
+                border = playerPopupBorderStroke(),
+                shadowElevation = 12.dp,
                 modifier = Modifier.testTag("player_resumed_banner")
             ) {
                 Row(
-                    modifier = Modifier.padding(start = 10.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
+                    modifier = Modifier
+                        .background(playerFrostedGlassBrush(accentAlpha = 0.12f))
+                        .padding(start = 10.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Replay,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
+                        tint = bannerAccent,
                         modifier = Modifier.size(15.dp)
                     )
                     Text(
@@ -758,8 +769,9 @@ fun PlayerScreen(
                         color = Color.White
                     )
                     Surface(
-                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.78f),
+                        color = lerp(Color(0xD9142138), bannerAccent, 0.34f),
                         shape = RoundedCornerShape(10.dp),
+                        border = BorderStroke(0.75.dp, bannerAccent.copy(alpha = 0.65f)),
                         modifier = Modifier
                             .clip(RoundedCornerShape(10.dp))
                             .clickable {
@@ -771,7 +783,7 @@ fun PlayerScreen(
                         Text(
                             text = tr("С начала", "From start"),
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            color = Color.White,
                             modifier = Modifier.padding(horizontal = 9.dp, vertical = 5.dp)
                         )
                     }
@@ -782,7 +794,7 @@ fun PlayerScreen(
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = tr("Скрыть уведомление", "Dismiss banner"),
-                            tint = Color.White.copy(alpha = 0.75f),
+                            tint = Color.White.copy(alpha = 0.78f),
                             modifier = Modifier.size(14.dp)
                         )
                     }
@@ -831,17 +843,24 @@ fun PlayerScreen(
             } else {
                 0f
             }
+            val seekAccent = MaterialTheme.colorScheme.primary.ensureReadableOn(
+                PlayerFrostedGlassBaseColor,
+                minContrast = 5.4f
+            )
 
             Surface(
-                color = Color(0xFF0E131F).copy(alpha = 0.65f),
+                color = PlayerFrostedGlassBaseColor,
                 shape = RoundedCornerShape(16.dp),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.50f)),
+                border = playerPopupBorderStroke(),
+                shadowElevation = 14.dp,
                 modifier = Modifier
-                    .width(190.dp)
+                    .width(184.dp)
                     .testTag("swipe_seek_hud")
             ) {
                 Column(
-                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                    modifier = Modifier
+                        .background(playerFrostedGlassBrush(accentAlpha = 0.12f))
+                        .padding(horizontal = 14.dp, vertical = 10.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
@@ -852,13 +871,13 @@ fun PlayerScreen(
                         Icon(
                             imageVector = if (isForward) Icons.Default.FastForward else Icons.Default.FastRewind,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
+                            tint = seekAccent,
                             modifier = Modifier.size(18.dp)
                         )
                         Text(
                             text = tr("${deltaSign}${absDeltaSec} сек", "${deltaSign}${absDeltaSec} s"),
                             style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.primary
+                            color = seekAccent
                         )
                     }
                     Text(
@@ -874,8 +893,8 @@ fun PlayerScreen(
                                 .fillMaxWidth()
                                 .height(3.dp)
                                 .clip(CircleShape),
-                            color = MaterialTheme.colorScheme.primary,
-                            trackColor = Color.White.copy(alpha = 0.2f)
+                            color = seekAccent,
+                            trackColor = Color.White.copy(alpha = 0.22f)
                         )
                     }
                 }
@@ -895,14 +914,21 @@ fun PlayerScreen(
             val isForward = doubleTapAccumulatedSec > 0
             val absSec = abs(doubleTapAccumulatedSec)
             val signPrefix = if (isForward) "+" else "-"
+            val tapAccent = MaterialTheme.colorScheme.primary.ensureReadableOn(
+                PlayerFrostedGlassBaseColor,
+                minContrast = 5.4f
+            )
             Surface(
-                color = Color(0xFF0E131F).copy(alpha = 0.65f),
+                color = PlayerFrostedGlassBaseColor,
                 shape = RoundedCornerShape(18.dp),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.50f)),
+                border = playerPopupBorderStroke(),
+                shadowElevation = 12.dp,
                 modifier = Modifier.testTag("double_tap_seek_pill")
             ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp),
+                    modifier = Modifier
+                        .background(playerFrostedGlassBrush(accentAlpha = 0.12f))
+                        .padding(horizontal = 14.dp, vertical = 7.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
@@ -910,7 +936,7 @@ fun PlayerScreen(
                         Icon(
                             imageVector = Icons.Default.FastRewind,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
+                            tint = tapAccent,
                             modifier = Modifier.size(16.dp)
                         )
                     }
@@ -924,7 +950,7 @@ fun PlayerScreen(
                         Icon(
                             imageVector = Icons.Default.FastForward,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
+                            tint = tapAccent,
                             modifier = Modifier.size(16.dp)
                         )
                     }
@@ -993,9 +1019,11 @@ fun PlayerScreen(
 
         if (!isInPipMode) {
             val isEnglish = LocalIsEnglish.current
+            val haptic = LocalHapticFeedback.current
             val currentConfigOrientation = LocalConfiguration.current.orientation
-            val toggleOrientationOneTap: () -> Unit = {
-                val currentlyHorizontal = when (orientationMode) {
+
+            val isCurrentlyHorizontal: () -> Boolean = {
+                when (orientationMode) {
                     PlayerOrientationMode.LANDSCAPE -> true
                     PlayerOrientationMode.PORTRAIT -> false
                     PlayerOrientationMode.VIDEO_ASPECT -> {
@@ -1009,8 +1037,33 @@ fun PlayerScreen(
                         currentConfigOrientation != android.content.res.Configuration.ORIENTATION_PORTRAIT
                     }
                 }
-                orientationMode = orientationMode.toggleLandscapePortrait(currentlyHorizontal)
-                isOrientationLocked = true
+            }
+
+            // Single tap switches orientation for the current video WITHOUT locking orientation
+            // across episodes, so subsequent episodes continue following the global setting.
+            val toggleOrientationOneTap: () -> Unit = {
+                orientationMode = orientationMode.toggleLandscapePortrait(isCurrentlyHorizontal())
+                interactionTick++
+            }
+
+            // Long press force-locks / unlocks the current orientation (indicated by a lock icon and accent tint).
+            val toggleOrientationLock: () -> Unit = {
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                val nextLocked = !isOrientationLocked
+                isOrientationLocked = nextLocked
+                if (nextLocked) {
+                    if (orientationMode == PlayerOrientationMode.AUTO ||
+                        orientationMode == PlayerOrientationMode.VIDEO_ASPECT
+                    ) {
+                        orientationMode = if (isCurrentlyHorizontal()) {
+                            PlayerOrientationMode.LANDSCAPE
+                        } else {
+                            PlayerOrientationMode.PORTRAIT
+                        }
+                    }
+                } else {
+                    orientationMode = settings.defaultPlayerOrientation
+                }
                 interactionTick++
             }
 
@@ -1038,7 +1091,54 @@ fun PlayerScreen(
                     )
                     .windowInsetsPadding(WindowInsets.displayCutout)
             ) {
-                // TOP BAR (compact, grouped controls + resolution badge + direct Episodes access)
+                val accentFreeHud = settings.playerControlsTheme.isAccentFree
+                val framelessHud = settings.playerControlsTheme.isFrameless
+                val darkGlassBase = PlayerFrostedGlassBaseColor
+                val hudAccentColor = if (accentFreeHud) {
+                    Color.White.copy(alpha = 0.92f)
+                } else {
+                    MaterialTheme.colorScheme.primary.ensureReadableOn(darkGlassBase, minContrast = 5.4f)
+                }
+                val hudPillBorder = when {
+                    framelessHud -> null
+                    accentFreeHud -> BorderStroke(0.85.dp, Color.White.copy(alpha = 0.34f))
+                    else -> BorderStroke(
+                        width = 0.9.dp,
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                Color.White.copy(alpha = 0.42f),
+                                hudAccentColor.copy(alpha = 0.58f),
+                                Color.White.copy(alpha = 0.18f)
+                            )
+                        )
+                    )
+                }
+                val hudActiveLockedBorder = when {
+                    framelessHud -> null
+                    accentFreeHud -> BorderStroke(1.dp, Color.White.copy(alpha = 0.55f))
+                    else -> BorderStroke(1.dp, hudAccentColor.copy(alpha = 0.88f))
+                }
+                val hudPillBg = if (framelessHud) Color.Transparent else darkGlassBase
+                val hudActiveLockedBg = when {
+                    framelessHud -> Color.Transparent
+                    accentFreeHud -> Color(0xCC1E293B)
+                    else -> lerp(darkGlassBase, hudAccentColor, 0.30f)
+                }
+                val hudGlassSheenBrush = remember(hudAccentColor, framelessHud) {
+                    if (framelessHud) {
+                        Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent))
+                    } else {
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color.White.copy(alpha = 0.16f),
+                                hudAccentColor.copy(alpha = 0.08f),
+                                Color.Transparent
+                            )
+                        )
+                    }
+                }
+
+                // TOP BAR (compact, frosted-glass grouped controls + resolution badge + direct Episodes access)
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -1047,16 +1147,29 @@ fun PlayerScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    IconButton(
-                        onClick = { if (showHud) exitPlayerCleanly() },
-                        enabled = showHud,
-                        modifier = Modifier.testTag("player_back_button")
+                    Surface(
+                        color = hudPillBg,
+                        shape = RoundedCornerShape(11.dp),
+                        border = hudPillBorder,
+                        modifier = Modifier
+                            .defaultMinSize(minWidth = 38.dp, minHeight = 36.dp)
+                            .clip(RoundedCornerShape(11.dp))
+                            .clickable(enabled = showHud) { exitPlayerCleanly() }
+                            .testTag("player_back_button")
                     ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = tr("Закрыть плеер", "Close player"),
-                            tint = Color.White
-                        )
+                        Box(
+                            modifier = Modifier
+                                .background(hudGlassSheenBrush)
+                                .padding(horizontal = 9.dp, vertical = 7.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = tr("Закрыть плеер", "Close player"),
+                                tint = Color.White,
+                                modifier = Modifier.size(19.dp)
+                            )
+                        }
                     }
 
                     Column(modifier = Modifier.weight(1f)) {
@@ -1082,29 +1195,14 @@ fun PlayerScreen(
                             Text(
                                 text = subInfo,
                                 style = MaterialTheme.typography.labelSmall,
-                                color = Color.White.copy(alpha = 0.72f),
+                                color = Color.White.copy(alpha = 0.76f),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
                         }
                     }
 
-                    val accentFreeHud = settings.playerControlsTheme.isAccentFree
-                    val framelessHud = settings.playerControlsTheme.isFrameless
-                    val darkGlassBase = Color(0xFF0E1524)
-                    val hudAccentColor = if (accentFreeHud) {
-                        Color.White.copy(alpha = 0.92f)
-                    } else {
-                        MaterialTheme.colorScheme.primary.ensureReadableOn(darkGlassBase, minContrast = 5.2f)
-                    }
-                    val hudPillBorder = when {
-                        framelessHud -> null
-                        accentFreeHud -> BorderStroke(0.8.dp, Color.White.copy(alpha = 0.32f))
-                        else -> BorderStroke(0.8.dp, hudAccentColor.copy(alpha = 0.55f))
-                    }
-                    val hudPillBg = if (framelessHud) Color.Transparent else Color(0x8C101828)
-
-                    // Clear video resolution badge (4K, 1080p, 720p, etc.)
+                    // Clear frosted-glass video resolution badge (4K, 1080p, 720p, etc.)
                     val resolutionBadge = remember(
                         playbackState.videoWidth,
                         playbackState.videoHeight,
@@ -1134,10 +1232,11 @@ fun PlayerScreen(
                         }
                         Surface(
                             color = hudPillBg,
-                            shape = RoundedCornerShape(10.dp),
+                            shape = RoundedCornerShape(11.dp),
                             border = hudPillBorder,
                             modifier = Modifier
-                                .clip(RoundedCornerShape(10.dp))
+                                .defaultMinSize(minHeight = 36.dp)
+                                .clip(RoundedCornerShape(11.dp))
                                 .clickable {
                                     interactionTick++
                                     activeSheet = ActivePlayerSheet.EPISODES
@@ -1145,7 +1244,9 @@ fun PlayerScreen(
                                 .testTag("player_top_episodes_button")
                         ) {
                             Row(
-                                modifier = Modifier.padding(horizontal = 9.dp, vertical = 6.dp),
+                                modifier = Modifier
+                                    .background(hudGlassSheenBrush)
+                                    .padding(horizontal = 9.dp, vertical = 7.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(5.dp)
                             ) {
@@ -1166,24 +1267,30 @@ fun PlayerScreen(
                         }
                     }
 
-                    // Grouped compact top-right utility buttons matching bottom bar button size
+                    // Grouped compact top-right frosted-glass utility buttons
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         Surface(
-                            color = hudPillBg,
+                            color = if (isOrientationLocked) hudActiveLockedBg else hudPillBg,
                             shape = RoundedCornerShape(11.dp),
-                            border = hudPillBorder,
+                            border = if (isOrientationLocked) hudActiveLockedBorder else hudPillBorder,
                             modifier = Modifier
                                 .defaultMinSize(minWidth = 38.dp, minHeight = 36.dp)
                                 .clip(RoundedCornerShape(11.dp))
-                                .clickable { toggleOrientationOneTap() }
+                                .combinedClickable(
+                                    onClick = toggleOrientationOneTap,
+                                    onLongClick = toggleOrientationLock
+                                )
                                 .testTag("player_orientation_button")
                         ) {
-                            Box(
-                                modifier = Modifier.padding(horizontal = 9.dp, vertical = 7.dp),
-                                contentAlignment = Alignment.Center
+                            Row(
+                                modifier = Modifier
+                                    .background(hudGlassSheenBrush)
+                                    .padding(horizontal = 9.dp, vertical = 7.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(2.dp)
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.ScreenRotation,
@@ -1191,13 +1298,21 @@ fun PlayerScreen(
                                         "Ориентация экрана: ${orientationMode.title}",
                                         "Screen orientation: ${orientationMode.localizedTitle(true)}"
                                     ),
-                                    tint = if (orientationMode != PlayerOrientationMode.AUTO && !accentFreeHud) {
+                                    tint = if (isOrientationLocked && !accentFreeHud) {
                                         hudAccentColor
                                     } else {
                                         Color.White
                                     },
-                                    modifier = Modifier.size(19.dp)
+                                    modifier = Modifier.size(18.dp)
                                 )
+                                if (isOrientationLocked) {
+                                    Icon(
+                                        imageVector = Icons.Default.Lock,
+                                        contentDescription = tr("Поворот зафиксирован", "Orientation locked"),
+                                        tint = if (!accentFreeHud) hudAccentColor else Color.White,
+                                        modifier = Modifier.size(12.dp)
+                                    )
+                                }
                             }
                         }
 
@@ -1216,7 +1331,9 @@ fun PlayerScreen(
                                 .testTag("player_lock_button")
                         ) {
                             Box(
-                                modifier = Modifier.padding(horizontal = 9.dp, vertical = 7.dp),
+                                modifier = Modifier
+                                    .background(hudGlassSheenBrush)
+                                    .padding(horizontal = 9.dp, vertical = 7.dp),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
@@ -1243,7 +1360,9 @@ fun PlayerScreen(
                                     .testTag("player_enter_pip_button")
                             ) {
                                 Box(
-                                    modifier = Modifier.padding(horizontal = 9.dp, vertical = 7.dp),
+                                    modifier = Modifier
+                                        .background(hudGlassSheenBrush)
+                                        .padding(horizontal = 9.dp, vertical = 7.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
@@ -1439,6 +1558,7 @@ fun PlayerScreen(
                             isOrientationLocked = false
                             orientationMode = mode
                         },
+                        onToggleOrientationLock = toggleOrientationLock,
                         onOpenCustomizer = {
                             interactionTick++
                             activeSheet = ActivePlayerSheet.CUSTOMIZE_QUICK_ACTIONS
@@ -1659,6 +1779,7 @@ fun PlayerScreen(
                         MediaFileInfoModalSheet(
                             info = mediaInfo,
                             onRenameRequest = null,
+                            usePlayerFrostedGlass = true,
                             onDismiss = { activeSheet = ActivePlayerSheet.NONE }
                         )
                     } else {
@@ -1741,6 +1862,29 @@ private fun PlayerTimelineSection(
     val activeChapter = chapters.getOrNull(activeChapterIndex)
 
     if (abLoopStartMs != null || chapters.isNotEmpty() || showSkipIntroButton) {
+        val timelineGlassBg = PlayerFrostedGlassBaseColor
+        val timelineAccent = MaterialTheme.colorScheme.primary.ensureReadableOn(
+            timelineGlassBg,
+            minContrast = 5.4f
+        )
+        val timelineGlassBorder = BorderStroke(
+            width = 0.9.dp,
+            brush = Brush.verticalGradient(
+                colors = listOf(
+                    Color.White.copy(alpha = 0.44f),
+                    timelineAccent.copy(alpha = 0.65f),
+                    Color.White.copy(alpha = 0.20f)
+                )
+            )
+        )
+        val timelineGlassSheen = Brush.verticalGradient(
+            colors = listOf(
+                Color.White.copy(alpha = 0.16f),
+                timelineAccent.copy(alpha = 0.10f),
+                Color.Transparent
+            )
+        )
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -1752,34 +1896,38 @@ private fun PlayerTimelineSection(
                 val aStr = formatTimeMs(abLoopStartMs)
                 val bStr = abLoopEndMs?.let { formatTimeMs(it) } ?: "…"
                 Surface(
-                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.85f),
-                    shape = RoundedCornerShape(10.dp),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
+                    color = lerp(timelineGlassBg, timelineAccent, 0.24f),
+                    shape = RoundedCornerShape(11.dp),
+                    border = timelineGlassBorder,
+                    shadowElevation = 6.dp,
                     modifier = Modifier
-                        .clip(RoundedCornerShape(10.dp))
+                        .clip(RoundedCornerShape(11.dp))
                         .clickable(onClick = onClearAbLoop)
                         .testTag("player_ab_loop_active_pill")
                 ) {
                     Row(
-                        modifier = Modifier.padding(horizontal = 9.dp, vertical = 5.dp),
+                        modifier = Modifier
+                            .background(timelineGlassSheen)
+                            .padding(horizontal = 9.dp, vertical = 5.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(5.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Repeat,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
+                            tint = timelineAccent,
                             modifier = Modifier.size(14.dp)
                         )
                         Text(
                             text = "A–B: $aStr → $bStr",
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.White
                         )
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = tr("Сбросить повтор A–B", "Clear A–B loop"),
-                            tint = MaterialTheme.colorScheme.primary,
+                            tint = timelineAccent,
                             modifier = Modifier.size(13.dp)
                         )
                     }
@@ -1789,24 +1937,27 @@ private fun PlayerTimelineSection(
             if (chapters.isNotEmpty()) {
                 val shownChapter = activeChapter ?: chapters.first()
                 Surface(
-                    color = Color(0xFF0E131F).copy(alpha = 0.65f),
-                    shape = RoundedCornerShape(10.dp),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)),
+                    color = timelineGlassBg,
+                    shape = RoundedCornerShape(11.dp),
+                    border = timelineGlassBorder,
+                    shadowElevation = 6.dp,
                     modifier = Modifier
                         .weight(1f, fill = false)
-                        .clip(RoundedCornerShape(10.dp))
+                        .clip(RoundedCornerShape(11.dp))
                         .clickable(onClick = onOpenChaptersSheet)
                         .testTag("player_active_chapter_pill")
                 ) {
                     Row(
-                        modifier = Modifier.padding(horizontal = 9.dp, vertical = 5.dp),
+                        modifier = Modifier
+                            .background(timelineGlassSheen)
+                            .padding(horizontal = 9.dp, vertical = 5.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(5.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Bookmarks,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
+                            tint = timelineAccent,
                             modifier = Modifier.size(14.dp)
                         )
                         Text(
@@ -1825,9 +1976,10 @@ private fun PlayerTimelineSection(
 
             if (showSkipIntroButton) {
                 Surface(
-                    color = Color(0xFF0E131F).copy(alpha = 0.65f),
+                    color = lerp(timelineGlassBg, timelineAccent, 0.16f),
                     shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)),
+                    border = timelineGlassBorder,
+                    shadowElevation = 8.dp,
                     modifier = Modifier
                         .clip(RoundedCornerShape(12.dp))
                         .combinedClickable(
@@ -1837,14 +1989,16 @@ private fun PlayerTimelineSection(
                         .testTag("player_skip_intro_button")
                 ) {
                     Row(
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                        modifier = Modifier
+                            .background(timelineGlassSheen)
+                            .padding(horizontal = 10.dp, vertical = 6.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.FastForward,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
+                            tint = timelineAccent,
                             modifier = Modifier.size(15.dp)
                         )
                         Text(

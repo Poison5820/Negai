@@ -56,12 +56,16 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindowProvider
 import androidx.core.view.WindowCompat
@@ -87,37 +91,150 @@ import com.example.ui.i18n.localizedLabel
 import com.example.ui.i18n.localizedSubtitle
 import com.example.ui.i18n.localizedTitle
 import com.example.ui.i18n.tr
+import com.example.ui.theme.ensureReadableOn
 import kotlin.math.roundToInt
+
+internal val PlayerFrostedGlassBaseColor = Color(0xC80B1220)
 
 @Composable
 internal fun playerPopupSheetContainerColor(): Color {
-    val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
-    return if (isDark) {
-        Color(0xFF0A101C).copy(alpha = 0.72f)
-    } else {
-        Color(0xFFF4F7FB).copy(alpha = 0.84f)
-    }
+    val accent = MaterialTheme.colorScheme.primary.ensureReadableOn(PlayerFrostedGlassBaseColor, minContrast = 5.2f)
+    return lerp(PlayerFrostedGlassBaseColor, accent, 0.08f).copy(alpha = 0.80f)
 }
 
 @Composable
 internal fun playerPopupCardColor(): Color {
-    val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
-    return if (isDark) {
-        Color(0xFF121B2E).copy(alpha = 0.58f)
-    } else {
-        Color(0xFFFFFFFF).copy(alpha = 0.78f)
-    }
+    val accent = MaterialTheme.colorScheme.primary.ensureReadableOn(PlayerFrostedGlassBaseColor, minContrast = 5.2f)
+    return lerp(Color(0xB8131E33), accent, 0.08f).copy(alpha = 0.68f)
 }
 
 @Composable
 internal fun playerPopupBorderStroke(): BorderStroke {
-    val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
-    val strokeColor = if (isDark) {
-        MaterialTheme.colorScheme.primary.copy(alpha = 0.38f)
-    } else {
-        MaterialTheme.colorScheme.primary.copy(alpha = 0.42f)
+    val accent = MaterialTheme.colorScheme.primary.ensureReadableOn(PlayerFrostedGlassBaseColor, minContrast = 5.4f)
+    return BorderStroke(
+        width = 1.dp,
+        brush = Brush.verticalGradient(
+            colors = listOf(
+                Color.White.copy(alpha = 0.44f),
+                accent.copy(alpha = 0.62f),
+                Color.White.copy(alpha = 0.20f)
+            )
+        )
+    )
+}
+
+@Composable
+internal fun playerFrostedGlassBrush(accentAlpha: Float = 0.10f): Brush {
+    val accent = MaterialTheme.colorScheme.primary.ensureReadableOn(PlayerFrostedGlassBaseColor, minContrast = 5.4f)
+    return Brush.verticalGradient(
+        colors = listOf(
+            Color.White.copy(alpha = 0.16f),
+            accent.copy(alpha = accentAlpha),
+            Color(0x38040812)
+        )
+    )
+}
+
+/**
+ * Unified Frosted Glass ModalBottomSheet for all player pop-ups:
+ * - Horizontally compact (`sheetMaxWidth = 440.dp`)
+ * - Same frosted glass material as the quick-action mini pop-up menus
+ * - Preserves the active accent color as a subtle glass tint and specular border
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun PlayerFrostedModalSheet(
+    onDismissRequest: () -> Unit,
+    modifier: Modifier = Modifier,
+    maxWidth: Dp = 440.dp,
+    content: @Composable () -> Unit
+) {
+    val glassBg = PlayerFrostedGlassBaseColor
+    val readableAccent = MaterialTheme.colorScheme.primary.ensureReadableOn(glassBg, minContrast = 5.4f)
+    val readableSecondary = MaterialTheme.colorScheme.secondary.ensureReadableOn(glassBg, minContrast = 5.2f)
+    val readableTertiary = MaterialTheme.colorScheme.tertiary.ensureReadableOn(glassBg, minContrast = 5.0f)
+    val frostedScheme = MaterialTheme.colorScheme.copy(
+        primary = readableAccent,
+        onPrimary = Color(0xFF070D19),
+        primaryContainer = lerp(Color(0xD9142138), readableAccent, 0.34f),
+        onPrimaryContainer = Color.White,
+        secondary = readableSecondary,
+        onSecondary = Color(0xFF070D19),
+        secondaryContainer = lerp(Color(0xD9142138), readableSecondary, 0.30f),
+        onSecondaryContainer = Color.White,
+        tertiary = readableTertiary,
+        tertiaryContainer = lerp(Color(0xD9142138), readableTertiary, 0.28f),
+        onTertiaryContainer = Color.White,
+        surface = glassBg,
+        onSurface = Color(0xFFF8FAFC),
+        surfaceVariant = Color(0xB8152036),
+        onSurfaceVariant = Color(0xFFCBD5E1),
+        outline = readableAccent.copy(alpha = 0.52f),
+        outlineVariant = Color.White.copy(alpha = 0.18f)
+    )
+    val sheetShape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
+
+    ModalBottomSheet(
+        onDismissRequest = onDismissRequest,
+        sheetMaxWidth = maxWidth,
+        shape = sheetShape,
+        containerColor = Color.Transparent,
+        scrimColor = PlayerPopupSheetScrimColor,
+        dragHandle = null,
+        modifier = modifier
+    ) {
+        KeepPlayerSheetImmersive()
+        MaterialTheme(colorScheme = frostedScheme) {
+            CompositionLocalProvider(LocalContentColor provides frostedScheme.onSurface) {
+                Surface(
+                    color = glassBg,
+                    shape = sheetShape,
+                    border = BorderStroke(
+                        width = 1.dp,
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                Color.White.copy(alpha = 0.44f),
+                                readableAccent.copy(alpha = 0.62f),
+                                Color.White.copy(alpha = 0.18f)
+                            )
+                        )
+                    ),
+                    shadowElevation = 18.dp,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                Brush.verticalGradient(
+                                    colors = listOf(
+                                        Color.White.copy(alpha = 0.15f),
+                                        readableAccent.copy(alpha = 0.09f),
+                                        Color(0x38040812)
+                                    )
+                                )
+                            )
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 8.dp, bottom = 4.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .width(36.dp)
+                                    .height(4.dp)
+                                    .clip(CircleShape)
+                                    .background(readableAccent.copy(alpha = 0.55f))
+                            )
+                        }
+                        content()
+                    }
+                }
+            }
+        }
     }
-    return BorderStroke(0.75.dp, strokeColor)
 }
 
 private tailrec fun Context.findHostActivityWindow(): Activity? = when (this) {
@@ -151,7 +268,7 @@ internal fun KeepPlayerSheetImmersive() {
 internal val PlayerPopupSheetContainerColor: Color
     @Composable get() = playerPopupSheetContainerColor()
 
-internal val PlayerPopupSheetScrimColor = Color.Black.copy(alpha = 0.20f)
+internal val PlayerPopupSheetScrimColor = Color.Black.copy(alpha = 0.22f)
 
 internal val PlayerPopupCardColor: Color
     @Composable get() = playerPopupCardColor()
@@ -184,23 +301,18 @@ fun AudioTracksModalSheet(
     onDismiss: () -> Unit
 ) {
     val isEnglish = LocalIsEnglish.current
-    val sheetBg = playerPopupSheetContainerColor()
     val cardBg = playerPopupCardColor()
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        containerColor = sheetBg,
-        scrimColor = PlayerPopupSheetScrimColor
+    PlayerFrostedModalSheet(
+        onDismissRequest = onDismiss
     ) {
-        KeepPlayerSheetImmersive()
-        CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 16.dp)
-                    .padding(bottom = 20.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 12.dp)
+                .padding(bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -568,7 +680,6 @@ fun AudioTracksModalSheet(
                 audioBoostPercent = audioBoostPercent,
                 onSetAudioBoostPercent = onSetAudioBoostPercent
             )
-            }
         }
     }
 }
@@ -589,23 +700,17 @@ fun SubtitleControlModalSheet(
     onDismiss: () -> Unit
 ) {
     val isEnglish = LocalIsEnglish.current
-    val sheetBg = playerPopupSheetContainerColor()
-    val cardBg = playerPopupCardColor()
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        containerColor = sheetBg,
-        scrimColor = PlayerPopupSheetScrimColor
+    PlayerFrostedModalSheet(
+        onDismissRequest = onDismiss
     ) {
-        KeepPlayerSheetImmersive()
-        CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 16.dp)
-                    .padding(bottom = 20.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 12.dp)
+                .padding(bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -824,7 +929,6 @@ fun SubtitleControlModalSheet(
                     onCheckedChange = onSetBackgroundEnabled
                 )
             }
-            }
         }
     }
 }
@@ -843,23 +947,17 @@ fun Anime4KControlModalSheet(
     onDismiss: () -> Unit
 ) {
     val isEnglish = LocalIsEnglish.current
-    val sheetBg = playerPopupSheetContainerColor()
-    val cardBg = playerPopupCardColor()
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        containerColor = sheetBg,
-        scrimColor = PlayerPopupSheetScrimColor
+    PlayerFrostedModalSheet(
+        onDismissRequest = onDismiss
     ) {
-        KeepPlayerSheetImmersive()
-        CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 16.dp)
-                    .padding(bottom = 20.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 12.dp)
+                .padding(bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -1055,7 +1153,6 @@ fun Anime4KControlModalSheet(
                     modifier = Modifier.testTag("anime4k_split_slider")
                 )
             }
-            }
         }
     }
 }
@@ -1072,23 +1169,17 @@ fun DecoderAndVideoModalSheet(
     onDismiss: () -> Unit
 ) {
     val isEnglish = LocalIsEnglish.current
-    val sheetBg = playerPopupSheetContainerColor()
-    val cardBg = playerPopupCardColor()
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        containerColor = sheetBg,
-        scrimColor = PlayerPopupSheetScrimColor
+    PlayerFrostedModalSheet(
+        onDismissRequest = onDismiss
     ) {
-        KeepPlayerSheetImmersive()
-        CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 16.dp)
-                    .padding(bottom = 20.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 12.dp)
+                .padding(bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -1185,5 +1276,4 @@ fun DecoderAndVideoModalSheet(
             }
         }
     }
-}
 }

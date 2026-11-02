@@ -1195,19 +1195,16 @@ internal fun RenameMediaDialog(
 internal fun MediaFileInfoModalSheet(
     info: com.example.data.DetailedMediaFileInfo,
     onRenameRequest: (() -> Unit)? = null,
+    usePlayerFrostedGlass: Boolean = false,
     onDismiss: () -> Unit
 ) {
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-        modifier = Modifier.testTag("media_file_info_sheet")
-    ) {
+    val sheetContent: @Composable () -> Unit = {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp)
-                .padding(bottom = 28.dp),
+                .padding(horizontal = if (usePlayerFrostedGlass) 12.dp else 20.dp)
+                .padding(bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Row(
@@ -1526,6 +1523,23 @@ internal fun MediaFileInfoModalSheet(
                     }
                 }
             }
+        }
+    }
+
+    if (usePlayerFrostedGlass) {
+        PlayerFrostedModalSheet(
+            onDismissRequest = onDismiss,
+            modifier = Modifier.testTag("media_file_info_sheet")
+        ) {
+            sheetContent()
+        }
+    } else {
+        ModalBottomSheet(
+            onDismissRequest = onDismiss,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+            modifier = Modifier.testTag("media_file_info_sheet")
+        ) {
+            sheetContent()
         }
     }
 }

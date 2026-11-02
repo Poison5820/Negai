@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -966,48 +967,95 @@ private fun FoldersTabContent(
     onOpenLastPlayed: () -> Unit
 ) {
     val isSelectionMode = selectedFolderIds.isNotEmpty()
-    LazyColumn(
+    val horizontalPad = if (compactMode) 12.dp else 16.dp
+    Column(
         modifier = Modifier
-            .fillMaxWidth()
+            .fillMaxSize()
             .widthIn(max = 1200.dp)
-            .testTag("folders_lazy_list"),
-        contentPadding = PaddingValues(
-            horizontal = if (compactMode) 12.dp else 16.dp,
-            vertical = if (compactMode) 4.dp else 8.dp
-        ),
-        verticalArrangement = Arrangement.spacedBy(if (compactMode) 8.dp else 12.dp)
     ) {
-        if (lastPlayedFile != null && searchQuery.isBlank()) {
-            item(key = "last_played_file_card") {
-                LastPlayedFileButton(
-                    item = lastPlayedFile,
-                    resumeEnabled = resumePlaybackEnabled,
-                    compactMode = compactMode,
-                    onClick = onOpenLastPlayed
+        // Pinned compact header: Continue Watching + Compact Search Bar stay fixed while folders scroll underneath
+        Surface(
+            color = MaterialTheme.colorScheme.background,
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("folders_pinned_top_header")
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        start = horizontalPad,
+                        end = horizontalPad,
+                        top = if (compactMode) 4.dp else 6.dp,
+                        bottom = if (compactMode) 6.dp else 8.dp
+                    ),
+                verticalArrangement = Arrangement.spacedBy(if (compactMode) 6.dp else 8.dp)
+            ) {
+                if (lastPlayedFile != null && searchQuery.isBlank()) {
+                    LastPlayedFileButton(
+                        item = lastPlayedFile,
+                        resumeEnabled = resumePlaybackEnabled,
+                        compactMode = true,
+                        onClick = onOpenLastPlayed
+                    )
+                }
+
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = onSearchQueryChange,
+                    placeholder = {
+                        Text(
+                            text = tr("Поиск папок и серий…", "Search folders & episodes…"),
+                            style = MaterialTheme.typography.bodySmall,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    },
+                    textStyle = MaterialTheme.typography.bodySmall,
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    },
+                    trailingIcon = {
+                        if (searchQuery.isNotEmpty()) {
+                            IconButton(
+                                onClick = { onSearchQueryChange("") },
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .testTag("clear_folder_search_button")
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = tr("Очистить поиск", "Clear search"),
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+                        }
+                    },
+                    singleLine = true,
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 44.dp)
+                        .testTag("search_folders_input")
                 )
             }
         }
 
-        item(key = "search_bar") {
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = onSearchQueryChange,
-                placeholder = { Text(tr("Поиск папок и серий…", "Search folders & episodes…")) },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                trailingIcon = {
-                    if (searchQuery.isNotEmpty()) {
-                        IconButton(onClick = { onSearchQueryChange("") }) {
-                            Icon(Icons.Default.Close, contentDescription = tr("Очистить поиск", "Clear search"))
-                        }
-                    }
-                },
-                singleLine = true,
-                shape = RoundedCornerShape(14.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("search_folders_input")
-            )
-        }
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .testTag("folders_lazy_list"),
+            contentPadding = PaddingValues(
+                horizontal = horizontalPad,
+                vertical = if (compactMode) 4.dp else 8.dp
+            ),
+            verticalArrangement = Arrangement.spacedBy(if (compactMode) 8.dp else 12.dp)
+        ) {
 
         item(key = "quick_actions") {
             Surface(
@@ -1221,6 +1269,7 @@ private fun FoldersTabContent(
 
         item(key = "bottom_spacer") {
             Spacer(modifier = Modifier.height(12.dp))
+        }
         }
     }
 }

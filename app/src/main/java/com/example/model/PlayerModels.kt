@@ -812,10 +812,10 @@ enum class SleepTimerPreset(
 }
 
 object AppVersionInfo {
-    const val VERSION_NAME = "3.1-pre1"
-    const val VERSION_CODE = 8
-    const val BADGE_TEXT = "v3.1 Pre-release"
-    const val RELEASE_TAG = "v3.1-pre1"
+    const val VERSION_NAME = "3.1"
+    const val VERSION_CODE = 9
+    const val BADGE_TEXT = "v3.1"
+    const val RELEASE_TAG = "v3.1"
     const val GITHUB_REPO_URL = "https://github.com/Poison5820/Negai"
     const val OBTAINIUM_ADD_URL = "https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/Poison5820/Negai"
 }

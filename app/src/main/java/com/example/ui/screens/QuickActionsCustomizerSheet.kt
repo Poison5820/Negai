@@ -93,19 +93,16 @@ fun QuickActionsCustomizerSheet(
         .ifEmpty { PlayerQuickAction.defaultActions }
     val availableToAdd = com.example.model.QuickActionsSerializer.availableToAdd(activeList)
 
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        containerColor = PlayerPopupSheetContainerColor,
-        scrimColor = PlayerPopupSheetScrimColor
+    PlayerFrostedModalSheet(
+        onDismissRequest = onDismiss
     ) {
-        KeepPlayerSheetImmersive()
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp)
-                .padding(bottom = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+                .padding(horizontal = 12.dp)
+                .padding(bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             // Header
             Row(

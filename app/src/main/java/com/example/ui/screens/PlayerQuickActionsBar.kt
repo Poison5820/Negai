@@ -193,6 +193,7 @@ internal fun PlayerQuickActionsBar(
     onUpdateSkipIntroSeconds: (Int) -> Unit = {},
     onSeekByMs: (Long) -> Unit = {},
     onSelectOrientationMode: (PlayerOrientationMode) -> Unit = {},
+    onToggleOrientationLock: () -> Unit = {},
     onOpenCustomizer: () -> Unit,
     onUserInteraction: () -> Unit = {},
     onScrollStateChanged: (Boolean) -> Unit = {},
@@ -276,7 +277,9 @@ internal fun PlayerQuickActionsBar(
             onClearAbLoop = onClearAbLoop,
             onUpdateSkipIntroSeconds = onUpdateSkipIntroSeconds,
             onSeekByMs = onSeekByMs,
-            onSelectOrientationMode = onSelectOrientationMode
+            onSelectOrientationMode = onSelectOrientationMode,
+            isOrientationLocked = isOrientationLocked,
+            onToggleOrientationLock = onToggleOrientationLock
         )
     }
 
@@ -571,7 +574,8 @@ private fun QuickActionHoldButton(
         playbackState = playbackState,
         settings = settings,
         scaleMode = scaleMode,
-        orientationMode = orientationMode
+        orientationMode = orientationMode,
+        isOrientationLocked = isOrientationLocked
     )
 
     val currentBuildMenuItems by rememberUpdatedState(buildMenuItems)
@@ -588,7 +592,7 @@ private fun QuickActionHoldButton(
             val menuItems = currentBuildMenuItems()
             if (menuItems.isNotEmpty()) {
                 val popupOffsetY = with(density) {
-                    -((menuItems.size * 38 + 42).coerceAtMost(315)).dp.roundToPx()
+                    -((menuItems.size * 36 + 38).coerceAtMost(305)).dp.roundToPx()
                 }
                 Popup(
                     alignment = Alignment.TopCenter,
@@ -668,19 +672,58 @@ private fun QuickActionHoldButton(
 
                         if (!holdTriggered) return@awaitEachGesture
 
-                        // Long press activated: open the mini popup menu immediately and keep tracking
-                        // the user's finger continuously until release.
+                        // Long press activated: open the mini popup menu immediately and orient selection
+                        // directly to the finger's vertical position over the interface (no virtual scroll offset).
                         val initialItems = currentBuildMenuItems()
                         if (initialItems.isEmpty()) return@awaitEachGesture
 
-                        var localHoveredIdx = initialItems.indexOfFirst { it.isSelected }
-                            .takeIf { it >= 0 } ?: initialItems.lastIndex.coerceAtLeast(0)
-                        val startHoverIdx = localHoveredIdx
+                        itemBoundsInWindow.keys.retainAll(initialItems.indices.toSet())
+                        val activeSelectedIdx = initialItems.indexOfFirst { it.isSelected }
+
+                        fun mapFingerPositionToMenuIndex(
+                            localY: Float,
+                            itemsList: List<QuickHoldMenuItem>
+                        ): Int {
+                            if (itemsList.isEmpty()) return 0
+                            val fingerWindowY = buttonWindowPos.y + localY
+                            val validBounds = itemBoundsInWindow.entries
+                                .filter { it.key in itemsList.indices }
+                                .sortedBy { it.key }
+
+                            if (validBounds.isNotEmpty()) {
+                                // Direct hit inside an item's window Y range
+                                validBounds.firstOrNull { (_, range) ->
+                                    fingerWindowY in range
+                                }?.let { return it.key }
+
+                                val topBound = validBounds.first()
+                                val bottomBound = validBounds.last()
+                                if (fingerWindowY <= topBound.value.start) {
+                                    return topBound.key
+                                }
+                                // When finger is on the button or at/below the bottom of the popup,
+                                // it points directly at the bottom "Откл." ("Off") item.
+                                if (fingerWindowY >= bottomBound.value.start) {
+                                    return itemsList.lastIndex
+                                }
+                                return validBounds.minByOrNull { (_, range) ->
+                                    val center = (range.start + range.endInclusive) * 0.5f
+                                    abs(fingerWindowY - center)
+                                }?.key ?: itemsList.lastIndex
+                            }
+
+                            // Geometric fallback before first layout pass:
+                            // Bottom of the menu (localY >= -6dp, on or right above the button) = lastIndex ("Откл."),
+                            // moving finger upward above the button selects progressively higher items.
+                            val heightAboveButtonPx = (-localY - with(density) { 6.dp.toPx() }).coerceAtLeast(0f)
+                            val stepsUpFromBottom = (heightAboveButtonPx / stepPx).toInt()
+                            return (itemsList.lastIndex - stepsUpFromBottom).coerceIn(0, itemsList.lastIndex)
+                        }
+
+                        var localHoveredIdx = mapFingerPositionToMenuIndex(downPos.y, initialItems)
 
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         currentOnOpenHoldMenu(localHoveredIdx)
-
-                        var dragStartLocalY: Float? = null
 
                         while (true) {
                             val event = awaitPointerEvent()
@@ -688,7 +731,9 @@ private fun QuickActionHoldButton(
                             if (!change.pressed) {
                                 change.consume()
                                 val finalItems = currentBuildMenuItems()
-                                if (maxMovePx >= dragThresholdPx && localHoveredIdx in finalItems.indices) {
+                                if (localHoveredIdx in finalItems.indices &&
+                                    (maxMovePx >= dragThresholdPx || localHoveredIdx != activeSelectedIdx)
+                                ) {
                                     finalItems[localHoveredIdx].onSelect()
                                     currentOnDismissHoldMenu()
                                 }
@@ -704,26 +749,9 @@ private fun QuickActionHoldButton(
                                 maxMovePx = moveDist
                             }
 
-                            val anchorY = dragStartLocalY ?: change.position.y.also { dragStartLocalY = it }
                             val itemsNow = currentBuildMenuItems()
                             if (itemsNow.isNotEmpty()) {
-                                val fingerWindowY = buttonWindowPos.y + change.position.y
-                                // 1. Direct hit test against rendered popup item window bounds if available
-                                val directHitIdx = itemBoundsInWindow.entries.firstOrNull { (idx, range) ->
-                                    idx in itemsNow.indices && fingerWindowY in range
-                                }?.key
-
-                                val computedIdx = if (directHitIdx != null) {
-                                    directHitIdx
-                                } else {
-                                    // 2. Smooth relative vertical drag fallback:
-                                    // Moving finger UP (negative deltaY) steps upward through the menu items.
-                                    val deltaY = change.position.y - anchorY
-                                    val stepsUp = ((-deltaY) / stepPx).roundToInt()
-                                    val baseIdx = if (change.position.y < -8f) itemsNow.lastIndex else startHoverIdx
-                                    (baseIdx - stepsUp).coerceIn(0, itemsNow.lastIndex)
-                                }
-
+                                val computedIdx = mapFingerPositionToMenuIndex(change.position.y, itemsNow)
                                 if (computedIdx != localHoveredIdx) {
                                     localHoveredIdx = computedIdx
                                     haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
@@ -1013,7 +1041,9 @@ private fun buildHoldMenuItemsForAction(
     onClearAbLoop: () -> Unit,
     onUpdateSkipIntroSeconds: (Int) -> Unit,
     onSeekByMs: (Long) -> Unit,
-    onSelectOrientationMode: (PlayerOrientationMode) -> Unit
+    onSelectOrientationMode: (PlayerOrientationMode) -> Unit,
+    isOrientationLocked: Boolean = false,
+    onToggleOrientationLock: () -> Unit = {}
 ): List<QuickHoldMenuItem> {
     val offText = if (isEnglish) "Off" else "Откл."
     return when (action) {
@@ -1263,7 +1293,18 @@ private fun buildHoldMenuItemsForAction(
         }
 
         PlayerQuickAction.ORIENTATION -> {
-            listOf(
+            val lockItem = QuickHoldMenuItem(
+                id = "LOCK_ORIENTATION",
+                label = if (isEnglish) {
+                    if (isOrientationLocked) "Unlock Orientation" else "Lock Orientation"
+                } else {
+                    if (isOrientationLocked) "Снять блокировку" else "Закрепить поворот"
+                },
+                badge = if (isOrientationLocked) "🔒 ON" else "🔒",
+                isSelected = isOrientationLocked,
+                onSelect = onToggleOrientationLock
+            )
+            listOf(lockItem) + listOf(
                 PlayerOrientationMode.PORTRAIT,
                 PlayerOrientationMode.LANDSCAPE,
                 PlayerOrientationMode.VIDEO_ASPECT
@@ -1272,16 +1313,21 @@ private fun buildHoldMenuItemsForAction(
                     id = mode.id,
                     label = mode.localizedTitle(isEnglish),
                     badge = mode.localizedBadge(isEnglish),
-                    isSelected = orientationMode == mode,
+                    isSelected = !isOrientationLocked && orientationMode == mode,
                     onSelect = { onSelectOrientationMode(mode) }
                 )
             } + QuickHoldMenuItem(
                 id = "OFF",
                 label = offText,
-                badge = PlayerOrientationMode.AUTO.localizedBadge(isEnglish),
-                isSelected = orientationMode == PlayerOrientationMode.AUTO,
+                badge = settings.defaultPlayerOrientation.localizedBadge(isEnglish),
+                isSelected = !isOrientationLocked && orientationMode == settings.defaultPlayerOrientation,
                 isOffOption = true,
-                onSelect = { onSelectOrientationMode(PlayerOrientationMode.AUTO) }
+                onSelect = {
+                    if (isOrientationLocked) {
+                        onToggleOrientationLock()
+                    }
+                    onSelectOrientationMode(settings.defaultPlayerOrientation)
+                }
             )
         }
 
@@ -1320,7 +1366,8 @@ private fun resolveQuickChipVisuals(
     playbackState: PlaybackRuntimeState,
     settings: PlayerSettings,
     scaleMode: VideoScaleMode,
-    orientationMode: PlayerOrientationMode
+    orientationMode: PlayerOrientationMode,
+    isOrientationLocked: Boolean = false
 ): QuickChipVisualState {
     val isEnglish = LocalIsEnglish.current
     val accentFree = settings.playerControlsTheme.isAccentFree
@@ -1518,12 +1565,11 @@ private fun resolveQuickChipVisuals(
         }
 
         PlayerQuickAction.ORIENTATION -> {
-            val lockedOrient = orientationMode != PlayerOrientationMode.AUTO
             QuickChipVisualState(
                 accessibilityLabel = if (isEnglish) "Screen Orientation" else "Ориентация экрана",
-                iconTint = if (lockedOrient) primary else Color.White,
-                containerColor = if (lockedOrient) activePrimaryBg else neutralBg,
-                border = if (lockedOrient) activeBorder else neutralBorder,
+                iconTint = if (isOrientationLocked) primary else Color.White,
+                containerColor = if (isOrientationLocked) activePrimaryBg else neutralBg,
+                border = if (isOrientationLocked) activeBorder else neutralBorder,
                 testTag = "player_quick_chip_ORIENTATION"
             )
         }
@@ -1597,23 +1643,18 @@ internal fun SkipIntroConfigModalSheet(
     var customInputText by remember(skipIntroSeconds) { mutableStateOf(skipIntroSeconds.toString()) }
     val presets = listOf(60, 75, 85, 90, 110, 120)
 
-    val sheetBg = playerPopupSheetContainerColor()
-    ModalBottomSheet(
+    PlayerFrostedModalSheet(
         onDismissRequest = onDismiss,
-        containerColor = sheetBg,
-        scrimColor = PlayerPopupSheetScrimColor,
         modifier = Modifier.testTag("skip_intro_config_modal_sheet")
     ) {
-        KeepPlayerSheetImmersive()
-        CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 16.dp)
-                    .padding(bottom = 20.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 12.dp)
+                .padding(bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -1807,7 +1848,6 @@ internal fun SkipIntroConfigModalSheet(
                     Text(tr("Пропустить (+${skipIntroSeconds}с)", "Skip (+${skipIntroSeconds}s)"), style = MaterialTheme.typography.labelMedium)
                 }
             }
-            }
         }
     }
 }
@@ -1823,21 +1863,16 @@ internal fun SpeedQuickModalSheet(
     onSetDefaultSpeed: (Float) -> Unit = {},
     onDismiss: () -> Unit
 ) {
-    val sheetBg = playerPopupSheetContainerColor()
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        containerColor = sheetBg,
-        scrimColor = PlayerPopupSheetScrimColor
+    PlayerFrostedModalSheet(
+        onDismissRequest = onDismiss
     ) {
-        KeepPlayerSheetImmersive()
-        CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .padding(bottom = 20.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp)
+                .padding(bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
@@ -1950,7 +1985,6 @@ internal fun SpeedQuickModalSheet(
             }
         }
     }
-}
 
 /**
  * Dedicated Aspect Ratio / Scale Mode bottom sheet opened by long-pressing SCALE quick action.
@@ -1963,91 +1997,85 @@ internal fun ScaleQuickModalSheet(
     onDismiss: () -> Unit
 ) {
     val isEnglish = LocalIsEnglish.current
-    val sheetBg = playerPopupSheetContainerColor()
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        containerColor = sheetBg,
-        scrimColor = PlayerPopupSheetScrimColor
+    PlayerFrostedModalSheet(
+        onDismissRequest = onDismiss
     ) {
-        KeepPlayerSheetImmersive()
-        CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .padding(bottom = 20.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp)
+                .padding(bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Icon(
-                        imageVector = when (currentScaleMode) {
-                            VideoScaleMode.FIT -> Icons.Default.AspectRatio
-                            VideoScaleMode.ZOOM -> Icons.Default.Fullscreen
-                            VideoScaleMode.STRETCH -> Icons.Default.OpenInFull
-                        },
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Text(
-                        tr("Масштаб кадра", "Aspect Ratio"),
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
+                Icon(
+                    imageVector = when (currentScaleMode) {
+                        VideoScaleMode.FIT -> Icons.Default.AspectRatio
+                        VideoScaleMode.ZOOM -> Icons.Default.Fullscreen
+                        VideoScaleMode.STRETCH -> Icons.Default.OpenInFull
+                    },
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Text(
+                    tr("Масштаб кадра", "Aspect Ratio"),
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
 
-                VideoScaleMode.entries.forEach { mode ->
-                    val selected = currentScaleMode == mode
-                    Card(
-                        shape = RoundedCornerShape(12.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = if (selected) {
-                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.65f)
-                            } else {
-                                playerPopupCardColor()
-                            }
-                        ),
+            VideoScaleMode.entries.forEach { mode ->
+                val selected = currentScaleMode == mode
+                Card(
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (selected) {
+                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.65f)
+                        } else {
+                            playerPopupCardColor()
+                        }
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable {
+                            onSelectScaleMode(mode)
+                            onDismiss()
+                        }
+                        .testTag("scale_sheet_option_${mode.id}")
+                ) {
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(12.dp))
-                            .clickable {
+                            .padding(horizontal = 12.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Icon(
+                            imageVector = when (mode) {
+                                VideoScaleMode.FIT -> Icons.Default.AspectRatio
+                                VideoScaleMode.ZOOM -> Icons.Default.Fullscreen
+                                VideoScaleMode.STRETCH -> Icons.Default.OpenInFull
+                            },
+                            contentDescription = null,
+                            tint = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Text(
+                            text = mode.localizedTitle(isEnglish),
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+                            modifier = Modifier.weight(1f)
+                        )
+                        RadioButton(
+                            selected = selected,
+                            onClick = {
                                 onSelectScaleMode(mode)
                                 onDismiss()
                             }
-                            .testTag("scale_sheet_option_${mode.id}")
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 12.dp, vertical = 10.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            Icon(
-                                imageVector = when (mode) {
-                                    VideoScaleMode.FIT -> Icons.Default.AspectRatio
-                                    VideoScaleMode.ZOOM -> Icons.Default.Fullscreen
-                                    VideoScaleMode.STRETCH -> Icons.Default.OpenInFull
-                                },
-                                contentDescription = null,
-                                tint = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Text(
-                                text = mode.localizedTitle(isEnglish),
-                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                                modifier = Modifier.weight(1f)
-                            )
-                            RadioButton(
-                                selected = selected,
-                                onClick = {
-                                    onSelectScaleMode(mode)
-                                    onDismiss()
-                                }
-                            )
-                        }
+                        )
                     }
                 }
             }
@@ -2066,18 +2094,15 @@ internal fun EpisodesQuickModalSheet(
     onSelectEpisodeIndex: (Int) -> Unit,
     onDismiss: () -> Unit
 ) {
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        containerColor = PlayerPopupSheetContainerColor,
-        scrimColor = PlayerPopupSheetScrimColor
+    PlayerFrostedModalSheet(
+        onDismissRequest = onDismiss
     ) {
-        KeepPlayerSheetImmersive()
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp)
-                .padding(bottom = 20.dp),
+                .padding(horizontal = 12.dp)
+                .padding(bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Row(
@@ -2190,18 +2215,15 @@ internal fun AudioBoostQuickModalSheet(
     onSetAudioBoostPercent: (Int) -> Unit,
     onDismiss: () -> Unit
 ) {
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        containerColor = PlayerPopupSheetContainerColor,
-        scrimColor = PlayerPopupSheetScrimColor
+    PlayerFrostedModalSheet(
+        onDismissRequest = onDismiss
     ) {
-        KeepPlayerSheetImmersive()
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .padding(bottom = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+                .padding(horizontal = 12.dp)
+                .padding(bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             AudioBoostControlSection(
                 audioBoostPercent = audioBoostPercent,
@@ -2231,18 +2253,15 @@ internal fun SleepTimerQuickModalSheet(
     onDismiss: () -> Unit
 ) {
     val isEnglish = LocalIsEnglish.current
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        containerColor = PlayerPopupSheetContainerColor,
-        scrimColor = PlayerPopupSheetScrimColor
+    PlayerFrostedModalSheet(
+        onDismissRequest = onDismiss
     ) {
-        KeepPlayerSheetImmersive()
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .padding(bottom = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+                .padding(horizontal = 12.dp)
+                .padding(bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),

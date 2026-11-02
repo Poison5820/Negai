@@ -1,5 +1,6 @@
 package com.example.ui.screens
 
+import android.net.Uri
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DeleteOutline
@@ -34,13 +36,23 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import coil.ImageLoader
+import coil.compose.AsyncImage
+import coil.decode.VideoFrameDecoder
+import coil.request.ImageRequest
+import coil.request.videoFrameMicros
 import com.example.data.PlaybackProgressEntity
 import com.example.data.PlaybackResumeHelper
 import com.example.model.VideoResolutionFormatter
@@ -61,6 +73,16 @@ internal fun RecentTabContent(
     onOpenLastPlayed: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+    val videoThumbnailLoader = remember(context) {
+        ImageLoader.Builder(context)
+            .components {
+                add(VideoFrameDecoder.Factory())
+            }
+            .crossfade(true)
+            .build()
+    }
+
     if (recentItems.isEmpty() && lastPlayedFile == null) {
         Box(
             modifier = modifier
@@ -172,6 +194,18 @@ internal fun RecentTabContent(
                 durationMs = item.durationMs,
                 resumeEnabled = resumePlaybackEnabled
             )
+            val canExtractThumbnail = remember(item.videoUri) {
+                val lower = item.videoUri.lowercase()
+                lower.startsWith("content://") || lower.startsWith("file://") || lower.startsWith("/")
+            }
+            val frameMicros = remember(item.positionMs, item.durationMs) {
+                val targetMs = when {
+                    item.positionMs > 1_000L -> item.positionMs
+                    item.durationMs > 10_000L -> (item.durationMs / 6L).coerceAtMost(30_000L)
+                    else -> 3_000L
+                }
+                targetMs * 1_000L
+            }
             Card(
                 shape = RoundedCornerShape(if (compactMode) 14.dp else 18.dp),
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
@@ -186,26 +220,82 @@ internal fun RecentTabContent(
             ) {
                 Column(
                     modifier = Modifier.padding(
-                        horizontal = if (compactMode) 12.dp else 16.dp,
-                        vertical = if (compactMode) 10.dp else 14.dp
+                        horizontal = if (compactMode) 10.dp else 14.dp,
+                        vertical = if (compactMode) 8.dp else 11.dp
                     )
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(if (compactMode) 38.dp else 44.dp)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(MaterialTheme.colorScheme.primaryContainer),
+                                .width(if (compactMode) 72.dp else 82.dp)
+                                .height(if (compactMode) 44.dp else 50.dp)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+                                .testTag("recent_item_thumbnail_box"),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Default.PlayArrow,
                                 contentDescription = tr("Продолжить", "Resume"),
-                                tint = MaterialTheme.colorScheme.primary
+                                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.72f),
+                                modifier = Modifier.size(20.dp)
                             )
+                            if (canExtractThumbnail) {
+                                val imageRequest = remember(item.videoUri, frameMicros) {
+                                    ImageRequest.Builder(context)
+                                        .data(
+                                            if (item.videoUri.startsWith("/")) {
+                                                java.io.File(item.videoUri)
+                                            } else {
+                                                Uri.parse(item.videoUri)
+                                            }
+                                        )
+                                        .videoFrameMicros(frameMicros)
+                                        .size(240, 140)
+                                        .crossfade(true)
+                                        .build()
+                                }
+                                AsyncImage(
+                                    model = imageRequest,
+                                    imageLoader = videoThumbnailLoader,
+                                    contentDescription = item.title,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                                Box(
+                                    modifier = Modifier
+                                        .size(22.dp)
+                                        .clip(CircleShape)
+                                        .background(Color(0x99060A12)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.PlayArrow,
+                                        contentDescription = null,
+                                        tint = Color.White,
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                }
+                            }
+                            if (item.durationMs > 0L) {
+                                Surface(
+                                    color = Color(0xBF050810),
+                                    shape = RoundedCornerShape(4.dp),
+                                    modifier = Modifier
+                                        .align(Alignment.BottomEnd)
+                                        .padding(2.dp)
+                                ) {
+                                    Text(
+                                        text = formatTimeMs(item.positionMs),
+                                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.5.sp),
+                                        color = Color.White,
+                                        modifier = Modifier.padding(horizontal = 3.5.dp, vertical = 0.5.dp)
+                                    )
+                                }
+                            }
                         }
                         Column(modifier = Modifier.weight(1f)) {
                             val resBadge = VideoResolutionFormatter.formatBadge(

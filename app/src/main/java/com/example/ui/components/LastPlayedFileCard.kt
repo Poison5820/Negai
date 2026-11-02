@@ -72,11 +72,11 @@ fun LastPlayedFileButton(
         }
     }
 
-    val corner = if (compactMode) 15.dp else 18.dp
+    val corner = if (compactMode) 12.dp else 15.dp
     Card(
         shape = RoundedCornerShape(corner),
         border = BorderStroke(
-            width = 1.dp,
+            width = 0.9.dp,
             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.45f)
         ),
         colors = CardDefaults.cardColors(
@@ -93,16 +93,16 @@ fun LastPlayedFileButton(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(
-                        horizontal = if (compactMode) 12.dp else 14.dp,
-                        vertical = if (compactMode) 9.dp else 12.dp
+                        horizontal = if (compactMode) 10.dp else 12.dp,
+                        vertical = if (compactMode) 6.dp else 8.dp
                     ),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(if (compactMode) 10.dp else 14.dp)
+                horizontalArrangement = Arrangement.spacedBy(if (compactMode) 8.dp else 10.dp)
             ) {
                 Box(
                     modifier = Modifier
-                        .size(if (compactMode) 38.dp else 44.dp)
-                        .clip(RoundedCornerShape(if (compactMode) 11.dp else 13.dp))
+                        .size(if (compactMode) 30.dp else 34.dp)
+                        .clip(RoundedCornerShape(if (compactMode) 9.dp else 10.dp))
                         .background(MaterialTheme.colorScheme.primary),
                     contentAlignment = Alignment.Center
                 ) {
@@ -110,7 +110,7 @@ fun LastPlayedFileButton(
                         imageVector = Icons.Default.PlayArrow,
                         contentDescription = headerLabel,
                         tint = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.size(if (compactMode) 22.dp else 24.dp)
+                        modifier = Modifier.size(if (compactMode) 18.dp else 20.dp)
                     )
                 }
 
@@ -118,15 +118,6 @@ fun LastPlayedFileButton(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(1.dp)
                 ) {
-                    Text(
-                        text = headerLabel,
-                        style = MaterialTheme.typography.labelMedium.copy(
-                            fontWeight = FontWeight.SemiBold
-                        ),
-                        color = MaterialTheme.colorScheme.primary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
                     val resBadge = VideoResolutionFormatter.formatBadge(
                         width = item.videoWidth,
                         height = item.videoHeight,
@@ -139,7 +130,9 @@ fun LastPlayedFileButton(
                     ) {
                         Text(
                             text = item.title,
-                            style = MaterialTheme.typography.titleMedium,
+                            style = MaterialTheme.typography.titleSmall.copy(
+                                fontWeight = FontWeight.SemiBold
+                            ),
                             color = MaterialTheme.colorScheme.onSurface,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
@@ -153,14 +146,29 @@ fun LastPlayedFileButton(
                             )
                         }
                     }
-                    if (subtitleText.isNotEmpty()) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
                         Text(
-                            text = subtitleText,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            text = headerLabel,
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = FontWeight.SemiBold
+                            ),
+                            color = MaterialTheme.colorScheme.primary,
+                            maxLines = 1
                         )
+                        if (subtitleText.isNotEmpty()) {
+                            Text(
+                                text = "• $subtitleText",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
                     }
                 }
             }
@@ -170,7 +178,7 @@ fun LastPlayedFileButton(
                     progress = { progressFraction },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(3.dp),
+                        .height(2.5.dp),
                     color = MaterialTheme.colorScheme.primary,
                     trackColor = MaterialTheme.colorScheme.surfaceContainerHighest
                 )

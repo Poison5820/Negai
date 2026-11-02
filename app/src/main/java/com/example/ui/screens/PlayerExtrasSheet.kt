@@ -74,6 +74,7 @@ import com.example.ui.i18n.localizedShortLabel
 import com.example.ui.i18n.localizedSubtitle
 import com.example.ui.i18n.localizedTitle
 import com.example.ui.i18n.tr
+import com.example.ui.theme.ensureReadableOn
 import kotlin.math.roundToInt
 
 enum class VerticalGestureMode {
@@ -111,15 +112,19 @@ fun VerticalGestureHudCard(
     hudState: GestureHudState,
     modifier: Modifier = Modifier
 ) {
+    val glassBg = PlayerFrostedGlassBaseColor
+    val readableAccent = MaterialTheme.colorScheme.primary.ensureReadableOn(glassBg, minContrast = 5.4f)
     Surface(
-        color = PlayerPopupSheetContainerColor,
-        shape = RoundedCornerShape(14.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.45f)),
+        color = glassBg,
+        shape = RoundedCornerShape(16.dp),
+        border = playerPopupBorderStroke(),
+        shadowElevation = 14.dp,
         modifier = modifier.testTag("vertical_gesture_hud")
     ) {
         Column(
             modifier = Modifier
-                .width(138.dp)
+                .width(136.dp)
+                .background(playerFrostedGlassBrush(accentAlpha = 0.12f))
                 .padding(horizontal = 12.dp, vertical = 9.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(5.dp)
@@ -131,7 +136,7 @@ fun VerticalGestureHudCard(
                     Icons.Default.VolumeUp
                 },
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
+                tint = readableAccent,
                 modifier = Modifier.size(20.dp)
             )
             Text(
@@ -149,8 +154,8 @@ fun VerticalGestureHudCard(
                     .fillMaxWidth()
                     .height(4.dp)
                     .clip(RoundedCornerShape(2.dp)),
-                color = MaterialTheme.colorScheme.primary,
-                trackColor = Color.White.copy(alpha = 0.2f)
+                color = readableAccent,
+                trackColor = Color.White.copy(alpha = 0.22f)
             )
         }
     }
@@ -161,21 +166,26 @@ fun LongPressSpeedPill(
     speed: Float,
     modifier: Modifier = Modifier
 ) {
+    val glassBg = PlayerFrostedGlassBaseColor
+    val readableAccent = MaterialTheme.colorScheme.primary.ensureReadableOn(glassBg, minContrast = 5.4f)
     Surface(
-        color = PlayerPopupSheetContainerColor,
+        color = glassBg,
         shape = RoundedCornerShape(50),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)),
+        border = playerPopupBorderStroke(),
+        shadowElevation = 12.dp,
         modifier = modifier.testTag("long_press_speed_pill")
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp),
+            modifier = Modifier
+                .background(playerFrostedGlassBrush(accentAlpha = 0.14f))
+                .padding(horizontal = 12.dp, vertical = 5.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Icon(
                 imageVector = Icons.Default.FastForward,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
+                tint = readableAccent,
                 modifier = Modifier.size(14.dp)
             )
             Text(
@@ -192,17 +202,22 @@ fun ScreenLockFloatingPill(
     onUnlock: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val glassBg = PlayerFrostedGlassBaseColor
+    val readableAccent = MaterialTheme.colorScheme.primary.ensureReadableOn(glassBg, minContrast = 5.4f)
     Surface(
-        color = PlayerPopupSheetContainerColor,
+        color = glassBg,
         shape = RoundedCornerShape(50),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.65f)),
+        border = playerPopupBorderStroke(),
+        shadowElevation = 14.dp,
         modifier = modifier
             .clip(RoundedCornerShape(50))
             .clickable(onClick = onUnlock)
             .testTag("unlock_screen_pill")
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+            modifier = Modifier
+                .background(playerFrostedGlassBrush(accentAlpha = 0.14f))
+                .padding(horizontal = 14.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
@@ -210,13 +225,13 @@ fun ScreenLockFloatingPill(
                 modifier = Modifier
                     .size(26.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)),
+                    .background(readableAccent.copy(alpha = 0.22f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.Lock,
                     contentDescription = tr("Разблокировать экран", "Unlock screen"),
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = readableAccent,
                     modifier = Modifier.size(15.dp)
                 )
             }
@@ -229,7 +244,7 @@ fun ScreenLockFloatingPill(
                 Text(
                     text = tr("Нажмите для разблокировки", "Tap to unlock controls"),
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color.White.copy(alpha = 0.75f)
+                    color = Color.White.copy(alpha = 0.78f)
                 )
             }
         }
@@ -275,23 +290,18 @@ fun PlayerToolsModalSheet(
 ) {
     val isEnglish = LocalIsEnglish.current
     val speeds = listOf(0.5f, 0.75f, 1.0f, 1.25f, 1.5f, 1.75f, 2.0f, 2.5f, 3.0f)
-    val sheetBg = playerPopupSheetContainerColor()
 
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        containerColor = sheetBg,
-        scrimColor = PlayerPopupSheetScrimColor
+    PlayerFrostedModalSheet(
+        onDismissRequest = onDismiss
     ) {
-        KeepPlayerSheetImmersive()
-        CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onSurface) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 16.dp)
-                    .padding(bottom = 20.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 12.dp)
+                .padding(bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -687,7 +697,6 @@ fun PlayerToolsModalSheet(
                         }
                     }
                 }
-            }
             }
         }
     }
