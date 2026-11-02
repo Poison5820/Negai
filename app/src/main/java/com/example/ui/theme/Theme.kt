@@ -187,18 +187,19 @@ fun buildNegaiColorScheme(
 
     when {
         !isDark -> {
-            background = Color(0xFFF8FAFC)
+            // Crisp cool daylight background (#ECF1F7) so white settings/library blocks stand out clearly
+            background = Color(0xFFECF1F7)
             surface = Color(0xFFFFFFFF)
-            surfaceVariant = lerp(Color(0xFFEFF4F9), rawPrimary, 0.06f)
+            surfaceVariant = lerp(Color(0xFFE6ECF4), rawPrimary, 0.05f)
             surfaceContainerLowest = Color(0xFFFFFFFF)
-            surfaceContainerLow = lerp(Color(0xFFF1F5F9), rawPrimary, 0.03f)
-            surfaceContainer = lerp(Color(0xFFE2E8F0), rawPrimary, 0.05f)
-            surfaceContainerHigh = lerp(Color(0xFFCBD5E1), rawPrimary, 0.06f)
-            surfaceContainerHighest = lerp(Color(0xFFB8C4D4), rawPrimary, 0.08f)
-            rawOnBg = Color(0xFF0F172A)
-            rawOnSurfaceVariant = Color(0xFF334155)
-            outline = Color(0xFF64748B).ensureReadableOn(background, 3.2f)
-            outlineVariant = Color(0xFFCBD5E1)
+            surfaceContainerLow = lerp(Color(0xFFF8FAFC), rawPrimary, 0.025f)
+            surfaceContainer = lerp(Color(0xFFF1F5F9), rawPrimary, 0.04f)
+            surfaceContainerHigh = lerp(Color(0xFFE5ECF5), rawPrimary, 0.05f)
+            surfaceContainerHighest = lerp(Color(0xFFD9E2EE), rawPrimary, 0.06f)
+            rawOnBg = Color(0xFF0B1120)
+            rawOnSurfaceVariant = Color(0xFF283548)
+            outline = Color(0xFF475569).ensureReadableOn(background, 3.8f)
+            outlineVariant = lerp(Color(0xFFCBD5E1), rawPrimary, 0.15f)
         }
         isPureOled -> {
             background = Color.Black
@@ -219,11 +220,11 @@ fun buildNegaiColorScheme(
             background = Color(0xFF0C111B)
             surface = Color(0xFF111827)
             surfaceVariant = lerp(Color(0xFF1E293B), rawPrimary, 0.08f)
-            surfaceContainerLowest = Color(0xFF080C14)
-            surfaceContainerLow = lerp(Color(0xFF131C2E), rawPrimary, 0.04f)
-            surfaceContainer = lerp(Color(0xFF182338), rawPrimary, 0.06f)
-            surfaceContainerHigh = lerp(Color(0xFF1F2D46), rawPrimary, 0.08f)
-            surfaceContainerHighest = lerp(Color(0xFF293A56), rawPrimary, 0.10f)
+            surfaceContainerLowest = Color(0xFF070A11)
+            surfaceContainerLow = lerp(Color(0xFF0E1523), rawPrimary, 0.04f)
+            surfaceContainer = lerp(Color(0xFF151F32), rawPrimary, 0.06f)
+            surfaceContainerHigh = lerp(Color(0xFF1D2A42), rawPrimary, 0.08f)
+            surfaceContainerHighest = lerp(Color(0xFF263652), rawPrimary, 0.10f)
             rawOnBg = Color(0xFFF3F6FC)
             rawOnSurfaceVariant = Color(0xFFCBD5E1)
             outline = lerp(Color(0xFF3B4A66), rawPrimary, 0.22f)
@@ -231,37 +232,62 @@ fun buildNegaiColorScheme(
         }
     }
 
-    // Ensure primary & secondary accents themselves are readable when used as text/icons on surfaces
-    val primary = rawPrimary.ensureReadableOn(surface, if (isDark) 4.5f else 4.2f)
-    val secondary = rawSecondary.ensureReadableOn(surface, if (isDark) 4.3f else 4.0f)
-    val tertiary = rawTertiary.ensureReadableOn(surface, 4.0f)
+    // Ensure primary, secondary & tertiary accents are readable across ALL surfaces and containers
+    val primary = if (isDark) {
+        rawPrimary
+            .ensureReadableOn(surface, 4.8f)
+            .ensureReadableOn(surfaceContainerHigh, 4.5f)
+    } else {
+        rawPrimary
+            .ensureReadableOn(surfaceContainerHighest, 4.8f)
+            .ensureReadableOn(surface, 5.5f)
+    }
+    val secondary = if (isDark) {
+        rawSecondary
+            .ensureReadableOn(surface, 4.6f)
+            .ensureReadableOn(surfaceContainerHigh, 4.3f)
+    } else {
+        rawSecondary
+            .ensureReadableOn(surfaceContainerHighest, 4.6f)
+            .ensureReadableOn(surface, 5.2f)
+    }
+    val tertiary = if (isDark) {
+        rawTertiary
+            .ensureReadableOn(surface, 4.5f)
+            .ensureReadableOn(surfaceContainerHigh, 4.2f)
+    } else {
+        rawTertiary
+            .ensureReadableOn(surfaceContainerHighest, 4.6f)
+            .ensureReadableOn(surface, 5.2f)
+    }
 
     // Compute balanced containers from the surface + accent
     val primaryContainer = monetScheme?.primaryContainer
-        ?: if (isDark) lerp(surfaceContainerHigh, primary, 0.28f) else lerp(Color.White, primary, 0.18f)
+        ?: if (isDark) lerp(surfaceContainerHigh, primary, 0.28f) else lerp(Color.White, rawPrimary, 0.15f)
     val secondaryContainer = monetScheme?.secondaryContainer
-        ?: if (isDark) lerp(surfaceContainerHigh, secondary, 0.25f) else lerp(Color.White, secondary, 0.16f)
+        ?: if (isDark) lerp(surfaceContainerHigh, secondary, 0.25f) else lerp(Color.White, rawSecondary, 0.14f)
     val tertiaryContainer = monetScheme?.tertiaryContainer
-        ?: if (isDark) lerp(surfaceContainerHigh, tertiary, 0.24f) else lerp(Color.White, tertiary, 0.16f)
+        ?: if (isDark) lerp(surfaceContainerHigh, tertiary, 0.24f) else lerp(Color.White, rawTertiary, 0.14f)
 
     // Algorithmic auto-contrast for every "on*" role
-    val onPrimary = primary.autoContrastTextColor(minContrast = 4.8f)
+    val onPrimary = primary.autoContrastTextColor(minContrast = 5.0f)
     val onPrimaryContainer = (monetScheme?.onPrimaryContainer ?: primary)
-        .ensureReadableOn(primaryContainer, minContrast = 4.8f)
+        .ensureReadableOn(primaryContainer, minContrast = 5.2f)
 
-    val onSecondary = secondary.autoContrastTextColor(minContrast = 4.8f)
+    val onSecondary = secondary.autoContrastTextColor(minContrast = 5.0f)
     val onSecondaryContainer = (monetScheme?.onSecondaryContainer ?: secondary)
-        .ensureReadableOn(secondaryContainer, minContrast = 4.8f)
+        .ensureReadableOn(secondaryContainer, minContrast = 5.2f)
 
-    val onTertiary = tertiary.autoContrastTextColor(minContrast = 4.8f)
+    val onTertiary = tertiary.autoContrastTextColor(minContrast = 5.0f)
     val onTertiaryContainer = (monetScheme?.onTertiaryContainer ?: tertiary)
-        .ensureReadableOn(tertiaryContainer, minContrast = 4.8f)
+        .ensureReadableOn(tertiaryContainer, minContrast = 5.2f)
 
-    val onBackground = rawOnBg.ensureReadableOn(background, minContrast = 7.0f)
-    val onSurface = rawOnBg.ensureReadableOn(surface, minContrast = 7.0f)
+    val onBackground = rawOnBg.ensureReadableOn(background, minContrast = 7.5f)
+    val onSurface = rawOnBg.ensureReadableOn(surface, minContrast = 7.5f)
     val onSurfaceVariant = rawOnSurfaceVariant
-        .ensureReadableOn(surfaceVariant, minContrast = 4.8f)
-        .ensureReadableOn(surfaceContainer, minContrast = 4.8f)
+        .ensureReadableOn(surfaceVariant, minContrast = 5.0f)
+        .ensureReadableOn(surfaceContainer, minContrast = 5.0f)
+        .ensureReadableOn(surfaceContainerHigh, minContrast = 4.6f)
 
     return if (isDark) {
         darkColorScheme(

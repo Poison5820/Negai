@@ -1,11 +1,16 @@
 package com.example.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -64,8 +69,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -73,10 +78,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerEventTimeoutCancellationException
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -110,8 +123,10 @@ import com.example.ui.i18n.localizedShortLabel
 import com.example.ui.i18n.localizedShortTitle
 import com.example.ui.i18n.localizedTitle
 import com.example.ui.i18n.tr
+import com.example.ui.theme.ensureReadableOn
 import java.util.Locale
 import kotlin.math.abs
+import kotlin.math.hypot
 import kotlin.math.roundToInt
 
 /**
@@ -141,11 +156,12 @@ private val CENTER_ZONE_CANONICAL_ORDER = listOf(
 /**
  * 3-Zone bottom quick-actions bar in the video player HUD:
  * - Left zone: AUDIO, SUBTITLES, SPEED
- * - Center zone: FRAME_INTERPOLATION | ANIME4K (separated by a vertical divider)
+ * - Center zone: [MEMC text <- MEMC icon] | [Anime4K icon -> Anime4K text]
+ *   with the vertical divider strictly pinned at the 50% center of the timeline bar.
  * - Right zone: DECODER (visible by default) + all remaining enabled actions + customize button.
  *
- * Holding any button opens a compact vertical mini pop-up menu directly above that button.
- * Without lifting the finger, dragging up/down highlights options and releasing applies the choice.
+ * Holding any button opens a frosted-glass vertical mini pop-up menu directly above that button.
+ * Without lifting the finger, sliding onto an option highlights it and releasing immediately applies it.
  * At the bottom of every mini-menu is "Откл." ("Off").
  */
 @OptIn(ExperimentalFoundationApi::class)
@@ -200,9 +216,13 @@ internal fun PlayerQuickActionsBar(
     val leftActions = remember(visibleActions) {
         LEFT_ZONE_CANONICAL_ORDER.filter { it in visibleActions }
     }
-    val centerActions = remember(visibleActions) {
-        CENTER_ZONE_CANONICAL_ORDER.filter { it in visibleActions }
+    val hasFrameInterpolation = remember(visibleActions) {
+        PlayerQuickAction.FRAME_INTERPOLATION in visibleActions
     }
+    val hasAnime4K = remember(visibleActions) {
+        PlayerQuickAction.ANIME4K in visibleActions
+    }
+    val hasCenterActions = hasFrameInterpolation || hasAnime4K
     val rightActions = remember(visibleActions) {
         val rawRight = visibleActions.filter {
             it !in LEFT_ZONE_CANONICAL_ORDER && it !in CENTER_ZONE_CANONICAL_ORDER
@@ -216,10 +236,12 @@ internal fun PlayerQuickActionsBar(
     var activeHoldAction by remember { mutableStateOf<PlayerQuickAction?>(null) }
     var hoveredMenuIndex by remember { mutableIntStateOf(-1) }
 
+    val leftScrollState = rememberScrollState()
     val rightScrollState = rememberScrollState()
-    LaunchedEffect(rightScrollState.isScrollInProgress) {
-        onScrollStateChanged(rightScrollState.isScrollInProgress)
-        if (rightScrollState.isScrollInProgress) {
+    LaunchedEffect(leftScrollState.isScrollInProgress, rightScrollState.isScrollInProgress) {
+        val scrolling = leftScrollState.isScrollInProgress || rightScrollState.isScrollInProgress
+        onScrollStateChanged(scrolling)
+        if (scrolling) {
             onUserInteraction()
         }
     }
@@ -258,6 +280,8 @@ internal fun PlayerQuickActionsBar(
         )
     }
 
+    // Symmetric two-wing layout around the exact 50% center divider so the center buttons
+    // (MEMC | Anime4K) never shift horizontally when left/right zones or badge texts change.
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -273,69 +297,24 @@ internal fun PlayerQuickActionsBar(
             }
             .padding(horizontal = 2.dp)
             .testTag("player_quick_actions_row"),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        // 1. LEFT ZONE: Audio, Subtitles, Speed
+        // LEFT WING (50% width): Left Zone (Audio, Subtitles, Speed) on the far left,
+        // and MEMC (Frame Interpolation) pinned at the inner right edge next to the center divider.
         Row(
-            modifier = Modifier.testTag("player_quick_actions_left_zone"),
+            modifier = Modifier.weight(1f),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(chipGap, Alignment.Start)
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            leftActions.forEach { action ->
-                QuickActionHoldButton(
-                    action = action,
-                    playbackState = playbackState,
-                    settings = settings,
-                    scaleMode = scaleMode,
-                    orientationMode = orientationMode,
-                    isOrientationLocked = isOrientationLocked,
-                    buttonShape = buttonShape,
-                    isHoldMenuOpen = activeHoldAction == action,
-                    hoveredMenuIndex = if (activeHoldAction == action) hoveredMenuIndex else -1,
-                    buildMenuItems = { buildMenuForAction(action) },
-                    onOpenHoldMenu = { initialIdx ->
-                        onUserInteraction()
-                        activeHoldAction = action
-                        hoveredMenuIndex = initialIdx
-                        onLongPressAction(action)
-                    },
-                    onUpdateHoveredIndex = { idx ->
-                        onUserInteraction()
-                        hoveredMenuIndex = idx
-                    },
-                    onDismissHoldMenu = {
-                        activeHoldAction = null
-                        hoveredMenuIndex = -1
-                    },
-                    onClick = {
-                        onUserInteraction()
-                        activeHoldAction = null
-                        onTriggerAction(action)
-                    }
-                )
-            }
-        }
-
-        // 2. CENTER ZONE: Interpolator | Anime4K with vertical divider
-        if (centerActions.isNotEmpty()) {
             Row(
                 modifier = Modifier
-                    .padding(horizontal = 4.dp)
-                    .testTag("player_quick_actions_center_zone"),
+                    .weight(1f, fill = false)
+                    .horizontalScroll(leftScrollState, enabled = activeHoldAction == null)
+                    .testTag("player_quick_actions_left_zone"),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(chipGap, Alignment.CenterHorizontally)
+                horizontalArrangement = Arrangement.spacedBy(chipGap, Alignment.Start)
             ) {
-                centerActions.forEachIndexed { idx, action ->
-                    if (idx > 0) {
-                        Box(
-                            modifier = Modifier
-                                .width(1.dp)
-                                .height(22.dp)
-                                .background(Color.White.copy(alpha = 0.36f))
-                                .testTag("player_center_quick_actions_divider")
-                        )
-                    }
+                leftActions.forEach { action ->
                     QuickActionHoldButton(
                         action = action,
                         playbackState = playbackState,
@@ -344,6 +323,158 @@ internal fun PlayerQuickActionsBar(
                         orientationMode = orientationMode,
                         isOrientationLocked = isOrientationLocked,
                         buttonShape = buttonShape,
+                        textOnLeft = false,
+                        isHoldMenuOpen = activeHoldAction == action,
+                        hoveredMenuIndex = if (activeHoldAction == action) hoveredMenuIndex else -1,
+                        buildMenuItems = { buildMenuForAction(action) },
+                        onOpenHoldMenu = { initialIdx ->
+                            onUserInteraction()
+                            activeHoldAction = action
+                            hoveredMenuIndex = initialIdx
+                            onLongPressAction(action)
+                        },
+                        onUpdateHoveredIndex = { idx ->
+                            onUserInteraction()
+                            hoveredMenuIndex = idx
+                        },
+                        onDismissHoldMenu = {
+                            activeHoldAction = null
+                            hoveredMenuIndex = -1
+                        },
+                        onClick = {
+                            onUserInteraction()
+                            activeHoldAction = null
+                            onTriggerAction(action)
+                        }
+                    )
+                }
+            }
+
+            if (hasFrameInterpolation) {
+                Spacer(modifier = Modifier.width(chipGap))
+                // MEMC button pinned immediately left of the center divider;
+                // its text badge slides out to the LEFT ([Text] [Icon] |)
+                QuickActionHoldButton(
+                    action = PlayerQuickAction.FRAME_INTERPOLATION,
+                    playbackState = playbackState,
+                    settings = settings,
+                    scaleMode = scaleMode,
+                    orientationMode = orientationMode,
+                    isOrientationLocked = isOrientationLocked,
+                    buttonShape = buttonShape,
+                    textOnLeft = true,
+                    isHoldMenuOpen = activeHoldAction == PlayerQuickAction.FRAME_INTERPOLATION,
+                    hoveredMenuIndex = if (activeHoldAction == PlayerQuickAction.FRAME_INTERPOLATION) hoveredMenuIndex else -1,
+                    buildMenuItems = { buildMenuForAction(PlayerQuickAction.FRAME_INTERPOLATION) },
+                    onOpenHoldMenu = { initialIdx ->
+                        onUserInteraction()
+                        activeHoldAction = PlayerQuickAction.FRAME_INTERPOLATION
+                        hoveredMenuIndex = initialIdx
+                        onLongPressAction(PlayerQuickAction.FRAME_INTERPOLATION)
+                    },
+                    onUpdateHoveredIndex = { newIdx ->
+                        onUserInteraction()
+                        hoveredMenuIndex = newIdx
+                    },
+                    onDismissHoldMenu = {
+                        activeHoldAction = null
+                        hoveredMenuIndex = -1
+                    },
+                    onClick = {
+                        onUserInteraction()
+                        activeHoldAction = null
+                        onTriggerAction(PlayerQuickAction.FRAME_INTERPOLATION)
+                    }
+                )
+            }
+        }
+
+        // EXACT 50% CENTER DIVIDER (pinned to the middle of the timeline bar)
+        if (hasCenterActions) {
+            Row(
+                modifier = Modifier
+                    .padding(horizontal = 5.dp)
+                    .testTag("player_quick_actions_center_zone"),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                if (hasFrameInterpolation && hasAnime4K) {
+                    Box(
+                        modifier = Modifier
+                            .width(1.2.dp)
+                            .height(22.dp)
+                            .background(Color.White.copy(alpha = 0.44f), RoundedCornerShape(1.dp))
+                            .testTag("player_center_quick_actions_divider")
+                    )
+                }
+            }
+        }
+
+        // RIGHT WING (50% width): Anime4K pinned at the inner left edge next to the center divider,
+        // and Right Zone (Decoder + remaining actions + Customize) on the far right.
+        Row(
+            modifier = Modifier.weight(1f),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            if (hasAnime4K) {
+                // Anime4K button pinned immediately right of the center divider;
+                // its text badge slides out to the RIGHT (| [Icon] [Text])
+                QuickActionHoldButton(
+                    action = PlayerQuickAction.ANIME4K,
+                    playbackState = playbackState,
+                    settings = settings,
+                    scaleMode = scaleMode,
+                    orientationMode = orientationMode,
+                    isOrientationLocked = isOrientationLocked,
+                    buttonShape = buttonShape,
+                    textOnLeft = false,
+                    isHoldMenuOpen = activeHoldAction == PlayerQuickAction.ANIME4K,
+                    hoveredMenuIndex = if (activeHoldAction == PlayerQuickAction.ANIME4K) hoveredMenuIndex else -1,
+                    buildMenuItems = { buildMenuForAction(PlayerQuickAction.ANIME4K) },
+                    onOpenHoldMenu = { initialIdx ->
+                        onUserInteraction()
+                        activeHoldAction = PlayerQuickAction.ANIME4K
+                        hoveredMenuIndex = initialIdx
+                        onLongPressAction(PlayerQuickAction.ANIME4K)
+                    },
+                    onUpdateHoveredIndex = { newIdx ->
+                        onUserInteraction()
+                        hoveredMenuIndex = newIdx
+                    },
+                    onDismissHoldMenu = {
+                        activeHoldAction = null
+                        hoveredMenuIndex = -1
+                    },
+                    onClick = {
+                        onUserInteraction()
+                        activeHoldAction = null
+                        onTriggerAction(PlayerQuickAction.ANIME4K)
+                    }
+                )
+                Spacer(modifier = Modifier.width(chipGap))
+            } else {
+                Spacer(modifier = Modifier.width(1.dp))
+            }
+
+            Row(
+                modifier = Modifier
+                    .weight(1f, fill = false)
+                    .horizontalScroll(rightScrollState, enabled = activeHoldAction == null)
+                    .testTag("player_quick_actions_right_zone"),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(chipGap, Alignment.End)
+            ) {
+                rightActions.forEach { action ->
+                    QuickActionHoldButton(
+                        action = action,
+                        playbackState = playbackState,
+                        settings = settings,
+                        scaleMode = scaleMode,
+                        orientationMode = orientationMode,
+                        isOrientationLocked = isOrientationLocked,
+                        buttonShape = buttonShape,
+                        textOnLeft = false,
                         isHoldMenuOpen = activeHoldAction == action,
                         hoveredMenuIndex = if (activeHoldAction == action) hoveredMenuIndex else -1,
                         buildMenuItems = { buildMenuForAction(action) },
@@ -368,82 +499,42 @@ internal fun PlayerQuickActionsBar(
                         }
                     )
                 }
-            }
-        }
 
-        // 3. RIGHT ZONE: Decoder (default visible) + remaining actions + Customize button
-        Row(
-            modifier = Modifier
-                .weight(1f, fill = false)
-                .horizontalScroll(rightScrollState)
-                .testTag("player_quick_actions_right_zone"),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(chipGap, Alignment.End)
-        ) {
-            rightActions.forEach { action ->
-                QuickActionHoldButton(
-                    action = action,
-                    playbackState = playbackState,
-                    settings = settings,
-                    scaleMode = scaleMode,
-                    orientationMode = orientationMode,
-                    isOrientationLocked = isOrientationLocked,
-                    buttonShape = buttonShape,
-                    isHoldMenuOpen = activeHoldAction == action,
-                    hoveredMenuIndex = if (activeHoldAction == action) hoveredMenuIndex else -1,
-                    buildMenuItems = { buildMenuForAction(action) },
-                    onOpenHoldMenu = { initialIdx ->
-                        onUserInteraction()
-                        activeHoldAction = action
-                        hoveredMenuIndex = initialIdx
-                        onLongPressAction(action)
-                    },
-                    onUpdateHoveredIndex = { newIdx ->
-                        onUserInteraction()
-                        hoveredMenuIndex = newIdx
-                    },
-                    onDismissHoldMenu = {
-                        activeHoldAction = null
-                        hoveredMenuIndex = -1
-                    },
-                    onClick = {
-                        onUserInteraction()
-                        activeHoldAction = null
-                        onTriggerAction(action)
-                    }
+                val customizeDesc = tr("Настроить быстрые клавиши плеера", "Customize player quick actions")
+                val readableAccent = MaterialTheme.colorScheme.primary.ensureReadableOn(
+                    Color(0xFF0C1322),
+                    minContrast = 5.2f
                 )
-            }
-
-            val customizeDesc = tr("Настроить быстрые клавиши плеера", "Customize player quick actions")
-            val customizeBorder = when {
-                frameless -> null
-                accentFree -> BorderStroke(1.dp, Color.White.copy(alpha = 0.24f))
-                else -> BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.45f))
-            }
-            Surface(
-                color = if (frameless) Color.Transparent else Color.White.copy(alpha = 0.14f),
-                shape = buttonShape,
-                border = customizeBorder,
-                modifier = Modifier
-                    .defaultMinSize(minWidth = 38.dp, minHeight = 36.dp)
-                    .clip(buttonShape)
-                    .clickable {
-                        onUserInteraction()
-                        onOpenCustomizer()
-                    }
-                    .semantics { contentDescription = customizeDesc }
-                    .testTag("player_customize_quick_actions_button")
-            ) {
-                Box(
-                    modifier = Modifier.padding(horizontal = 9.dp, vertical = 8.dp),
-                    contentAlignment = Alignment.Center
+                val customizeBorder = when {
+                    frameless -> null
+                    accentFree -> BorderStroke(0.85.dp, Color.White.copy(alpha = 0.28f))
+                    else -> BorderStroke(0.85.dp, readableAccent.copy(alpha = 0.52f))
+                }
+                Surface(
+                    color = if (frameless) Color.Transparent else Color(0x88101828),
+                    shape = buttonShape,
+                    border = customizeBorder,
+                    modifier = Modifier
+                        .defaultMinSize(minWidth = 38.dp, minHeight = 36.dp)
+                        .clip(buttonShape)
+                        .clickable {
+                            onUserInteraction()
+                            onOpenCustomizer()
+                        }
+                        .semantics { contentDescription = customizeDesc }
+                        .testTag("player_customize_quick_actions_button")
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = customizeDesc,
-                        tint = if (accentFree) Color.White.copy(alpha = 0.88f) else MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(17.dp)
-                    )
+                    Box(
+                        modifier = Modifier.padding(horizontal = 9.dp, vertical = 8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = customizeDesc,
+                            tint = if (accentFree) Color.White.copy(alpha = 0.90f) else readableAccent,
+                            modifier = Modifier.size(17.dp)
+                        )
+                    }
                 }
             }
         }
@@ -460,6 +551,7 @@ private fun QuickActionHoldButton(
     orientationMode: PlayerOrientationMode,
     isOrientationLocked: Boolean,
     buttonShape: RoundedCornerShape,
+    textOnLeft: Boolean = false,
     isHoldMenuOpen: Boolean,
     hoveredMenuIndex: Int,
     buildMenuItems: () -> List<QuickHoldMenuItem>,
@@ -470,7 +562,9 @@ private fun QuickActionHoldButton(
 ) {
     val isEnglish = LocalIsEnglish.current
     val density = LocalDensity.current
-    val stepPx = with(density) { 36.dp.toPx().coerceAtLeast(24f) }
+    val haptic = LocalHapticFeedback.current
+    val stepPx = with(density) { 28.dp.toPx().coerceAtLeast(20f) }
+    val dragThresholdPx = with(density) { 6.dp.toPx() }
 
     val chipState = resolveQuickChipVisuals(
         action = action,
@@ -484,15 +578,17 @@ private fun QuickActionHoldButton(
     val currentOnOpenHoldMenu by rememberUpdatedState(onOpenHoldMenu)
     val currentOnUpdateHoveredIndex by rememberUpdatedState(onUpdateHoveredIndex)
     val currentOnDismissHoldMenu by rememberUpdatedState(onDismissHoldMenu)
-    var cumulativeDragY by remember { mutableFloatStateOf(0f) }
-    var totalAbsDrag by remember { mutableFloatStateOf(0f) }
+    val currentOnClick by rememberUpdatedState(onClick)
+
+    var buttonWindowPos by remember { mutableStateOf(Offset.Zero) }
+    val itemBoundsInWindow = remember { mutableStateMapOf<Int, ClosedFloatingPointRange<Float>>() }
 
     Box(contentAlignment = Alignment.TopCenter) {
         if (isHoldMenuOpen) {
             val menuItems = currentBuildMenuItems()
             if (menuItems.isNotEmpty()) {
                 val popupOffsetY = with(density) {
-                    -((menuItems.size * 38 + 38).coerceAtMost(310)).dp.roundToPx()
+                    -((menuItems.size * 38 + 42).coerceAtMost(315)).dp.roundToPx()
                 }
                 Popup(
                     alignment = Alignment.TopCenter,
@@ -510,6 +606,9 @@ private fun QuickActionHoldButton(
                         title = action.localizedShortTitle(isEnglish),
                         items = menuItems,
                         hoveredIndex = hoveredMenuIndex,
+                        onItemWindowBoundsChanged = { idx, range ->
+                            itemBoundsInWindow[idx] = range
+                        },
                         onSelectItem = { item ->
                             item.onSelect()
                             currentOnDismissHoldMenu()
@@ -526,60 +625,150 @@ private fun QuickActionHoldButton(
             modifier = Modifier
                 .defaultMinSize(minWidth = 38.dp, minHeight = 36.dp)
                 .clip(buttonShape)
-                .pointerInput(action) {
-                    detectDragGesturesAfterLongPress(
-                        onDragStart = {
-                            val items = currentBuildMenuItems()
-                            cumulativeDragY = 0f
-                            totalAbsDrag = 0f
-                            val selectedIdx = items.indexOfFirst { it.isSelected }
-                                .takeIf { it >= 0 } ?: items.lastIndex.coerceAtLeast(0)
-                            currentOnOpenHoldMenu(selectedIdx)
-                        },
-                        onDrag = { change, dragAmount ->
-                            change.consume()
-                            val items = currentBuildMenuItems()
-                            if (items.isNotEmpty()) {
-                                cumulativeDragY += dragAmount.y
-                                totalAbsDrag += abs(dragAmount.y)
-                                // Sliding finger UP (negative Y) moves up from the bottom "Откл." item
-                                val stepsUp = ((-cumulativeDragY) / stepPx).roundToInt()
-                                val targetIndex = (items.lastIndex - stepsUp).coerceIn(0, items.lastIndex)
-                                currentOnUpdateHoveredIndex(targetIndex)
-                            }
-                        },
-                        onDragEnd = {
-                            val items = currentBuildMenuItems()
-                            if (totalAbsDrag >= stepPx * 0.35f && hoveredMenuIndex in items.indices) {
-                                items[hoveredMenuIndex].onSelect()
-                                currentOnDismissHoldMenu()
-                            }
-                        },
-                        onDragCancel = {
-                            // Keep popup open on cancel if user didn't drag
-                        }
-                    )
+                .onGloballyPositioned { coords ->
+                    buttonWindowPos = coords.positionInWindow()
                 }
-                .combinedClickable(
-                    onClick = onClick,
-                    onLongClick = {
-                        val items = currentBuildMenuItems()
-                        val selectedIdx = items.indexOfFirst { it.isSelected }
-                            .takeIf { it >= 0 } ?: items.lastIndex.coerceAtLeast(0)
-                        currentOnOpenHoldMenu(selectedIdx)
+                .pointerInput(action) {
+                    awaitEachGesture {
+                        val down = awaitFirstDown(requireUnconsumed = false)
+                        val downPos = down.position
+                        var holdTriggered = false
+                        var releasedAsTap = false
+                        var maxMovePx = 0f
+
+                        try {
+                            withTimeout(240L) {
+                                while (true) {
+                                    val event = awaitPointerEvent()
+                                    val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                                    if (!change.pressed) {
+                                        change.consume()
+                                        releasedAsTap = true
+                                        break
+                                    }
+                                    val dist = hypot(
+                                        change.position.x - downPos.x,
+                                        change.position.y - downPos.y
+                                    )
+                                    if (dist > maxMovePx) {
+                                        maxMovePx = dist
+                                    }
+                                }
+                            }
+                        } catch (_: PointerEventTimeoutCancellationException) {
+                            holdTriggered = true
+                        }
+
+                        if (releasedAsTap) {
+                            if (maxMovePx < dragThresholdPx * 2f) {
+                                currentOnClick()
+                            }
+                            return@awaitEachGesture
+                        }
+
+                        if (!holdTriggered) return@awaitEachGesture
+
+                        // Long press activated: open the mini popup menu immediately and keep tracking
+                        // the user's finger continuously until release.
+                        val initialItems = currentBuildMenuItems()
+                        if (initialItems.isEmpty()) return@awaitEachGesture
+
+                        var localHoveredIdx = initialItems.indexOfFirst { it.isSelected }
+                            .takeIf { it >= 0 } ?: initialItems.lastIndex.coerceAtLeast(0)
+                        val startHoverIdx = localHoveredIdx
+
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        currentOnOpenHoldMenu(localHoveredIdx)
+
+                        var dragStartLocalY: Float? = null
+
+                        while (true) {
+                            val event = awaitPointerEvent()
+                            val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                            if (!change.pressed) {
+                                change.consume()
+                                val finalItems = currentBuildMenuItems()
+                                if (maxMovePx >= dragThresholdPx && localHoveredIdx in finalItems.indices) {
+                                    finalItems[localHoveredIdx].onSelect()
+                                    currentOnDismissHoldMenu()
+                                }
+                                break
+                            }
+
+                            change.consume()
+                            val moveDist = hypot(
+                                change.position.x - downPos.x,
+                                change.position.y - downPos.y
+                            )
+                            if (moveDist > maxMovePx) {
+                                maxMovePx = moveDist
+                            }
+
+                            val anchorY = dragStartLocalY ?: change.position.y.also { dragStartLocalY = it }
+                            val itemsNow = currentBuildMenuItems()
+                            if (itemsNow.isNotEmpty()) {
+                                val fingerWindowY = buttonWindowPos.y + change.position.y
+                                // 1. Direct hit test against rendered popup item window bounds if available
+                                val directHitIdx = itemBoundsInWindow.entries.firstOrNull { (idx, range) ->
+                                    idx in itemsNow.indices && fingerWindowY in range
+                                }?.key
+
+                                val computedIdx = if (directHitIdx != null) {
+                                    directHitIdx
+                                } else {
+                                    // 2. Smooth relative vertical drag fallback:
+                                    // Moving finger UP (negative deltaY) steps upward through the menu items.
+                                    val deltaY = change.position.y - anchorY
+                                    val stepsUp = ((-deltaY) / stepPx).roundToInt()
+                                    val baseIdx = if (change.position.y < -8f) itemsNow.lastIndex else startHoverIdx
+                                    (baseIdx - stepsUp).coerceIn(0, itemsNow.lastIndex)
+                                }
+
+                                if (computedIdx != localHoveredIdx) {
+                                    localHoveredIdx = computedIdx
+                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    currentOnUpdateHoveredIndex(localHoveredIdx)
+                                }
+                            }
+                        }
                     }
-                )
+                }
                 .semantics { contentDescription = chipState.accessibilityLabel }
                 .testTag(chipState.testTag)
         ) {
             Row(
-                modifier = Modifier.padding(
-                    horizontal = if (chipState.counterBadge != null) 9.dp else 10.dp,
-                    vertical = 8.dp
-                ),
+                modifier = Modifier
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color.White.copy(alpha = 0.10f),
+                                Color.Transparent
+                            )
+                        )
+                    )
+                    .padding(
+                        horizontal = if (chipState.counterBadge != null) 9.dp else 10.dp,
+                        vertical = 8.dp
+                    ),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
+                if (textOnLeft) {
+                    AnimatedVisibility(
+                        visible = chipState.counterBadge != null,
+                        enter = expandHorizontally(expandFrom = Alignment.End) + fadeIn(),
+                        exit = shrinkHorizontally(shrinkTowards = Alignment.End) + fadeOut()
+                    ) {
+                        Text(
+                            text = chipState.counterBadge.orEmpty(),
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.White,
+                            maxLines = 1
+                        )
+                    }
+                }
+
                 Icon(
                     imageVector = when (action) {
                         PlayerQuickAction.SCALE -> when (scaleMode) {
@@ -601,14 +790,21 @@ private fun QuickActionHoldButton(
                         modifier = Modifier.size(12.dp)
                     )
                 }
-                if (chipState.counterBadge != null) {
-                    Text(
-                        text = chipState.counterBadge,
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = Color.White,
-                        maxLines = 1
-                    )
+
+                if (!textOnLeft) {
+                    AnimatedVisibility(
+                        visible = chipState.counterBadge != null,
+                        enter = expandHorizontally(expandFrom = Alignment.Start) + fadeIn(),
+                        exit = shrinkHorizontally(shrinkTowards = Alignment.Start) + fadeOut()
+                    ) {
+                        Text(
+                            text = chipState.counterBadge.orEmpty(),
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.White,
+                            maxLines = 1
+                        )
+                    }
                 }
             }
         }
@@ -621,116 +817,169 @@ private fun QuickActionHoldMiniPopupCard(
     title: String,
     items: List<QuickHoldMenuItem>,
     hoveredIndex: Int,
+    onItemWindowBoundsChanged: (Int, ClosedFloatingPointRange<Float>) -> Unit = { _, _ -> },
     onSelectItem: (QuickHoldMenuItem) -> Unit
 ) {
+    val glassBg = Color(0xC80B1220)
+    val readableAccent = MaterialTheme.colorScheme.primary.ensureReadableOn(glassBg, minContrast = 5.4f)
+    val glassShape = RoundedCornerShape(16.dp)
+
     Surface(
-        color = Color(0xF2101520),
-        shape = RoundedCornerShape(14.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.50f)),
-        shadowElevation = 10.dp,
+        color = glassBg,
+        shape = glassShape,
+        border = BorderStroke(
+            width = 1.dp,
+            brush = Brush.verticalGradient(
+                colors = listOf(
+                    Color.White.copy(alpha = 0.44f),
+                    readableAccent.copy(alpha = 0.62f),
+                    Color.White.copy(alpha = 0.20f)
+                )
+            )
+        ),
+        shadowElevation = 16.dp,
         modifier = Modifier
-            .widthIn(min = 168.dp, max = 240.dp)
+            .widthIn(min = 176.dp, max = 248.dp)
             .testTag("quick_hold_mini_menu_${action.id}")
     ) {
-        Column(
-            modifier = Modifier
-                .heightIn(max = 290.dp)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 6.dp, vertical = 6.dp),
-            verticalArrangement = Arrangement.spacedBy(3.dp)
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Bold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
-            )
-            items.forEachIndexed { index, item ->
-                val isHovered = index == hoveredIndex
-                if (item.isOffOption && index > 0) {
-                    HorizontalDivider(
-                        color = Color.White.copy(alpha = 0.14f),
-                        modifier = Modifier.padding(vertical = 2.dp)
+        Box(
+            modifier = Modifier.background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        Color.White.copy(alpha = 0.16f),
+                        readableAccent.copy(alpha = 0.08f),
+                        Color(0x33040812)
                     )
-                }
-                val bgColor = when {
-                    isHovered && item.isOffOption -> MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.85f)
-                    isHovered -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.90f)
-                    item.isSelected -> Color.White.copy(alpha = 0.16f)
-                    else -> Color.Transparent
-                }
-                val textColor = when {
-                    isHovered && item.isOffOption -> MaterialTheme.colorScheme.onErrorContainer
-                    isHovered -> MaterialTheme.colorScheme.onPrimaryContainer
-                    item.isOffOption -> Color(0xFFFFB4AB)
-                    item.isSelected -> MaterialTheme.colorScheme.primary
-                    else -> Color.White
-                }
-                Surface(
-                    color = bgColor,
-                    shape = RoundedCornerShape(9.dp),
+                )
+            )
+        ) {
+            Column(
+                modifier = Modifier
+                    .heightIn(max = 296.dp)
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 7.dp, vertical = 7.dp),
+                verticalArrangement = Arrangement.spacedBy(3.dp)
+            ) {
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(9.dp))
-                        .clickable { onSelectItem(item) }
-                        .testTag("quick_hold_item_${action.id}_${item.id}")
+                        .padding(horizontal = 8.dp, vertical = 2.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Row(
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = readableAccent,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                HorizontalDivider(
+                    color = Color.White.copy(alpha = 0.14f),
+                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
+                )
+                items.forEachIndexed { index, item ->
+                    val isHovered = index == hoveredIndex
+                    if (item.isOffOption && index > 0) {
+                        HorizontalDivider(
+                            color = Color.White.copy(alpha = 0.16f),
+                            modifier = Modifier.padding(vertical = 2.dp)
+                        )
+                    }
+                    val bgColor = when {
+                        isHovered && item.isOffOption -> Color(0xD97F1D1D)
+                        isHovered -> lerp(Color(0xD9152238), readableAccent, 0.34f)
+                        item.isSelected -> Color.White.copy(alpha = 0.16f)
+                        else -> Color.White.copy(alpha = 0.04f)
+                    }
+                    val itemBorder = when {
+                        isHovered && item.isOffOption -> BorderStroke(0.9.dp, Color(0xFFFFB4AB).copy(alpha = 0.85f))
+                        isHovered -> BorderStroke(0.9.dp, readableAccent.copy(alpha = 0.90f))
+                        item.isSelected -> BorderStroke(0.65.dp, readableAccent.copy(alpha = 0.48f))
+                        else -> null
+                    }
+                    val textColor = when {
+                        isHovered -> Color.White
+                        item.isOffOption -> Color(0xFFFFB4AB)
+                        item.isSelected -> readableAccent
+                        else -> Color(0xFFF1F5F9)
+                    }
+                    Surface(
+                        color = bgColor,
+                        shape = RoundedCornerShape(10.dp),
+                        border = itemBorder,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 8.dp, vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
+                            .clip(RoundedCornerShape(10.dp))
+                            .onGloballyPositioned { coords ->
+                                val topY = coords.positionInWindow().y
+                                val bottomY = topY + coords.size.height
+                                onItemWindowBoundsChanged(index, topY..bottomY)
+                            }
+                            .clickable { onSelectItem(item) }
+                            .testTag("quick_hold_item_${action.id}_${item.id}")
                     ) {
                         Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 8.dp, vertical = 6.dp),
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            modifier = Modifier.weight(1f)
+                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            if (item.isOffOption) {
-                                Icon(
-                                    imageVector = Icons.Default.PowerSettingsNew,
-                                    contentDescription = null,
-                                    tint = textColor,
-                                    modifier = Modifier.size(14.dp)
-                                )
-                            } else if (item.isSelected) {
-                                Icon(
-                                    imageVector = Icons.Default.Check,
-                                    contentDescription = null,
-                                    tint = textColor,
-                                    modifier = Modifier.size(14.dp)
-                                )
-                            } else {
-                                Spacer(modifier = Modifier.size(14.dp))
-                            }
-                            Text(
-                                text = item.label,
-                                style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp),
-                                fontWeight = if (isHovered || item.isSelected || item.isOffOption) {
-                                    FontWeight.SemiBold
-                                } else {
-                                    FontWeight.Normal
-                                },
-                                color = textColor,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                        if (!item.badge.isNullOrBlank()) {
-                            Surface(
-                                color = Color.White.copy(alpha = 0.14f),
-                                shape = RoundedCornerShape(5.dp)
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                modifier = Modifier.weight(1f)
                             ) {
+                                if (item.isOffOption) {
+                                    Icon(
+                                        imageVector = Icons.Default.PowerSettingsNew,
+                                        contentDescription = null,
+                                        tint = textColor,
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                } else if (item.isSelected) {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = null,
+                                        tint = textColor,
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                } else {
+                                    Spacer(modifier = Modifier.size(14.dp))
+                                }
                                 Text(
-                                    text = item.badge,
-                                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                                    text = item.label,
+                                    style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp),
+                                    fontWeight = if (isHovered || item.isSelected || item.isOffOption) {
+                                        FontWeight.SemiBold
+                                    } else {
+                                        FontWeight.Medium
+                                    },
                                     color = textColor,
-                                    modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp)
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
+                            }
+                            if (!item.badge.isNullOrBlank()) {
+                                Surface(
+                                    color = if (isHovered) {
+                                        Color.White.copy(alpha = 0.22f)
+                                    } else {
+                                        Color.White.copy(alpha = 0.14f)
+                                    },
+                                    shape = RoundedCornerShape(6.dp)
+                                ) {
+                                    Text(
+                                        text = item.badge,
+                                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = textColor,
+                                        modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.5.dp)
+                                    )
+                                }
                             }
                         }
                     }
@@ -1076,23 +1325,37 @@ private fun resolveQuickChipVisuals(
     val isEnglish = LocalIsEnglish.current
     val accentFree = settings.playerControlsTheme.isAccentFree
     val frameless = settings.playerControlsTheme.isFrameless
-    val primary = if (accentFree) Color.White.copy(alpha = 0.90f) else MaterialTheme.colorScheme.primary
-    val secondary = if (accentFree) Color.White.copy(alpha = 0.90f) else MaterialTheme.colorScheme.secondary
+    val darkHudGlass = Color(0xFF0C1322)
+    val primary = if (accentFree) {
+        Color.White.copy(alpha = 0.92f)
+    } else {
+        MaterialTheme.colorScheme.primary.ensureReadableOn(darkHudGlass, minContrast = 5.2f)
+    }
+    val secondary = if (accentFree) {
+        Color.White.copy(alpha = 0.92f)
+    } else {
+        MaterialTheme.colorScheme.secondary.ensureReadableOn(darkHudGlass, minContrast = 5.2f)
+    }
     val activePrimaryBg = when {
         frameless -> Color.Transparent
-        accentFree -> Color.White.copy(alpha = 0.22f)
-        else -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.75f)
+        accentFree -> Color(0x991E293B)
+        else -> lerp(Color(0xCC0E1729), primary, 0.28f)
     }
     val activeSecondaryBg = when {
         frameless -> Color.Transparent
-        accentFree -> Color.White.copy(alpha = 0.22f)
-        else -> MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.78f)
+        accentFree -> Color(0x991E293B)
+        else -> lerp(Color(0xCC0E1729), secondary, 0.28f)
     }
-    val neutralBg = if (frameless) Color.Transparent else Color.White.copy(alpha = 0.12f)
+    val neutralBg = if (frameless) Color.Transparent else Color(0x88101828)
+    val neutralBorder = when {
+        frameless -> null
+        accentFree -> BorderStroke(0.75.dp, Color.White.copy(alpha = 0.24f))
+        else -> BorderStroke(0.75.dp, Color.White.copy(alpha = 0.20f))
+    }
     val activeBorder = when {
         frameless -> null
-        accentFree -> BorderStroke(1.dp, Color.White.copy(alpha = 0.35f))
-        else -> BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.55f))
+        accentFree -> BorderStroke(0.9.dp, Color.White.copy(alpha = 0.45f))
+        else -> BorderStroke(0.9.dp, primary.copy(alpha = 0.72f))
     }
 
     return when (action) {
@@ -1104,7 +1367,7 @@ private fun resolveQuickChipVisuals(
                 counterBadge = speedStr,
                 iconTint = if (isModified) primary else Color.White,
                 containerColor = if (isModified) activePrimaryBg else neutralBg,
-                border = if (isModified) activeBorder else null,
+                border = if (isModified) activeBorder else neutralBorder,
                 testTag = "player_quick_chip_SPEED"
             )
         }
@@ -1119,7 +1382,7 @@ private fun resolveQuickChipVisuals(
                 accessibilityLabel = if (isEnglish) "Audio & Restoration" else "Аудио и очистка",
                 iconTint = primary,
                 containerColor = if (modified) activePrimaryBg else neutralBg,
-                border = if (modified) activeBorder else null,
+                border = if (modified) activeBorder else neutralBorder,
                 testTag = "player_open_audio_sheet_chip"
             )
         }
@@ -1130,7 +1393,7 @@ private fun resolveQuickChipVisuals(
                 accessibilityLabel = if (isEnglish) "Subtitles" else "Субтитры",
                 iconTint = if (subActive) primary else Color.White,
                 containerColor = if (subActive) activePrimaryBg else neutralBg,
-                border = if (subActive) activeBorder else null,
+                border = if (subActive) activeBorder else neutralBorder,
                 testTag = "player_open_subtitles_sheet_chip"
             )
         }
@@ -1143,7 +1406,7 @@ private fun resolveQuickChipVisuals(
                 counterBadge = badge,
                 iconTint = primary,
                 containerColor = if (isCustom) activePrimaryBg else neutralBg,
-                border = if (isCustom) activeBorder else null,
+                border = if (isCustom) activeBorder else neutralBorder,
                 testTag = "player_open_decoder_sheet_chip"
             )
         }
@@ -1157,7 +1420,7 @@ private fun resolveQuickChipVisuals(
                 counterBadge = badge,
                 iconTint = if (isOn) primary else Color.White,
                 containerColor = if (isOn) activePrimaryBg else neutralBg,
-                border = if (isOn) activeBorder else null,
+                border = if (isOn) activeBorder else neutralBorder,
                 testTag = "player_quick_chip_FRAME_INTERPOLATION"
             )
         }
@@ -1171,7 +1434,7 @@ private fun resolveQuickChipVisuals(
                 counterBadge = badge,
                 iconTint = if (isOn) secondary else Color.White,
                 containerColor = if (isOn) activeSecondaryBg else neutralBg,
-                border = if (isOn) activeBorder else null,
+                border = if (isOn) activeBorder else neutralBorder,
                 testTag = "player_open_anime4k_sheet_chip"
             )
         }
@@ -1184,6 +1447,7 @@ private fun resolveQuickChipVisuals(
                 counterBadge = "$currentNum/$total",
                 iconTint = primary,
                 containerColor = neutralBg,
+                border = neutralBorder,
                 testTag = "player_quick_chip_EPISODES"
             )
         }
@@ -1194,6 +1458,7 @@ private fun resolveQuickChipVisuals(
                 accessibilityLabel = if (isEnglish) "Chapters ($chapterCount)" else "Главы ($chapterCount)",
                 iconTint = if (chapterCount > 0) primary else Color.White,
                 containerColor = if (chapterCount > 0) activePrimaryBg else neutralBg,
+                border = if (chapterCount > 0) activeBorder else neutralBorder,
                 testTag = "player_quick_chip_CHAPTERS"
             )
         }
@@ -1204,7 +1469,7 @@ private fun resolveQuickChipVisuals(
                 accessibilityLabel = scaleMode.localizedShortLabel(isEnglish),
                 iconTint = if (isZoomed) primary else Color.White,
                 containerColor = if (isZoomed) activePrimaryBg else neutralBg,
-                border = if (isZoomed) activeBorder else null,
+                border = if (isZoomed) activeBorder else neutralBorder,
                 testTag = "player_quick_chip_SCALE"
             )
         }
@@ -1215,7 +1480,7 @@ private fun resolveQuickChipVisuals(
                 accessibilityLabel = if (isEnglish) "Audio Boost" else "Усиление звука",
                 iconTint = if (boosted) primary else Color.White,
                 containerColor = if (boosted) activePrimaryBg else neutralBg,
-                border = if (boosted) activeBorder else null,
+                border = if (boosted) activeBorder else neutralBorder,
                 testTag = "player_quick_chip_AUDIO_BOOST"
             )
         }
@@ -1226,7 +1491,7 @@ private fun resolveQuickChipVisuals(
                 accessibilityLabel = if (isEnglish) "Sleep Timer" else "Таймер сна",
                 iconTint = if (active) primary else Color.White,
                 containerColor = if (active) activePrimaryBg else neutralBg,
-                border = if (active) activeBorder else null,
+                border = if (active) activeBorder else neutralBorder,
                 testTag = "player_quick_chip_SLEEP_TIMER"
             )
         }
@@ -1237,7 +1502,7 @@ private fun resolveQuickChipVisuals(
                 accessibilityLabel = if (isEnglish) "A–B Loop" else "Повтор A–B",
                 iconTint = if (hasA) primary else Color.White,
                 containerColor = if (hasA) activePrimaryBg else neutralBg,
-                border = if (hasA) activeBorder else null,
+                border = if (hasA) activeBorder else neutralBorder,
                 testTag = "player_quick_chip_AB_LOOP"
             )
         }
@@ -1247,6 +1512,7 @@ private fun resolveQuickChipVisuals(
                 accessibilityLabel = if (isEnglish) "+${settings.skipIntroSeconds}s Intro" else "+${settings.skipIntroSeconds}с Опенинг",
                 iconTint = primary,
                 containerColor = neutralBg,
+                border = neutralBorder,
                 testTag = "player_quick_chip_SKIP_INTRO"
             )
         }
@@ -1257,7 +1523,7 @@ private fun resolveQuickChipVisuals(
                 accessibilityLabel = if (isEnglish) "Screen Orientation" else "Ориентация экрана",
                 iconTint = if (lockedOrient) primary else Color.White,
                 containerColor = if (lockedOrient) activePrimaryBg else neutralBg,
-                border = if (lockedOrient) activeBorder else null,
+                border = if (lockedOrient) activeBorder else neutralBorder,
                 testTag = "player_quick_chip_ORIENTATION"
             )
         }
@@ -1267,6 +1533,7 @@ private fun resolveQuickChipVisuals(
                 accessibilityLabel = if (isEnglish) "Lock Screen" else "Блокировка экрана",
                 iconTint = Color.White,
                 containerColor = neutralBg,
+                border = neutralBorder,
                 testTag = "player_quick_chip_LOCK"
             )
         }
@@ -1276,6 +1543,7 @@ private fun resolveQuickChipVisuals(
                 accessibilityLabel = "PiP",
                 iconTint = primary,
                 containerColor = neutralBg,
+                border = neutralBorder,
                 testTag = "player_quick_chip_PIP"
             )
         }
@@ -1288,7 +1556,7 @@ private fun resolveQuickChipVisuals(
                 accessibilityLabel = if (isEnglish) "More Tools" else "Все инструменты",
                 iconTint = if (hasActiveTool) primary else Color.White,
                 containerColor = if (hasActiveTool) activePrimaryBg else neutralBg,
-                border = if (hasActiveTool) activeBorder else null,
+                border = if (hasActiveTool) activeBorder else neutralBorder,
                 testTag = "player_open_tools_sheet_chip"
             )
         }
@@ -1298,6 +1566,7 @@ private fun resolveQuickChipVisuals(
                 accessibilityLabel = if (isEnglish) "File Info" else "Сведения о файле",
                 iconTint = primary,
                 containerColor = neutralBg,
+                border = neutralBorder,
                 testTag = "player_quick_chip_FILE_INFO"
             )
         }

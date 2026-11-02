@@ -7,6 +7,7 @@ import android.media.AudioManager
 import android.provider.Settings
 import android.view.Surface
 import android.view.WindowManager
+import com.example.ui.theme.ensureReadableOn
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
@@ -319,26 +320,39 @@ fun PlayerScreen(
         onDispose { view.keepScreenOn = false }
     }
 
-    // Apply & dynamically update Activity screen orientation based on video aspect ratio,
-    // ignoring any pre-buffered dimension changes during the last 2.5s of an episode.
+    // Lock video aspect dimensions per episode so pre-buffered next items can never flip orientation early
+    var lockedEpisodeIndexForAspect by remember { mutableIntStateOf(-1) }
+    var lockedEpisodeWidth by remember { mutableIntStateOf(0) }
+    var lockedEpisodeHeight by remember { mutableIntStateOf(0) }
+
+    if (playbackState.currentEpisodeIndex != lockedEpisodeIndexForAspect) {
+        lockedEpisodeIndexForAspect = playbackState.currentEpisodeIndex
+        val epW = playbackState.currentEpisode?.videoWidth?.takeIf { it > 0 } ?: playbackState.videoWidth
+        val epH = playbackState.currentEpisode?.videoHeight?.takeIf { it > 0 } ?: playbackState.videoHeight
+        lockedEpisodeWidth = epW
+        lockedEpisodeHeight = epH
+    } else if ((lockedEpisodeWidth <= 0 || lockedEpisodeHeight <= 0) &&
+        playbackState.videoWidth > 0 &&
+        playbackState.videoHeight > 0
+    ) {
+        lockedEpisodeWidth = playbackState.videoWidth
+        lockedEpisodeHeight = playbackState.videoHeight
+    }
+
+    // Apply & dynamically update Activity screen orientation strictly once per episode or manual mode change
     DisposableEffect(
         orientationMode,
         playbackState.currentEpisodeIndex,
-        playbackState.videoWidth,
-        playbackState.videoHeight
+        lockedEpisodeWidth,
+        lockedEpisodeHeight
     ) {
-        val livePosMs = positionMsFlow.value.coerceAtLeast(playbackState.currentPositionMs)
-        val isNearEnd = playbackState.durationMs > 2_500L &&
-            livePosMs >= (playbackState.durationMs - 2_500L)
-        if (!isNearEnd) {
-            val activity = context as? Activity
-            val targetOrientation = orientationMode.resolveActivityOrientation(
-                videoWidth = playbackState.videoWidth,
-                videoHeight = playbackState.videoHeight
-            )
-            if (activity != null && activity.requestedOrientation != targetOrientation) {
-                activity.requestedOrientation = targetOrientation
-            }
+        val activity = context as? Activity
+        val targetOrientation = orientationMode.resolveActivityOrientation(
+            videoWidth = lockedEpisodeWidth,
+            videoHeight = lockedEpisodeHeight
+        )
+        if (activity != null && activity.requestedOrientation != targetOrientation) {
+            activity.requestedOrientation = targetOrientation
         }
         onDispose {}
     }
@@ -1077,13 +1091,18 @@ fun PlayerScreen(
 
                     val accentFreeHud = settings.playerControlsTheme.isAccentFree
                     val framelessHud = settings.playerControlsTheme.isFrameless
-                    val hudAccentColor = if (accentFreeHud) Color.White.copy(alpha = 0.90f) else MaterialTheme.colorScheme.primary
+                    val darkGlassBase = Color(0xFF0E1524)
+                    val hudAccentColor = if (accentFreeHud) {
+                        Color.White.copy(alpha = 0.92f)
+                    } else {
+                        MaterialTheme.colorScheme.primary.ensureReadableOn(darkGlassBase, minContrast = 5.2f)
+                    }
                     val hudPillBorder = when {
                         framelessHud -> null
-                        accentFreeHud -> BorderStroke(1.dp, Color.White.copy(alpha = 0.24f))
-                        else -> BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.45f))
+                        accentFreeHud -> BorderStroke(0.8.dp, Color.White.copy(alpha = 0.32f))
+                        else -> BorderStroke(0.8.dp, hudAccentColor.copy(alpha = 0.55f))
                     }
-                    val hudPillBg = if (framelessHud) Color.Transparent else Color.White.copy(alpha = 0.14f)
+                    val hudPillBg = if (framelessHud) Color.Transparent else Color(0x8C101828)
 
                     // Clear video resolution badge (4K, 1080p, 720p, etc.)
                     val resolutionBadge = remember(
@@ -1173,7 +1192,7 @@ fun PlayerScreen(
                                         "Screen orientation: ${orientationMode.localizedTitle(true)}"
                                     ),
                                     tint = if (orientationMode != PlayerOrientationMode.AUTO && !accentFreeHud) {
-                                        MaterialTheme.colorScheme.primary
+                                        hudAccentColor
                                     } else {
                                         Color.White
                                     },

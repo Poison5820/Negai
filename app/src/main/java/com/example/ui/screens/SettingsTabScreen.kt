@@ -225,59 +225,64 @@ fun SettingsTabContent(
                     .testTag("settings_category_detail_list"),
                 contentPadding = PaddingValues(
                     horizontal = if (settings.compactUiMode) 8.dp else 10.dp,
-                    vertical = if (settings.compactUiMode) 6.dp else 8.dp
+                    vertical = if (settings.compactUiMode) 8.dp else 10.dp
                 ),
-                verticalArrangement = Arrangement.spacedBy(if (settings.compactUiMode) 8.dp else 10.dp)
+                verticalArrangement = Arrangement.spacedBy(if (settings.compactUiMode) 12.dp else 14.dp)
             ) {
                 item(key = activeCategory.id) {
-                    when (activeCategory) {
-                        SettingsCategory.APPEARANCE -> AppearanceSettingsPage(
-                            settings = settings,
-                            actions = actions,
-                            onOpenQuickActionsCustomizer = { showQuickActionsCustomizer = true }
-                        )
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(if (settings.compactUiMode) 12.dp else 14.dp)
+                    ) {
+                        when (activeCategory) {
+                            SettingsCategory.APPEARANCE -> AppearanceSettingsPage(
+                                settings = settings,
+                                actions = actions,
+                                onOpenQuickActionsCustomizer = { showQuickActionsCustomizer = true }
+                            )
 
-                        SettingsCategory.PLAYBACK -> PlaybackSettingsPage(
-                            settings = settings,
-                            actions = actions
-                        )
+                            SettingsCategory.PLAYBACK -> PlaybackSettingsPage(
+                                settings = settings,
+                                actions = actions
+                            )
 
-                        SettingsCategory.CONTROLS -> GesturesSettingsPage(
-                            settings = settings,
-                            actions = actions
-                        )
+                            SettingsCategory.CONTROLS -> GesturesSettingsPage(
+                                settings = settings,
+                                actions = actions
+                            )
 
-                        SettingsCategory.ENHANCEMENTS -> VideoAndAnime4KSettingsPage(
-                            settings = settings,
-                            actions = actions
-                        )
+                            SettingsCategory.ENHANCEMENTS -> VideoAndAnime4KSettingsPage(
+                                settings = settings,
+                                actions = actions
+                            )
 
-                        SettingsCategory.AUDIO_AND_SUBTITLES -> AudioAndSubtitlesSettingsPage(
-                            settings = settings,
-                            actions = actions
-                        )
+                            SettingsCategory.AUDIO_AND_SUBTITLES -> AudioAndSubtitlesSettingsPage(
+                                settings = settings,
+                                actions = actions
+                            )
 
-                        SettingsCategory.TORRENTS -> TorrServerSettingsPage(
-                            settings = settings,
-                            actions = actions
-                        )
+                            SettingsCategory.TORRENTS -> TorrServerSettingsPage(
+                                settings = settings,
+                                actions = actions
+                            )
 
-                        SettingsCategory.STORAGE -> StorageAndExclusionsSettingsPage(
-                            settings = settings,
-                            hasStorageAccess = hasStorageAccess,
-                            hasAllFilesAccess = hasAllFilesAccess,
-                            libraryRoots = libraryRoots,
-                            hiddenFolders = hiddenFolders,
-                            recentCount = recentCount,
-                            actions = actions
-                        )
+                            SettingsCategory.STORAGE -> StorageAndExclusionsSettingsPage(
+                                settings = settings,
+                                hasStorageAccess = hasStorageAccess,
+                                hasAllFilesAccess = hasAllFilesAccess,
+                                libraryRoots = libraryRoots,
+                                hiddenFolders = hiddenFolders,
+                                recentCount = recentCount,
+                                actions = actions
+                            )
 
-                        SettingsCategory.DEVICE_INFO -> DeviceInfoSettingsPage()
+                            SettingsCategory.DEVICE_INFO -> DeviceInfoSettingsPage()
 
-                        SettingsCategory.MISCELLANEOUS -> MiscellaneousSettingsPage(
-                            settings = settings,
-                            actions = actions
-                        )
+                            SettingsCategory.MISCELLANEOUS -> MiscellaneousSettingsPage(
+                                settings = settings,
+                                actions = actions
+                            )
+                        }
                     }
                 }
 
@@ -306,6 +311,17 @@ private fun SettingsCategoryHub(
     onSelectCategory: (SettingsCategory) -> Unit
 ) {
     val isEnglish = LocalIsEnglish.current
+    val isDark = MaterialTheme.colorScheme.background.red < 0.5f
+    val isPureOled = MaterialTheme.colorScheme.background.red < 0.01f &&
+        MaterialTheme.colorScheme.background.green < 0.01f &&
+        MaterialTheme.colorScheme.background.blue < 0.01f
+    val hubCardBg = when {
+        !isDark -> androidx.compose.ui.graphics.Color(0xFFFFFFFF).copy(alpha = 0.94f)
+        isPureOled -> androidx.compose.ui.graphics.Color(0xFF0A101B).copy(alpha = 0.92f)
+        else -> androidx.compose.ui.graphics.Color(0xFF070B13).copy(alpha = 0.92f)
+    }
+    val hubBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = if (isDark) 0.58f else 0.48f)
+
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
@@ -313,9 +329,9 @@ private fun SettingsCategoryHub(
             .testTag("settings_lazy_list"),
         contentPadding = PaddingValues(
             horizontal = if (settings.compactUiMode) 8.dp else 10.dp,
-            vertical = if (settings.compactUiMode) 6.dp else 10.dp
+            vertical = if (settings.compactUiMode) 8.dp else 12.dp
         ),
-        verticalArrangement = Arrangement.spacedBy(if (settings.compactUiMode) 8.dp else 10.dp)
+        verticalArrangement = Arrangement.spacedBy(if (settings.compactUiMode) 10.dp else 12.dp)
     ) {
         items(
             items = SettingsCategory.entries,
@@ -331,10 +347,11 @@ private fun SettingsCategoryHub(
             )
             Card(
                 shape = RoundedCornerShape(if (settings.compactUiMode) 15.dp else 18.dp),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                border = BorderStroke(0.75.dp, hubBorderColor),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer
+                    containerColor = hubCardBg
                 ),
+                elevation = CardDefaults.cardElevation(defaultElevation = if (isDark) 0.dp else 1.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .defaultMinSize(minHeight = if (settings.compactUiMode) 64.dp else 72.dp)
@@ -362,7 +379,7 @@ private fun SettingsCategoryHub(
                         Icon(
                             imageVector = category.icon(),
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
                             modifier = Modifier.size(22.dp)
                         )
                     }
@@ -374,6 +391,7 @@ private fun SettingsCategoryHub(
                         Text(
                             text = category.localizedTitle(isEnglish),
                             style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -389,7 +407,7 @@ private fun SettingsCategoryHub(
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
             }

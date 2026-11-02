@@ -1803,32 +1803,64 @@ internal fun SettingsSectionCard(
     icon: ImageVector = Icons.Default.HighQuality,
     content: @Composable () -> Unit
 ) {
+    val bgLum = MaterialTheme.colorScheme.background.red * 0.2126f +
+        MaterialTheme.colorScheme.background.green * 0.7152f +
+        MaterialTheme.colorScheme.background.blue * 0.0722f
+    val isDark = bgLum < 0.35f
+    val isPureOled = MaterialTheme.colorScheme.background.red < 0.01f &&
+        MaterialTheme.colorScheme.background.green < 0.01f &&
+        MaterialTheme.colorScheme.background.blue < 0.01f
+
+    // Darker block background in Dark theme, distinct dark glass in OLED, pure bright white in Light theme
+    val blockContainerColor = when {
+        !isDark -> Color(0xFFFFFFFF).copy(alpha = 0.95f)
+        isPureOled -> Color(0xFF0A101B).copy(alpha = 0.94f)
+        else -> Color(0xFF060A12).copy(alpha = 0.94f)
+    }
+    val accentBorderColor = MaterialTheme.colorScheme.primary.copy(
+        alpha = if (isDark) 0.62f else 0.52f
+    )
+
     Card(
-        shape = RoundedCornerShape(14.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        shape = RoundedCornerShape(16.dp),
+        border = BorderStroke(0.75.dp, accentBorderColor),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer
+            containerColor = blockContainerColor
         ),
-        modifier = Modifier.fillMaxWidth()
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = if (isDark) 0.dp else 1.5.dp
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 2.dp)
     ) {
         Column(
-            modifier = Modifier.padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 13.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(9.dp)
             ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp)
-                )
+                Box(
+                    modifier = Modifier
+                        .size(28.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = if (isDark) 0.65f else 0.85f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
                 Column {
                     Text(
                         text = title,
-                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold)
+                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     if (!subtitle.isNullOrBlank()) {
                         Text(
@@ -1839,6 +1871,10 @@ internal fun SettingsSectionCard(
                     }
                 }
             }
+            HorizontalDivider(
+                thickness = 0.5.dp,
+                color = MaterialTheme.colorScheme.primary.copy(alpha = if (isDark) 0.18f else 0.16f)
+            )
             content()
         }
     }
@@ -1852,33 +1888,56 @@ internal fun SettingToggleRow(
     onCheckedChange: (Boolean) -> Unit,
     testTag: String
 ) {
-    Row(
+    val isDark = MaterialTheme.colorScheme.background.red < 0.5f
+    val rowBg = if (isDark) {
+        MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = 0.72f)
+    } else {
+        MaterialTheme.colorScheme.surfaceContainerLow
+    }
+    Surface(
+        color = rowBg,
+        shape = RoundedCornerShape(12.dp),
+        border = BorderStroke(
+            0.6.dp,
+            if (checked) {
+                MaterialTheme.colorScheme.primary.copy(alpha = 0.45f)
+            } else {
+                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.65f)
+            }
+        ),
         modifier = Modifier
             .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
             .clickable { onCheckedChange(!checked) }
-            .padding(vertical = 2.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyMedium
-            )
-            if (!subtitle.isNullOrBlank()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    text = title,
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+                    color = MaterialTheme.colorScheme.onSurface
                 )
+                if (!subtitle.isNullOrBlank()) {
+                    Text(
+                        text = subtitle,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
+            Spacer(modifier = Modifier.width(12.dp))
+            Switch(
+                checked = checked,
+                onCheckedChange = onCheckedChange,
+                modifier = Modifier.testTag(testTag)
+            )
         }
-        Spacer(modifier = Modifier.width(12.dp))
-        Switch(
-            checked = checked,
-            onCheckedChange = onCheckedChange,
-            modifier = Modifier.testTag(testTag)
-        )
     }
 }
 

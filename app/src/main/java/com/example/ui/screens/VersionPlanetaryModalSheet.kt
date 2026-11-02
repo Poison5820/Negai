@@ -57,6 +57,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.example.ui.theme.ensureReadableOn
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
@@ -331,16 +332,19 @@ fun VersionPlanetaryModalSheet(
             ) {
                 PLANETARY_FEATURES.forEach { orbit ->
                     val isSelected = orbit.index == selectedOrbitIndex
+                    val baseSurface = MaterialTheme.colorScheme.surfaceContainerLowest
+                    val chipBg = if (isSelected) {
+                        androidx.compose.ui.graphics.lerp(baseSurface, orbit.color, 0.16f)
+                    } else {
+                        baseSurface
+                    }
+                    val readableOrbitColor = orbit.color.ensureReadableOn(chipBg, minContrast = 5.2f)
                     Surface(
-                        color = if (isSelected) {
-                            orbit.color.copy(alpha = 0.18f)
-                        } else {
-                            MaterialTheme.colorScheme.surfaceContainer
-                        },
+                        color = chipBg,
                         shape = RoundedCornerShape(12.dp),
                         border = BorderStroke(
-                            1.dp,
-                            if (isSelected) orbit.color else MaterialTheme.colorScheme.outlineVariant
+                            if (isSelected) 1.dp else 0.8.dp,
+                            if (isSelected) readableOrbitColor else MaterialTheme.colorScheme.outlineVariant
                         ),
                         modifier = Modifier
                             .clip(RoundedCornerShape(12.dp))
@@ -356,13 +360,13 @@ fun VersionPlanetaryModalSheet(
                                 modifier = Modifier
                                     .size(8.dp)
                                     .clip(CircleShape)
-                                    .background(orbit.color)
+                                    .background(readableOrbitColor)
                             )
                             Text(
                                 text = orbit.badge,
                                 style = MaterialTheme.typography.labelSmall,
                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                color = if (isSelected) orbit.color else MaterialTheme.colorScheme.onSurface
+                                color = if (isSelected) readableOrbitColor else MaterialTheme.colorScheme.onSurface
                             )
                         }
                     }
@@ -370,11 +374,13 @@ fun VersionPlanetaryModalSheet(
             }
 
             // Highlighted Selected Orbit Detail Card
+            val detailCardBg = MaterialTheme.colorScheme.surfaceContainerLowest
+            val readableSelectedColor = selectedFeature.color.ensureReadableOn(detailCardBg, minContrast = 5.2f)
             Card(
                 shape = RoundedCornerShape(16.dp),
-                border = BorderStroke(1.dp, selectedFeature.color.copy(alpha = 0.55f)),
+                border = BorderStroke(0.9.dp, readableSelectedColor.copy(alpha = 0.65f)),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                    containerColor = detailCardBg
                 ),
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -389,7 +395,7 @@ fun VersionPlanetaryModalSheet(
                         Icon(
                             imageVector = selectedFeature.icon,
                             contentDescription = null,
-                            tint = selectedFeature.color,
+                            tint = readableSelectedColor,
                             modifier = Modifier.size(20.dp)
                         )
                         Text(
@@ -407,8 +413,8 @@ fun VersionPlanetaryModalSheet(
                     Text(
                         text = if (isEnglish) selectedFeature.specsEn else selectedFeature.specsRu,
                         style = MaterialTheme.typography.labelSmall,
-                        color = selectedFeature.color,
-                        fontWeight = FontWeight.Medium
+                        color = readableSelectedColor,
+                        fontWeight = FontWeight.SemiBold
                     )
                 }
             }
@@ -422,16 +428,22 @@ fun VersionPlanetaryModalSheet(
 
             PLANETARY_FEATURES.forEach { feature ->
                 val isSelected = feature.index == selectedOrbitIndex
+                val baseCardBg = MaterialTheme.colorScheme.surfaceContainerLowest
+                val cardBg = if (isSelected) {
+                    androidx.compose.ui.graphics.lerp(baseCardBg, feature.color, 0.10f)
+                } else {
+                    baseCardBg
+                }
+                val iconCircleBg = androidx.compose.ui.graphics.lerp(cardBg, feature.color, 0.18f)
+                val readableFeatureColor = feature.color
+                    .ensureReadableOn(iconCircleBg, minContrast = 4.8f)
+                    .ensureReadableOn(cardBg, minContrast = 5.2f)
                 Surface(
-                    color = if (isSelected) {
-                        MaterialTheme.colorScheme.surfaceContainerHighest
-                    } else {
-                        MaterialTheme.colorScheme.surfaceContainer
-                    },
+                    color = cardBg,
                     shape = RoundedCornerShape(14.dp),
                     border = BorderStroke(
-                        1.dp,
-                        if (isSelected) feature.color.copy(alpha = 0.6f) else MaterialTheme.colorScheme.outlineVariant
+                        0.8.dp,
+                        if (isSelected) readableFeatureColor.copy(alpha = 0.70f) else MaterialTheme.colorScheme.primary.copy(alpha = 0.28f)
                     ),
                     modifier = Modifier
                         .fillMaxWidth()
@@ -447,13 +459,13 @@ fun VersionPlanetaryModalSheet(
                             modifier = Modifier
                                 .size(34.dp)
                                 .clip(CircleShape)
-                                .background(feature.color.copy(alpha = 0.16f)),
+                                .background(iconCircleBg),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = feature.icon,
                                 contentDescription = null,
-                                tint = feature.color,
+                                tint = readableFeatureColor,
                                 modifier = Modifier.size(18.dp)
                             )
                         }
@@ -461,7 +473,8 @@ fun VersionPlanetaryModalSheet(
                             Text(
                                 text = if (isEnglish) feature.titleEn else feature.titleRu,
                                 style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.SemiBold
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
                                 text = if (isEnglish) feature.specsEn else feature.specsRu,
@@ -475,9 +488,9 @@ fun VersionPlanetaryModalSheet(
 
             // Release v3.1 Pre-release Changelog Card
             Surface(
-                color = MaterialTheme.colorScheme.surfaceContainer,
+                color = MaterialTheme.colorScheme.surfaceContainerLowest,
                 shape = RoundedCornerShape(14.dp),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                border = BorderStroke(0.8.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.42f)),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(

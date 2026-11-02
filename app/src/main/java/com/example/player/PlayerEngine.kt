@@ -336,9 +336,13 @@ class PlayerEngine private constructor(
                 val player = _exoPlayer
                 val dur = player?.duration?.takeIf { it != C.TIME_UNSET && it > 0L } ?: _state.value.durationMs
                 val pos = player?.currentPosition?.coerceAtLeast(0L) ?: _positionMs.value
-                val isNearEpisodeEnd = dur > 2_500L && pos >= (dur - 2_500L)
-                if (isNearEpisodeEnd && _state.value.videoWidth > 0 && _state.value.videoHeight > 0) {
-                    // ExoPlayer pre-renders the next playlist item ~1-2s before the current item finishes.
+                val currentW = _state.value.videoWidth
+                val currentH = _state.value.videoHeight
+                val hasEstablishedSize = currentW > 0 && currentH > 0
+                val aspectFlipped = hasEstablishedSize && ((finalW >= finalH) != (currentW >= currentH))
+                val isNearEpisodeEnd = dur > 1_500L && pos >= (dur - 8_000L)
+                if (hasEstablishedSize && (isNearEpisodeEnd || (aspectFlipped && pos > 800L))) {
+                    // ExoPlayer pre-renders/initializes the next playlist item before the current item finishes.
                     // Defer applying the new dimensions until onMediaItemTransition so orientation never flips early!
                     pendingNextVideoWidth = finalW
                     pendingNextVideoHeight = finalH
@@ -411,8 +415,8 @@ class PlayerEngine private constructor(
                         currentEpisodeIndex = idx,
                         currentPositionMs = pos,
                         durationMs = currentDur,
-                        videoWidth = if (nextW > 0) nextW else it.videoWidth,
-                        videoHeight = if (nextH > 0) nextH else it.videoHeight,
+                        videoWidth = nextW,
+                        videoHeight = nextH,
                         chapters = emptyList(),
                         abLoopStartMs = null,
                         abLoopEndMs = null,
@@ -511,6 +515,8 @@ class PlayerEngine private constructor(
             initializedTimestampMs: Long,
             initializationDurationMs: Long
         ) {
+            val activeIdx = _exoPlayer?.currentMediaItemIndex ?: _state.value.currentEpisodeIndex
+            if (eventTime.windowIndex != activeIdx) return
             val lower = decoderName.lowercase()
             val isSw = lower.startsWith("omx.google.") ||
                 lower.startsWith("c2.android.") ||
@@ -538,6 +544,25 @@ class PlayerEngine private constructor(
                 val dispW = if (rotated) parH else parW
                 val dispH = if (rotated) parW else parH
                 val fps = format.frameRate.takeIf { it > 1f } ?: 0f
+
+                val activeIdx = _exoPlayer?.currentMediaItemIndex ?: _state.value.currentEpisodeIndex
+                if (eventTime.windowIndex != activeIdx) {
+                    // Pre-buffered next episode in playlist: cache dimensions for onMediaItemTransition
+                    // so the screen never rotates before the current episode finishes!
+                    pendingNextVideoWidth = dispW
+                    pendingNextVideoHeight = dispH
+                    return
+                }
+
+                val currentW = _state.value.videoWidth
+                val currentH = _state.value.videoHeight
+                val pos = _exoPlayer?.currentPosition?.coerceAtLeast(0L) ?: _positionMs.value
+                if (currentW > 0 && currentH > 0 && pos > 800L && ((dispW >= dispH) != (currentW >= currentH))) {
+                    pendingNextVideoWidth = dispW
+                    pendingNextVideoHeight = dispH
+                    return
+                }
+
                 detectedVideoWidth = dispW
                 detectedVideoHeight = dispH
 
@@ -563,6 +588,8 @@ class PlayerEngine private constructor(
             format: Format,
             decoderReuseEvaluation: androidx.media3.exoplayer.DecoderReuseEvaluation?
         ) {
+            val activeIdx = _exoPlayer?.currentMediaItemIndex ?: _state.value.currentEpisodeIndex
+            if (eventTime.windowIndex != activeIdx) return
             updateDetectedAudioFormat(format)
         }
     }

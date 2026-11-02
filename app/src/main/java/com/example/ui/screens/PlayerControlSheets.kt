@@ -93,9 +93,9 @@ import kotlin.math.roundToInt
 internal fun playerPopupSheetContainerColor(): Color {
     val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
     return if (isDark) {
-        Color(0xFF090D16).copy(alpha = 0.68f)
+        Color(0xFF0A101C).copy(alpha = 0.72f)
     } else {
-        MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.82f)
+        Color(0xFFF4F7FB).copy(alpha = 0.84f)
     }
 }
 
@@ -103,9 +103,9 @@ internal fun playerPopupSheetContainerColor(): Color {
 internal fun playerPopupCardColor(): Color {
     val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
     return if (isDark) {
-        Color(0xFF101726).copy(alpha = 0.60f)
+        Color(0xFF121B2E).copy(alpha = 0.58f)
     } else {
-        MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.78f)
+        Color(0xFFFFFFFF).copy(alpha = 0.78f)
     }
 }
 
@@ -113,11 +113,11 @@ internal fun playerPopupCardColor(): Color {
 internal fun playerPopupBorderStroke(): BorderStroke {
     val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
     val strokeColor = if (isDark) {
-        MaterialTheme.colorScheme.primary.copy(alpha = 0.22f)
+        MaterialTheme.colorScheme.primary.copy(alpha = 0.38f)
     } else {
-        MaterialTheme.colorScheme.primary.copy(alpha = 0.30f)
+        MaterialTheme.colorScheme.primary.copy(alpha = 0.42f)
     }
-    return BorderStroke(0.5.dp, strokeColor)
+    return BorderStroke(0.75.dp, strokeColor)
 }
 
 private tailrec fun Context.findHostActivityWindow(): Activity? = when (this) {
@@ -148,9 +148,13 @@ internal fun KeepPlayerSheetImmersive() {
     }
 }
 
-internal val PlayerPopupSheetContainerColor = Color(0xFF090D16).copy(alpha = 0.68f)
-internal val PlayerPopupSheetScrimColor = Color.Black.copy(alpha = 0.22f)
-internal val PlayerPopupCardColor = Color(0xFF101726).copy(alpha = 0.60f)
+internal val PlayerPopupSheetContainerColor: Color
+    @Composable get() = playerPopupSheetContainerColor()
+
+internal val PlayerPopupSheetScrimColor = Color.Black.copy(alpha = 0.20f)
+
+internal val PlayerPopupCardColor: Color
+    @Composable get() = playerPopupCardColor()
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
