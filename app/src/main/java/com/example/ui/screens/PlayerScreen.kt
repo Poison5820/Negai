@@ -1106,9 +1106,9 @@ fun PlayerScreen(
                         width = 0.9.dp,
                         brush = Brush.verticalGradient(
                             colors = listOf(
-                                Color.White.copy(alpha = 0.42f),
-                                hudAccentColor.copy(alpha = 0.58f),
-                                Color.White.copy(alpha = 0.18f)
+                                Color.White.copy(alpha = 0.44f),
+                                hudAccentColor.copy(alpha = 0.65f),
+                                Color.White.copy(alpha = 0.20f)
                             )
                         )
                     )
@@ -1131,7 +1131,7 @@ fun PlayerScreen(
                         Brush.verticalGradient(
                             colors = listOf(
                                 Color.White.copy(alpha = 0.16f),
-                                hudAccentColor.copy(alpha = 0.08f),
+                                hudAccentColor.copy(alpha = 0.10f),
                                 Color.Transparent
                             )
                         )
@@ -1151,6 +1151,7 @@ fun PlayerScreen(
                         color = hudPillBg,
                         shape = RoundedCornerShape(11.dp),
                         border = hudPillBorder,
+                        shadowElevation = if (framelessHud) 0.dp else 6.dp,
                         modifier = Modifier
                             .defaultMinSize(minWidth = 38.dp, minHeight = 36.dp)
                             .clip(RoundedCornerShape(11.dp))
@@ -1234,6 +1235,7 @@ fun PlayerScreen(
                             color = hudPillBg,
                             shape = RoundedCornerShape(11.dp),
                             border = hudPillBorder,
+                            shadowElevation = if (framelessHud) 0.dp else 6.dp,
                             modifier = Modifier
                                 .defaultMinSize(minHeight = 36.dp)
                                 .clip(RoundedCornerShape(11.dp))
@@ -1276,6 +1278,7 @@ fun PlayerScreen(
                             color = if (isOrientationLocked) hudActiveLockedBg else hudPillBg,
                             shape = RoundedCornerShape(11.dp),
                             border = if (isOrientationLocked) hudActiveLockedBorder else hudPillBorder,
+                            shadowElevation = if (framelessHud) 0.dp else 6.dp,
                             modifier = Modifier
                                 .defaultMinSize(minWidth = 38.dp, minHeight = 36.dp)
                                 .clip(RoundedCornerShape(11.dp))
@@ -1320,6 +1323,7 @@ fun PlayerScreen(
                             color = hudPillBg,
                             shape = RoundedCornerShape(11.dp),
                             border = hudPillBorder,
+                            shadowElevation = if (framelessHud) 0.dp else 6.dp,
                             modifier = Modifier
                                 .defaultMinSize(minWidth = 38.dp, minHeight = 36.dp)
                                 .clip(RoundedCornerShape(11.dp))
@@ -1353,6 +1357,7 @@ fun PlayerScreen(
                                 color = hudPillBg,
                                 shape = RoundedCornerShape(11.dp),
                                 border = hudPillBorder,
+                                shadowElevation = if (framelessHud) 0.dp else 6.dp,
                                 modifier = Modifier
                                     .defaultMinSize(minWidth = 38.dp, minHeight = 36.dp)
                                     .clip(RoundedCornerShape(11.dp))

@@ -330,11 +330,11 @@ class ExampleUnitTest {
             )
         )
 
-        // Finished / near-end (>= 98% and <= 15s left) -> restarts from 0
+        // Finished / near-end (>= 95% or <= 15s left) -> restarts from 0
         assertEquals(
             0L,
             com.example.data.PlaybackResumeHelper.computeResumePositionMs(
-                positionMs = duration24m - 5_000L,
+                positionMs = (duration24m * 96L) / 100L,
                 durationMs = duration24m,
                 resumeEnabled = true
             )

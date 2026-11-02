@@ -2033,8 +2033,11 @@ class PlayerEngine private constructor(
         val currentState = _state.value
         if (currentState.errorMessage != null) return
         val ep = currentState.currentEpisode ?: return
-        val pos = player.currentPosition.coerceAtLeast(0L)
+        val rawPos = player.currentPosition.coerceAtLeast(0L)
         val dur = player.duration.takeIf { it != C.TIME_UNSET && it > 0L } ?: currentState.durationMs
+        val isEnded = player.playbackState == Player.STATE_ENDED ||
+            (dur > 0L && dur >= 10_000L && (rawPos >= (dur * 95L) / 100L || (dur - rawPos) <= 15_000L))
+        val pos = if (isEnded) 0L else rawPos
         _positionMs.value = pos
         if (dur <= 0L && pos <= 0L) return
         engineScope.launch {

@@ -423,7 +423,7 @@ fun TorrentsTabContent(
             else -> {
                 itemsIndexed(
                     items = state.filteredResults,
-                    key = { idx, item -> "${item.id}_$idx" },
+                    key = { _, item -> item.magnetUri?.ifBlank { null } ?: "${item.trackerGroup.id}_${item.id}_${item.title.hashCode()}" },
                     contentType = { _, _ -> "torrent_result_card" }
                 ) { index, item ->
                     TorrentResultCard(

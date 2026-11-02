@@ -25,10 +25,7 @@ object PlaybackResumeHelper {
 
         val remainingMs = durationMs - positionMs
         if (remainingMs <= 3_000L) return 0L
-        if (durationMs >= 20_000L &&
-            positionMs >= (durationMs * 98L) / 100L &&
-            remainingMs <= 15_000L
-        ) {
+        if (durationMs >= 10_000L && (positionMs >= (durationMs * 95L) / 100L || remainingMs <= 15_000L)) {
             return 0L
         }
 

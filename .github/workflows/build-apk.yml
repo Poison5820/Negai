@@ -81,49 +81,23 @@ jobs:
             touch .env
           fi
 
-      - name: Resolve Release Version & Tag (Auto-increment patch if tag exists)
+      - name: Resolve Release Version & Tag
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           BASE_VERSION=$(grep -E 'versionName\s*=\s*"[^"]+"' app/build.gradle.kts | head -n 1 | sed -E 's/.*"([^"]+)".*/\1/')
           if [ -z "$BASE_VERSION" ]; then
-            BASE_VERSION="2.5"
+            BASE_VERSION="3.2"
           fi
           BASE_CODE=$(grep -E 'versionCode\s*=\s*[0-9]+' app/build.gradle.kts | head -n 1 | sed -E 's/[^0-9]*([0-9]+).*/\1/')
           if [ -z "$BASE_CODE" ]; then
-            BASE_CODE="6"
+            BASE_CODE="10"
           fi
 
           FINAL_VERSION="$BASE_VERSION"
           FINAL_CODE="$BASE_CODE"
           FINAL_TAG="v${FINAL_VERSION}"
-
-          if gh release view "$FINAL_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 || git rev-parse "$FINAL_TAG" >/dev/null 2>&1; then
-            PATCH=1
-            # Extract major.minor prefix (e.g. 2.5 from 2.5 or 2.5.x)
-            MAJOR_MINOR=$(echo "$BASE_VERSION" | awk -F. '{print $1"."$2}')
-            while [ "$PATCH" -le 500 ]; do
-              CANDIDATE_VER="${MAJOR_MINOR}.${PATCH}"
-              CANDIDATE_TAG="v${CANDIDATE_VER}"
-              if ! gh release view "$CANDIDATE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 && ! git rev-parse "$CANDIDATE_TAG" >/dev/null 2>&1; then
-                FINAL_VERSION="$CANDIDATE_VER"
-                FINAL_TAG="$CANDIDATE_TAG"
-                FINAL_CODE=$((BASE_CODE + PATCH))
-                break
-              fi
-              PATCH=$((PATCH + 1))
-            done
-
-            sed -i -E "s/versionName\s*=\s*\"[^\"]+\"/versionName = \"${FINAL_VERSION}\"/" app/build.gradle.kts
-            sed -i -E "s/versionCode\s*=\s*[0-9]+/versionCode = ${FINAL_CODE}/" app/build.gradle.kts
-            if [ -f app/src/main/java/com/example/model/PlayerModels.kt ]; then
-              sed -i -E "s/const val VERSION_NAME = \"[^\"]+\"/const val VERSION_NAME = \"${FINAL_VERSION}\"/" app/src/main/java/com/example/model/PlayerModels.kt
-              sed -i -E "s/const val VERSION_CODE = [0-9]+/const val VERSION_CODE = ${FINAL_CODE}/" app/src/main/java/com/example/model/PlayerModels.kt
-              sed -i -E "s/const val BADGE_TEXT = \"[^\"]+\"/const val BADGE_TEXT = \"${FINAL_TAG}\"/" app/src/main/java/com/example/model/PlayerModels.kt
-              sed -i -E "s/const val RELEASE_TAG = \"[^\"]+\"/const val RELEASE_TAG = \"${FINAL_TAG}\"/" app/src/main/java/com/example/model/PlayerModels.kt
-            fi
-          fi
 
           echo "RESOLVED_VERSION_NAME=${FINAL_VERSION}" >> "$GITHUB_ENV"
           echo "RESOLVED_RELEASE_TAG=${FINAL_TAG}" >> "$GITHUB_ENV"
@@ -148,7 +122,7 @@ jobs:
           name: negai-apk
           path: negai.apk
 
-      - name: Create GitHub Release & Upload negai.apk
+      - name: Create or Update GitHub Release & Upload negai.apk
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -159,24 +133,36 @@ jobs:
             exit 1
           fi
 
-          TAG="${RESOLVED_RELEASE_TAG:-v2.5}"
+          TAG="${RESOLVED_RELEASE_TAG:-v3.2}"
           SHORT_SHA="${GITHUB_SHA::7}"
           APK_SIZE=$(du -h negai.apk | cut -f1)
+          TITLE="negai ${TAG} — Cinema & Anime 4K Player (RU / EN)"
 
-          NOTES=$(printf "### negai %s (Pre-release) — Cinema & Anime 4K Player (RU / EN)\n\n[![Get it on Obtainium](https://raw.githubusercontent.com/ImranR98/Obtainium/main/assets/graphics/badge_obtainium.png)](https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/%s)\n\n#### 🇷🇺 Изменения в пре-релизе %s\n- **Компактные полупрозрачные меню плеера (65%%)**: все всплывающие шторки плеера сделаны компактнее с уменьшенным шрифтом и прозрачным фоном, чтобы не перекрывать видео; убран дублирующий индикатор герцовки в верхней панели.\n- **Кнопка глав и детектор озвучки в торрентах**: кнопка глав над таймлайном очищена от лишних стрелок и открывает список глав с таймингами старта; в карточке подробностей торрент-раздачи разделены «Озвучка и перевод» и «Субтитры» (с поддержкой RUS/ПМ/ПД/ЛМ/Дубляж/MVO/JacRed voices).\n- **Синхронизация звука и Bluetooth (Игровой режим)**: исправлено применение задержки при старте видео, реализован двусторонний сдвиг аудио/видео в реальном времени, рабочая кнопка ресинхронизации потока и пресеты задержки (Игровой режим -45 мс / LE Audio -60 мс / Стандартный BT -150 мс).\n- **Авто-баланс Anime4K + MEMC и вкладка «Об устройстве»**: при одновременном включении интерполяции кадров (MEMC) и тяжёлых пресетов Anime4K (CNN/CNNX) шейдер автоматически переходит в быстрый однопроходный режим без просадок FPS; в настройки добавлена вкладка с характеристиками экрана и списком аппаратных/программных декодеров MediaCodec.\n- **Единый сертификат подписи APK**: все сборки GitHub Actions подписываются одним неизменным ключом для бесшовного обновления поверх установленной версии.\n\n#### 🇬🇧 What's New in Pre-release %s\n- **Compact 65%% Translucent Player Sheets**: smaller typography, tighter spacing, and 65%% opacity backgrounds across all player popups so video stays visible; removed duplicate refresh rate badge from top bar.\n- **Clean Chapters Pill & Accurate Torrent Voiceover Parsing**: chapter pill above seekbar directly opens chapter list with start timestamps; torrent release details now separate Voiceovers (RUS/Dub/MVO/JacRed voices) from Subtitles.\n- **Real-Time A/V Sync & Bluetooth Gaming Mode Presets**: fixed startup latency overwrite, added bidirectional MediaClock A/V shift, active stream resynchronization, and Gaming Mode (-45ms) / LE Audio (-60ms) / Standard BT (-150ms) presets.\n- **Anime4K + MEMC Auto-Fast & Device Info Tab**: automatic switch to single-pass Anime4K_Fast when frame interpolation is active to prevent GPU frame drops; new Settings tab displaying screen resolution, refresh rates, HDR capabilities, and hardware/software MediaCodec decoders.\n- **Consistent APK Signing Key**: deterministic keystore fallback ensures every release updates cleanly in-place.\n\n---\n- **APK:** \`negai.apk\` (%s)\n- **Build / Commit:** \`#%s\` / \`%s\` (branch \`%s\`)\n- **Direct Download:** [negai.apk](https://github.com/%s/releases/download/%s/negai.apk)" "$TAG" "$GITHUB_REPOSITORY" "$TAG" "$TAG" "$APK_SIZE" "$GITHUB_RUN_NUMBER" "$SHORT_SHA" "$GITHUB_REF_NAME" "$GITHUB_REPOSITORY" "$TAG")
+          NOTES=$(printf "### negai %s — Cinema & Anime 4K Player (RU / EN)\n\n[![Get it on Obtainium](https://raw.githubusercontent.com/ImranR98/Obtainium/main/assets/graphics/badge_obtainium.png)](https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/%s)\n\n#### 🇷🇺 Изменения в релизе %s\n- **Умный сброс завершённых серий (≥95%%)**: если серия просмотрена до финала или титров (прогресс ≥95%% или остаток ≤15 с), повторный запуск открывает видео с 00:00 и предотвращает мгновенный переход на следующий эпизод.\n- **Плавность интерфейса 120 Гц**: устранение микрозадержек и лагов при скролле списков серий, папок, торрентов и настроек за счёт асинхронной загрузки превью, стабильных ключей LazyColumn и мемоизации компонентов.\n- **Верхние правые кнопки плеера в стиле Frosted Glass**: кнопки фиксации поворота экрана, замка от случайных нажатий и PiP получили единый стиль матового стекла с градиентным обрамлением, микробликом и объёмной тенью, как у нижней панели таймлайна.\n- **Актуализация пасхальной планетарной модели**: обновлены орбиты и характеристики технологий плеера (Игровой режим Bluetooth, авто-баланс Anime4K+MEMC, детектор озвучек торрентов).\n- **Очистка репозитория**: удалена ошибочная запись из .gitignore и синхронизированы описания функций во всех разделах.\n\n#### 🇬🇧 What's New in Release %s\n- **Smart Restart of Completed Videos (≥95%%)**: episodes watched to ≥95%% (or ending in ≤15s) automatically start at 00:00 when reopened, preventing accidental auto-skipping to the next video.\n- **120Hz Scrolling Smoothness**: eliminated stutter in episode cards, folders, torrents, and settings by switching thumbnail lookups to background IO threads, stabilizing LazyColumn keys, and memoizing gradient brushes.\n- **Frosted Glass Top HUD Buttons**: rotation lock, screen lock, and PiP utility buttons now match the bottom timeline panel with frosted glass tint, gradient borders, and depth elevation.\n- **Updated Planetary Easter Egg**: refreshed orbital specifications with Bluetooth Gaming Mode, Anime4K+MEMC auto-balance, and torrent voiceover parsing.\n- **Repository Polish**: removed invalid gitignore typo and synchronized English/Russian function descriptions across all screens.\n\n---\n- **APK:** \`negai.apk\` (%s)\n- **Build / Commit:** \`#%s\` / \`%s\` (branch \`%s\`)\n- **Direct Download:** [negai.apk](https://github.com/%s/releases/download/%s/negai.apk)" "$TAG" "$GITHUB_REPOSITORY" "$TAG" "$TAG" "$APK_SIZE" "$GITHUB_RUN_NUMBER" "$SHORT_SHA" "$GITHUB_REF_NAME" "$GITHUB_REPOSITORY" "$TAG")
 
-          gh release create "$TAG" negai.apk \
-            --repo "$GITHUB_REPOSITORY" \
-            --target "$GITHUB_SHA" \
-            --title "negai ${TAG} (Pre-release)" \
-            --notes "$NOTES" \
-            --prerelease
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release $TAG already exists on GitHub. Updating to official full Release (removing pre-release flag)..."
+            gh release edit "$TAG" \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "$TITLE" \
+              --notes "$NOTES" \
+              --prerelease=false \
+              --draft=false
+            gh release upload "$TAG" negai.apk --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            echo "Creating official full GitHub Release $TAG..."
+            gh release create "$TAG" negai.apk \
+              --repo "$GITHUB_REPOSITORY" \
+              --target "$GITHUB_SHA" \
+              --title "$TITLE" \
+              --notes "$NOTES"
+          fi
 
           REL_URL=$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json url -q .url)
-          echo "Published GitHub Pre-release: $REL_URL"
+          echo "Published GitHub Release: $REL_URL"
 
           {
-            echo "## GitHub Pre-release опубликован"
-            echo "- **Пре-релиз:** [${TAG}](${REL_URL})"
+            echo "## GitHub Release опубликован"
+            echo "- **Релиз:** [${TAG}](${REL_URL})"
             echo "- **APK:** \`negai.apk\` (${APK_SIZE})"
           } >> "$GITHUB_STEP_SUMMARY"

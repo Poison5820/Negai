@@ -134,9 +134,7 @@ object VideoThumbnailCache {
         targetHeightPx: Int = DEFAULT_THUMB_HEIGHT
     ): ImageRequest {
         val cacheKey = generateKey(videoUri, DEFAULT_FRAME_MILLIS, targetWidthPx, targetHeightPx)
-        val cachedFile = getCachedFile(context, videoUri, DEFAULT_FRAME_MILLIS, targetWidthPx, targetHeightPx)
-
-        val dataTarget: Any = cachedFile ?: Uri.parse(videoUri)
+        val dataTarget: Any = Uri.parse(videoUri)
 
         return ImageRequest.Builder(context)
             .data(dataTarget)

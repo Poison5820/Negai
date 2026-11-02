@@ -1476,9 +1476,33 @@ private fun VideoFolderCard(
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
     val cardCorner = if (compactMode) 16.dp else 20.dp
+    val cardShape = remember(compactMode) { RoundedCornerShape(cardCorner) }
+    val iconCorner = if (compactMode) 12.dp else 15.dp
+    val iconShape = remember(compactMode) { RoundedCornerShape(iconCorner) }
+
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val primaryContainer = MaterialTheme.colorScheme.primaryContainer
+    val secondaryContainer = MaterialTheme.colorScheme.secondaryContainer
+    val iconBgBrush = remember(isSelected, primaryColor, primaryContainer, secondaryContainer) {
+        if (isSelected) {
+            Brush.linearGradient(
+                colors = listOf(
+                    primaryColor,
+                    primaryColor.copy(alpha = 0.85f)
+                )
+            )
+        } else {
+            Brush.linearGradient(
+                colors = listOf(
+                    primaryContainer,
+                    secondaryContainer.copy(alpha = 0.75f)
+                )
+            )
+        }
+    }
 
     Card(
-        shape = RoundedCornerShape(cardCorner),
+        shape = cardShape,
         border = BorderStroke(
             width = if (isSelected) 2.dp else 1.dp,
             color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
@@ -1492,7 +1516,7 @@ private fun VideoFolderCard(
         ),
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(cardCorner))
+            .clip(cardShape)
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = {
@@ -1518,24 +1542,8 @@ private fun VideoFolderCard(
                 Box(
                     modifier = Modifier
                         .size(if (compactMode) 44.dp else 54.dp)
-                        .clip(RoundedCornerShape(if (compactMode) 12.dp else 15.dp))
-                        .background(
-                            if (isSelected) {
-                                Brush.linearGradient(
-                                    colors = listOf(
-                                        MaterialTheme.colorScheme.primary,
-                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.85f)
-                                    )
-                                )
-                            } else {
-                                Brush.linearGradient(
-                                    colors = listOf(
-                                        MaterialTheme.colorScheme.primaryContainer,
-                                        MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.75f)
-                                    )
-                                )
-                            }
-                        ),
+                        .clip(iconShape)
+                        .background(iconBgBrush),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(

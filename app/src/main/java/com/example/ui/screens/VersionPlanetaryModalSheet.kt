@@ -133,10 +133,10 @@ private val PLANETARY_FEATURES = listOf(
         badge = "DSP • De-Artifact",
         titleRu = "Очистка звука De-Artifact DSP и синхронизация ±5 с",
         titleEn = "Audio De-Artifact DSP, ±5s Sync & Boost",
-        subtitleRu = "3-уровневая очистка сжатых дорожек AAC/MP3/Opus от ВЧ-звона и клиппинга, сдвиг ±5 с и усиление до 200%",
-        subtitleEn = "3-level low-bitrate audio de-ringing, harmonic exciter & soft-knee de-clipper, ±5s sync & 200% boost",
-        specsRu = "De-Artifact DSP (Мягкий/Стандарт/Агрессивный) • Авто ≤128 кбит/с",
-        specsEn = "De-Artifact DSP (Soft/Standard/Aggressive) • Auto ≤128 kbps",
+        subtitleRu = "3-уровневая очистка сжатых дорожек AAC/MP3/Opus от ВЧ-звона и клиппинга, сдвиг ±5 с и пресеты задержки Bluetooth",
+        subtitleEn = "3-level low-bitrate audio de-ringing, harmonic exciter & soft-knee de-clipper, ±5s sync & BT latency presets",
+        specsRu = "DSP (Мягкий/Стандарт/Агрессивный) • Игровой режим BT (-45мс, -60мс, -150мс)",
+        specsEn = "DSP (Soft/Standard/Aggressive) • BT Gaming Presets (-45ms, -60ms, -150ms)",
         color = Color(0xFF69F0AE),
         orbitRadiusFraction = 0.68f,
         speedMultiplier = -0.8f,
@@ -150,10 +150,10 @@ private val PLANETARY_FEATURES = listOf(
         badge = "TorrServer • MKV",
         titleRu = "TorrServer P2P, встроенные главы и субтитры ASS/SRT",
         titleEn = "TorrServer P2P, Embedded Chapters & ASS/SRT",
-        subtitleRu = "Прямой стриминг торрентов в 4K, парсер глав Matroska EBML / MP4 Nero и раздельные окна серий и глав",
-        subtitleEn = "Direct 4K torrent streaming, Matroska EBML / MP4 Nero chapter parser & dedicated Episodes/Chapters sheets",
-        specsRu = "HTTP Range • DoH • Раздельные окна Серии / Главы",
-        specsEn = "HTTP Range • DoH • Dedicated Episodes / Chapters UI",
+        subtitleRu = "Прямой стриминг торрентов в 4K, парсер глав Matroska EBML / MP4 Nero, раздельные озвучки и субтитры",
+        subtitleEn = "Direct 4K torrent streaming, Matroska EBML / MP4 Nero chapter parser, voiceover parsing & dedicated Episodes/Chapters",
+        specsRu = "HTTP Range • DoH • Детектор озвучек (RUS/Дубляж/MVO) • Серии / Главы",
+        specsEn = "HTTP Range • DoH • Voiceover Parser (RUS/Dub/MVO) • Episodes / Chapters UI",
         color = Color(0xFFFFAB40),
         orbitRadiusFraction = 0.88f,
         speedMultiplier = 0.55f,
@@ -501,8 +501,8 @@ fun VersionPlanetaryModalSheet(
                 ) {
                     Text(
                         text = tr(
-                            "Релиз v3.1 — Что нового относительно v3.1-pre1",
-                            "Release v3.1 — What's New since v3.1-pre1"
+                            "Релиз v3.2 — Что нового в версии 3.2",
+                            "Release v3.2 — What's New in v3.2"
                         ),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold,
@@ -510,23 +510,21 @@ fun VersionPlanetaryModalSheet(
                     )
                     val notes = if (isEnglish) {
                         listOf(
-                            "• Unified Frosted Glass design with accent tint and horizontal compactness (440 dp) for all player pop-ups, sheets, and HUD overlays",
-                            "• Frosted Glass styling for the Skip Intro ('+85s Opening') button, top player HUD buttons, and color-coded video resolution badge (4K / 1080p / 720p)",
-                            "• Direct finger-position tracking in hold mini-menus: selection follows finger height over the menu & button so 'Off' («Откл.») at the bottom is effortless to select",
-                            "• Orientation button force-locks only on long-press (with Lock icon & accent highlight); single tap rotates without overriding global orientation settings across episodes",
-                            "• Pinned compact top header in Folders tab: 'Continue Watching' button and compact Search bar stay fixed at the top when scrolling large folder lists",
-                            "• Video frame thumbnails in Watch History extracted automatically via Coil VideoFrameDecoder with timestamp badges",
-                            "• Includes all v3.1-pre1 core upgrades: 3-level Audio De-Artifact DSP, 3-zone bottom bar with centered MEMC | Anime4K, and 2-column Settings cards"
+                            "• Smart restart of completed videos: series watched to ≥95% (or ending in ≤15s) automatically start at 00:00 instead of instantly skipping to the next episode",
+                            "• Comprehensive 120Hz scroll performance: non-blocking IO thumbnail decoding, stable LazyColumn keys, and memoized gradient cards eliminate list stutter",
+                            "• Frosted Glass top-right HUD: screen rotation lock, accidental touch lock, and PiP buttons match the bottom timeline panel with glow sheen and elevation",
+                            "• Updated Planetary Easter Egg: live orbital specs updated with Bluetooth Gaming Mode, Anime4K+MEMC auto-balance, and Voiceover parsing",
+                            "• Enhanced torrent metadata parsing: release cards clearly separate audio voiceovers (Dub/MVO/JacRed) from external subtitles",
+                            "• Hardware inspector & Device specs: display capabilities, refresh rates, HDR formats, and active MediaCodec decoders in Settings"
                         )
                     } else {
                         listOf(
-                            "• Единый стиль матового стекла (Frosted Glass) с акцентным оттенком и компактной шириной (440 dp) для всех всплывающих окон и индикаторов плеера",
-                            "• Адаптация кнопки пропуска опенинга («+85с Опенинг»), верхних кнопок плеера и цветного значка разрешения видео (4K / 1080p / 720p) под матовое стекло",
-                            "• Ориентация мини-меню непосредственно по положению пальца над интерфейсом — режим «Откл.» внизу выбирается легко без упора в нижний край экрана",
-                            "• Принудительная блокировка поворота экрана только по удержанию кнопки ориентации (с иконкой замка и акцентной подсветкой); одиночное нажатие не ломает глобальную настройку между сериями",
-                            "• Закреплённая компактная шапка в главном меню папок: компактная кнопка «Продолжить» и поиск остаются на месте при прокрутке больших списков папок",
-                            "• Отображение видео-миниатюр кадра в «Истории» с отметкой времени (при наличии доступа к кадру видео)",
-                            "• Включает все нововведения v3.1-pre1: 3-уровневую очистку звука De-Artifact DSP, 3-зонную нижнюю панель (MEMC | Anime4K по центру) и двухколоночные блоки настроек"
+                            "• Умный сброс завершённых серий: серии с просмотром ≥95% (или остатком ≤15 с) стартуют с 00:00 и не переключаются мгновенно на следующую",
+                            "• Комплексная оптимизация плавности 120 Гц: неблокирующая фоновая загрузка миниатюр, стабильные ключи LazyColumn и мемоизация карточек убирают микрофризы",
+                            "• Верхние правые кнопки плеера в стиле Frosted Glass: кнопки поворота, замка экрана и PiP выполнены в едином стиле с нижней панелью с градиентной рамкой и тенью",
+                            "• Обновлённая планетарная модель: актуализированы характеристики орбит (Игровой режим Bluetooth, авто-баланс Anime4K+MEMC, распознавание озвучек)",
+                            "• Разделение озвучек и субтитров в торрентах: карточки релизов чётко отделяют переводы (RUS/Дубляж/MVO/JacRed) от субтитров",
+                            "• Сведения об устройстве в настройках: разрешение, герцовка экрана, поддержка HDR и список доступных декодеров MediaCodec"
                         )
                     }
                     notes.forEach { line ->

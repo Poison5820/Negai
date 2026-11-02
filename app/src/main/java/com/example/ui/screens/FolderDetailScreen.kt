@@ -653,6 +653,10 @@ private fun AutoBindSummaryBanner(
     }
 }
 
+private val EpisodeThumbPlaceholderBrush = Brush.linearGradient(
+    listOf(Color(0xFF192236), Color(0xFF0E1320))
+)
+
 @OptIn(ExperimentalLayoutApi::class, ExperimentalFoundationApi::class)
 @Composable
 private fun EpisodeRowCard(
@@ -672,11 +676,17 @@ private fun EpisodeRowCard(
 ) {
     val context = LocalContext.current
     var menuExpanded by remember { mutableStateOf(false) }
-    val corner = if (compactMode) 15.dp else 18.dp
+    val cardShape = remember(compactMode) { RoundedCornerShape(if (compactMode) 15.dp else 18.dp) }
+    val cardBorder = remember(isSelected) {
+        BorderStroke(
+            width = if (isSelected) 2.dp else 1.dp,
+            color = if (isSelected) Color.Unspecified else Color.Unspecified
+        )
+    }
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(corner))
+            .clip(cardShape)
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = {
@@ -688,7 +698,7 @@ private fun EpisodeRowCard(
                 }
             )
             .testTag("episode_card_$index"),
-        shape = RoundedCornerShape(corner),
+        shape = cardShape,
         border = BorderStroke(
             width = if (isSelected) 2.dp else 1.dp,
             color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
@@ -723,14 +733,7 @@ private fun EpisodeRowCard(
                             .width(if (compactMode) 112.dp else 124.dp)
                             .height(if (compactMode) 63.dp else 70.dp)
                             .clip(RoundedCornerShape(10.dp))
-                            .background(
-                                Brush.linearGradient(
-                                    listOf(
-                                        Color(0xFF192236),
-                                        Color(0xFF0E1320)
-                                    )
-                                )
-                            ),
+                            .background(EpisodeThumbPlaceholderBrush),
                         contentAlignment = Alignment.Center
                     ) {
                         AsyncImage(

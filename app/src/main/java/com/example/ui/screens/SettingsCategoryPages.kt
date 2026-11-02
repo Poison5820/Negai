@@ -1796,6 +1796,13 @@ internal fun <T> TwoColumnSettingsGrid(
     }
 }
 
+private data class SettingsSectionCardProps(
+    val containerColor: Color,
+    val border: BorderStroke,
+    val elevation: androidx.compose.ui.unit.Dp,
+    val isDark: Boolean
+)
+
 @Composable
 internal fun SettingsSectionCard(
     title: String,
@@ -1803,32 +1810,32 @@ internal fun SettingsSectionCard(
     icon: ImageVector = Icons.Default.HighQuality,
     content: @Composable () -> Unit
 ) {
-    val bgLum = MaterialTheme.colorScheme.background.red * 0.2126f +
-        MaterialTheme.colorScheme.background.green * 0.7152f +
-        MaterialTheme.colorScheme.background.blue * 0.0722f
-    val isDark = bgLum < 0.35f
-    val isPureOled = MaterialTheme.colorScheme.background.red < 0.01f &&
-        MaterialTheme.colorScheme.background.green < 0.01f &&
-        MaterialTheme.colorScheme.background.blue < 0.01f
-
-    // Darker block background in Dark theme, distinct dark glass in OLED, pure bright white in Light theme
-    val blockContainerColor = when {
-        !isDark -> Color(0xFFFFFFFF).copy(alpha = 0.95f)
-        isPureOled -> Color(0xFF0A101B).copy(alpha = 0.94f)
-        else -> Color(0xFF060A12).copy(alpha = 0.94f)
+    val bg = MaterialTheme.colorScheme.background
+    val primary = MaterialTheme.colorScheme.primary
+    val sectionCardProps = remember(bg, primary) {
+        val bgLum = bg.red * 0.2126f + bg.green * 0.7152f + bg.blue * 0.0722f
+        val isDark = bgLum < 0.35f
+        val isPureOled = bg.red < 0.01f && bg.green < 0.01f && bg.blue < 0.01f
+        val containerColor = when {
+            !isDark -> Color(0xFFFFFFFF).copy(alpha = 0.95f)
+            isPureOled -> Color(0xFF0A101B).copy(alpha = 0.94f)
+            else -> Color(0xFF060A12).copy(alpha = 0.94f)
+        }
+        val border = BorderStroke(0.75.dp, primary.copy(alpha = if (isDark) 0.62f else 0.52f))
+        val elevation = if (isDark) 0.dp else 1.5.dp
+        SettingsSectionCardProps(containerColor, border, elevation, isDark)
     }
-    val accentBorderColor = MaterialTheme.colorScheme.primary.copy(
-        alpha = if (isDark) 0.62f else 0.52f
-    )
+    val cardShape = remember { RoundedCornerShape(16.dp) }
+    val isDark = sectionCardProps.isDark
 
     Card(
-        shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(0.75.dp, accentBorderColor),
+        shape = cardShape,
+        border = sectionCardProps.border,
         colors = CardDefaults.cardColors(
-            containerColor = blockContainerColor
+            containerColor = sectionCardProps.containerColor
         ),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = if (isDark) 0.dp else 1.5.dp
+            defaultElevation = sectionCardProps.elevation
         ),
         modifier = Modifier
             .fillMaxWidth()
