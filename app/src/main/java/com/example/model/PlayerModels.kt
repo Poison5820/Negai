@@ -559,12 +559,16 @@ enum class VideoScaleMode(
 ) {
     FIT("FIT", "По размеру экрана", "Вписать"),
     ZOOM("ZOOM", "Заполнение (без полей)", "Заполнение"),
-    STRETCH("STRETCH", "Растянуть", "Растянуть");
+    STRETCH("STRETCH", "Растянуть", "Растянуть"),
+    SBS_3D_TO_2D("SBS_3D_TO_2D", "3D SBS: Левый глаз (2D)", "3D SBS"),
+    TAB_3D_TO_2D("TAB_3D_TO_2D", "3D TAB: Верхний глаз (2D)", "3D TAB");
 
     fun next(): VideoScaleMode = when (this) {
         FIT -> ZOOM
         ZOOM -> STRETCH
-        STRETCH -> FIT
+        STRETCH -> SBS_3D_TO_2D
+        SBS_3D_TO_2D -> TAB_3D_TO_2D
+        TAB_3D_TO_2D -> FIT
     }
 
     companion object {
@@ -878,15 +882,22 @@ data class ReleaseHistoryEntry(
 )
 
 object AppVersionInfo {
-    const val VERSION_NAME = "3.4.6"
-    const val VERSION_CODE = 16
-    const val BADGE_TEXT = "v3.4.6"
-    const val RELEASE_TAG = "v3.4.6"
+    const val VERSION_NAME = "3.6"
+    const val VERSION_CODE = 17
+    const val BADGE_TEXT = "v3.6"
+    const val RELEASE_TAG = "v3.6"
     const val GITHUB_REPO_URL = "https://github.com/Poison5820/Negai"
     const val ANIME4K_ORIGINAL_REPO_URL = "https://github.com/bloc97/Anime4K"
     const val OBTAINIUM_ADD_URL = "https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/Poison5820/Negai"
 
     val RELEASE_HISTORY: List<ReleaseHistoryEntry> = listOf(
+        ReleaseHistoryEntry(
+            versionName = "3.6",
+            versionCode = 17,
+            tag = "v3.6",
+            summaryRu = "Поддержка HDR (HDR10, HLG, Dolby Vision) с прямым выводом через 10-бит SurfaceView, поддержка многоканального аудио AC3, DTS, Dolby с программным стерео-миксом и Passthrough, автосмена декодера при сбое, исправление определения битрейта AAC и новые 3D-режимы SBS / TAB для IMAX 3D видео.",
+            summaryEn = "HDR playback (HDR10, HLG, Dolby Vision) via 10-bit SurfaceView direct presentation, multichannel AC3/DTS/Dolby audio support with software stereo downmix and passthrough, automatic software decoder fallback on error, accurate AAC bitrate detection fix, and 3D SBS / TAB view modes for IMAX 3D videos."
+        ),
         ReleaseHistoryEntry(
             versionName = "3.4.6",
             versionCode = 16,

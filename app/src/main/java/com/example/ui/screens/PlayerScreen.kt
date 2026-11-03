@@ -9,6 +9,8 @@ import android.media.AudioManager
 import android.os.Build
 import android.provider.Settings
 import android.view.Surface
+import android.view.SurfaceHolder
+import android.view.SurfaceView
 import android.view.WindowManager
 import com.example.ui.theme.ensureReadableOn
 import androidx.activity.compose.BackHandler
@@ -19,8 +21,13 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
@@ -239,6 +246,7 @@ fun PlayerScreen(
     onUpdatePlayerAutoDpiScale: (Boolean) -> Unit = {},
     onUpdateControlsAutoHideSeconds: (Int) -> Unit = {},
     onDismissResumeBanner: () -> Unit,
+    onDismissHudNotice: () -> Unit = {},
     onRestartFromBeginning: () -> Unit,
     onSelectVideoQuality: (com.example.player.VideoQualityUiOption) -> Unit = {},
     onUpdateMaxAudioBoostPercent: (Int) -> Unit = {},
@@ -492,6 +500,13 @@ fun PlayerScreen(
         if (playbackState.resumedFromPositionMs != null) {
             delay(5500L)
             onDismissResumeBanner()
+        }
+    }
+
+    LaunchedEffect(playbackState.hudNotice) {
+        if (playbackState.hudNotice != null) {
+            delay(4000L)
+            onDismissHudNotice()
         }
     }
 
@@ -750,32 +765,44 @@ fun PlayerScreen(
             }
             .testTag("video_player_stage")
     ) {
-        // 1. Real-time Hardware Decoder + GPU MEMC Frame Interpolation + Anime4K OpenGL ES 2.0 Surface
-        val hasVisualProcessing = settings.effectiveAnime4KPreset != Anime4KPreset.OFF ||
-            settings.effectiveFrameInterpolationMode.isEnabled
-        Anime4KVideoSurface(
-            videoWidth = playbackState.videoWidth,
-            videoHeight = playbackState.videoHeight,
-            preset = settings.effectiveAnime4KPreset,
-            strength = settings.anime4kStrength,
-            interpolationMode = settings.effectiveFrameInterpolationMode,
-            isPlaying = playbackState.isPlaying,
-            sourceFrameRate = playbackState.sourceFrameRate,
-            playbackSpeed = playbackState.playbackSpeed,
-            highRefreshRateEnabled = settings.highRefreshRateEnabled,
-            targetDisplayHz = refreshPlan.targetDisplayHz,
-            targetRenderFps = refreshPlan.targetRenderFps,
-            surfaceFrameRateHz = refreshPlan.surfaceFrameRateHz,
-            frameRateCompatibility = refreshPlan.frameRateCompatibility,
-            memcActive = refreshPlan.memcActive,
-            graphicsBackend = settings.graphicsBackend,
-            splitCompareEnabled = splitCompareEnabled && hasVisualProcessing,
-            splitPosition = splitPosition,
-            scaleMode = scaleMode,
-            onSurfaceReady = onSurfaceReady,
-            onSurfaceDestroyed = onSurfaceDestroyed,
-            modifier = Modifier.fillMaxSize()
-        )
+        // 1. Video Surface: Direct 10-bit HDR SurfaceView if HDR is detected, or OpenGL ES 2.0 Anime4K Surface for SDR
+        val isHdrActive = playbackState.isHdr
+        val hasVisualProcessing = !isHdrActive && (settings.effectiveAnime4KPreset != Anime4KPreset.OFF ||
+            settings.effectiveFrameInterpolationMode.isEnabled)
+        if (isHdrActive) {
+            HdrVideoSurface(
+                videoWidth = playbackState.videoWidth,
+                videoHeight = playbackState.videoHeight,
+                scaleMode = scaleMode,
+                onSurfaceReady = onSurfaceReady,
+                onSurfaceDestroyed = onSurfaceDestroyed,
+                modifier = Modifier.fillMaxSize()
+            )
+        } else {
+            Anime4KVideoSurface(
+                videoWidth = playbackState.videoWidth,
+                videoHeight = playbackState.videoHeight,
+                preset = settings.effectiveAnime4KPreset,
+                strength = settings.anime4kStrength,
+                interpolationMode = settings.effectiveFrameInterpolationMode,
+                isPlaying = playbackState.isPlaying,
+                sourceFrameRate = playbackState.sourceFrameRate,
+                playbackSpeed = playbackState.playbackSpeed,
+                highRefreshRateEnabled = settings.highRefreshRateEnabled,
+                targetDisplayHz = refreshPlan.targetDisplayHz,
+                targetRenderFps = refreshPlan.targetRenderFps,
+                surfaceFrameRateHz = refreshPlan.surfaceFrameRateHz,
+                frameRateCompatibility = refreshPlan.frameRateCompatibility,
+                memcActive = refreshPlan.memcActive,
+                graphicsBackend = settings.graphicsBackend,
+                splitCompareEnabled = splitCompareEnabled && hasVisualProcessing,
+                splitPosition = splitPosition,
+                scaleMode = scaleMode,
+                onSurfaceReady = onSurfaceReady,
+                onSurfaceDestroyed = onSurfaceDestroyed,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
 
         // 2. Real-time SRT / ASS / Embedded Subtitle Renderer
         SubtitleOverlay(
@@ -839,6 +866,46 @@ fun PlayerScreen(
                 .padding(top = 18.dp)
         ) {
             LongPressSpeedPill(speed = playbackState.playbackSpeed)
+        }
+
+        // Automatic Decoder Fallback / System Notice Pill
+        AnimatedVisibility(
+            visible = playbackState.hudNotice != null && !isInPipMode,
+            enter = fadeIn(tween(180)) + slideInVertically { -it / 2 },
+            exit = fadeOut(tween(180)) + slideOutVertically { -it / 2 },
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .windowInsetsPadding(WindowInsets.safeDrawing)
+                .padding(top = 56.dp, start = 16.dp, end = 16.dp)
+        ) {
+            val noticeText = playbackState.hudNotice.orEmpty()
+            Surface(
+                color = PlayerFrostedGlassBaseColor,
+                shape = RoundedCornerShape(14.dp),
+                border = playerPopupBorderStroke(),
+                shadowElevation = 10.dp
+            ) {
+                Row(
+                    modifier = Modifier
+                        .background(playerFrostedGlassBrush(accentAlpha = 0.12f))
+                        .padding(horizontal = 14.dp, vertical = 9.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Info,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Text(
+                        text = noticeText,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = Color.White,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
         }
 
         // Auto-Dismissing Resume Playback Floating Pill ("Продолжено с MM:SS" + "С начала")
@@ -1463,6 +1530,14 @@ fun PlayerScreen(
                                         }
                                     )
                                     .testTag("player_resolution_badge")
+                            )
+                        }
+
+                        if (playbackState.isHdr && playbackState.hdrBadge.isNotBlank()) {
+                            com.example.ui.components.ResolutionBadgeChip(
+                                badge = playbackState.hdrBadge,
+                                compact = isCompactTopBar,
+                                modifier = Modifier.testTag("player_hdr_badge")
                             )
                         }
 
@@ -2508,6 +2583,68 @@ private fun PlayerLiveStatsOverlayCard(
                 color = Color.White.copy(alpha = 0.80f)
             )
         }
+    }
+}
+
+@Composable
+private fun HdrVideoSurface(
+    videoWidth: Int,
+    videoHeight: Int,
+    scaleMode: VideoScaleMode,
+    onSurfaceReady: (Surface) -> Unit,
+    onSurfaceDestroyed: (Surface) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
+    ) {
+        val aspect = remember(videoWidth, videoHeight) {
+            if (videoWidth > 0 && videoHeight > 0) {
+                videoWidth.toFloat() / videoHeight.toFloat()
+            } else {
+                16f / 9f
+            }
+        }
+        val viewModifier = when (scaleMode) {
+            VideoScaleMode.FIT,
+            VideoScaleMode.SBS_3D_TO_2D,
+            VideoScaleMode.TAB_3D_TO_2D -> Modifier.aspectRatio(aspect)
+            VideoScaleMode.ZOOM,
+            VideoScaleMode.STRETCH -> Modifier.fillMaxSize()
+        }
+        AndroidView(
+            modifier = viewModifier,
+            factory = { context ->
+                SurfaceView(context).apply {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        holder.setFormat(android.graphics.PixelFormat.RGBA_1010102)
+                    }
+                    holder.addCallback(object : SurfaceHolder.Callback {
+                        override fun surfaceCreated(holder: SurfaceHolder) {
+                            if (holder.surface.isValid) {
+                                onSurfaceReady(holder.surface)
+                            }
+                        }
+
+                        override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
+                            if (holder.surface.isValid) {
+                                onSurfaceReady(holder.surface)
+                            }
+                        }
+
+                        override fun surfaceDestroyed(holder: SurfaceHolder) {
+                            onSurfaceDestroyed(holder.surface)
+                        }
+                    })
+                }
+            },
+            update = { surfaceView ->
+                if (videoWidth > 0 && videoHeight > 0) {
+                    surfaceView.holder.setFixedSize(videoWidth, videoHeight)
+                }
+            }
+        )
     }
 }
 

@@ -22,11 +22,13 @@ import androidx.media3.common.text.CueGroup
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.DefaultHttpDataSource
+import androidx.media3.common.audio.ChannelMixingAudioProcessor
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.SeekParameters
 import androidx.media3.exoplayer.analytics.AnalyticsListener
+import androidx.media3.exoplayer.audio.AudioCapabilities
 import androidx.media3.exoplayer.audio.AudioSink
 import androidx.media3.exoplayer.audio.DefaultAudioSink
 import androidx.media3.exoplayer.mediacodec.MediaCodecSelector
@@ -164,6 +166,9 @@ data class PlaybackRuntimeState(
     val isTempSpeedBoostActive: Boolean = false,
     val resumedFromPositionMs: Long? = null,
     val resumeEventId: Long = 0L,
+    val isHdr: Boolean = false,
+    val hdrBadge: String = "",
+    val hudNotice: String? = null,
     val errorMessage: String? = null
 ) {
     val currentEpisode: EpisodeItem?
@@ -208,6 +213,11 @@ class PlayerEngine private constructor(
 
     private var configuredDecoderMode: DecoderMode = DecoderMode.HW_PLUS
     private var highRefreshOrInterpActive: Boolean = true
+    private var decoderFallbackRetryCount: Int = 0
+
+    fun clearHudNotice() {
+        _state.update { it.copy(hudNotice = null) }
+    }
 
     private var boundSurface: Surface? = null
     private var controllerFuture: ListenableFuture<MediaController>? = null
@@ -395,6 +405,9 @@ class PlayerEngine private constructor(
 
         override fun onPlaybackStateChanged(playbackState: Int) {
             val player = _exoPlayer ?: return
+            if (playbackState == Player.STATE_READY) {
+                decoderFallbackRetryCount = 0
+            }
             val buffering = playbackState == Player.STATE_BUFFERING
             val liveDur = player.duration.takeIf { it != C.TIME_UNSET && it > 0L }
             val dur = liveDur ?: _state.value.durationMs
@@ -703,6 +716,36 @@ class PlayerEngine private constructor(
         }
 
         override fun onPlayerError(error: PlaybackException) {
+            val isCodecOrDecoderError = when (error.errorCode) {
+                PlaybackException.ERROR_CODE_DECODER_INIT_FAILED,
+                PlaybackException.ERROR_CODE_DECODING_FAILED,
+                PlaybackException.ERROR_CODE_DECODING_FORMAT_EXCEEDS_CAPABILITIES,
+                PlaybackException.ERROR_CODE_DECODING_FORMAT_UNSUPPORTED,
+                PlaybackException.ERROR_CODE_AUDIO_TRACK_INIT_FAILED,
+                PlaybackException.ERROR_CODE_AUDIO_TRACK_WRITE_FAILED -> true
+                else -> {
+                    val cause = error.cause
+                    cause is androidx.media3.exoplayer.mediacodec.MediaCodecDecoderException ||
+                        cause is androidx.media3.exoplayer.mediacodec.MediaCodecRenderer.DecoderInitializationException ||
+                        cause is androidx.media3.exoplayer.audio.AudioSink.InitializationException ||
+                        cause is androidx.media3.exoplayer.audio.AudioSink.ConfigurationException ||
+                        cause is android.media.MediaCodec.CodecException
+                }
+            }
+
+            if (isCodecOrDecoderError && configuredDecoderMode != DecoderMode.SOFTWARE_PREFER && decoderFallbackRetryCount < 2) {
+                decoderFallbackRetryCount++
+                _state.update {
+                    it.copy(
+                        errorMessage = null,
+                        isBuffering = true,
+                        hudNotice = "Сбой аппаратного декодера: выполнен автопереход на программный (SW)"
+                    )
+                }
+                switchDecoderMode(DecoderMode.SOFTWARE_PREFER)
+                return
+            }
+
             stopPositionTicker()
             _state.update {
                 it.copy(
@@ -763,6 +806,22 @@ class PlayerEngine private constructor(
                 detectedVideoWidth = dispW
                 detectedVideoHeight = dispH
 
+                val colorInfo = format.colorInfo
+                val colorTransfer = colorInfo?.colorTransfer ?: C.COLOR_TRANSFER_SDR
+                val colorSpace = colorInfo?.colorSpace ?: C.COLOR_SPACE_BT709
+                val sampleMime = format.sampleMimeType.orEmpty().lowercase()
+                val isDolbyVision = sampleMime.contains("dolby-vision") || sampleMime.contains("dvhe") || sampleMime.contains("dvh1")
+                val isHdr10 = colorTransfer == C.COLOR_TRANSFER_ST2084
+                val isHlg = colorTransfer == C.COLOR_TRANSFER_HLG
+                val isHdrDetected = isDolbyVision || isHdr10 || isHlg || (colorSpace == C.COLOR_SPACE_BT2020 && colorTransfer != C.COLOR_TRANSFER_SDR)
+                val badge = when {
+                    isDolbyVision -> "Dolby Vision"
+                    isHdr10 -> "HDR10"
+                    isHlg -> "HLG"
+                    isHdrDetected -> "HDR"
+                    else -> ""
+                }
+
                 _state.update { state ->
                     val codecTag = format.sampleMimeType?.substringAfter('/')?.uppercase() ?: ""
                     val updatedName = if (state.activeVideoCodecName.startsWith("Ожидание")) {
@@ -777,7 +836,9 @@ class PlayerEngine private constructor(
                         sourceFrameRate = if (fps > 0f) fps else state.sourceFrameRate,
                         activeVideoCodecName = updatedName,
                         videoMimeType = format.sampleMimeType ?: state.videoMimeType,
-                        videoBitrateBps = vBitrate
+                        videoBitrateBps = vBitrate,
+                        isHdr = isHdrDetected,
+                        hdrBadge = badge
                     )
                 }
             }
@@ -905,10 +966,12 @@ class PlayerEngine private constructor(
                 enableFloatOutput: Boolean,
                 enableAudioTrackPlaybackParams: Boolean
             ): AudioSink? {
+                val audioCapabilities = AudioCapabilities.getCapabilities(context)
                 return DefaultAudioSink.Builder(context)
-                    .setEnableFloatOutput(enableFloatOutput)
+                    .setAudioCapabilities(audioCapabilities)
+                    .setEnableFloatOutput(true)
                     .setEnableAudioTrackPlaybackParams(enableAudioTrackPlaybackParams)
-                    .setAudioProcessors(arrayOf(audioDelayProcessor))
+                    .setAudioProcessors(arrayOf(ChannelMixingAudioProcessor(), audioDelayProcessor))
                     .build()
             }
 
@@ -1275,6 +1338,7 @@ class PlayerEngine private constructor(
 
         val dataSourceFactory = DefaultDataSource.Factory(appContext, httpFactory)
         val extractorsFactory = DefaultExtractorsFactory()
+            .setConstantBitrateSeekingEnabled(true)
         val mediaSourceFactory = DefaultMediaSourceFactory(dataSourceFactory, extractorsFactory)
 
         val metadata = MediaMetadata.Builder()
@@ -2351,21 +2415,33 @@ class PlayerEngine private constructor(
         extMeta: ExternalAudioTrack?,
         embeddedAudioIndex: Int
     ): Int {
+        val mime = format.sampleMimeType.orEmpty().lowercase()
+        val ext = extMeta?.extension.orEmpty().lowercase()
+        val isAac = mime.contains("mp4a") || mime.contains("aac") || ext == "aac" || ext == "m4a"
+        val channels = format.channelCount.takeIf { it > 0 } ?: 2
+
         val directBps = when {
             format.bitrate > 0 -> format.bitrate
             format.averageBitrate > 0 -> format.averageBitrate
             format.peakBitrate > 0 -> format.peakBitrate
             else -> 0
         }
-        if (directBps > 0) {
-            return (directBps / 1000).coerceAtLeast(1)
+        val directKbps = if (directBps > 0) (directBps / 1000).coerceAtLeast(1) else 0
+
+        // Android's MP4/MKV extractors frequently return 64000 (64 kbps) as a dummy core rate for stereo AAC
+        val isDummyAacRate = isAac && directKbps in 1..64 && channels >= 2
+
+        if (directKbps > 0 && !isDummyAacRate) {
+            return directKbps
         }
 
         if (extMeta != null) {
             val cachedExt = probedExternalAudioBitratesKbps[extMeta.uri]
-            if (cachedExt != null && cachedExt > 0) return cachedExt
+            if (cachedExt != null && cachedExt > 0 && !(isAac && cachedExt in 1..64 && channels >= 2)) {
+                return cachedExt
+            }
             val probedExt = probeExternalAudioBitrateKbps(extMeta.uri, episode)
-            if (probedExt > 0) {
+            if (probedExt > 0 && !(isAac && probedExt in 1..64 && channels >= 2)) {
                 probedExternalAudioBitratesKbps[extMeta.uri] = probedExt
                 return probedExt
             }
@@ -2374,7 +2450,9 @@ class PlayerEngine private constructor(
                 probeContainerAudioBitratesKbps(episode.uri)
             }
             val probed = containerRates.getOrNull(embeddedAudioIndex) ?: 0
-            if (probed > 0) return probed
+            if (probed > 0 && !(isAac && probed in 1..64 && channels >= 2)) {
+                return probed
+            }
         }
 
         return estimateAudioBitrateFromFormatKbps(format, extMeta?.extension)
@@ -2396,6 +2474,31 @@ class PlayerEngine private constructor(
             }
         }
         return 0
+    }
+
+    private fun probeTrackBitrateFromSamples(extractor: android.media.MediaExtractor, trackIndex: Int): Int {
+        return runCatching {
+            extractor.selectTrack(trackIndex)
+            extractor.seekTo(0L, android.media.MediaExtractor.SEEK_TO_CLOSEST_SYNC)
+            var totalBytes = 0L
+            val firstPtsUs = extractor.sampleTime.takeIf { it >= 0L } ?: 0L
+            var lastPtsUs = firstPtsUs
+            var sampleCount = 0
+            while (sampleCount < 40) {
+                val size = extractor.sampleSize
+                if (size <= 0) break
+                totalBytes += size
+                lastPtsUs = extractor.sampleTime
+                sampleCount++
+                if (!extractor.advance()) break
+            }
+            extractor.unselectTrack(trackIndex)
+            val durationUs = lastPtsUs - firstPtsUs
+            if (durationUs > 100_000L && totalBytes > 0L) {
+                val bps = (totalBytes * 8_000_000L) / durationUs
+                (bps / 1000).toInt().coerceIn(32, 4000)
+            } else 0
+        }.getOrDefault(0)
     }
 
     private fun probeContainerAudioBitratesKbps(uriStr: String): List<Int> {
@@ -2422,7 +2525,24 @@ class PlayerEngine private constructor(
                     val bps = if (mf.containsKey(android.media.MediaFormat.KEY_BIT_RATE)) {
                         runCatching { mf.getInteger(android.media.MediaFormat.KEY_BIT_RATE) }.getOrDefault(0)
                     } else 0
-                    result.add(if (bps > 0) (bps / 1000).coerceAtLeast(1) else 0)
+                    var kbps = if (bps > 0) (bps / 1000).coerceAtLeast(1) else 0
+                    val channels = if (mf.containsKey(android.media.MediaFormat.KEY_CHANNEL_COUNT)) {
+                        runCatching { mf.getInteger(android.media.MediaFormat.KEY_CHANNEL_COUNT) }.getOrDefault(2)
+                    } else 2
+                    val sampleRate = if (mf.containsKey(android.media.MediaFormat.KEY_SAMPLE_RATE)) {
+                        runCatching { mf.getInteger(android.media.MediaFormat.KEY_SAMPLE_RATE) }.getOrDefault(48000)
+                    } else 48000
+                    val isAac = mime.contains("mp4a", ignoreCase = true) || mime.contains("aac", ignoreCase = true)
+
+                    if (isAac && (kbps <= 64 || kbps == 0) && channels >= 2) {
+                        val sampled = probeTrackBitrateFromSamples(extractor, i)
+                        kbps = if (sampled > 0) {
+                            sampled
+                        } else {
+                            if (channels >= 6) 320 else if (sampleRate >= 44100) 192 else 128
+                        }
+                    }
+                    result.add(kbps)
                 }
             }
             result
@@ -2477,6 +2597,14 @@ class PlayerEngine private constructor(
                 }
             mime.contains("mpeg") || mime.contains("mp3") || ext == "mp3" ->
                 if (channels == 1) 128 else 192
+            mime.contains("mp4a") || mime.contains("aac") || ext == "m4a" || ext == "aac" ->
+                when {
+                    channels >= 8 -> 448
+                    channels >= 6 -> 320
+                    channels == 1 -> 96
+                    sampleRate >= 44_100 -> 192
+                    else -> 128
+                }
             else ->
                 when {
                     channels >= 8 -> 512
@@ -2490,12 +2618,17 @@ class PlayerEngine private constructor(
 
     private fun updateDetectedAudioFormat(format: Format, resolvedBitrateKbps: Int = 0) {
         val rawBitrate = format.bitrate
+        val mime = format.sampleMimeType.orEmpty().lowercase()
+        val isAac = mime.contains("mp4a") || mime.contains("aac")
+        val channels = format.channelCount.takeIf { it > 0 } ?: 2
+        val directKbps = if (rawBitrate > 0) (rawBitrate / 1000).coerceAtLeast(1) else 0
+        val isDummyAac = isAac && directKbps in 1..64 && channels >= 2
+
         val kbps = when {
-            rawBitrate > 0 -> (rawBitrate / 1000).coerceAtLeast(1)
-            resolvedBitrateKbps > 0 -> resolvedBitrateKbps
+            resolvedBitrateKbps > 0 && !(isAac && resolvedBitrateKbps in 1..64 && channels >= 2) -> resolvedBitrateKbps
+            directKbps > 0 && !isDummyAac -> directKbps
             else -> estimateAudioBitrateFromFormatKbps(format, null)
         }
-        val mime = format.sampleMimeType.orEmpty().lowercase()
         val isLosslessCodec = mime.contains("flac") || mime.contains("raw") || mime.contains("pcm") ||
             mime.contains("truehd") || mime.contains("alac")
         // Consider low-bitrate when reported bitrate <= 132 kbps, or when a lossy stereo/mono stream

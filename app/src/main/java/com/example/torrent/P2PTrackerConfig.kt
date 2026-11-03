@@ -127,7 +127,7 @@ object P2PTrackerConfig {
             val client = ResilientTrackerNetwork.client(enableDoh)
             val request = Request.Builder()
                 .url(cleanUrl)
-                .header("User-Agent", "Negai-P2P-Client/3.4.6")
+                .header("User-Agent", "Negai-P2P-Client/3.6")
                 .header("Accept", "application/json, text/plain")
                 .build()
 

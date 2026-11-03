@@ -599,6 +599,10 @@ class NegaiViewModel(application: Application) : AndroidViewModel(application) {
         playerEngine.dismissResumeBanner()
     }
 
+    fun dismissHudNotice() {
+        playerEngine.clearHudNotice()
+    }
+
     fun restartEpisodeFromBeginning() {
         playerEngine.restartFromBeginning()
     }

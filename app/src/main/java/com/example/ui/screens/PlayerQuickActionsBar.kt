@@ -1017,6 +1017,8 @@ private fun QuickActionHoldButton(
                             VideoScaleMode.FIT -> Icons.Default.AspectRatio
                             VideoScaleMode.ZOOM -> Icons.Default.Fullscreen
                             VideoScaleMode.STRETCH -> Icons.Default.OpenInFull
+                            VideoScaleMode.SBS_3D_TO_2D,
+                            VideoScaleMode.TAB_3D_TO_2D -> Icons.Default.AspectRatio
                         }
                         else -> action.iconVector()
                     },
@@ -1419,7 +1421,12 @@ private fun buildHoldMenuItemsForAction(
         }
 
         PlayerQuickAction.SCALE -> {
-            listOf(VideoScaleMode.STRETCH, VideoScaleMode.ZOOM).map { mode ->
+            listOf(
+                VideoScaleMode.TAB_3D_TO_2D,
+                VideoScaleMode.SBS_3D_TO_2D,
+                VideoScaleMode.STRETCH,
+                VideoScaleMode.ZOOM
+            ).map { mode ->
                 QuickHoldMenuItem(
                     id = mode.id,
                     label = mode.localizedTitle(isEnglish),
@@ -2240,6 +2247,8 @@ internal fun ScaleQuickModalSheet(
                         VideoScaleMode.FIT -> Icons.Default.AspectRatio
                         VideoScaleMode.ZOOM -> Icons.Default.Fullscreen
                         VideoScaleMode.STRETCH -> Icons.Default.OpenInFull
+                        VideoScaleMode.SBS_3D_TO_2D,
+                        VideoScaleMode.TAB_3D_TO_2D -> Icons.Default.AspectRatio
                     },
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
@@ -2283,6 +2292,8 @@ internal fun ScaleQuickModalSheet(
                                 VideoScaleMode.FIT -> Icons.Default.AspectRatio
                                 VideoScaleMode.ZOOM -> Icons.Default.Fullscreen
                                 VideoScaleMode.STRETCH -> Icons.Default.OpenInFull
+                                VideoScaleMode.SBS_3D_TO_2D,
+                                VideoScaleMode.TAB_3D_TO_2D -> Icons.Default.AspectRatio
                             },
                             contentDescription = null,
                             tint = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,

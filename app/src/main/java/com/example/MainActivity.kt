@@ -634,6 +634,7 @@ fun NegaiAppRoot(
                 onUpdatePlayerAutoDpiScale = { enabled -> viewModel.setPlayerAutoDpiScale(enabled) },
                 onUpdateControlsAutoHideSeconds = { sec -> viewModel.setControlsAutoHideSeconds(sec) },
                 onDismissResumeBanner = { viewModel.dismissResumeBanner() },
+                onDismissHudNotice = { viewModel.dismissHudNotice() },
                 onRestartFromBeginning = { viewModel.restartEpisodeFromBeginning() },
                 onSelectVideoQuality = { opt -> viewModel.selectVideoQualityOption(opt) },
                 onUpdateMaxAudioBoostPercent = { pct -> viewModel.setMaxAudioBoostPercent(pct) },

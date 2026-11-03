@@ -455,6 +455,36 @@ private class Anime4KRenderer(
             position(0)
         }
 
+    private val quadVerticesSbs: FloatBuffer = ByteBuffer.allocateDirect(4 * 4 * 4)
+        .order(ByteOrder.nativeOrder())
+        .asFloatBuffer()
+        .apply {
+            put(
+                floatArrayOf(
+                    -1f, -1f, 0f, 0f,
+                     1f, -1f, 0.5f, 0f,
+                    -1f,  1f, 0f, 1f,
+                     1f,  1f, 0.5f, 1f
+                )
+            )
+            position(0)
+        }
+
+    private val quadVerticesTab: FloatBuffer = ByteBuffer.allocateDirect(4 * 4 * 4)
+        .order(ByteOrder.nativeOrder())
+        .asFloatBuffer()
+        .apply {
+            put(
+                floatArrayOf(
+                    -1f, -1f, 0f, 0.5f,
+                     1f, -1f, 1f, 0.5f,
+                    -1f,  1f, 0f, 1f,
+                     1f,  1f, 1f, 1f
+                )
+            )
+            position(0)
+        }
+
     fun setVsyncLoopRunning(running: Boolean) {
         vsyncLoopRunning = running
         if (!running) {
@@ -1026,15 +1056,20 @@ private class Anime4KRenderer(
     }
 
     private fun bindQuadAttributes(aPos: Int, aUv: Int) {
-        quadVertices.position(0)
+        val buffer = when (activeScaleMode) {
+            VideoScaleMode.SBS_3D_TO_2D -> quadVerticesSbs
+            VideoScaleMode.TAB_3D_TO_2D -> quadVerticesTab
+            else -> quadVertices
+        }
+        buffer.position(0)
         if (aPos >= 0) {
             GLES20.glEnableVertexAttribArray(aPos)
-            GLES20.glVertexAttribPointer(aPos, 2, GLES20.GL_FLOAT, false, 16, quadVertices)
+            GLES20.glVertexAttribPointer(aPos, 2, GLES20.GL_FLOAT, false, 16, buffer)
         }
-        quadVertices.position(2)
+        buffer.position(2)
         if (aUv >= 0) {
             GLES20.glEnableVertexAttribArray(aUv)
-            GLES20.glVertexAttribPointer(aUv, 2, GLES20.GL_FLOAT, false, 16, quadVertices)
+            GLES20.glVertexAttribPointer(aUv, 2, GLES20.GL_FLOAT, false, 16, buffer)
         }
     }
 
@@ -1059,7 +1094,9 @@ private class Anime4KRenderer(
         val vidAspect = vidW.toFloat() / vidH.toFloat()
 
         return when (mode) {
-            VideoScaleMode.FIT -> {
+            VideoScaleMode.FIT,
+            VideoScaleMode.SBS_3D_TO_2D,
+            VideoScaleMode.TAB_3D_TO_2D -> {
                 if (vidAspect > surfAspect) {
                     val outH = (surfW / vidAspect).roundToInt().coerceAtLeast(1)
                     ViewportRect(0, (surfH - outH) / 2, surfW, outH)

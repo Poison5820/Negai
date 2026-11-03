@@ -210,12 +210,16 @@ fun VideoScaleMode.localizedTitle(isEnglish: Boolean): String = if (!isEnglish) 
     VideoScaleMode.FIT -> "Fit to Screen"
     VideoScaleMode.ZOOM -> "Zoom (Fill / Crop)"
     VideoScaleMode.STRETCH -> "Stretch"
+    VideoScaleMode.SBS_3D_TO_2D -> "3D SBS: Left Eye (2D)"
+    VideoScaleMode.TAB_3D_TO_2D -> "3D TAB: Top Eye (2D)"
 }
 
 fun VideoScaleMode.localizedShortLabel(isEnglish: Boolean): String = if (!isEnglish) shortBadge else when (this) {
     VideoScaleMode.FIT -> "Fit"
     VideoScaleMode.ZOOM -> "Fill"
     VideoScaleMode.STRETCH -> "Stretch"
+    VideoScaleMode.SBS_3D_TO_2D -> "3D SBS"
+    VideoScaleMode.TAB_3D_TO_2D -> "3D TAB"
 }
 
 fun SubtitleColorPreset.localizedLabel(isEnglish: Boolean): String = if (!isEnglish) label else when (this) {
