@@ -878,15 +878,22 @@ data class ReleaseHistoryEntry(
 )
 
 object AppVersionInfo {
-    const val VERSION_NAME = "3.4.4"
-    const val VERSION_CODE = 14
-    const val BADGE_TEXT = "v3.4.4"
-    const val RELEASE_TAG = "v3.4.4"
+    const val VERSION_NAME = "3.4.6"
+    const val VERSION_CODE = 16
+    const val BADGE_TEXT = "v3.4.6"
+    const val RELEASE_TAG = "v3.4.6"
     const val GITHUB_REPO_URL = "https://github.com/Poison5820/Negai"
     const val ANIME4K_ORIGINAL_REPO_URL = "https://github.com/bloc97/Anime4K"
     const val OBTAINIUM_ADD_URL = "https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/Poison5820/Negai"
 
     val RELEASE_HISTORY: List<ReleaseHistoryEntry> = listOf(
+        ReleaseHistoryEntry(
+            versionName = "3.4.6",
+            versionCode = 16,
+            tag = "v3.4.6",
+            summaryRu = "Единый полупрозрачный стиль матового стекла для всех верхних и нижних элементов плеера, переключение режимов подложек (Стекло / Без фона / Акцент) в быстром меню оформления и в меню «Ещё», исправление автоповорота по формату видео, копирование названия удержанием, бегущая строка заголовка, узкая боковая шкала громкости/яркости и масштабирование 90%/110%.",
+            summaryEn = "Unified translucent frosted glass across all top and bottom player HUD controls, surface mode switching (Glass / Frameless / Accent) in both the top appearance popup and player More menu, video aspect auto-orientation fix, long-press title copy, marquee title, slim side volume/brightness bar, and 90%/110% UI scale presets."
+        ),
         ReleaseHistoryEntry(
             versionName = "3.4.4",
             versionCode = 14,

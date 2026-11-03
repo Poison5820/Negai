@@ -1311,92 +1311,22 @@ fun PlayerScreen(
                     }
                     .background(
                         Brush.verticalGradient(
-                            0.0f to Color.Black.copy(alpha = 0.82f),
-                            0.28f to Color.Transparent,
-                            0.68f to Color.Transparent,
-                            1.0f to Color.Black.copy(alpha = 0.92f)
+                            0.0f to Color.Black.copy(alpha = 0.46f),
+                            0.22f to Color.Transparent,
+                            0.76f to Color.Transparent,
+                            1.0f to Color.Black.copy(alpha = 0.56f)
                         )
                     )
             ) {
-                val accentFreeHud = settings.playerControlsTheme.isAccentFree
-                val surfaceStyle = settings.playerSurfaceStyle
-                val darkGlassBase = Color(0xFF0C1322)
-                val hudAccentColor = if (accentFreeHud) {
-                    Color.White.copy(alpha = 0.92f)
-                } else {
-                    MaterialTheme.colorScheme.primary.ensureReadableOn(darkGlassBase, minContrast = 5.2f)
-                }
+                val hudPalette = rememberPlayerHudSurfacePalette(settings)
+                val accentFreeHud = hudPalette.accentFree
+                val hudAccentColor = hudPalette.primaryAccent
                 val hudButtonShape = RoundedCornerShape(12.dp)
-                val hudPillBorder: BorderStroke? = when (surfaceStyle) {
-                    PlayerSurfaceStyle.FRAMELESS -> null
-                    PlayerSurfaceStyle.SOLID_ACCENT -> BorderStroke(
-                        0.85.dp,
-                        hudAccentColor.copy(alpha = if (accentFreeHud) 0.35f else 0.58f)
-                    )
-                    PlayerSurfaceStyle.FROSTED_GLASS -> BorderStroke(
-                        width = 0.85.dp,
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                Color.White.copy(alpha = 0.36f),
-                                hudAccentColor.copy(alpha = if (accentFreeHud) 0.16f else 0.36f),
-                                Color.White.copy(alpha = 0.14f)
-                            )
-                        )
-                    )
-                }
-                val hudActiveLockedBorder: BorderStroke? = when (surfaceStyle) {
-                    PlayerSurfaceStyle.FRAMELESS -> null
-                    PlayerSurfaceStyle.SOLID_ACCENT -> BorderStroke(
-                        1.dp,
-                        hudAccentColor.copy(alpha = 0.88f)
-                    )
-                    PlayerSurfaceStyle.FROSTED_GLASS -> if (accentFreeHud) {
-                        BorderStroke(0.95.dp, Color.White.copy(alpha = 0.52f))
-                    } else {
-                        BorderStroke(0.95.dp, hudAccentColor.copy(alpha = 0.78f))
-                    }
-                }
-                val hudPillBg: Color = when (surfaceStyle) {
-                    PlayerSurfaceStyle.FRAMELESS -> Color.Transparent
-                    PlayerSurfaceStyle.SOLID_ACCENT -> lerp(
-                        Color(0xD90E1626),
-                        hudAccentColor,
-                        if (accentFreeHud) 0.18f else 0.32f
-                    )
-                    PlayerSurfaceStyle.FROSTED_GLASS -> PlayerFrostedGlassBaseColor
-                }
-                val hudActiveLockedBg: Color = when (surfaceStyle) {
-                    PlayerSurfaceStyle.FRAMELESS -> if (accentFreeHud) {
-                        Color.White.copy(alpha = 0.14f)
-                    } else {
-                        hudAccentColor.copy(alpha = 0.22f)
-                    }
-                    PlayerSurfaceStyle.SOLID_ACCENT -> lerp(
-                        Color(0xEB0E1626),
-                        hudAccentColor,
-                        if (accentFreeHud) 0.32f else 0.50f
-                    )
-                    PlayerSurfaceStyle.FROSTED_GLASS -> if (accentFreeHud) {
-                        Color(0xCC1E293B)
-                    } else {
-                        lerp(PlayerFrostedGlassBaseColor, hudAccentColor, 0.28f)
-                    }
-                }
-                val hudGlassSheenBrush = remember(surfaceStyle, hudAccentColor, accentFreeHud) {
-                    when (surfaceStyle) {
-                        PlayerSurfaceStyle.FROSTED_GLASS -> Brush.verticalGradient(
-                            colors = listOf(
-                                Color.White.copy(alpha = 0.16f),
-                                hudAccentColor.copy(alpha = if (accentFreeHud) 0.04f else 0.08f),
-                                Color.Transparent
-                            )
-                        )
-                        PlayerSurfaceStyle.FRAMELESS,
-                        PlayerSurfaceStyle.SOLID_ACCENT -> Brush.verticalGradient(
-                            listOf(Color.Transparent, Color.Transparent)
-                        )
-                    }
-                }
+                val hudPillBorder: BorderStroke? = hudPalette.neutralBorder
+                val hudActiveLockedBorder: BorderStroke? = hudPalette.activeBorder
+                val hudPillBg: Color = hudPalette.neutralBg
+                val hudActiveLockedBg: Color = hudPalette.activePrimaryBg
+                val hudGlassSheenBrush = hudPalette.sheenBrush
 
                 // TOP BAR (compact, surface-styled grouped controls + resolution badge + direct Playlist access)
                 BoxWithConstraints(
@@ -1749,6 +1679,7 @@ fun PlayerScreen(
                     // Isolated Timeline Composable: collects positionMsFlow independently so 4Hz playback
                     // ticks never recompose the entire PlayerScreen, OpenGL Surface, or QuickActionsBar!
                     PlayerTimelineSection(
+                        settings = settings,
                         controlsTheme = settings.playerControlsTheme,
                         positionMsFlow = positionMsFlow,
                         durationMs = playbackState.durationMs,
@@ -1889,6 +1820,7 @@ fun PlayerScreen(
                             orientationMode = mode
                         },
                         onToggleOrientationLock = toggleOrientationLock,
+                        onSelectSurfaceStyle = onSelectSurfaceStyle,
                         onOpenCustomizer = {
                             interactionTick++
                             activeSheet = ActivePlayerSheet.CUSTOMIZE_QUICK_ACTIONS
@@ -2196,6 +2128,7 @@ internal fun rememberPlayerEffectiveScale(settings: PlayerSettings): Float {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun PlayerTimelineSection(
+    settings: PlayerSettings,
     controlsTheme: PlayerControlsTheme,
     positionMsFlow: StateFlow<Long>,
     durationMs: Long,
@@ -2234,28 +2167,14 @@ private fun PlayerTimelineSection(
     val activeChapter = chapters.getOrNull(activeChapterIndex)
 
     if (abLoopStartMs != null || chapters.isNotEmpty() || showSkipIntroButton) {
-        val timelineGlassBg = PlayerFrostedGlassBaseColor
-        val timelineAccent = MaterialTheme.colorScheme.primary.ensureReadableOn(
-            timelineGlassBg,
-            minContrast = 5.4f
-        )
-        val timelineGlassBorder = BorderStroke(
-            width = 0.9.dp,
-            brush = Brush.verticalGradient(
-                colors = listOf(
-                    Color.White.copy(alpha = 0.44f),
-                    timelineAccent.copy(alpha = 0.65f),
-                    Color.White.copy(alpha = 0.20f)
-                )
-            )
-        )
-        val timelineGlassSheen = Brush.verticalGradient(
-            colors = listOf(
-                Color.White.copy(alpha = 0.16f),
-                timelineAccent.copy(alpha = 0.10f),
-                Color.Transparent
-            )
-        )
+        val hudPalette = rememberPlayerHudSurfacePalette(settings)
+        val timelineGlassBg = hudPalette.neutralBg
+        val timelineActiveBg = hudPalette.activePrimaryBg
+        val timelineAccent = hudPalette.primaryAccent
+        val timelineGlassBorder = hudPalette.neutralBorder
+        val timelineActiveBorder = hudPalette.activeBorder
+        val timelineGlassSheen = hudPalette.sheenBrush
+        val timelineShadow = if (settings.playerSurfaceStyle == PlayerSurfaceStyle.FRAMELESS) 0.dp else 6.dp
 
         Row(
             modifier = Modifier
@@ -2268,10 +2187,10 @@ private fun PlayerTimelineSection(
                 val aStr = formatTimeMs(abLoopStartMs)
                 val bStr = abLoopEndMs?.let { formatTimeMs(it) } ?: "…"
                 Surface(
-                    color = lerp(timelineGlassBg, timelineAccent, 0.24f),
+                    color = timelineActiveBg,
                     shape = RoundedCornerShape(11.dp),
-                    border = timelineGlassBorder,
-                    shadowElevation = 6.dp,
+                    border = timelineActiveBorder,
+                    shadowElevation = timelineShadow,
                     modifier = Modifier
                         .clip(RoundedCornerShape(11.dp))
                         .clickable(onClick = onClearAbLoop)
@@ -2312,7 +2231,7 @@ private fun PlayerTimelineSection(
                     color = timelineGlassBg,
                     shape = RoundedCornerShape(11.dp),
                     border = timelineGlassBorder,
-                    shadowElevation = 6.dp,
+                    shadowElevation = timelineShadow,
                     modifier = Modifier
                         .weight(1f, fill = false)
                         .clip(RoundedCornerShape(11.dp))
@@ -2348,10 +2267,10 @@ private fun PlayerTimelineSection(
 
             if (showSkipIntroButton) {
                 Surface(
-                    color = lerp(timelineGlassBg, timelineAccent, 0.16f),
+                    color = timelineGlassBg,
                     shape = RoundedCornerShape(12.dp),
                     border = timelineGlassBorder,
-                    shadowElevation = 8.dp,
+                    shadowElevation = timelineShadow,
                     modifier = Modifier
                         .clip(RoundedCornerShape(12.dp))
                         .combinedClickable(
@@ -2429,7 +2348,7 @@ private fun PlayerLiveStatsOverlayCard(
     onClose: () -> Unit
 ) {
     val isEnglish = LocalIsEnglish.current
-    val glassBg = PlayerFrostedGlassBaseColor
+    val glassBg = PlayerFrostedGlassPopupColor
     val accent = MaterialTheme.colorScheme.primary.ensureReadableOn(glassBg, minContrast = 5.4f)
     val ep = playbackState.currentEpisode
     val isNetwork = remember(ep?.uri) {

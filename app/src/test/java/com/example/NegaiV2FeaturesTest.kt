@@ -24,10 +24,10 @@ class NegaiV2FeaturesTest {
 
     @Test
     fun version3BuildConfig_and_frameInterpolationUserFacingLabels() {
-        assertEquals(13, BuildConfig.VERSION_CODE)
-        assertEquals("3.4.3-pre", BuildConfig.VERSION_NAME)
+        assertEquals(16, BuildConfig.VERSION_CODE)
+        assertEquals("3.4.6", BuildConfig.VERSION_NAME)
         assertEquals("app.negai.player", BuildConfig.APPLICATION_ID)
-        assertEquals("v3.4.3-pre", com.example.model.AppVersionInfo.BADGE_TEXT)
+        assertEquals("v3.4.6", com.example.model.AppVersionInfo.BADGE_TEXT)
         assertEquals("https://github.com/bloc97/Anime4K", com.example.model.AppVersionInfo.ANIME4K_ORIGINAL_REPO_URL)
 
         assertEquals(com.example.model.AppLanguage.SYSTEM, com.example.model.AppLanguage.fromId("system"))
@@ -701,15 +701,15 @@ class NegaiV2FeaturesTest {
         assertTrue(com.example.vulkan.VulkanShaderPipelines.VULKAN_MEMC_MOTION_COMPUTE_SHADER.contains("imageStore(motionVectors"))
         assertTrue(com.example.vulkan.VulkanShaderPipelines.VULKAN_COMPOSITE_FRAGMENT_SHADER.contains("#version 450 core"))
 
-        // 3. Version info & release history (3.4.3-pre, 3.4.2-pre, 3.4-pre1)
-        assertEquals("3.4.3-pre", com.example.model.AppVersionInfo.VERSION_NAME)
-        assertEquals(13, com.example.model.AppVersionInfo.VERSION_CODE)
-        assertEquals("v3.4.3-pre", com.example.model.AppVersionInfo.BADGE_TEXT)
-        assertEquals("v3.4.3-pre", com.example.model.AppVersionInfo.RELEASE_TAG)
-        assertEquals(3, com.example.model.AppVersionInfo.RELEASE_HISTORY.size)
-        assertEquals("3.4.3-pre", com.example.model.AppVersionInfo.RELEASE_HISTORY[0].versionName)
-        assertEquals("3.4.2-pre", com.example.model.AppVersionInfo.RELEASE_HISTORY[1].versionName)
-        assertEquals("3.4-pre1", com.example.model.AppVersionInfo.RELEASE_HISTORY[2].versionName)
+        // 3. Version info & release history (3.4.6)
+        assertEquals("3.4.6", com.example.model.AppVersionInfo.VERSION_NAME)
+        assertEquals(16, com.example.model.AppVersionInfo.VERSION_CODE)
+        assertEquals("v3.4.6", com.example.model.AppVersionInfo.BADGE_TEXT)
+        assertEquals("v3.4.6", com.example.model.AppVersionInfo.RELEASE_TAG)
+        assertEquals(5, com.example.model.AppVersionInfo.RELEASE_HISTORY.size)
+        assertEquals("3.4.6", com.example.model.AppVersionInfo.RELEASE_HISTORY[0].versionName)
+        assertEquals("3.4.4", com.example.model.AppVersionInfo.RELEASE_HISTORY[1].versionName)
+        assertEquals("3.4.3-pre", com.example.model.AppVersionInfo.RELEASE_HISTORY[2].versionName)
     }
 
     @Test

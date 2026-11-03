@@ -197,6 +197,7 @@ internal fun PlayerQuickActionsBar(
     onSeekByMs: (Long) -> Unit = {},
     onSelectOrientationMode: (PlayerOrientationMode) -> Unit = {},
     onToggleOrientationLock: () -> Unit = {},
+    onSelectSurfaceStyle: (PlayerSurfaceStyle) -> Unit = {},
     onOpenCustomizer: () -> Unit,
     onUserInteraction: () -> Unit = {},
     onScrollStateChanged: (Boolean) -> Unit = {},
@@ -264,10 +265,8 @@ internal fun PlayerQuickActionsBar(
 
     val chipGap = if (settings.compactUiMode) 5.dp else 6.dp
     val buttonShape = RoundedCornerShape(12.dp)
-    val surfaceStyle = settings.playerSurfaceStyle
-    val accentFree = settings.playerControlsTheme.isAccentFree &&
-        surfaceStyle != PlayerSurfaceStyle.SOLID_ACCENT
-    val frameless = surfaceStyle == PlayerSurfaceStyle.FRAMELESS
+    val hudPalette = rememberPlayerHudSurfacePalette(settings)
+    val accentFree = hudPalette.accentFree
 
     val buildMenuForAction: (PlayerQuickAction) -> List<QuickHoldMenuItem> = { action ->
         buildHoldMenuItemsForAction(
@@ -296,42 +295,16 @@ internal fun PlayerQuickActionsBar(
             onSeekByMs = onSeekByMs,
             onSelectOrientationMode = onSelectOrientationMode,
             isOrientationLocked = isOrientationLocked,
-            onToggleOrientationLock = onToggleOrientationLock
+            onToggleOrientationLock = onToggleOrientationLock,
+            onSelectSurfaceStyle = onSelectSurfaceStyle
         )
     }
 
     val customizeDesc = tr("Настроить быстрые клавиши плеера", "Customize player quick actions")
-    val readableAccent = MaterialTheme.colorScheme.primary.ensureReadableOn(
-        Color(0xFF0C1322),
-        minContrast = 5.2f
-    )
-    val customizeContainerColor = when (surfaceStyle) {
-        PlayerSurfaceStyle.FRAMELESS -> Color.Transparent
-        PlayerSurfaceStyle.SOLID_ACCENT -> lerp(Color(0xD90B111E), readableAccent, 0.28f)
-        PlayerSurfaceStyle.FROSTED_GLASS -> Color(0x99101828)
-    }
-    val customizeSheenBrush = when (surfaceStyle) {
-        PlayerSurfaceStyle.FROSTED_GLASS -> Brush.verticalGradient(
-            colors = listOf(
-                Color.White.copy(alpha = 0.14f),
-                Color.White.copy(alpha = 0.03f),
-                Color.Transparent
-            )
-        )
-        PlayerSurfaceStyle.FRAMELESS,
-        PlayerSurfaceStyle.SOLID_ACCENT -> Brush.verticalGradient(
-            listOf(Color.Transparent, Color.Transparent)
-        )
-    }
-    val customizeBorder = when (surfaceStyle) {
-        PlayerSurfaceStyle.FRAMELESS -> null
-        PlayerSurfaceStyle.SOLID_ACCENT -> BorderStroke(0.85.dp, readableAccent.copy(alpha = 0.52f))
-        PlayerSurfaceStyle.FROSTED_GLASS -> if (accentFree) {
-            BorderStroke(0.85.dp, Color.White.copy(alpha = 0.28f))
-        } else {
-            BorderStroke(0.85.dp, readableAccent.copy(alpha = 0.52f))
-        }
-    }
+    val readableAccent = hudPalette.primaryAccent
+    val customizeContainerColor = hudPalette.neutralBg
+    val customizeSheenBrush = hudPalette.sheenBrush
+    val customizeBorder = hudPalette.neutralBorder
 
     BoxWithConstraints(
         modifier = modifier
@@ -1089,30 +1062,23 @@ private fun QuickActionHoldMiniPopupCard(
     onItemWindowBoundsChanged: (Int, ClosedFloatingPointRange<Float>) -> Unit = { _, _ -> },
     onSelectItem: (QuickHoldMenuItem) -> Unit
 ) {
-    val isPureOled = MaterialTheme.colorScheme.background.red < 0.01f &&
-        MaterialTheme.colorScheme.background.green < 0.01f &&
-        MaterialTheme.colorScheme.background.blue < 0.01f
-    val glassBg = if (isPureOled) Color(0xF5050505) else Color(0xC80B1220)
+    val glassBg = PlayerFrostedGlassPopupColor
     val readableAccent = MaterialTheme.colorScheme.primary.ensureReadableOn(glassBg, minContrast = 5.4f)
     val glassShape = RoundedCornerShape(16.dp)
 
     Surface(
         color = glassBg,
         shape = glassShape,
-        border = if (isPureOled) {
-            BorderStroke(1.dp, readableAccent.copy(alpha = 0.25f))
-        } else {
-            BorderStroke(
-                width = 1.dp,
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        Color.White.copy(alpha = 0.44f),
-                        readableAccent.copy(alpha = 0.62f),
-                        Color.White.copy(alpha = 0.20f)
-                    )
+        border = BorderStroke(
+            width = 1.dp,
+            brush = Brush.verticalGradient(
+                colors = listOf(
+                    Color.White.copy(alpha = 0.42f),
+                    readableAccent.copy(alpha = 0.58f),
+                    Color.White.copy(alpha = 0.18f)
                 )
             )
-        },
+        ),
         shadowElevation = 16.dp,
         modifier = Modifier
             .widthIn(min = 176.dp, max = 248.dp)
@@ -1291,7 +1257,8 @@ private fun buildHoldMenuItemsForAction(
     onSeekByMs: (Long) -> Unit,
     onSelectOrientationMode: (PlayerOrientationMode) -> Unit,
     isOrientationLocked: Boolean = false,
-    onToggleOrientationLock: () -> Unit = {}
+    onToggleOrientationLock: () -> Unit = {},
+    onSelectSurfaceStyle: (PlayerSurfaceStyle) -> Unit = {}
 ): List<QuickHoldMenuItem> {
     val offText = if (isEnglish) "Off" else "Откл."
     return when (action) {
@@ -1579,7 +1546,38 @@ private fun buildHoldMenuItemsForAction(
             )
         }
 
-        PlayerQuickAction.TOOLS,
+        PlayerQuickAction.TOOLS -> {
+            val currentStyle = settings.playerSurfaceStyle
+            val openToolsItem = QuickHoldMenuItem(
+                id = "OPEN_ALL_TOOLS",
+                label = if (isEnglish) "All Tools & Settings" else "Все инструменты",
+                badge = "⋯",
+                isSelected = false,
+                onSelect = { onTriggerAction(PlayerQuickAction.TOOLS) }
+            )
+            val surfaceItems = listOf(
+                PlayerSurfaceStyle.FROSTED_GLASS,
+                PlayerSurfaceStyle.SOLID_ACCENT
+            ).map { style ->
+                QuickHoldMenuItem(
+                    id = "surface_${style.id}",
+                    label = style.localizedTitle(isEnglish),
+                    badge = style.localizedBadge(isEnglish),
+                    isSelected = currentStyle == style,
+                    onSelect = { onSelectSurfaceStyle(style) }
+                )
+            }
+            val framelessItem = QuickHoldMenuItem(
+                id = "surface_${PlayerSurfaceStyle.FRAMELESS.id}",
+                label = PlayerSurfaceStyle.FRAMELESS.localizedTitle(isEnglish),
+                badge = PlayerSurfaceStyle.FRAMELESS.localizedBadge(isEnglish),
+                isSelected = currentStyle == PlayerSurfaceStyle.FRAMELESS,
+                isOffOption = true,
+                onSelect = { onSelectSurfaceStyle(PlayerSurfaceStyle.FRAMELESS) }
+            )
+            listOf(openToolsItem) + surfaceItems + framelessItem
+        }
+
         PlayerQuickAction.FILE_INFO -> emptyList()
 
         else -> {
@@ -1622,61 +1620,14 @@ private fun resolveQuickChipVisuals(
     isInfoOverlayVisible: Boolean = false
 ): QuickChipVisualState {
     val isEnglish = LocalIsEnglish.current
-    val surfaceStyle = settings.playerSurfaceStyle
-    val accentFree = settings.playerControlsTheme.isAccentFree &&
-        surfaceStyle != PlayerSurfaceStyle.SOLID_ACCENT
-    val darkHudGlass = Color(0xFF0C1322)
-    val primary = if (accentFree) {
-        Color.White.copy(alpha = 0.92f)
-    } else {
-        MaterialTheme.colorScheme.primary.ensureReadableOn(darkHudGlass, minContrast = 5.2f)
-    }
-    val secondary = if (accentFree) {
-        Color.White.copy(alpha = 0.92f)
-    } else {
-        MaterialTheme.colorScheme.secondary.ensureReadableOn(darkHudGlass, minContrast = 5.2f)
-    }
-    val activePrimaryBg = when (surfaceStyle) {
-        PlayerSurfaceStyle.FRAMELESS -> Color.Transparent
-        PlayerSurfaceStyle.SOLID_ACCENT -> lerp(Color(0xE00B111E), primary, 0.44f)
-        PlayerSurfaceStyle.FROSTED_GLASS -> if (accentFree) {
-            Color(0x991E293B)
-        } else {
-            lerp(Color(0xCC0E1729), primary, 0.28f)
-        }
-    }
-    val activeSecondaryBg = when (surfaceStyle) {
-        PlayerSurfaceStyle.FRAMELESS -> Color.Transparent
-        PlayerSurfaceStyle.SOLID_ACCENT -> lerp(Color(0xE00B111E), secondary, 0.44f)
-        PlayerSurfaceStyle.FROSTED_GLASS -> if (accentFree) {
-            Color(0x991E293B)
-        } else {
-            lerp(Color(0xCC0E1729), secondary, 0.28f)
-        }
-    }
-    val neutralBg = when (surfaceStyle) {
-        PlayerSurfaceStyle.FRAMELESS -> Color.Transparent
-        PlayerSurfaceStyle.SOLID_ACCENT -> lerp(Color(0xD90B111E), primary, 0.26f)
-        PlayerSurfaceStyle.FROSTED_GLASS -> Color(0x99101828)
-    }
-    val neutralBorder = when (surfaceStyle) {
-        PlayerSurfaceStyle.FRAMELESS -> null
-        PlayerSurfaceStyle.SOLID_ACCENT -> BorderStroke(0.8.dp, primary.copy(alpha = 0.42f))
-        PlayerSurfaceStyle.FROSTED_GLASS -> if (accentFree) {
-            BorderStroke(0.75.dp, Color.White.copy(alpha = 0.24f))
-        } else {
-            BorderStroke(0.75.dp, Color.White.copy(alpha = 0.22f))
-        }
-    }
-    val activeBorder = when (surfaceStyle) {
-        PlayerSurfaceStyle.FRAMELESS -> null
-        PlayerSurfaceStyle.SOLID_ACCENT -> BorderStroke(1.dp, primary.copy(alpha = 0.82f))
-        PlayerSurfaceStyle.FROSTED_GLASS -> if (accentFree) {
-            BorderStroke(0.9.dp, Color.White.copy(alpha = 0.45f))
-        } else {
-            BorderStroke(0.9.dp, primary.copy(alpha = 0.72f))
-        }
-    }
+    val hudPalette = rememberPlayerHudSurfacePalette(settings)
+    val primary = hudPalette.primaryAccent
+    val secondary = hudPalette.secondaryAccent
+    val activePrimaryBg = hudPalette.activePrimaryBg
+    val activeSecondaryBg = hudPalette.activeSecondaryBg
+    val neutralBg = hudPalette.neutralBg
+    val neutralBorder = hudPalette.neutralBorder
+    val activeBorder = hudPalette.activeBorder
 
     return when (action) {
         PlayerQuickAction.SPEED -> {

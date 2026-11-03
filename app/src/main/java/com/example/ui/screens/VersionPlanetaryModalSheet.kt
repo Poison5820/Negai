@@ -625,7 +625,7 @@ fun VersionPlanetaryModalSheet(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = tr("История сборок (3.4.x Prerelease)", "Release History (3.4.x Prerelease)"),
+                        text = tr("История релизов (3.4.x)", "Release History (3.4.x)"),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.primary

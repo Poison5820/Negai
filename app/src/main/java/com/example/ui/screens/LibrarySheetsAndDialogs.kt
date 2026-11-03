@@ -75,6 +75,7 @@ import com.example.model.AppThemeMode
 import com.example.model.EpisodeSortOption
 import com.example.model.FolderSortOption
 import com.example.model.PlayerControlsTheme
+import com.example.model.PlayerSurfaceStyle
 import com.example.ui.components.PlayerControlsThemeSelectorSection
 import com.example.ui.components.formatFileSize
 import com.example.ui.i18n.LocalIsEnglish
@@ -600,10 +601,12 @@ internal fun QuickThemeBottomSheet(
     currentTheme: AppThemeMode,
     currentAccentColor: AppAccentColor = AppAccentColor.CYAN,
     currentControlsTheme: PlayerControlsTheme = PlayerControlsTheme.CLASSIC_OLED,
+    currentSurfaceStyle: PlayerSurfaceStyle = PlayerSurfaceStyle.FROSTED_GLASS,
     currentLanguage: AppLanguage = AppLanguage.SYSTEM,
     onSelectTheme: (AppThemeMode) -> Unit,
     onSelectAccentColor: (AppAccentColor) -> Unit = {},
     onSelectControlsTheme: (PlayerControlsTheme) -> Unit = {},
+    onSelectSurfaceStyle: (PlayerSurfaceStyle) -> Unit = {},
     onSelectLanguage: (AppLanguage) -> Unit = {},
     onDismiss: () -> Unit
 ) {
@@ -809,6 +812,37 @@ internal fun QuickThemeBottomSheet(
                 selectedTheme = currentControlsTheme,
                 onSelectTheme = onSelectControlsTheme,
                 compactChipsOnly = true
+            )
+
+            HorizontalDivider(
+                modifier = Modifier.padding(vertical = 4.dp),
+                color = MaterialTheme.colorScheme.outlineVariant
+            )
+
+            Text(
+                text = tr(
+                    "Режим подложек кнопок: ${currentSurfaceStyle.localizedTitle(isEnglish)}",
+                    "HUD Button Surface Mode: ${currentSurfaceStyle.localizedTitle(isEnglish)}"
+                ),
+                style = MaterialTheme.typography.titleMedium
+            )
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                PlayerSurfaceStyle.entries.forEach { style ->
+                    FilterChip(
+                        selected = currentSurfaceStyle == style,
+                        onClick = { onSelectSurfaceStyle(style) },
+                        label = { Text(style.localizedTitle(isEnglish)) },
+                        modifier = Modifier.testTag("quick_surface_style_chip_${style.id}")
+                    )
+                }
+            }
+            Text(
+                text = currentSurfaceStyle.localizedSubtitle(isEnglish),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }

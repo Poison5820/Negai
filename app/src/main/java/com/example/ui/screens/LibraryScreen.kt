@@ -811,6 +811,7 @@ fun LibraryScreen(
             currentTheme = settings.themeMode,
             currentAccentColor = settings.accentColor,
             currentControlsTheme = settings.playerControlsTheme,
+            currentSurfaceStyle = settings.playerSurfaceStyle,
             currentLanguage = settings.appLanguage,
             onSelectTheme = { mode ->
                 effectiveSettingsActions.onUpdateThemeMode(mode)
@@ -820,6 +821,9 @@ fun LibraryScreen(
             },
             onSelectControlsTheme = { controlsTheme ->
                 effectiveSettingsActions.onUpdatePlayerControlsTheme(controlsTheme)
+            },
+            onSelectSurfaceStyle = { surfaceStyle ->
+                effectiveSettingsActions.onUpdatePlayerSurfaceStyle(surfaceStyle)
             },
             onSelectLanguage = { lang ->
                 effectiveSettingsActions.onUpdateAppLanguage(lang)

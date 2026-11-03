@@ -104,7 +104,114 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import kotlin.math.roundToInt
 
-internal val PlayerFrostedGlassBaseColor = Color(0xF2050505)
+import com.example.model.PlayerSurfaceStyle
+
+internal val PlayerFrostedGlassBaseColor = Color(0x700D1524)
+internal val PlayerFrostedGlassPopupColor = Color(0xB30B1220)
+
+internal data class PlayerHudSurfacePalette(
+    val surfaceStyle: PlayerSurfaceStyle,
+    val accentFree: Boolean,
+    val primaryAccent: Color,
+    val secondaryAccent: Color,
+    val neutralBg: Color,
+    val activePrimaryBg: Color,
+    val activeSecondaryBg: Color,
+    val neutralBorder: BorderStroke?,
+    val activeBorder: BorderStroke?,
+    val sheenBrush: Brush
+)
+
+@Composable
+internal fun rememberPlayerHudSurfacePalette(settings: PlayerSettings): PlayerHudSurfacePalette {
+    val surfaceStyle = settings.playerSurfaceStyle
+    val accentFree = settings.playerControlsTheme.isAccentFree &&
+        surfaceStyle != PlayerSurfaceStyle.SOLID_ACCENT
+    val darkHudGlass = Color(0xFF0C1322)
+    val primary = if (accentFree) {
+        Color.White.copy(alpha = 0.92f)
+    } else {
+        MaterialTheme.colorScheme.primary.ensureReadableOn(darkHudGlass, minContrast = 5.2f)
+    }
+    val secondary = if (accentFree) {
+        Color.White.copy(alpha = 0.92f)
+    } else {
+        MaterialTheme.colorScheme.secondary.ensureReadableOn(darkHudGlass, minContrast = 5.2f)
+    }
+    val neutralBg = when (surfaceStyle) {
+        PlayerSurfaceStyle.FRAMELESS -> Color.Transparent
+        PlayerSurfaceStyle.SOLID_ACCENT -> lerp(Color(0xBF0B111E), primary, 0.28f)
+        PlayerSurfaceStyle.FROSTED_GLASS -> PlayerFrostedGlassBaseColor
+    }
+    val activePrimaryBg = when (surfaceStyle) {
+        PlayerSurfaceStyle.FRAMELESS -> if (accentFree) {
+            Color.White.copy(alpha = 0.14f)
+        } else {
+            primary.copy(alpha = 0.22f)
+        }
+        PlayerSurfaceStyle.SOLID_ACCENT -> lerp(Color(0xD90B111E), primary, 0.44f)
+        PlayerSurfaceStyle.FROSTED_GLASS -> if (accentFree) {
+            Color(0x851E293B)
+        } else {
+            lerp(PlayerFrostedGlassBaseColor, primary, 0.28f)
+        }
+    }
+    val activeSecondaryBg = when (surfaceStyle) {
+        PlayerSurfaceStyle.FRAMELESS -> if (accentFree) {
+            Color.White.copy(alpha = 0.14f)
+        } else {
+            secondary.copy(alpha = 0.22f)
+        }
+        PlayerSurfaceStyle.SOLID_ACCENT -> lerp(Color(0xD90B111E), secondary, 0.44f)
+        PlayerSurfaceStyle.FROSTED_GLASS -> if (accentFree) {
+            Color(0x851E293B)
+        } else {
+            lerp(PlayerFrostedGlassBaseColor, secondary, 0.28f)
+        }
+    }
+    val neutralBorder = when (surfaceStyle) {
+        PlayerSurfaceStyle.FRAMELESS -> null
+        PlayerSurfaceStyle.SOLID_ACCENT -> BorderStroke(0.8.dp, primary.copy(alpha = 0.44f))
+        PlayerSurfaceStyle.FROSTED_GLASS -> BorderStroke(
+            0.75.dp,
+            Color.White.copy(alpha = if (accentFree) 0.26f else 0.24f)
+        )
+    }
+    val activeBorder = when (surfaceStyle) {
+        PlayerSurfaceStyle.FRAMELESS -> null
+        PlayerSurfaceStyle.SOLID_ACCENT -> BorderStroke(1.dp, primary.copy(alpha = 0.82f))
+        PlayerSurfaceStyle.FROSTED_GLASS -> if (accentFree) {
+            BorderStroke(0.9.dp, Color.White.copy(alpha = 0.48f))
+        } else {
+            BorderStroke(0.9.dp, primary.copy(alpha = 0.72f))
+        }
+    }
+    val sheenBrush = when (surfaceStyle) {
+        PlayerSurfaceStyle.FROSTED_GLASS -> Brush.verticalGradient(
+            colors = listOf(
+                Color.White.copy(alpha = 0.14f),
+                Color.White.copy(alpha = 0.03f),
+                Color.Transparent
+            )
+        )
+        PlayerSurfaceStyle.FRAMELESS,
+        PlayerSurfaceStyle.SOLID_ACCENT -> Brush.verticalGradient(
+            listOf(Color.Transparent, Color.Transparent)
+        )
+    }
+    return PlayerHudSurfacePalette(
+        surfaceStyle = surfaceStyle,
+        accentFree = accentFree,
+        primaryAccent = primary,
+        secondaryAccent = secondary,
+        neutralBg = neutralBg,
+        activePrimaryBg = activePrimaryBg,
+        activeSecondaryBg = activeSecondaryBg,
+        neutralBorder = neutralBorder,
+        activeBorder = activeBorder,
+        sheenBrush = sheenBrush
+    )
+}
 
 @Composable
 internal fun playerPopupSheetContainerColor(): Color {
@@ -134,36 +241,29 @@ internal fun playerPopupCardColor(): Color {
 
 @Composable
 internal fun playerPopupBorderStroke(): BorderStroke {
-    val bg = MaterialTheme.colorScheme.background
-    val isPureOled = bg.red < 0.01f && bg.green < 0.01f && bg.blue < 0.01f
     val accent = MaterialTheme.colorScheme.primary
-    return if (isPureOled) {
-        BorderStroke(0.8.dp, accent.copy(alpha = 0.22f))
-    } else {
-        BorderStroke(1.dp, accent.copy(alpha = 0.38f))
-    }
+    return BorderStroke(
+        width = 0.85.dp,
+        brush = Brush.verticalGradient(
+            colors = listOf(
+                Color.White.copy(alpha = 0.34f),
+                accent.copy(alpha = 0.44f),
+                Color.White.copy(alpha = 0.16f)
+            )
+        )
+    )
 }
 
 @Composable
-internal fun playerFrostedGlassBrush(accentAlpha: Float = 0.04f): Brush {
-    val bg = MaterialTheme.colorScheme.background
-    val isPureOled = bg.red < 0.01f && bg.green < 0.01f && bg.blue < 0.01f
+internal fun playerFrostedGlassBrush(accentAlpha: Float = 0.08f): Brush {
     val accent = MaterialTheme.colorScheme.primary
-    return if (isPureOled) {
-        Brush.verticalGradient(
-            colors = listOf(
-                Color(0xFF050505),
-                Color(0xFF030303)
-            )
+    return Brush.verticalGradient(
+        colors = listOf(
+            Color.White.copy(alpha = 0.14f),
+            accent.copy(alpha = accentAlpha.coerceAtMost(0.10f)),
+            Color.Transparent
         )
-    } else {
-        Brush.verticalGradient(
-            colors = listOf(
-                accent.copy(alpha = accentAlpha.coerceAtMost(0.06f)),
-                Color.Transparent
-            )
-        )
-    }
+    )
 }
 
 /**

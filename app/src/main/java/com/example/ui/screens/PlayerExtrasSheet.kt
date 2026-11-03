@@ -446,6 +446,11 @@ fun PlayerToolsModalSheet(
                         )
                     }
                 }
+                Text(
+                    text = surfaceStyle.localizedSubtitle(isEnglish),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
 
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
