@@ -48,11 +48,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.ImageLoader
 import coil.compose.AsyncImage
-import coil.decode.VideoFrameDecoder
-import coil.request.ImageRequest
-import coil.request.videoFrameMicros
 import com.example.data.PlaybackProgressEntity
 import com.example.data.PlaybackResumeHelper
 import com.example.model.VideoResolutionFormatter
@@ -60,6 +56,7 @@ import com.example.ui.components.LastPlayedFileButton
 import com.example.ui.components.ResolutionBadgeChip
 import com.example.ui.components.formatTimeMs
 import com.example.ui.i18n.tr
+import com.example.ui.util.VideoThumbnailCache
 
 @Composable
 internal fun RecentTabContent(
@@ -75,13 +72,11 @@ internal fun RecentTabContent(
 ) {
     val context = LocalContext.current
     val videoThumbnailLoader = remember(context) {
-        ImageLoader.Builder(context)
-            .components {
-                add(VideoFrameDecoder.Factory())
-            }
-            .crossfade(true)
-            .build()
+        VideoThumbnailCache.getImageLoader(context)
     }
+    val itemCardShape = remember(compactMode) { RoundedCornerShape(if (compactMode) 14.dp else 18.dp) }
+    val outlineVariant = MaterialTheme.colorScheme.outlineVariant
+    val itemBorder = remember(outlineVariant) { BorderStroke(1.dp, outlineVariant) }
 
     if (recentItems.isEmpty() && lastPlayedFile == null) {
         Box(
@@ -198,23 +193,15 @@ internal fun RecentTabContent(
                 val lower = item.videoUri.lowercase()
                 lower.startsWith("content://") || lower.startsWith("file://") || lower.startsWith("/")
             }
-            val frameMicros = remember(item.positionMs, item.durationMs) {
-                val targetMs = when {
-                    item.positionMs > 1_000L -> item.positionMs
-                    item.durationMs > 10_000L -> (item.durationMs / 6L).coerceAtMost(30_000L)
-                    else -> 3_000L
-                }
-                targetMs * 1_000L
-            }
             Card(
-                shape = RoundedCornerShape(if (compactMode) 14.dp else 18.dp),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                shape = itemCardShape,
+                border = itemBorder,
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainer
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(if (compactMode) 14.dp else 18.dp))
+                    .clip(itemCardShape)
                     .clickable { onResumeRecent(item) }
                     .testTag("recent_item_card")
             ) {
@@ -244,19 +231,13 @@ internal fun RecentTabContent(
                                 modifier = Modifier.size(20.dp)
                             )
                             if (canExtractThumbnail) {
-                                val imageRequest = remember(item.videoUri, frameMicros) {
-                                    ImageRequest.Builder(context)
-                                        .data(
-                                            if (item.videoUri.startsWith("/")) {
-                                                java.io.File(item.videoUri)
-                                            } else {
-                                                Uri.parse(item.videoUri)
-                                            }
-                                        )
-                                        .videoFrameMicros(frameMicros)
-                                        .size(240, 140)
-                                        .crossfade(true)
-                                        .build()
+                                val imageRequest = remember(item.videoUri) {
+                                    VideoThumbnailCache.buildEpisodeThumbnailRequest(
+                                        context = context,
+                                        videoUri = item.videoUri,
+                                        targetWidthPx = 240,
+                                        targetHeightPx = 140
+                                    )
                                 }
                                 AsyncImage(
                                     model = imageRequest,

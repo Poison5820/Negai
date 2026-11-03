@@ -43,6 +43,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -321,6 +322,11 @@ private fun SettingsCategoryHub(
         else -> androidx.compose.ui.graphics.Color(0xFF070B13).copy(alpha = 0.92f)
     }
     val hubBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = if (isDark) 0.58f else 0.48f)
+    val hubBorder = remember(hubBorderColor) { BorderStroke(0.75.dp, hubBorderColor) }
+    val hubCardShape = remember(settings.compactUiMode) {
+        RoundedCornerShape(if (settings.compactUiMode) 15.dp else 18.dp)
+    }
+    val hubIconShape = remember { RoundedCornerShape(13.dp) }
 
     LazyColumn(
         modifier = Modifier
@@ -346,8 +352,8 @@ private fun SettingsCategoryHub(
                 isEnglish = isEnglish
             )
             Card(
-                shape = RoundedCornerShape(if (settings.compactUiMode) 15.dp else 18.dp),
-                border = BorderStroke(0.75.dp, hubBorderColor),
+                shape = hubCardShape,
+                border = hubBorder,
                 colors = CardDefaults.cardColors(
                     containerColor = hubCardBg
                 ),
@@ -355,7 +361,7 @@ private fun SettingsCategoryHub(
                 modifier = Modifier
                     .fillMaxWidth()
                     .defaultMinSize(minHeight = if (settings.compactUiMode) 64.dp else 72.dp)
-                    .clip(RoundedCornerShape(if (settings.compactUiMode) 15.dp else 18.dp))
+                    .clip(hubCardShape)
                     .clickable { onSelectCategory(category) }
                     .testTag("settings_category_${category.id}")
             ) {
@@ -372,7 +378,7 @@ private fun SettingsCategoryHub(
                     Box(
                         modifier = Modifier
                             .size(44.dp)
-                            .clip(RoundedCornerShape(13.dp))
+                            .clip(hubIconShape)
                             .background(MaterialTheme.colorScheme.primaryContainer),
                         contentAlignment = Alignment.Center
                     ) {

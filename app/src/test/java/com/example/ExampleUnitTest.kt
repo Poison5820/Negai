@@ -330,12 +330,30 @@ class ExampleUnitTest {
             )
         )
 
-        // Finished / near-end (>= 95% or <= 15s left) -> restarts from 0
+        // Finished / near-end (>= 95% or <= 15s left or 100% completed) -> restarts from 0
         assertEquals(
             0L,
             com.example.data.PlaybackResumeHelper.computeResumePositionMs(
-                positionMs = (duration24m * 96L) / 100L,
+                positionMs = (duration24m * 95L) / 100L,
                 durationMs = duration24m,
+                resumeEnabled = true
+            )
+        )
+        assertEquals(
+            0L,
+            com.example.data.PlaybackResumeHelper.computeResumePositionMs(
+                positionMs = duration24m,
+                durationMs = duration24m,
+                resumeEnabled = true
+            )
+        )
+        val duration10m = 10 * 60 * 1000L
+        // 14s remaining on a 10m video (even though < 98.5%) -> restarts from 0
+        assertEquals(
+            0L,
+            com.example.data.PlaybackResumeHelper.computeResumePositionMs(
+                positionMs = duration10m - 14_000L,
+                durationMs = duration10m,
                 resumeEnabled = true
             )
         )

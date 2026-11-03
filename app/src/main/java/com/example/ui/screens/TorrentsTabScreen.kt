@@ -804,6 +804,10 @@ private fun TorrentResultCard(
 ) {
     val context = LocalContext.current
     var menuExpanded by remember { mutableStateOf(false) }
+    val cardShape = remember { RoundedCornerShape(20.dp) }
+    val badgeShape = remember { RoundedCornerShape(8.dp) }
+    val outlineVariant = MaterialTheme.colorScheme.outlineVariant
+    val cardBorder = remember(outlineVariant) { BorderStroke(1.dp, outlineVariant) }
 
     val trackerContainerColor = when (item.trackerGroup) {
         TorrentTrackerGroup.RUTRACKER -> MaterialTheme.colorScheme.primaryContainer
@@ -819,8 +823,8 @@ private fun TorrentResultCard(
     }
 
     Card(
-        shape = RoundedCornerShape(20.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        shape = cardShape,
+        border = cardBorder,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainer
         ),
@@ -846,7 +850,7 @@ private fun TorrentResultCard(
                 ) {
                     Surface(
                         color = trackerContainerColor,
-                        shape = RoundedCornerShape(8.dp)
+                        shape = badgeShape
                     ) {
                         Text(
                             text = item.trackerName,
@@ -859,7 +863,7 @@ private fun TorrentResultCard(
                     if (!item.qualityBadge.isNullOrBlank()) {
                         Surface(
                             color = MaterialTheme.colorScheme.surfaceContainerHighest,
-                            shape = RoundedCornerShape(8.dp)
+                            shape = badgeShape
                         ) {
                             Text(
                                 text = item.qualityBadge,
@@ -873,7 +877,7 @@ private fun TorrentResultCard(
                     if (item.sizeLabel.isNotBlank()) {
                         Surface(
                             color = MaterialTheme.colorScheme.surfaceContainerHighest,
-                            shape = RoundedCornerShape(8.dp)
+                            shape = badgeShape
                         ) {
                             Text(
                                 text = item.sizeLabel,
@@ -907,43 +911,45 @@ private fun TorrentResultCard(
                                 contentDescription = tr("Дополнительные действия", "More actions")
                             )
                         }
-                        DropdownMenu(
-                            expanded = menuExpanded,
-                            onDismissRequest = { menuExpanded = false }
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text(tr("Подробная информация о раздаче", "Detailed release info")) },
-                                leadingIcon = {
-                                    Icon(Icons.Default.Info, contentDescription = null)
-                                },
-                                onClick = {
-                                    menuExpanded = false
-                                    onOpenDetails()
+                        if (menuExpanded) {
+                            DropdownMenu(
+                                expanded = true,
+                                onDismissRequest = { menuExpanded = false }
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text(tr("Подробная информация о раздаче", "Detailed release info")) },
+                                    leadingIcon = {
+                                        Icon(Icons.Default.Info, contentDescription = null)
+                                    },
+                                    onClick = {
+                                        menuExpanded = false
+                                        onOpenDetails()
+                                    }
+                                )
+                                if (!item.magnetUri.isNullOrBlank()) {
+                                    DropdownMenuItem(
+                                        text = { Text(tr("Скопировать Magnet-ссылку", "Copy Magnet link")) },
+                                        leadingIcon = {
+                                            Icon(Icons.Default.ContentCopy, contentDescription = null)
+                                        },
+                                        onClick = {
+                                            menuExpanded = false
+                                            onCopyMagnet(item.magnetUri)
+                                        }
+                                    )
                                 }
-                            )
-                            if (!item.magnetUri.isNullOrBlank()) {
-                                DropdownMenuItem(
-                                    text = { Text(tr("Скопировать Magnet-ссылку", "Copy Magnet link")) },
-                                    leadingIcon = {
-                                        Icon(Icons.Default.ContentCopy, contentDescription = null)
-                                    },
-                                    onClick = {
-                                        menuExpanded = false
-                                        onCopyMagnet(item.magnetUri)
-                                    }
-                                )
-                            }
-                            if (!item.topicUrl.isNullOrBlank()) {
-                                DropdownMenuItem(
-                                    text = { Text(tr("Страница раздачи на трекере", "Open tracker topic page")) },
-                                    leadingIcon = {
-                                        Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = null)
-                                    },
-                                    onClick = {
-                                        menuExpanded = false
-                                        TorrentIntentHelper.openUrlInBrowser(context, item.topicUrl)
-                                    }
-                                )
+                                if (!item.topicUrl.isNullOrBlank()) {
+                                    DropdownMenuItem(
+                                        text = { Text(tr("Страница раздачи на трекере", "Open tracker topic page")) },
+                                        leadingIcon = {
+                                            Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = null)
+                                        },
+                                        onClick = {
+                                            menuExpanded = false
+                                            TorrentIntentHelper.openUrlInBrowser(context, item.topicUrl)
+                                        }
+                                    )
+                                }
                             }
                         }
                     }

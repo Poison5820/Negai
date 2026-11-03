@@ -677,10 +677,12 @@ private fun EpisodeRowCard(
     val context = LocalContext.current
     var menuExpanded by remember { mutableStateOf(false) }
     val cardShape = remember(compactMode) { RoundedCornerShape(if (compactMode) 15.dp else 18.dp) }
-    val cardBorder = remember(isSelected) {
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val outlineColor = MaterialTheme.colorScheme.outlineVariant
+    val cardBorder = remember(isSelected, primaryColor, outlineColor) {
         BorderStroke(
             width = if (isSelected) 2.dp else 1.dp,
-            color = if (isSelected) Color.Unspecified else Color.Unspecified
+            color = if (isSelected) primaryColor else outlineColor
         )
     }
     Card(
@@ -699,10 +701,7 @@ private fun EpisodeRowCard(
             )
             .testTag("episode_card_$index"),
         shape = cardShape,
-        border = BorderStroke(
-            width = if (isSelected) 2.dp else 1.dp,
-            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
-        ),
+        border = cardBorder,
         colors = CardDefaults.cardColors(
             containerColor = if (isSelected) {
                 MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.28f)

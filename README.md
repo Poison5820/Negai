@@ -32,10 +32,10 @@
 ## Key Capabilities
 
 ### 1. Video Pipeline & OpenGL ES Shaders
-- **Decoding Engine**: Media3 / ExoPlayer pipeline with selectable **HW+**, **HW**, and **SW** decoder modes supporting H.264, 10-bit HEVC (HDR10 / HLG / Dolby Vision profiles), VP9, and AV1.
-- **Anime4K Real-Time Upscaling**: Custom GLSL shader stages (`Anime4K_Fast`, `Anime4K_Upscale_CNN`, `Anime4K_Upscale_CNNX`) with Sobel gradient line reconstruction and dark-contour preservation.
+- **Decoding Engine**: Media3 / ExoPlayer pipeline with selectable **HW+**, **HW**, and **SW** decoder modes supporting H.264, 10-bit HEVC (HDR10 / HLG / Dolby Vision profiles), VP9, and AV1, plus a built-in **Hardware & MediaCodec Inspector** in Settings.
+- **Anime4K Real-Time Upscaling**: Custom GLSL shader stages (`Anime4K_Fast`, `Anime4K_Upscale_CNN`, `Anime4K_Upscale_CNNX`) with Sobel gradient line reconstruction, dark-contour preservation, live split-screen comparison, and automatic `Anime4K_Fast` load-balancing when paired with MEMC.
 - **Frame Interpolation (MEMC)**: Phase-consistent bidirectional motion estimation and frame synthesis (`ANIME 2x`, `BALANCED`, `MAX_FPS`) with perceptual luminance preservation for simultaneous operation alongside Anime4K without frame flickering.
-- **LTPO & High Refresh Rate Cadence**: Automatic display refresh rate matching (`24Hz`, `48Hz`, `60Hz`, `90Hz`, `120Hz`) with harmonic cadence locking.
+- **LTPO & High Refresh Rate Cadence**: Automatic display refresh rate matching (`24Hz`, `48Hz`, `60Hz`, `90Hz`, `120Hz`, `144Hz`, `165Hz`) with harmonic cadence locking.
 - **Aspect-Aware Orientation**: Automatic landscape/portrait switching per video aspect ratio, manual 1-tap orientation lock preserved across episode transitions, and buffered video-size transitions that prevent premature screen rotation before an episode ends.
 
 ### 2. Multi-Track Audio, De-Artifact DSP, Subtitles & Chapters
@@ -43,32 +43,31 @@
 - **Low-Bitrate Audio De-Artifact DSP**: Real-time 3-stage PCM restoration pipeline (`Soft`, `Standard`, `Aggressive`, `Off` + `Auto ≤ 128 kbps`) featuring dynamic high-frequency de-ringing, warm harmonic voice presence restoration, and cubic soft-knee de-clipping for compressed AAC/MP3/Opus voiceover tracks.
 - **Audio Synchronization & Bluetooth Compensation**:
   - Manual audio delay adjustment from **-5000 ms to +5000 ms** using non-destructive `MediaClock` offset for negative delays and PCM ring buffering for positive delays.
-  - Automatic Bluetooth A2DP / LE Audio latency compensation with real-time Gaming Mode (~45 ms) detection.
+  - Automatic Bluetooth A2DP / LE Audio latency compensation with real-time Gaming Mode (~45 ms) detection and manual presets (`-45 ms`, `-60 ms`, `-150 ms`).
   - Software DSP Audio Boost up to **200%** (+12 dB) with a soft-knee `tanh` limiter.
 - **Subtitle Renderer**: Styled ASS/SSA/SRT/VTT rendering with customizable scale, vertical offset, background opacity, and ±30s timing shift.
-- **Embedded Chapters**: Native Matroska (`MKV` EBML `ChapterAtom`) and `MP4` (`chpl`) chapter extraction with interactive timeline markers and chapter list navigation.
+- **Embedded Chapters**: Native Matroska (`MKV` EBML `ChapterAtom`) and `MP4` (`chpl`) chapter extraction with interactive timeline markers and dedicated Episodes / Chapters navigation.
 
 ### 3. Library Management & TorrServer Streaming
-- **Fast Binary Library Cache**: Instant cold start with background folder synchronization, natural episode sorting, resolution badges (`4K`, `1440p`, `1080p`, `720p`), and smart playback resume.
-- **TorrServer P2P Integration**: Built-in torrent release search with voiceover/subtitle tag parsing, magnet/torrent handoff to local or remote TorrServer instances, and automatic multi-episode playlist assembly with external `.mka`/`.ass` track binding.
+- **Fast Binary Library Cache & Smart Resume**: Instant cold start with background folder synchronization, natural episode sorting, resolution badges (`4K`, `1440p`, `1080p`, `720p`), and smart playback resume that automatically restarts completed episodes (`>= 95%` watched or `<= 15s` remaining) from `00:00` without auto-skipping to the next episode.
+- **TorrServer P2P Integration**: Built-in torrent release search with separated voiceover (`RUS/Dub/MVO/JacRed`) and subtitle tag parsing, magnet/torrent handoff to local or remote TorrServer instances, and automatic multi-episode playlist assembly with external `.mka`/`.ass` track binding.
 
 ### 4. Adaptive Interface & Theme Architecture
 - **Separated Base Theme Modes & Accent Palettes**:
   - **5 Base Theme Badges**: `Light`, `Dark` (`#0C111B`), `OLED` (`#000000` pure black), `Auto` (System Light/Dark), and `Auto OLED` (System Light/Pure Black).
   - **7 Accent Palettes**: `Monet` (Android 12+ dynamic colors), `Electric Cyan`, `Cyber Sakura`, `Deep Navy`, `Cyber Mint`, `Slate Indigo`, and `Sunset Amber`.
   - **Algorithmic WCAG 2.1 Auto-Contrast**: Dynamic relative-luminance contrast solver (`>= 4.5:1` / `7.0:1`) automatically adjusts foreground text and badge legibility across all theme and accent combinations.
-- **20:9 Landscape & Tablet Ergonomics**: Scrollable compact navigation rail, wide multi-column layouts (`1200dp`), independent App UI and Player HUD scaling (`75%–140%`), and zero-jank permanently mounted player controls that keep Android system bars hidden when opening modal sheets.
+- **Frosted Glass HUD & 120Hz Ergonomics**: Unified translucent Frosted Glass styling across both top-right player controls and the bottom quick-actions bar, non-blocking disk-cached episode thumbnails, scrollable compact navigation rail, wide multi-column layouts (`1200dp`), and independent App UI and Player HUD scaling (`75%–140%`).
 
 ---
 
-## Release 3.0 Summary
+## Release 3.2 Summary
 
-- **Combined Anime4K + MEMC Pipeline**: Unified luma propagation (`synLuma` in synthesized frame alpha channel) eliminates alternating-frame brightness flickering when running Frame Interpolation and Anime4K simultaneously; tuned `Anime4K_Fast` contour preservation to sharpen edges without thinning dark line art.
-- **Zero-Freeze Player HUD & Immersive Sheets**: Permanently mounted player HUD composition with GPU alpha transitions and immersive `ModalBottomSheet` window flags prevent frame drops and keep system bars hidden during playback.
-- **Orientation & Exit Stability**: Buffered end-of-episode video size changes prevent premature screen rotation before episode transitions; synchronous orientation and inset restoration eliminates layout shifts when exiting the player via system back gestures.
-- **Separated Theme & Accent System**: Split appearance settings into 5 base theme mode badges (`Light`, `Dark`, `OLED`, `Auto`, `Auto OLED`) and 7 accent palettes with algorithmic WCAG 2.1 text contrast.
-- **20:9 Landscape Layout & Folder View Refinements**: Optimized landscape navigation and wide screen layouts outside the player; streamlined open-folder top bar and folder-only metadata inspection.
-- **Bilingual Localization**: Centralized Russian (`RU`) and English (`EN`) localization across all screens, dialogs, and player sheets.
+- **Smart Restart of Completed Episodes (95% Threshold)**: Fixed an issue where completed or near-completed episodes (`>= 95%` watched or `<= 15s` left) could retain an end-of-file timestamp and immediately skip to the next episode upon reopening. Completed episodes now reset to `00:00` on finish and reopen cleanly from the start while keeping their watched badge in the folder list.
+- **120Hz List Scrolling Optimization**: Removed synchronous UI-thread file checks during thumbnail request building, unified `RecentTabScreen` and `FolderDetailScreen` onto the shared disk-backed `VideoThumbnailCache`, added stable keys in `TorrentsTabScreen`, lazily composed context menus, and memoized card shapes/borders/brushes across all screens.
+- **Frosted Glass Top-Right Player HUD**: Redesigned the top-right player buttons (Episodes/Chapters, Orientation Lock, Screen Touch Lock, and Picture-in-Picture) with the same translucent Frosted Glass surface (`#88101828`), subtle border, and top inner highlight sheen as the bottom `PlayerQuickActionsBar`.
+- **Updated Planetary Easter Egg & Synchronized Translations**: Updated the interactive planetary model (`VersionPlanetaryModalSheet`) with current v3.2 orbital specifications (`Auto-Fast with MEMC`, `165Hz`, Bluetooth Gaming presets, voiceover parser) and unified RU/EN terminology across Settings, Player sheets, and dialogs.
+- **Hardware Inspector & Torrent Voiceover Separation**: Added device display/HDR/MediaCodec hardware inspection in Settings and dedicated voiceover vs. subtitle parsing on torrent release cards.
 
 ---
 
@@ -117,5 +116,5 @@ gradle :app:testDebugUnitTest
 ## Repository & Obtainium Updates
 
 - **Package ID**: `app.negai.player`
-- **Version**: `3.0` (`versionCode = 7`)
+- **Version**: `3.2` (`versionCode = 10`)
 - **GitHub Repository**: [https://github.com/Poison5820/Negai](https://github.com/Poison5820/Negai)

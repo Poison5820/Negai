@@ -99,10 +99,10 @@ private val PLANETARY_FEATURES = listOf(
         badge = "GLSL • Anime4K",
         titleRu = "Апскейлинг Anime4K в реальном времени",
         titleEn = "Real-Time Anime4K GLSL Upscaling",
-        subtitleRu = "Многопроходная реконструкция контуров Собеля, CNN / CNNX и живое сравнение До/После",
-        subtitleEn = "Multi-pass Sobel contour reconstruction, CNN / CNNX shaders & live split-screen compare",
-        specsRu = "OpenGL ES 2.0 • 4 пресета • 0 задержки кадра",
-        specsEn = "OpenGL ES 2.0 • 4 Presets • Zero frame latency",
+        subtitleRu = "Многопроходная реконструкция контуров Собеля, CNN / CNNX, авто-Fast с MEMC и живое сравнение До/После",
+        subtitleEn = "Multi-pass Sobel contour reconstruction, CNN / CNNX shaders, Auto-Fast with MEMC & live split-screen compare",
+        specsRu = "OpenGL ES 2.0 • 4 пресета • Авто-Fast с MEMC • 0 задержки",
+        specsEn = "OpenGL ES 2.0 • 4 Presets • Auto-Fast with MEMC • Zero latency",
         color = Color(0xFF00E5FF),
         orbitRadiusFraction = 0.28f,
         speedMultiplier = 1.6f,
@@ -118,8 +118,8 @@ private val PLANETARY_FEATURES = listOf(
         titleEn = "MEMC Frame Interpolation & LTPO Cadence",
         subtitleRu = "Фазово-согласованный двунаправленный варпинг до 165 Гц с защитой от артефактов на сменах сцен",
         subtitleEn = "Phase-consistent bidirectional motion warp up to 165Hz with scene-cut artifact protection",
-        specsRu = "24/30 → 60/90/120/165 Гц • Highp векторы движения",
-        specsEn = "24/30 → 60/90/120/165Hz • Highp motion vectors",
+        specsRu = "24/30 → 60/90/120/144/165 Гц • Highp векторы движения",
+        specsEn = "24/30 → 60/90/120/144/165Hz • Highp motion vectors",
         color = Color(0xFFFF4D8D),
         orbitRadiusFraction = 0.48f,
         speedMultiplier = 1.1f,
@@ -510,9 +510,9 @@ fun VersionPlanetaryModalSheet(
                     )
                     val notes = if (isEnglish) {
                         listOf(
-                            "• Smart restart of completed videos: series watched to ≥95% (or ending in ≤15s) automatically start at 00:00 instead of instantly skipping to the next episode",
+                            "• Smart restart of completed videos: episodes watched to ≥95% (or ending in ≤15s) automatically start at 00:00 instead of instantly skipping to the next episode",
                             "• Comprehensive 120Hz scroll performance: non-blocking IO thumbnail decoding, stable LazyColumn keys, and memoized gradient cards eliminate list stutter",
-                            "• Frosted Glass top-right HUD: screen rotation lock, accidental touch lock, and PiP buttons match the bottom timeline panel with glow sheen and elevation",
+                            "• Frosted Glass top-right HUD: episodes/chapters, rotation lock, touch lock, and PiP buttons use the same translucent frosted glass style as the bottom quick-actions panel",
                             "• Updated Planetary Easter Egg: live orbital specs updated with Bluetooth Gaming Mode, Anime4K+MEMC auto-balance, and Voiceover parsing",
                             "• Enhanced torrent metadata parsing: release cards clearly separate audio voiceovers (Dub/MVO/JacRed) from external subtitles",
                             "• Hardware inspector & Device specs: display capabilities, refresh rates, HDR formats, and active MediaCodec decoders in Settings"
@@ -521,7 +521,7 @@ fun VersionPlanetaryModalSheet(
                         listOf(
                             "• Умный сброс завершённых серий: серии с просмотром ≥95% (или остатком ≤15 с) стартуют с 00:00 и не переключаются мгновенно на следующую",
                             "• Комплексная оптимизация плавности 120 Гц: неблокирующая фоновая загрузка миниатюр, стабильные ключи LazyColumn и мемоизация карточек убирают микрофризы",
-                            "• Верхние правые кнопки плеера в стиле Frosted Glass: кнопки поворота, замка экрана и PiP выполнены в едином стиле с нижней панелью с градиентной рамкой и тенью",
+                            "• Верхние правые кнопки плеера в стиле матового стекла (Frosted Glass): кнопки серий/глав, поворота, блокировки касаний и PiP оформлены идентично нижней панели",
                             "• Обновлённая планетарная модель: актуализированы характеристики орбит (Игровой режим Bluetooth, авто-баланс Anime4K+MEMC, распознавание озвучек)",
                             "• Разделение озвучек и субтитров в торрентах: карточки релизов чётко отделяют переводы (RUS/Дубляж/MVO/JacRed) от субтитров",
                             "• Сведения об устройстве в настройках: разрешение, герцовка экрана, поддержка HDR и список доступных декодеров MediaCodec"

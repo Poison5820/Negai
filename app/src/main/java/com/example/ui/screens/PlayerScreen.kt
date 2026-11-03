@@ -1093,45 +1093,36 @@ fun PlayerScreen(
             ) {
                 val accentFreeHud = settings.playerControlsTheme.isAccentFree
                 val framelessHud = settings.playerControlsTheme.isFrameless
-                val darkGlassBase = PlayerFrostedGlassBaseColor
+                val darkGlassBase = Color(0xFF0C1322)
                 val hudAccentColor = if (accentFreeHud) {
                     Color.White.copy(alpha = 0.92f)
                 } else {
-                    MaterialTheme.colorScheme.primary.ensureReadableOn(darkGlassBase, minContrast = 5.4f)
+                    MaterialTheme.colorScheme.primary.ensureReadableOn(darkGlassBase, minContrast = 5.2f)
                 }
+                val hudButtonShape = RoundedCornerShape(12.dp)
                 val hudPillBorder = when {
                     framelessHud -> null
-                    accentFreeHud -> BorderStroke(0.85.dp, Color.White.copy(alpha = 0.34f))
-                    else -> BorderStroke(
-                        width = 0.9.dp,
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                Color.White.copy(alpha = 0.44f),
-                                hudAccentColor.copy(alpha = 0.65f),
-                                Color.White.copy(alpha = 0.20f)
-                            )
-                        )
-                    )
+                    accentFreeHud -> BorderStroke(0.75.dp, Color.White.copy(alpha = 0.24f))
+                    else -> BorderStroke(0.75.dp, Color.White.copy(alpha = 0.20f))
                 }
                 val hudActiveLockedBorder = when {
                     framelessHud -> null
-                    accentFreeHud -> BorderStroke(1.dp, Color.White.copy(alpha = 0.55f))
-                    else -> BorderStroke(1.dp, hudAccentColor.copy(alpha = 0.88f))
+                    accentFreeHud -> BorderStroke(0.9.dp, Color.White.copy(alpha = 0.45f))
+                    else -> BorderStroke(0.9.dp, hudAccentColor.copy(alpha = 0.72f))
                 }
-                val hudPillBg = if (framelessHud) Color.Transparent else darkGlassBase
+                val hudPillBg = if (framelessHud) Color.Transparent else Color(0x88101828)
                 val hudActiveLockedBg = when {
                     framelessHud -> Color.Transparent
-                    accentFreeHud -> Color(0xCC1E293B)
-                    else -> lerp(darkGlassBase, hudAccentColor, 0.30f)
+                    accentFreeHud -> Color(0x991E293B)
+                    else -> lerp(Color(0xCC0E1729), hudAccentColor, 0.28f)
                 }
-                val hudGlassSheenBrush = remember(hudAccentColor, framelessHud) {
+                val hudGlassSheenBrush = remember(framelessHud) {
                     if (framelessHud) {
                         Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent))
                     } else {
                         Brush.verticalGradient(
                             colors = listOf(
-                                Color.White.copy(alpha = 0.16f),
-                                hudAccentColor.copy(alpha = 0.10f),
+                                Color.White.copy(alpha = 0.10f),
                                 Color.Transparent
                             )
                         )
@@ -1149,26 +1140,25 @@ fun PlayerScreen(
                 ) {
                     Surface(
                         color = hudPillBg,
-                        shape = RoundedCornerShape(11.dp),
+                        shape = hudButtonShape,
                         border = hudPillBorder,
-                        shadowElevation = if (framelessHud) 0.dp else 6.dp,
                         modifier = Modifier
                             .defaultMinSize(minWidth = 38.dp, minHeight = 36.dp)
-                            .clip(RoundedCornerShape(11.dp))
+                            .clip(hudButtonShape)
                             .clickable(enabled = showHud) { exitPlayerCleanly() }
                             .testTag("player_back_button")
                     ) {
                         Box(
                             modifier = Modifier
                                 .background(hudGlassSheenBrush)
-                                .padding(horizontal = 9.dp, vertical = 7.dp),
+                                .padding(horizontal = 10.dp, vertical = 8.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = tr("Закрыть плеер", "Close player"),
                                 tint = Color.White,
-                                modifier = Modifier.size(19.dp)
+                                modifier = Modifier.size(18.dp)
                             )
                         }
                     }
@@ -1233,12 +1223,11 @@ fun PlayerScreen(
                         }
                         Surface(
                             color = hudPillBg,
-                            shape = RoundedCornerShape(11.dp),
+                            shape = hudButtonShape,
                             border = hudPillBorder,
-                            shadowElevation = if (framelessHud) 0.dp else 6.dp,
                             modifier = Modifier
-                                .defaultMinSize(minHeight = 36.dp)
-                                .clip(RoundedCornerShape(11.dp))
+                                .defaultMinSize(minWidth = 38.dp, minHeight = 36.dp)
+                                .clip(hudButtonShape)
                                 .clickable {
                                     interactionTick++
                                     activeSheet = ActivePlayerSheet.EPISODES
@@ -1248,19 +1237,19 @@ fun PlayerScreen(
                             Row(
                                 modifier = Modifier
                                     .background(hudGlassSheenBrush)
-                                    .padding(horizontal = 9.dp, vertical = 7.dp),
+                                    .padding(horizontal = 9.dp, vertical = 8.dp),
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(5.dp)
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.PlaylistPlay,
                                     contentDescription = epButtonLabel,
                                     tint = hudAccentColor,
-                                    modifier = Modifier.size(16.dp)
+                                    modifier = Modifier.size(18.dp)
                                 )
                                 Text(
                                     text = epButtonLabel,
-                                    style = MaterialTheme.typography.labelSmall,
+                                    style = MaterialTheme.typography.labelMedium,
                                     fontWeight = FontWeight.SemiBold,
                                     color = Color.White,
                                     maxLines = 1
@@ -1269,19 +1258,18 @@ fun PlayerScreen(
                         }
                     }
 
-                    // Grouped compact top-right frosted-glass utility buttons
+                    // Grouped compact top-right frosted-glass utility buttons (matched to bottom panel)
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        horizontalArrangement = Arrangement.spacedBy(if (settings.compactUiMode) 5.dp else 6.dp)
                     ) {
                         Surface(
                             color = if (isOrientationLocked) hudActiveLockedBg else hudPillBg,
-                            shape = RoundedCornerShape(11.dp),
+                            shape = hudButtonShape,
                             border = if (isOrientationLocked) hudActiveLockedBorder else hudPillBorder,
-                            shadowElevation = if (framelessHud) 0.dp else 6.dp,
                             modifier = Modifier
                                 .defaultMinSize(minWidth = 38.dp, minHeight = 36.dp)
-                                .clip(RoundedCornerShape(11.dp))
+                                .clip(hudButtonShape)
                                 .combinedClickable(
                                     onClick = toggleOrientationOneTap,
                                     onLongClick = toggleOrientationLock
@@ -1291,9 +1279,9 @@ fun PlayerScreen(
                             Row(
                                 modifier = Modifier
                                     .background(hudGlassSheenBrush)
-                                    .padding(horizontal = 9.dp, vertical = 7.dp),
+                                    .padding(horizontal = 10.dp, vertical = 8.dp),
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(2.dp)
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.ScreenRotation,
@@ -1321,12 +1309,11 @@ fun PlayerScreen(
 
                         Surface(
                             color = hudPillBg,
-                            shape = RoundedCornerShape(11.dp),
+                            shape = hudButtonShape,
                             border = hudPillBorder,
-                            shadowElevation = if (framelessHud) 0.dp else 6.dp,
                             modifier = Modifier
                                 .defaultMinSize(minWidth = 38.dp, minHeight = 36.dp)
-                                .clip(RoundedCornerShape(11.dp))
+                                .clip(hudButtonShape)
                                 .clickable {
                                     isScreenLocked = true
                                     lockedPillVisible = true
@@ -1337,7 +1324,7 @@ fun PlayerScreen(
                             Box(
                                 modifier = Modifier
                                     .background(hudGlassSheenBrush)
-                                    .padding(horizontal = 9.dp, vertical = 7.dp),
+                                    .padding(horizontal = 10.dp, vertical = 8.dp),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
@@ -1347,7 +1334,7 @@ fun PlayerScreen(
                                         "Lock screen against accidental touches"
                                     ),
                                     tint = Color.White,
-                                    modifier = Modifier.size(19.dp)
+                                    modifier = Modifier.size(18.dp)
                                 )
                             }
                         }
@@ -1355,19 +1342,18 @@ fun PlayerScreen(
                         if (pipSupported) {
                             Surface(
                                 color = hudPillBg,
-                                shape = RoundedCornerShape(11.dp),
+                                shape = hudButtonShape,
                                 border = hudPillBorder,
-                                shadowElevation = if (framelessHud) 0.dp else 6.dp,
                                 modifier = Modifier
                                     .defaultMinSize(minWidth = 38.dp, minHeight = 36.dp)
-                                    .clip(RoundedCornerShape(11.dp))
+                                    .clip(hudButtonShape)
                                     .clickable { onEnterPip() }
                                     .testTag("player_enter_pip_button")
                             ) {
                                 Box(
                                     modifier = Modifier
                                         .background(hudGlassSheenBrush)
-                                        .padding(horizontal = 9.dp, vertical = 7.dp),
+                                        .padding(horizontal = 10.dp, vertical = 8.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
@@ -1376,8 +1362,8 @@ fun PlayerScreen(
                                             "Режим Картинка в картинке (PiP)",
                                             "Picture-in-Picture (PiP) mode"
                                         ),
-                                        tint = Color.White,
-                                        modifier = Modifier.size(19.dp)
+                                        tint = hudAccentColor,
+                                        modifier = Modifier.size(18.dp)
                                     )
                                 }
                             }

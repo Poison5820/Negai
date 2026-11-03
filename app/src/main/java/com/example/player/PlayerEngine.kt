@@ -3,6 +3,7 @@ package com.example.player
 import android.content.ComponentName
 import android.content.Context
 import android.net.Uri
+import android.os.SystemClock
 import android.view.Surface
 import androidx.annotation.OptIn
 import androidx.compose.runtime.Immutable
@@ -261,9 +262,62 @@ class PlayerEngine private constructor(
         }
     }
 
+    private var awaitingInitialDurationVerifyIndex: Int = -1
+    private var lastManualEpisodeStartIndex: Int = -1
+    private var lastManualEpisodeStartRealtimeMs: Long = 0L
+    private var lastManualEpisodeInitialPosMs: Long = 0L
+
+    private fun verifyAndResetIfResumedAtEnd(player: ExoPlayer, resolvedDur: Long) {
+        if (resolvedDur <= 0L) return
+        val currentIdx = player.currentMediaItemIndex
+        if (awaitingInitialDurationVerifyIndex != currentIdx) return
+        awaitingInitialDurationVerifyIndex = -1
+        val currentPos = player.currentPosition.coerceAtLeast(_positionMs.value).coerceAtLeast(0L)
+        if (currentPos > 0L &&
+            PlaybackResumeHelper.computeResumePositionMs(
+                positionMs = currentPos,
+                durationMs = resolvedDur,
+                resumeEnabled = true
+            ) == 0L
+        ) {
+            lastManualEpisodeInitialPosMs = 0L
+            player.seekTo(currentIdx, 0L)
+            _positionMs.value = 0L
+            _state.update {
+                it.copy(
+                    currentPositionMs = 0L,
+                    durationMs = resolvedDur,
+                    resumedFromPositionMs = null
+                )
+            }
+            val ep = _state.value.playlist.getOrNull(currentIdx)
+            if (ep != null) {
+                engineScope.launch {
+                    repository.savePlaybackProgress(
+                        episode = ep,
+                        positionMs = 0L,
+                        durationMs = resolvedDur,
+                        videoWidth = detectedVideoWidth,
+                        videoHeight = detectedVideoHeight
+                    )
+                }
+            }
+        }
+    }
+
     private val playerListener = object : Player.Listener {
         override fun onAudioSessionIdChanged(audioSessionId: Int) {
             audioBoostController.onAudioSessionIdChanged(audioSessionId)
+        }
+
+        override fun onTimelineChanged(timeline: androidx.media3.common.Timeline, reason: Int) {
+            val player = _exoPlayer ?: return
+            val liveDur = player.duration.takeIf { it != C.TIME_UNSET && it > 0L } ?: return
+            lastKnownDurationForTrackedEpisodeMs = liveDur
+            verifyAndResetIfResumedAtEnd(player, liveDur)
+            if (_state.value.durationMs != liveDur) {
+                _state.update { it.copy(durationMs = liveDur) }
+            }
         }
 
         override fun onIsPlayingChanged(isPlaying: Boolean) {
@@ -290,12 +344,15 @@ class PlayerEngine private constructor(
         override fun onPlaybackStateChanged(playbackState: Int) {
             val player = _exoPlayer ?: return
             val buffering = playbackState == Player.STATE_BUFFERING
-            val dur = player.duration.takeIf { it != C.TIME_UNSET && it > 0L } ?: _state.value.durationMs
-            val pos = player.currentPosition.coerceAtLeast(0L)
-            _positionMs.value = pos
-            if (dur > 0L) {
-                lastKnownDurationForTrackedEpisodeMs = dur
+            val liveDur = player.duration.takeIf { it != C.TIME_UNSET && it > 0L }
+            val dur = liveDur ?: _state.value.durationMs
+            var pos = player.currentPosition.coerceAtLeast(0L)
+            if (liveDur != null) {
+                lastKnownDurationForTrackedEpisodeMs = liveDur
+                verifyAndResetIfResumedAtEnd(player, liveDur)
+                pos = player.currentPosition.coerceAtLeast(0L)
             }
+            _positionMs.value = pos
             _state.update { prev ->
                 val updatedChapters = if (dur > 0L && prev.chapters.isNotEmpty() && prev.chapters.last().endTimeMs < dur) {
                     prev.chapters.mapIndexed { idx, ch ->
@@ -320,7 +377,33 @@ class PlayerEngine private constructor(
                 if (_state.value.sleepTimerPreset == SleepTimerPreset.END_OF_EPISODE) {
                     clearSleepTimerInternal()
                 }
-                persistCurrentProgress()
+                val ep = _state.value.currentEpisode
+                val completedDur = dur.coerceAtLeast(pos).coerceAtLeast(lastKnownDurationForTrackedEpisodeMs).coerceAtLeast(10_000L)
+                if (ep != null) {
+                    val w = detectedVideoWidth
+                    val h = detectedVideoHeight
+                    engineScope.launch {
+                        repository.savePlaybackProgress(
+                            episode = ep,
+                            positionMs = completedDur,
+                            durationMs = completedDur,
+                            videoWidth = w,
+                            videoHeight = h
+                        )
+                    }
+                }
+                // Reset player timer to 00:00 after finishing so the user can replay without being stuck at EOF
+                player.pause()
+                player.seekTo(0L)
+                _positionMs.value = 0L
+                _state.update {
+                    it.copy(
+                        isPlaying = false,
+                        currentPositionMs = 0L,
+                        durationMs = completedDur,
+                        resumedFromPositionMs = null
+                    )
+                }
             }
         }
 
@@ -372,17 +455,38 @@ class PlayerEngine private constructor(
             if (oldPosition.mediaItemIndex != newPosition.mediaItemIndex &&
                 oldPosition.mediaItemIndex in playlist.indices
             ) {
+                val elapsedSinceManualStart = SystemClock.elapsedRealtime() - lastManualEpisodeStartRealtimeMs
+                val isInstantEofOnReopen = reason == Player.DISCONTINUITY_REASON_AUTO_TRANSITION &&
+                    oldPosition.mediaItemIndex == lastManualEpisodeStartIndex &&
+                    lastManualEpisodeInitialPosMs > 5_000L &&
+                    elapsedSinceManualStart in 0L..3_500L
+                if (isInstantEofOnReopen) {
+                    return
+                }
+
                 val outgoingEp = playlist[oldPosition.mediaItemIndex]
                 val outgoingPos = oldPosition.positionMs.coerceAtLeast(0L)
-                val outgoingDur = lastKnownDurationForTrackedEpisodeMs.coerceAtLeast(outgoingEp.durationMs)
-                if (outgoingPos > 0L || outgoingDur > 0L) {
+                val outgoingDur = lastKnownDurationForTrackedEpisodeMs
+                    .coerceAtLeast(outgoingEp.durationMs)
+                    .coerceAtLeast(_state.value.durationMs)
+                val isCompleted = reason == Player.DISCONTINUITY_REASON_AUTO_TRANSITION ||
+                    (outgoingDur >= 10_000L && (outgoingPos >= (outgoingDur * 95L) / 100L || (outgoingDur - outgoingPos) <= 15_000L))
+                val resolvedDur = if (isCompleted) {
+                    outgoingDur.coerceAtLeast(outgoingPos).coerceAtLeast(10_000L)
+                } else {
+                    outgoingDur
+                }
+                val resolvedPos = if (isCompleted) resolvedDur else outgoingPos
+                if (resolvedPos > 0L || resolvedDur > 0L) {
+                    val outW = detectedVideoWidth
+                    val outH = detectedVideoHeight
                     engineScope.launch {
                         repository.savePlaybackProgress(
                             episode = outgoingEp,
-                            positionMs = outgoingPos,
-                            durationMs = outgoingDur,
-                            videoWidth = detectedVideoWidth,
-                            videoHeight = detectedVideoHeight
+                            positionMs = resolvedPos,
+                            durationMs = resolvedDur,
+                            videoWidth = outW,
+                            videoHeight = outH
                         )
                     }
                 }
@@ -394,8 +498,46 @@ class PlayerEngine private constructor(
             val idx = player.currentMediaItemIndex
             val playlist = _state.value.playlist
             if (idx in playlist.indices) {
-                val prevIdx = lastTrackedEpisodeIndex
-                val prevDur = lastKnownDurationForTrackedEpisodeMs
+                val elapsedSinceManualStart = SystemClock.elapsedRealtime() - lastManualEpisodeStartRealtimeMs
+                if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO &&
+                    lastManualEpisodeStartIndex in playlist.indices &&
+                    lastManualEpisodeStartIndex != idx &&
+                    lastManualEpisodeInitialPosMs > 5_000L &&
+                    elapsedSinceManualStart in 0L..3_500L
+                ) {
+                    // Guard: the episode opened by the user had a legacy/corrupt saved position right at EOF
+                    // and immediately auto-transitioned. Rewind back to the requested episode at 00:00!
+                    val targetIdx = lastManualEpisodeStartIndex
+                    val targetEp = playlist[targetIdx]
+                    val fallbackDur = lastKnownDurationForTrackedEpisodeMs
+                        .coerceAtLeast(targetEp.durationMs)
+                        .coerceAtLeast(lastManualEpisodeInitialPosMs)
+                    lastManualEpisodeInitialPosMs = 0L
+                    lastManualEpisodeStartRealtimeMs = SystemClock.elapsedRealtime()
+                    lastTrackedEpisodeIndex = targetIdx
+                    awaitingInitialDurationVerifyIndex = -1
+                    _positionMs.value = 0L
+                    player.seekTo(targetIdx, 0L)
+                    player.playWhenReady = true
+                    _state.update {
+                        it.copy(
+                            currentEpisodeIndex = targetIdx,
+                            currentPositionMs = 0L,
+                            durationMs = fallbackDur,
+                            resumedFromPositionMs = null,
+                            errorMessage = null
+                        )
+                    }
+                    engineScope.launch {
+                        repository.savePlaybackProgress(
+                            episode = targetEp,
+                            positionMs = 0L,
+                            durationMs = fallbackDur
+                        )
+                    }
+                    return
+                }
+
                 lastTrackedEpisodeIndex = idx
                 val currentDur = player.duration.takeIf { d -> d != C.TIME_UNSET && d > 0L } ?: 0L
                 val pos = player.currentPosition.coerceAtLeast(0L)
@@ -427,50 +569,55 @@ class PlayerEngine private constructor(
                 ptsSampleCount = 0
                 onEpisodeActivated(newEp)
 
-                if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO ||
-                    reason == Player.MEDIA_ITEM_TRANSITION_REASON_SEEK
-                ) {
+                val isExternalSeekTransition = reason == Player.MEDIA_ITEM_TRANSITION_REASON_SEEK &&
+                    (idx != lastManualEpisodeStartIndex || elapsedSinceManualStart > 1_500L)
+                if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO || isExternalSeekTransition) {
                     engineScope.launch {
-                        if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO &&
-                            prevIdx in playlist.indices &&
-                            prevIdx != idx &&
-                            prevDur > 0L
-                        ) {
-                            repository.savePlaybackProgress(
-                                episode = playlist[prevIdx],
-                                positionMs = prevDur,
-                                durationMs = prevDur
-                            )
-                        }
                         val settings = repository.settingsFlow.first()
                         val saved = repository.getSavedProgressForEpisode(newEp)
+                        val effectiveDur = (saved?.durationMs ?: 0L)
+                            .coerceAtLeast(newEp.durationMs)
+                            .coerceAtLeast(currentDur)
                         val resumePos = PlaybackResumeHelper.computeResumePositionMs(
                             positionMs = saved?.positionMs ?: newEp.resumePositionMs,
-                            durationMs = saved?.durationMs ?: newEp.durationMs,
+                            durationMs = effectiveDur,
                             resumeEnabled = settings.resumePlayback
                         )
-                        val effectivePos = if (resumePos > 0L &&
-                            player.currentMediaItemIndex == idx &&
-                            player.currentPosition < 2_500L
-                        ) {
-                            player.seekTo(idx, resumePos)
-                            _positionMs.value = resumePos
-                            _state.update {
-                                it.copy(
-                                    currentPositionMs = resumePos,
-                                    durationMs = saved?.durationMs ?: it.durationMs,
-                                    resumedFromPositionMs = resumePos,
-                                    resumeEventId = System.currentTimeMillis()
-                                )
+                        awaitingInitialDurationVerifyIndex = if (resumePos > 0L && currentDur <= 0L) idx else -1
+                        val effectivePos = if (player.currentMediaItemIndex == idx) {
+                            if (resumePos > 0L && player.currentPosition < 2_500L) {
+                                player.seekTo(idx, resumePos)
+                                _positionMs.value = resumePos
+                                _state.update {
+                                    it.copy(
+                                        currentPositionMs = resumePos,
+                                        durationMs = effectiveDur.coerceAtLeast(it.durationMs),
+                                        resumedFromPositionMs = resumePos,
+                                        resumeEventId = System.currentTimeMillis()
+                                    )
+                                }
+                                resumePos
+                            } else if (resumePos == 0L && player.currentPosition > 1_000L) {
+                                player.seekTo(idx, 0L)
+                                _positionMs.value = 0L
+                                _state.update {
+                                    it.copy(
+                                        currentPositionMs = 0L,
+                                        durationMs = effectiveDur.coerceAtLeast(it.durationMs),
+                                        resumedFromPositionMs = null
+                                    )
+                                }
+                                0L
+                            } else {
+                                player.currentPosition.coerceAtLeast(0L)
                             }
-                            resumePos
                         } else {
-                            player.currentPosition.coerceAtLeast(0L)
+                            resumePos
                         }
                         repository.savePlaybackProgress(
                             episode = newEp,
                             positionMs = effectivePos,
-                            durationMs = saved?.durationMs ?: newEp.durationMs
+                            durationMs = effectiveDur
                         )
                     }
                 }
@@ -903,6 +1050,10 @@ class PlayerEngine private constructor(
             )
             lastTrackedEpisodeIndex = safeIndex
             lastKnownDurationForTrackedEpisodeMs = effectiveSavedDuration
+            awaitingInitialDurationVerifyIndex = if (startPos > 0L) safeIndex else -1
+            lastManualEpisodeStartIndex = safeIndex
+            lastManualEpisodeStartRealtimeMs = SystemClock.elapsedRealtime()
+            lastManualEpisodeInitialPosMs = startPos
             detectedVideoWidth = startEpisode.videoWidth.takeIf { it > 0 } ?: (savedProgress?.videoWidth ?: 0)
             detectedVideoHeight = startEpisode.videoHeight.takeIf { it > 0 } ?: (savedProgress?.videoHeight ?: 0)
             lastFramePtsUs = C.TIME_UNSET
@@ -1611,10 +1762,14 @@ class PlayerEngine private constructor(
             val targetEpisode = playlist[index]
             engineScope.launch {
                 if (outgoingEp != null && (outgoingPos > 0L || outgoingDur > 0L)) {
+                    val outCompleted = outgoingDur >= 10_000L &&
+                        (outgoingPos >= (outgoingDur * 95L) / 100L || (outgoingDur - outgoingPos) <= 15_000L)
+                    val outResolvedDur = if (outCompleted) outgoingDur.coerceAtLeast(outgoingPos) else outgoingDur
+                    val outResolvedPos = if (outCompleted) outResolvedDur else outgoingPos
                     repository.savePlaybackProgress(
                         episode = outgoingEp,
-                        positionMs = outgoingPos,
-                        durationMs = outgoingDur,
+                        positionMs = outResolvedPos,
+                        durationMs = outResolvedDur,
                         videoWidth = outgoingW,
                         videoHeight = outgoingH
                     )
@@ -1629,6 +1784,10 @@ class PlayerEngine private constructor(
                 )
                 lastTrackedEpisodeIndex = index
                 lastKnownDurationForTrackedEpisodeMs = effectiveDur
+                awaitingInitialDurationVerifyIndex = if (resumePos > 0L) index else -1
+                lastManualEpisodeStartIndex = index
+                lastManualEpisodeStartRealtimeMs = SystemClock.elapsedRealtime()
+                lastManualEpisodeInitialPosMs = resumePos
                 _positionMs.value = resumePos
                 _state.update {
                     it.copy(
@@ -1990,7 +2149,13 @@ class PlayerEngine private constructor(
         val player = _exoPlayer ?: return
         var pos = player.currentPosition.coerceAtLeast(0L)
         val currentState = _state.value
-        val dur = player.duration.takeIf { it != C.TIME_UNSET && it > 0L } ?: currentState.durationMs
+        val liveDur = player.duration.takeIf { it != C.TIME_UNSET && it > 0L }
+        if (liveDur != null) {
+            lastKnownDurationForTrackedEpisodeMs = liveDur
+            verifyAndResetIfResumedAtEnd(player, liveDur)
+            pos = player.currentPosition.coerceAtLeast(0L)
+        }
+        val dur = liveDur ?: currentState.durationMs
 
         // Enforce A-B segment loop when both A and B markers are set
         val loopA = currentState.abLoopStartMs
@@ -2034,12 +2199,14 @@ class PlayerEngine private constructor(
         if (currentState.errorMessage != null) return
         val ep = currentState.currentEpisode ?: return
         val rawPos = player.currentPosition.coerceAtLeast(0L)
-        val dur = player.duration.takeIf { it != C.TIME_UNSET && it > 0L } ?: currentState.durationMs
+        val dur = (player.duration.takeIf { it != C.TIME_UNSET && it > 0L } ?: currentState.durationMs)
+            .coerceAtLeast(lastKnownDurationForTrackedEpisodeMs)
         val isEnded = player.playbackState == Player.STATE_ENDED ||
-            (dur > 0L && dur >= 10_000L && (rawPos >= (dur * 95L) / 100L || (dur - rawPos) <= 15_000L))
-        val pos = if (isEnded) 0L else rawPos
-        _positionMs.value = pos
-        if (dur <= 0L && pos <= 0L) return
+            (dur >= 10_000L && (rawPos >= (dur * 95L) / 100L || (dur - rawPos) <= 15_000L))
+        val effectiveDur = if (isEnded) dur.coerceAtLeast(rawPos).coerceAtLeast(10_000L) else dur
+        val posToSave = if (isEnded) effectiveDur else rawPos
+        _positionMs.value = if (player.playbackState == Player.STATE_ENDED) 0L else rawPos
+        if (effectiveDur <= 0L && posToSave <= 0L) return
         engineScope.launch {
             if (PlaybackResumeHelper.isLocalFileUri(ep.uri) &&
                 !PlaybackResumeHelper.isMediaFileExists(appContext, ep.uri)
@@ -2049,8 +2216,8 @@ class PlayerEngine private constructor(
             }
             repository.savePlaybackProgress(
                 episode = ep,
-                positionMs = pos,
-                durationMs = dur,
+                positionMs = posToSave,
+                durationMs = effectiveDur,
                 videoWidth = detectedVideoWidth,
                 videoHeight = detectedVideoHeight
             )
