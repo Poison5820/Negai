@@ -162,9 +162,9 @@ object VulkanHardwareCapabilityDetector {
     ) {
         val summaryBadge: String
             get() = when {
-                !isSupported -> "GLES Fallback"
-                hardwareLevel >= 1 -> "Vulkan 1.1+ (Уровень 1)"
-                else -> "Vulkan 1.0 (Базовый)"
+                !isSupported -> "GLES 3.0"
+                hardwareLevel >= 1 -> "Vulkan 1.1+"
+                else -> "Vulkan 1.0"
             }
 
         fun localizedDescription(isEnglish: Boolean): String = when {

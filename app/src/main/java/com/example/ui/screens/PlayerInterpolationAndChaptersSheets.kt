@@ -67,6 +67,9 @@ import com.example.model.FrameInterpolationMode
 import com.example.model.VideoChapter
 import com.example.model.VideoResolutionFormatter
 import com.example.player.RefreshRatePlan
+import com.example.ui.components.ModeInfoIconButton
+import com.example.ui.components.ModeInfoModalDialog
+import com.example.ui.components.ModeInfoTopic
 import com.example.ui.components.ResolutionBadgeChip
 import com.example.ui.components.formatTimeMs
 import com.example.ui.i18n.LocalIsEnglish
@@ -99,6 +102,14 @@ fun FrameInterpolationModalSheet(
 ) {
     val isEnglish = LocalIsEnglish.current
     val effectiveMode = if (frameInterpolationEnabled) interpolationMode else FrameInterpolationMode.OFF
+    var showMemcInfoModal by rememberSaveable { mutableStateOf(false) }
+
+    if (showMemcInfoModal) {
+        ModeInfoModalDialog(
+            topic = ModeInfoTopic.FRAME_INTERPOLATION,
+            onDismiss = { showMemcInfoModal = false }
+        )
+    }
 
     PlayerFrostedModalSheet(
         onDismissRequest = onDismiss
@@ -112,6 +123,7 @@ fun FrameInterpolationModalSheet(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Row(
+                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
@@ -121,7 +133,7 @@ fun FrameInterpolationModalSheet(
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(20.dp)
                 )
-                Column {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = tr(
                             "Интерполяция кадров и частота LTPO",
@@ -131,13 +143,17 @@ fun FrameInterpolationModalSheet(
                     )
                     Text(
                         text = tr(
-                            "Реалтайм сглаживание движения (GPU MEMC) и адаптивная герцовка экрана",
-                            "Real-time GPU motion smoothing (MEMC) and adaptive display refresh rate"
+                            "Реалтайм сглаживание движения (GPU MEMC)",
+                            "Real-time GPU motion smoothing (MEMC)"
                         ),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+                ModeInfoIconButton(
+                    topic = ModeInfoTopic.FRAME_INTERPOLATION,
+                    onClick = { showMemcInfoModal = true }
+                )
             }
 
             if (isAnime4kAutoFastActive) {

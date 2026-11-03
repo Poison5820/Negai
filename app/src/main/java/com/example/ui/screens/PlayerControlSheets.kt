@@ -85,6 +85,9 @@ import com.example.player.AudioTrackUiOption
 import com.example.player.BluetoothAudioRouteState
 import com.example.player.SubtitleTrackUiOption
 import com.example.ui.components.InstantSlider
+import com.example.ui.components.ModeInfoIconButton
+import com.example.ui.components.ModeInfoModalDialog
+import com.example.ui.components.ModeInfoTopic
 import com.example.ui.components.formatDelaySeconds
 import com.example.ui.i18n.LocalIsEnglish
 import com.example.ui.i18n.localizedBadge
@@ -94,6 +97,10 @@ import com.example.ui.i18n.localizedSubtitle
 import com.example.ui.i18n.localizedTitle
 import com.example.ui.i18n.tr
 import com.example.ui.theme.ensureReadableOn
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import kotlin.math.roundToInt
 
 internal val PlayerFrostedGlassBaseColor = Color(0xC80B1220)
@@ -418,16 +425,23 @@ fun AudioTracksModalSheet(
             HorizontalDivider(modifier = Modifier.padding(vertical = 2.dp))
 
             // Audio De-Artifact / Compression Restoration DSP Section
+            var showAudioDspInfoModal by rememberSaveable { mutableStateOf(false) }
+            if (showAudioDspInfoModal) {
+                ModeInfoModalDialog(
+                    topic = ModeInfoTopic.AUDIO_CLEANUP,
+                    onDismiss = { showAudioDspInfoModal = false }
+                )
+            }
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         tr(
-                            "Очистка от искажений сжатия (De-Artifact DSP)",
-                            "Audio Compression De-Artifact DSP"
+                            "Очистка звука (De-Artifact DSP)",
+                            "Audio Cleanup (De-Artifact DSP)"
                         ),
                         style = MaterialTheme.typography.bodyMedium
                     )
@@ -438,8 +452,8 @@ fun AudioTracksModalSheet(
                         )
                     } else {
                         tr(
-                            "Подавление ВЧ-звона и восстановление тембра голоса в AAC/MP3/Opus",
-                            "De-ringing, harmonic exciter & soft-knee de-clipper for low-bitrate tracks"
+                            "Подавление ВЧ-звона и клиппинга AAC/MP3/Opus",
+                            "De-ringing & de-clipper for low-bitrate tracks"
                         )
                     }
                     Text(
@@ -452,6 +466,10 @@ fun AudioTracksModalSheet(
                         }
                     )
                 }
+                ModeInfoIconButton(
+                    topic = ModeInfoTopic.AUDIO_CLEANUP,
+                    onClick = { showAudioDspInfoModal = true }
+                )
                 Surface(
                     color = if (isAudioDeArtifactActive) {
                         MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.75f)
@@ -468,6 +486,8 @@ fun AudioTracksModalSheet(
                         } else {
                             MaterialTheme.colorScheme.onSurfaceVariant
                         },
+                        maxLines = 1,
+                        softWrap = false,
                         modifier = Modifier
                             .padding(horizontal = 8.dp, vertical = 4.dp)
                             .testTag("audio_de_artifact_status_badge")
@@ -999,6 +1019,13 @@ fun Anime4KControlModalSheet(
     onDismiss: () -> Unit
 ) {
     val isEnglish = LocalIsEnglish.current
+    var showAnime4kInfoModal by rememberSaveable { mutableStateOf(false) }
+    if (showAnime4kInfoModal) {
+        ModeInfoModalDialog(
+            topic = ModeInfoTopic.ANIME4K,
+            onDismiss = { showAnime4kInfoModal = false }
+        )
+    }
     PlayerFrostedModalSheet(
         onDismissRequest = onDismiss
     ) {
@@ -1011,6 +1038,7 @@ fun Anime4KControlModalSheet(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Row(
+                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
@@ -1022,7 +1050,12 @@ fun Anime4KControlModalSheet(
                 )
                 Text(
                     tr("Anime4K — Реалтайм апскейлинг", "Anime4K — Real-Time Upscaling"),
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.weight(1f)
+                )
+                ModeInfoIconButton(
+                    topic = ModeInfoTopic.ANIME4K,
+                    onClick = { showAnime4kInfoModal = true }
                 )
             }
 
@@ -1221,6 +1254,13 @@ fun DecoderAndVideoModalSheet(
     onDismiss: () -> Unit
 ) {
     val isEnglish = LocalIsEnglish.current
+    var showDecoderInfoModal by rememberSaveable { mutableStateOf(false) }
+    if (showDecoderInfoModal) {
+        ModeInfoModalDialog(
+            topic = ModeInfoTopic.DECODER,
+            onDismiss = { showDecoderInfoModal = false }
+        )
+    }
     PlayerFrostedModalSheet(
         onDismissRequest = onDismiss
     ) {
@@ -1233,6 +1273,7 @@ fun DecoderAndVideoModalSheet(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Row(
+                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
@@ -1244,7 +1285,12 @@ fun DecoderAndVideoModalSheet(
                 )
                 Text(
                     tr("Аппаратный декодер и видео", "Hardware Decoder & Video"),
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.weight(1f)
+                )
+                ModeInfoIconButton(
+                    topic = ModeInfoTopic.DECODER,
+                    onClick = { showDecoderInfoModal = true }
                 )
             }
 

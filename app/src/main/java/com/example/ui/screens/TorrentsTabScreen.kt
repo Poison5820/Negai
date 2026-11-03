@@ -87,6 +87,7 @@ import com.example.torrent.TorrentSearchResult
 import com.example.torrent.TorrentSortMode
 import com.example.torrent.TorrentTrackerGroup
 import com.example.ui.TorrentsUiState
+import com.example.ui.components.ScaleToFitWidthBox
 import com.example.ui.i18n.LocalIsEnglish
 import com.example.ui.i18n.localizedLabel
 import com.example.ui.i18n.localizedShortLabel
@@ -397,22 +398,47 @@ fun TorrentsTabContent(
                                         onClick = {
                                             onSelectTrackerFilter(TorrentTrackerGroup.ALL)
                                             onSelectQualityFilter(TorrentQualityFilter.ALL)
-                                        }
+                                        },
+                                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
                                     ) {
-                                        Text(tr("Сбросить фильтры", "Reset filters"))
+                                        ScaleToFitWidthBox {
+                                            Text(
+                                                text = tr("Сбросить фильтры", "Reset filters"),
+                                                maxLines = 1,
+                                                softWrap = false
+                                            )
+                                        }
                                     }
                                 } else {
-                                    FilledTonalButton(onClick = { onSubmitSearch(null) }) {
+                                    FilledTonalButton(
+                                        onClick = { onSubmitSearch(null) },
+                                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+                                    ) {
                                         Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
                                         Spacer(modifier = Modifier.width(6.dp))
-                                        Text(tr("Повторить поиск", "Retry search"))
+                                        ScaleToFitWidthBox {
+                                            Text(
+                                                text = tr("Повторить поиск", "Retry search"),
+                                                maxLines = 1,
+                                                softWrap = false
+                                            )
+                                        }
                                     }
                                 }
 
-                                OutlinedButton(onClick = onOpenManualDialog) {
+                                OutlinedButton(
+                                    onClick = onOpenManualDialog,
+                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+                                ) {
                                     Icon(Icons.Default.Link, contentDescription = null, modifier = Modifier.size(18.dp))
                                     Spacer(modifier = Modifier.width(6.dp))
-                                    Text(stringResource(R.string.action_open_magnet_or_file))
+                                    ScaleToFitWidthBox {
+                                        Text(
+                                            text = stringResource(R.string.action_open_magnet_or_file),
+                                            maxLines = 1,
+                                            softWrap = false
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -685,30 +711,51 @@ private fun TorrServerStatusBanner(
             ) {
                 FilledTonalButton(
                     onClick = onOpenManualDialog,
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
                     modifier = Modifier.testTag("torrents_open_manual_dialog_button")
                 ) {
                     Icon(Icons.Default.Link, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text(stringResource(R.string.action_open_magnet_or_file))
+                    ScaleToFitWidthBox {
+                        Text(
+                            text = stringResource(R.string.action_open_magnet_or_file),
+                            maxLines = 1,
+                            softWrap = false
+                        )
+                    }
                 }
 
                 OutlinedButton(
                     onClick = onOpenSavedSheet,
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
                     modifier = Modifier.testTag("torrents_open_saved_list_button")
                 ) {
                     Icon(Icons.Default.Storage, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text(stringResource(R.string.action_saved_torrserver_list))
+                    ScaleToFitWidthBox {
+                        Text(
+                            text = stringResource(R.string.action_saved_torrserver_list),
+                            maxLines = 1,
+                            softWrap = false
+                        )
+                    }
                 }
 
                 if (!isOnline && isTorrServerInstalled) {
                     OutlinedButton(
                         onClick = onLaunchTorrServerApp,
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
                         modifier = Modifier.testTag("torrents_launch_torrserver_app_button")
                     ) {
                         Icon(Icons.Default.Dns, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text(tr("Запустить TorrServer", "Launch TorrServer"))
+                        ScaleToFitWidthBox {
+                            Text(
+                                text = tr("Запустить TorrServer", "Launch TorrServer"),
+                                maxLines = 1,
+                                softWrap = false
+                            )
+                        }
                     }
                 }
             }
@@ -780,13 +827,20 @@ private fun TorrentsInitialHeroCard(
 
             OutlinedButton(
                 onClick = onOpenManualDialog,
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .defaultMinSize(minHeight = 48.dp)
             ) {
                 Icon(Icons.Default.Link, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(tr("Вставить Magnet-ссылку или выбрать .torrent файл", "Paste Magnet link or select .torrent file"))
+                ScaleToFitWidthBox {
+                    Text(
+                        text = tr("Вставить Magnet-ссылку или выбрать .torrent файл", "Paste Magnet link or select .torrent file"),
+                        maxLines = 1,
+                        softWrap = false
+                    )
+                }
             }
         }
     }
@@ -1009,11 +1063,12 @@ private fun TorrentResultCard(
             }
 
             Row(
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Button(
                     onClick = onWatch,
+                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 8.dp),
                     modifier = Modifier
                         .weight(1f)
                         .defaultMinSize(minHeight = 48.dp)
@@ -1024,16 +1079,19 @@ private fun TorrentResultCard(
                         contentDescription = null,
                         modifier = Modifier.size(18.dp)
                     )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = stringResource(R.string.action_watch_torrent),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                    Spacer(modifier = Modifier.width(5.dp))
+                    ScaleToFitWidthBox {
+                        Text(
+                            text = stringResource(R.string.action_watch_torrent),
+                            maxLines = 1,
+                            softWrap = false
+                        )
+                    }
                 }
 
                 OutlinedButton(
                     onClick = onOpenExternal,
+                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 8.dp),
                     modifier = Modifier
                         .weight(1f)
                         .defaultMinSize(minHeight = 48.dp)
@@ -1044,12 +1102,14 @@ private fun TorrentResultCard(
                         contentDescription = null,
                         modifier = Modifier.size(18.dp)
                     )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = stringResource(R.string.action_open_external_torrent),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                    Spacer(modifier = Modifier.width(5.dp))
+                    ScaleToFitWidthBox {
+                        Text(
+                            text = stringResource(R.string.action_open_external_torrent),
+                            maxLines = 1,
+                            softWrap = false
+                        )
+                    }
                 }
             }
         }

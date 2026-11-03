@@ -14,6 +14,7 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -240,8 +241,15 @@ internal fun PlayerQuickActionsBar(
 
     val leftScrollState = rememberScrollState()
     val rightScrollState = rememberScrollState()
-    LaunchedEffect(leftScrollState.isScrollInProgress, rightScrollState.isScrollInProgress) {
-        val scrolling = leftScrollState.isScrollInProgress || rightScrollState.isScrollInProgress
+    val unifiedScrollState = rememberScrollState()
+    LaunchedEffect(
+        leftScrollState.isScrollInProgress,
+        rightScrollState.isScrollInProgress,
+        unifiedScrollState.isScrollInProgress
+    ) {
+        val scrolling = leftScrollState.isScrollInProgress ||
+            rightScrollState.isScrollInProgress ||
+            unifiedScrollState.isScrollInProgress
         onScrollStateChanged(scrolling)
         if (scrolling) {
             onUserInteraction()
@@ -284,9 +292,18 @@ internal fun PlayerQuickActionsBar(
         )
     }
 
-    // Symmetric two-wing layout around the exact 50% center divider so the center buttons
-    // (MEMC | Anime4K) never shift horizontally when left/right zones or badge texts change.
-    Row(
+    val customizeDesc = tr("Настроить быстрые клавиши плеера", "Customize player quick actions")
+    val readableAccent = MaterialTheme.colorScheme.primary.ensureReadableOn(
+        Color(0xFF0C1322),
+        minContrast = 5.2f
+    )
+    val customizeBorder = when {
+        frameless -> null
+        accentFree -> BorderStroke(0.85.dp, Color.White.copy(alpha = 0.28f))
+        else -> BorderStroke(0.85.dp, readableAccent.copy(alpha = 0.52f))
+    }
+
+    BoxWithConstraints(
         modifier = modifier
             .fillMaxWidth()
             .pointerInput(Unit) {
@@ -300,27 +317,65 @@ internal fun PlayerQuickActionsBar(
                 }
             }
             .padding(horizontal = 2.dp)
-            .testTag("player_quick_actions_row"),
-        verticalAlignment = Alignment.CenterVertically
     ) {
-        // LEFT WING (50% width): Left Zone (Audio, Subtitles, Speed) on the far left,
-        // and MEMC (Frame Interpolation) pinned at the inner right edge next to the center divider.
-        Row(
-            modifier = Modifier.weight(1f),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
+        val isCompactPortraitBar = maxWidth < 600.dp
+
+        if (isCompactPortraitBar) {
+            // Portrait / compact mode: single continuous horizontal scroll strip so buttons
+            // never clip or merge in the middle of the bar while keeping rounded shapes and spacing.
             Row(
                 modifier = Modifier
-                    .weight(1f, fill = false)
-                    .horizontalScroll(leftScrollState, enabled = activeHoldAction == null)
-                    .testTag("player_quick_actions_left_zone"),
+                    .fillMaxWidth()
+                    .horizontalScroll(unifiedScrollState, enabled = activeHoldAction == null)
+                    .testTag("player_quick_actions_row"),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(chipGap, Alignment.Start)
+                horizontalArrangement = Arrangement.spacedBy(chipGap)
             ) {
-                leftActions.forEach { action ->
+                Row(
+                    modifier = Modifier.testTag("player_quick_actions_left_zone"),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(chipGap)
+                ) {
+                    leftActions.forEach { action ->
+                        QuickActionHoldButton(
+                            action = action,
+                            playbackState = playbackState,
+                            settings = settings,
+                            scaleMode = scaleMode,
+                            orientationMode = orientationMode,
+                            isOrientationLocked = isOrientationLocked,
+                            isInfoOverlayVisible = isInfoOverlayVisible,
+                            buttonShape = buttonShape,
+                            textOnLeft = false,
+                            isHoldMenuOpen = activeHoldAction == action,
+                            hoveredMenuIndex = if (activeHoldAction == action) hoveredMenuIndex else -1,
+                            buildMenuItems = { buildMenuForAction(action) },
+                            onOpenHoldMenu = { initialIdx ->
+                                onUserInteraction()
+                                activeHoldAction = action
+                                hoveredMenuIndex = initialIdx
+                                onLongPressAction(action)
+                            },
+                            onUpdateHoveredIndex = { idx ->
+                                onUserInteraction()
+                                hoveredMenuIndex = idx
+                            },
+                            onDismissHoldMenu = {
+                                activeHoldAction = null
+                                hoveredMenuIndex = -1
+                            },
+                            onClick = {
+                                onUserInteraction()
+                                activeHoldAction = null
+                                onTriggerAction(action)
+                            }
+                        )
+                    }
+                }
+
+                if (hasFrameInterpolation) {
                     QuickActionHoldButton(
-                        action = action,
+                        action = PlayerQuickAction.FRAME_INTERPOLATION,
                         playbackState = playbackState,
                         settings = settings,
                         scaleMode = scaleMode,
@@ -328,169 +383,15 @@ internal fun PlayerQuickActionsBar(
                         isOrientationLocked = isOrientationLocked,
                         isInfoOverlayVisible = isInfoOverlayVisible,
                         buttonShape = buttonShape,
-                        textOnLeft = false,
-                        isHoldMenuOpen = activeHoldAction == action,
-                        hoveredMenuIndex = if (activeHoldAction == action) hoveredMenuIndex else -1,
-                        buildMenuItems = { buildMenuForAction(action) },
+                        textOnLeft = true,
+                        isHoldMenuOpen = activeHoldAction == PlayerQuickAction.FRAME_INTERPOLATION,
+                        hoveredMenuIndex = if (activeHoldAction == PlayerQuickAction.FRAME_INTERPOLATION) hoveredMenuIndex else -1,
+                        buildMenuItems = { buildMenuForAction(PlayerQuickAction.FRAME_INTERPOLATION) },
                         onOpenHoldMenu = { initialIdx ->
                             onUserInteraction()
-                            activeHoldAction = action
+                            activeHoldAction = PlayerQuickAction.FRAME_INTERPOLATION
                             hoveredMenuIndex = initialIdx
-                            onLongPressAction(action)
-                        },
-                        onUpdateHoveredIndex = { idx ->
-                            onUserInteraction()
-                            hoveredMenuIndex = idx
-                        },
-                        onDismissHoldMenu = {
-                            activeHoldAction = null
-                            hoveredMenuIndex = -1
-                        },
-                        onClick = {
-                            onUserInteraction()
-                            activeHoldAction = null
-                            onTriggerAction(action)
-                        }
-                    )
-                }
-            }
-
-            if (hasFrameInterpolation) {
-                Spacer(modifier = Modifier.width(chipGap))
-                // MEMC button pinned immediately left of the center divider;
-                // its text badge slides out to the LEFT ([Text] [Icon] |)
-                QuickActionHoldButton(
-                    action = PlayerQuickAction.FRAME_INTERPOLATION,
-                    playbackState = playbackState,
-                    settings = settings,
-                    scaleMode = scaleMode,
-                    orientationMode = orientationMode,
-                    isOrientationLocked = isOrientationLocked,
-                    isInfoOverlayVisible = isInfoOverlayVisible,
-                    buttonShape = buttonShape,
-                    textOnLeft = true,
-                    isHoldMenuOpen = activeHoldAction == PlayerQuickAction.FRAME_INTERPOLATION,
-                    hoveredMenuIndex = if (activeHoldAction == PlayerQuickAction.FRAME_INTERPOLATION) hoveredMenuIndex else -1,
-                    buildMenuItems = { buildMenuForAction(PlayerQuickAction.FRAME_INTERPOLATION) },
-                    onOpenHoldMenu = { initialIdx ->
-                        onUserInteraction()
-                        activeHoldAction = PlayerQuickAction.FRAME_INTERPOLATION
-                        hoveredMenuIndex = initialIdx
-                        onLongPressAction(PlayerQuickAction.FRAME_INTERPOLATION)
-                    },
-                    onUpdateHoveredIndex = { newIdx ->
-                        onUserInteraction()
-                        hoveredMenuIndex = newIdx
-                    },
-                    onDismissHoldMenu = {
-                        activeHoldAction = null
-                        hoveredMenuIndex = -1
-                    },
-                    onClick = {
-                        onUserInteraction()
-                        activeHoldAction = null
-                        onTriggerAction(PlayerQuickAction.FRAME_INTERPOLATION)
-                    }
-                )
-            }
-        }
-
-        // EXACT 50% CENTER DIVIDER (pinned to the middle of the timeline bar)
-        if (hasCenterActions) {
-            Row(
-                modifier = Modifier
-                    .padding(horizontal = 5.dp)
-                    .testTag("player_quick_actions_center_zone"),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                if (hasFrameInterpolation && hasAnime4K) {
-                    Box(
-                        modifier = Modifier
-                            .width(1.2.dp)
-                            .height(22.dp)
-                            .background(Color.White.copy(alpha = 0.44f), RoundedCornerShape(1.dp))
-                            .testTag("player_center_quick_actions_divider")
-                    )
-                }
-            }
-        }
-
-        // RIGHT WING (50% width): Anime4K pinned at the inner left edge next to the center divider,
-        // and Right Zone (Decoder + remaining actions + Customize) on the far right.
-        Row(
-            modifier = Modifier.weight(1f),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            if (hasAnime4K) {
-                // Anime4K button pinned immediately right of the center divider;
-                // its text badge slides out to the RIGHT (| [Icon] [Text])
-                QuickActionHoldButton(
-                    action = PlayerQuickAction.ANIME4K,
-                    playbackState = playbackState,
-                    settings = settings,
-                    scaleMode = scaleMode,
-                    orientationMode = orientationMode,
-                    isOrientationLocked = isOrientationLocked,
-                    isInfoOverlayVisible = isInfoOverlayVisible,
-                    buttonShape = buttonShape,
-                    textOnLeft = false,
-                    isHoldMenuOpen = activeHoldAction == PlayerQuickAction.ANIME4K,
-                    hoveredMenuIndex = if (activeHoldAction == PlayerQuickAction.ANIME4K) hoveredMenuIndex else -1,
-                    buildMenuItems = { buildMenuForAction(PlayerQuickAction.ANIME4K) },
-                    onOpenHoldMenu = { initialIdx ->
-                        onUserInteraction()
-                        activeHoldAction = PlayerQuickAction.ANIME4K
-                        hoveredMenuIndex = initialIdx
-                        onLongPressAction(PlayerQuickAction.ANIME4K)
-                    },
-                    onUpdateHoveredIndex = { newIdx ->
-                        onUserInteraction()
-                        hoveredMenuIndex = newIdx
-                    },
-                    onDismissHoldMenu = {
-                        activeHoldAction = null
-                        hoveredMenuIndex = -1
-                    },
-                    onClick = {
-                        onUserInteraction()
-                        activeHoldAction = null
-                        onTriggerAction(PlayerQuickAction.ANIME4K)
-                    }
-                )
-                Spacer(modifier = Modifier.width(chipGap))
-            } else {
-                Spacer(modifier = Modifier.width(1.dp))
-            }
-
-            Row(
-                modifier = Modifier
-                    .weight(1f, fill = false)
-                    .horizontalScroll(rightScrollState, enabled = activeHoldAction == null)
-                    .testTag("player_quick_actions_right_zone"),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(chipGap, Alignment.End)
-            ) {
-                rightActions.forEach { action ->
-                    QuickActionHoldButton(
-                        action = action,
-                        playbackState = playbackState,
-                        settings = settings,
-                        scaleMode = scaleMode,
-                        orientationMode = orientationMode,
-                        isOrientationLocked = isOrientationLocked,
-                        isInfoOverlayVisible = isInfoOverlayVisible,
-                        buttonShape = buttonShape,
-                        textOnLeft = false,
-                        isHoldMenuOpen = activeHoldAction == action,
-                        hoveredMenuIndex = if (activeHoldAction == action) hoveredMenuIndex else -1,
-                        buildMenuItems = { buildMenuForAction(action) },
-                        onOpenHoldMenu = { initialIdx ->
-                            onUserInteraction()
-                            activeHoldAction = action
-                            hoveredMenuIndex = initialIdx
-                            onLongPressAction(action)
+                            onLongPressAction(PlayerQuickAction.FRAME_INTERPOLATION)
                         },
                         onUpdateHoveredIndex = { newIdx ->
                             onUserInteraction()
@@ -503,59 +404,394 @@ internal fun PlayerQuickActionsBar(
                         onClick = {
                             onUserInteraction()
                             activeHoldAction = null
-                            onTriggerAction(action)
+                            onTriggerAction(PlayerQuickAction.FRAME_INTERPOLATION)
                         }
                     )
                 }
 
-                val customizeDesc = tr("Настроить быстрые клавиши плеера", "Customize player quick actions")
-                val readableAccent = MaterialTheme.colorScheme.primary.ensureReadableOn(
-                    Color(0xFF0C1322),
-                    minContrast = 5.2f
-                )
-                val customizeBorder = when {
-                    frameless -> null
-                    accentFree -> BorderStroke(0.85.dp, Color.White.copy(alpha = 0.28f))
-                    else -> BorderStroke(0.85.dp, readableAccent.copy(alpha = 0.52f))
-                }
-                Surface(
-                    color = if (frameless) Color.Transparent else Color(0x88101828),
-                    shape = buttonShape,
-                    border = customizeBorder,
-                    modifier = Modifier
-                        .defaultMinSize(minWidth = 38.dp, minHeight = 36.dp)
-                        .clip(buttonShape)
-                        .clickable {
-                            onUserInteraction()
-                            onOpenCustomizer()
+                if (hasCenterActions) {
+                    Row(
+                        modifier = Modifier
+                            .padding(horizontal = 2.dp)
+                            .testTag("player_quick_actions_center_zone"),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        if (hasFrameInterpolation && hasAnime4K) {
+                            Box(
+                                modifier = Modifier
+                                    .width(1.2.dp)
+                                    .height(22.dp)
+                                    .background(Color.White.copy(alpha = 0.44f), RoundedCornerShape(1.dp))
+                                    .testTag("player_center_quick_actions_divider")
+                            )
                         }
-                        .semantics { contentDescription = customizeDesc }
-                        .testTag("player_customize_quick_actions_button")
-                ) {
-                Box(
-                    modifier = Modifier
-                        .background(
-                            if (frameless) {
-                                Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent))
-                            } else {
-                                Brush.verticalGradient(
-                                    colors = listOf(
-                                        Color.White.copy(alpha = 0.10f),
-                                        Color.Transparent
-                                    )
-                                )
-                            }
-                        )
-                        .padding(horizontal = 9.dp, vertical = 8.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = customizeDesc,
-                        tint = if (accentFree) Color.White.copy(alpha = 0.90f) else readableAccent,
-                        modifier = Modifier.size(17.dp)
+                    }
+                }
+
+                if (hasAnime4K) {
+                    QuickActionHoldButton(
+                        action = PlayerQuickAction.ANIME4K,
+                        playbackState = playbackState,
+                        settings = settings,
+                        scaleMode = scaleMode,
+                        orientationMode = orientationMode,
+                        isOrientationLocked = isOrientationLocked,
+                        isInfoOverlayVisible = isInfoOverlayVisible,
+                        buttonShape = buttonShape,
+                        textOnLeft = false,
+                        isHoldMenuOpen = activeHoldAction == PlayerQuickAction.ANIME4K,
+                        hoveredMenuIndex = if (activeHoldAction == PlayerQuickAction.ANIME4K) hoveredMenuIndex else -1,
+                        buildMenuItems = { buildMenuForAction(PlayerQuickAction.ANIME4K) },
+                        onOpenHoldMenu = { initialIdx ->
+                            onUserInteraction()
+                            activeHoldAction = PlayerQuickAction.ANIME4K
+                            hoveredMenuIndex = initialIdx
+                            onLongPressAction(PlayerQuickAction.ANIME4K)
+                        },
+                        onUpdateHoveredIndex = { newIdx ->
+                            onUserInteraction()
+                            hoveredMenuIndex = newIdx
+                        },
+                        onDismissHoldMenu = {
+                            activeHoldAction = null
+                            hoveredMenuIndex = -1
+                        },
+                        onClick = {
+                            onUserInteraction()
+                            activeHoldAction = null
+                            onTriggerAction(PlayerQuickAction.ANIME4K)
+                        }
                     )
                 }
+
+                Row(
+                    modifier = Modifier.testTag("player_quick_actions_right_zone"),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(chipGap)
+                ) {
+                    rightActions.forEach { action ->
+                        QuickActionHoldButton(
+                            action = action,
+                            playbackState = playbackState,
+                            settings = settings,
+                            scaleMode = scaleMode,
+                            orientationMode = orientationMode,
+                            isOrientationLocked = isOrientationLocked,
+                            isInfoOverlayVisible = isInfoOverlayVisible,
+                            buttonShape = buttonShape,
+                            textOnLeft = false,
+                            isHoldMenuOpen = activeHoldAction == action,
+                            hoveredMenuIndex = if (activeHoldAction == action) hoveredMenuIndex else -1,
+                            buildMenuItems = { buildMenuForAction(action) },
+                            onOpenHoldMenu = { initialIdx ->
+                                onUserInteraction()
+                                activeHoldAction = action
+                                hoveredMenuIndex = initialIdx
+                                onLongPressAction(action)
+                            },
+                            onUpdateHoveredIndex = { newIdx ->
+                                onUserInteraction()
+                                hoveredMenuIndex = newIdx
+                            },
+                            onDismissHoldMenu = {
+                                activeHoldAction = null
+                                hoveredMenuIndex = -1
+                            },
+                            onClick = {
+                                onUserInteraction()
+                                activeHoldAction = null
+                                onTriggerAction(action)
+                            }
+                        )
+                    }
+
+                    Surface(
+                        color = if (frameless) Color.Transparent else Color(0x88101828),
+                        shape = buttonShape,
+                        border = customizeBorder,
+                        modifier = Modifier
+                            .defaultMinSize(minWidth = 38.dp, minHeight = 36.dp)
+                            .clip(buttonShape)
+                            .clickable {
+                                onUserInteraction()
+                                onOpenCustomizer()
+                            }
+                            .semantics { contentDescription = customizeDesc }
+                            .testTag("player_customize_quick_actions_button")
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .background(
+                                    if (frameless) {
+                                        Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent))
+                                    } else {
+                                        Brush.verticalGradient(
+                                            colors = listOf(
+                                                Color.White.copy(alpha = 0.10f),
+                                                Color.Transparent
+                                            )
+                                        )
+                                    }
+                                )
+                                .padding(horizontal = 9.dp, vertical = 8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = customizeDesc,
+                                tint = if (accentFree) Color.White.copy(alpha = 0.90f) else readableAccent,
+                                modifier = Modifier.size(17.dp)
+                            )
+                        }
+                    }
+                }
+            }
+        } else {
+            // Landscape / wide mode: symmetric two-wing layout around the exact 50% center divider
+            // so the center buttons (MEMC | Anime4K) never shift horizontally.
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("player_quick_actions_row"),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    modifier = Modifier.weight(1f),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .weight(1f, fill = false)
+                            .horizontalScroll(leftScrollState, enabled = activeHoldAction == null)
+                            .testTag("player_quick_actions_left_zone"),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(chipGap, Alignment.Start)
+                    ) {
+                        leftActions.forEach { action ->
+                            QuickActionHoldButton(
+                                action = action,
+                                playbackState = playbackState,
+                                settings = settings,
+                                scaleMode = scaleMode,
+                                orientationMode = orientationMode,
+                                isOrientationLocked = isOrientationLocked,
+                                isInfoOverlayVisible = isInfoOverlayVisible,
+                                buttonShape = buttonShape,
+                                textOnLeft = false,
+                                isHoldMenuOpen = activeHoldAction == action,
+                                hoveredMenuIndex = if (activeHoldAction == action) hoveredMenuIndex else -1,
+                                buildMenuItems = { buildMenuForAction(action) },
+                                onOpenHoldMenu = { initialIdx ->
+                                    onUserInteraction()
+                                    activeHoldAction = action
+                                    hoveredMenuIndex = initialIdx
+                                    onLongPressAction(action)
+                                },
+                                onUpdateHoveredIndex = { idx ->
+                                    onUserInteraction()
+                                    hoveredMenuIndex = idx
+                                },
+                                onDismissHoldMenu = {
+                                    activeHoldAction = null
+                                    hoveredMenuIndex = -1
+                                },
+                                onClick = {
+                                    onUserInteraction()
+                                    activeHoldAction = null
+                                    onTriggerAction(action)
+                                }
+                            )
+                        }
+                    }
+
+                    if (hasFrameInterpolation) {
+                        Spacer(modifier = Modifier.width(chipGap))
+                        QuickActionHoldButton(
+                            action = PlayerQuickAction.FRAME_INTERPOLATION,
+                            playbackState = playbackState,
+                            settings = settings,
+                            scaleMode = scaleMode,
+                            orientationMode = orientationMode,
+                            isOrientationLocked = isOrientationLocked,
+                            isInfoOverlayVisible = isInfoOverlayVisible,
+                            buttonShape = buttonShape,
+                            textOnLeft = true,
+                            isHoldMenuOpen = activeHoldAction == PlayerQuickAction.FRAME_INTERPOLATION,
+                            hoveredMenuIndex = if (activeHoldAction == PlayerQuickAction.FRAME_INTERPOLATION) hoveredMenuIndex else -1,
+                            buildMenuItems = { buildMenuForAction(PlayerQuickAction.FRAME_INTERPOLATION) },
+                            onOpenHoldMenu = { initialIdx ->
+                                onUserInteraction()
+                                activeHoldAction = PlayerQuickAction.FRAME_INTERPOLATION
+                                hoveredMenuIndex = initialIdx
+                                onLongPressAction(PlayerQuickAction.FRAME_INTERPOLATION)
+                            },
+                            onUpdateHoveredIndex = { newIdx ->
+                                onUserInteraction()
+                                hoveredMenuIndex = newIdx
+                            },
+                            onDismissHoldMenu = {
+                                activeHoldAction = null
+                                hoveredMenuIndex = -1
+                            },
+                            onClick = {
+                                onUserInteraction()
+                                activeHoldAction = null
+                                onTriggerAction(PlayerQuickAction.FRAME_INTERPOLATION)
+                            }
+                        )
+                    }
+                }
+
+                if (hasCenterActions) {
+                    Row(
+                        modifier = Modifier
+                            .padding(horizontal = 5.dp)
+                            .testTag("player_quick_actions_center_zone"),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        if (hasFrameInterpolation && hasAnime4K) {
+                            Box(
+                                modifier = Modifier
+                                    .width(1.2.dp)
+                                    .height(22.dp)
+                                    .background(Color.White.copy(alpha = 0.44f), RoundedCornerShape(1.dp))
+                                    .testTag("player_center_quick_actions_divider")
+                            )
+                        }
+                    }
+                }
+
+                Row(
+                    modifier = Modifier.weight(1f),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    if (hasAnime4K) {
+                        QuickActionHoldButton(
+                            action = PlayerQuickAction.ANIME4K,
+                            playbackState = playbackState,
+                            settings = settings,
+                            scaleMode = scaleMode,
+                            orientationMode = orientationMode,
+                            isOrientationLocked = isOrientationLocked,
+                            isInfoOverlayVisible = isInfoOverlayVisible,
+                            buttonShape = buttonShape,
+                            textOnLeft = false,
+                            isHoldMenuOpen = activeHoldAction == PlayerQuickAction.ANIME4K,
+                            hoveredMenuIndex = if (activeHoldAction == PlayerQuickAction.ANIME4K) hoveredMenuIndex else -1,
+                            buildMenuItems = { buildMenuForAction(PlayerQuickAction.ANIME4K) },
+                            onOpenHoldMenu = { initialIdx ->
+                                onUserInteraction()
+                                activeHoldAction = PlayerQuickAction.ANIME4K
+                                hoveredMenuIndex = initialIdx
+                                onLongPressAction(PlayerQuickAction.ANIME4K)
+                            },
+                            onUpdateHoveredIndex = { newIdx ->
+                                onUserInteraction()
+                                hoveredMenuIndex = newIdx
+                            },
+                            onDismissHoldMenu = {
+                                activeHoldAction = null
+                                hoveredMenuIndex = -1
+                            },
+                            onClick = {
+                                onUserInteraction()
+                                activeHoldAction = null
+                                onTriggerAction(PlayerQuickAction.ANIME4K)
+                            }
+                        )
+                        Spacer(modifier = Modifier.width(chipGap))
+                    } else {
+                        Spacer(modifier = Modifier.width(1.dp))
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .weight(1f, fill = false)
+                            .horizontalScroll(rightScrollState, enabled = activeHoldAction == null)
+                            .testTag("player_quick_actions_right_zone"),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(chipGap, Alignment.End)
+                    ) {
+                        rightActions.forEach { action ->
+                            QuickActionHoldButton(
+                                action = action,
+                                playbackState = playbackState,
+                                settings = settings,
+                                scaleMode = scaleMode,
+                                orientationMode = orientationMode,
+                                isOrientationLocked = isOrientationLocked,
+                                isInfoOverlayVisible = isInfoOverlayVisible,
+                                buttonShape = buttonShape,
+                                textOnLeft = false,
+                                isHoldMenuOpen = activeHoldAction == action,
+                                hoveredMenuIndex = if (activeHoldAction == action) hoveredMenuIndex else -1,
+                                buildMenuItems = { buildMenuForAction(action) },
+                                onOpenHoldMenu = { initialIdx ->
+                                    onUserInteraction()
+                                    activeHoldAction = action
+                                    hoveredMenuIndex = initialIdx
+                                    onLongPressAction(action)
+                                },
+                                onUpdateHoveredIndex = { newIdx ->
+                                    onUserInteraction()
+                                    hoveredMenuIndex = newIdx
+                                },
+                                onDismissHoldMenu = {
+                                    activeHoldAction = null
+                                    hoveredMenuIndex = -1
+                                },
+                                onClick = {
+                                    onUserInteraction()
+                                    activeHoldAction = null
+                                    onTriggerAction(action)
+                                }
+                            )
+                        }
+
+                        Surface(
+                            color = if (frameless) Color.Transparent else Color(0x88101828),
+                            shape = buttonShape,
+                            border = customizeBorder,
+                            modifier = Modifier
+                                .defaultMinSize(minWidth = 38.dp, minHeight = 36.dp)
+                                .clip(buttonShape)
+                                .clickable {
+                                    onUserInteraction()
+                                    onOpenCustomizer()
+                                }
+                                .semantics { contentDescription = customizeDesc }
+                                .testTag("player_customize_quick_actions_button")
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        if (frameless) {
+                                            Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent))
+                                        } else {
+                                            Brush.verticalGradient(
+                                                colors = listOf(
+                                                    Color.White.copy(alpha = 0.10f),
+                                                    Color.Transparent
+                                                )
+                                            )
+                                        }
+                                    )
+                                    .padding(horizontal = 9.dp, vertical = 8.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Edit,
+                                    contentDescription = customizeDesc,
+                                    tint = if (accentFree) Color.White.copy(alpha = 0.90f) else readableAccent,
+                                    modifier = Modifier.size(17.dp)
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }

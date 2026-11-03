@@ -55,6 +55,12 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -387,6 +393,15 @@ fun PlayerToolsModalSheet(
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
             // 0a. Global App & Player UI Scale (75% - 140% + Auto DPI) & HUD Auto-Hide Timeout
+            var pendingPlayerScale by remember {
+                mutableIntStateOf(playerUiScalePercent.coerceIn(75, 140))
+            }
+            var isDraggingPlayerScale by remember { mutableStateOf(false) }
+            LaunchedEffect(playerUiScalePercent) {
+                if (!isDraggingPlayerScale) {
+                    pendingPlayerScale = playerUiScalePercent.coerceIn(75, 140)
+                }
+            }
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -395,13 +410,18 @@ fun PlayerToolsModalSheet(
                 ) {
                     Text(
                         text = tr(
-                            "Масштаб интерфейса ($playerUiScalePercent%)",
-                            "UI & Text Scale ($playerUiScalePercent%)"
+                            "Масштаб интерфейса ($pendingPlayerScale%)",
+                            "UI & Text Scale ($pendingPlayerScale%)"
                         ),
                         style = MaterialTheme.typography.titleSmall
                     )
                     FilledTonalButton(
-                        onClick = { onUpdatePlayerUiScalePercent(100) },
+                        onClick = {
+                            isDraggingPlayerScale = false
+                            pendingPlayerScale = 100
+                            onUpdatePlayerUiScalePercent(100)
+                        },
+                        enabled = playerUiScalePercent != 100 || pendingPlayerScale != 100,
                         shape = RoundedCornerShape(10.dp),
                         contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 10.dp, vertical = 4.dp),
                         modifier = Modifier
@@ -414,12 +434,22 @@ fun PlayerToolsModalSheet(
                             modifier = Modifier.size(14.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("100%", style = MaterialTheme.typography.labelSmall)
+                        Text("100%", style = MaterialTheme.typography.labelSmall, maxLines = 1, softWrap = false)
                     }
                 }
-                InstantSlider(
-                    value = playerUiScalePercent.coerceIn(75, 140).toFloat(),
-                    onValueChange = { onUpdatePlayerUiScalePercent(it.roundToInt().coerceIn(75, 140)) },
+                Slider(
+                    value = pendingPlayerScale.toFloat(),
+                    onValueChange = {
+                        isDraggingPlayerScale = true
+                        pendingPlayerScale = it.roundToInt().coerceIn(75, 140)
+                    },
+                    onValueChangeFinished = {
+                        isDraggingPlayerScale = false
+                        val target = pendingPlayerScale.coerceIn(75, 140)
+                        if (target != playerUiScalePercent) {
+                            onUpdatePlayerUiScalePercent(target)
+                        }
+                    },
                     valueRange = 75f..140f,
                     modifier = Modifier.testTag("tools_ui_scale_slider")
                 )
@@ -429,8 +459,12 @@ fun PlayerToolsModalSheet(
                 ) {
                     listOf(80, 90, 100, 110, 125, 140).forEach { pct ->
                         FilterChip(
-                            selected = playerUiScalePercent == pct,
-                            onClick = { onUpdatePlayerUiScalePercent(pct) },
+                            selected = pendingPlayerScale == pct,
+                            onClick = {
+                                isDraggingPlayerScale = false
+                                pendingPlayerScale = pct
+                                onUpdatePlayerUiScalePercent(pct)
+                            },
                             label = { Text("$pct%") },
                             modifier = Modifier.testTag("tools_ui_scale_chip_$pct")
                         )

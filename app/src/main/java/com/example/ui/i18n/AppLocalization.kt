@@ -159,25 +159,25 @@ fun DecoderMode.localizedTitle(isEnglish: Boolean): String = if (!isEnglish) tit
 fun DecoderMode.localizedSubtitle(isEnglish: Boolean): String = localizedDescription(isEnglish)
 
 fun DecoderMode.localizedDescription(isEnglish: Boolean): String = if (!isEnglish) description else when (this) {
-    DecoderMode.HW_PLUS -> "Prioritizes hardware MediaCodec chips (HEVC/AVC/AV1/VP9) with automatic fallback for non-standard profiles."
-    DecoderMode.HW_STRICT -> "Exclusively uses GPU/SoC hardware decoders for maximum battery efficiency."
-    DecoderMode.SOFTWARE_PREFER -> "Prioritizes CPU software codecs for rare or damaged video streams."
+    DecoderMode.HW_PLUS -> "Hardware GPU MediaCodec + auto fallback"
+    DecoderMode.HW_STRICT -> "Strict GPU/SoC hardware decoder only"
+    DecoderMode.SOFTWARE_PREFER -> "Multi-threaded CPU software decoder"
 }
 
 fun Anime4KPreset.localizedTitle(isEnglish: Boolean): String = if (!isEnglish) title else when (this) {
     Anime4KPreset.OFF -> "Off (Original)"
-    Anime4KPreset.ANIME4K_FAST -> "Anime4K Mode C • Fast (Denoise + Upscale)"
-    Anime4KPreset.ANIME4K_UPSCALE_CNN -> "Anime4K Mode B • Restore + Upscale CNN"
-    Anime4KPreset.ANIME4K_UPSCALE_CNNX -> "Anime4K Mode A • HQ Restore + Upscale CNNX"
+    Anime4KPreset.ANIME4K_FAST -> "Anime4K Mode C • Fast"
+    Anime4KPreset.ANIME4K_UPSCALE_CNN -> "Anime4K Mode B • Restore CNN"
+    Anime4KPreset.ANIME4K_UPSCALE_CNNX -> "Anime4K Mode A • Ultra CNNX"
 }
 
 fun Anime4KPreset.localizedSubtitle(isEnglish: Boolean): String = localizedDescription(isEnglish)
 
 fun Anime4KPreset.localizedDescription(isEnglish: Boolean): String = if (!isEnglish) description else when (this) {
-    Anime4KPreset.OFF -> "Direct hardware decoder output without GPU post-processing."
-    Anime4KPreset.ANIME4K_FAST -> "Mode C (bloc97/Anime4K): Clamp_Highlights + fast halo clean and contour sharpening with minimal mobile GPU load."
-    Anime4KPreset.ANIME4K_UPSCALE_CNN -> "Mode B (bloc97/Anime4K): Clamp_Highlights + soft neural CReLU line reconstruction (Restore_CNN_Soft) and ring-free upscaling."
-    Anime4KPreset.ANIME4K_UPSCALE_CNNX -> "Mode A (bloc97/Anime4K): Clamp_Highlights + deep Sobel gradient reconstruction, dense CNNX convolution, and subpixel anti-aliasing."
+    Anime4KPreset.OFF -> "Original frame without upscale"
+    Anime4KPreset.ANIME4K_FAST -> "Mode C: fast denoise & contour upscale"
+    Anime4KPreset.ANIME4K_UPSCALE_CNN -> "Mode B: line restoration + CNN upscale"
+    Anime4KPreset.ANIME4K_UPSCALE_CNNX -> "Mode A: deep restoration + CNNX"
 }
 
 fun FrameInterpolationMode.localizedTitle(isEnglish: Boolean): String = if (!isEnglish) title else when (this) {
@@ -191,11 +191,11 @@ fun FrameInterpolationMode.localizedTitle(isEnglish: Boolean): String = if (!isE
 fun FrameInterpolationMode.localizedSubtitle(isEnglish: Boolean): String = localizedDescription(isEnglish)
 
 fun FrameInterpolationMode.localizedDescription(isEnglish: Boolean): String = if (!isEnglish) description else when (this) {
-    FrameInterpolationMode.OFF -> "Direct native frame output (24/30 fps) without intermediate phase synthesis."
-    FrameInterpolationMode.CINEMA -> "Gentle 2× panning smoothing (48/50/60 fps) preserving natural cinematic cadence."
-    FrameInterpolationMode.SMOOTH_60 -> "Bidirectional MEMC motion compensation up to stable 60 fps with LTPO power savings."
-    FrameInterpolationMode.MAX_FPS -> "Phase-locked frame interpolation matched to 90 / 120 / 144 / 165 Hz displays."
-    FrameInterpolationMode.ANIME -> "2D animation mode: high refresh rate with thin line, subtitle, and scene-cut protection."
+    FrameInterpolationMode.OFF -> "Original source frame rate (24/30 fps)"
+    FrameInterpolationMode.CINEMA -> "Gentle 2× panning smoothing without soap-opera effect"
+    FrameInterpolationMode.SMOOTH_60 -> "Stable 60 fps with scene-cut detection"
+    FrameInterpolationMode.MAX_FPS -> "Matches 90–165 Hz display refresh rate"
+    FrameInterpolationMode.ANIME -> "2D animation profile with line & subtitle guard"
 }
 
 fun FrameInterpolationMode.localizedBadge(isEnglish: Boolean): String = if (!isEnglish) badgeLabel else when (this) {
@@ -236,16 +236,16 @@ fun AudioDeArtifactMode.localizedTitle(isEnglish: Boolean): String = when (this)
 
 fun AudioDeArtifactMode.localizedSubtitle(isEnglish: Boolean): String = when (this) {
     AudioDeArtifactMode.OFF -> if (isEnglish) {
-        "No additional DSP restoration filter for compressed audio"
+        "Direct output without DSP filtering"
     } else subtitle
     AudioDeArtifactMode.SOFT -> if (isEnglish) {
-        "Gentle smoothing of high-frequency ringing and quantization artifacts"
+        "Gentle HF harshness smoothing"
     } else subtitle
     AudioDeArtifactMode.STANDARD -> if (isEnglish) {
-        "Balanced restoration for low-bitrate AAC/MP3/Opus and soft de-clipping"
+        "AAC/Opus cleanup + soft de-clipper"
     } else subtitle
     AudioDeArtifactMode.AGGRESSIVE -> if (isEnglish) {
-        "Maximum suppression of metallic ringing and harmonic restoration (≤ 96 kbps)"
+        "Max ringing suppression (≤ 96 kbps)"
     } else subtitle
 }
 

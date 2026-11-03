@@ -86,6 +86,7 @@ import com.example.torrent.TorrentInspectorState
 import com.example.torrent.TorrentIntentHelper
 import com.example.torrent.TorrentReleaseDetails
 import com.example.torrent.TorrentSearchResult
+import com.example.ui.components.ScaleToFitWidthBox
 import com.example.ui.components.formatFileSize
 import com.example.ui.i18n.LocalIsEnglish
 import com.example.ui.i18n.tr
@@ -175,13 +176,20 @@ fun TorrentInspectorBottomSheet(
                                 onClick = {
                                     onForceDirectStream(directCandidate, inspectorState.title)
                                 },
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
                                 modifier = Modifier
                                     .defaultMinSize(minHeight = 48.dp)
                                     .testTag("inspector_force_direct_stream_button")
                             ) {
                                 Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Text(tr("Запустить поток сразу", "Start stream immediately"))
+                                ScaleToFitWidthBox {
+                                    Text(
+                                        text = tr("Запустить поток сразу", "Start stream immediately"),
+                                        maxLines = 1,
+                                        softWrap = false
+                                    )
+                                }
                             }
                         }
 
@@ -194,6 +202,7 @@ fun TorrentInspectorBottomSheet(
                                         inspectorState.title
                                     )
                                 },
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
                                 modifier = Modifier
                                     .defaultMinSize(minHeight = 48.dp)
                                     .testTag("inspector_loading_open_external_button")
@@ -204,7 +213,13 @@ fun TorrentInspectorBottomSheet(
                                     modifier = Modifier.size(18.dp)
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Text(stringResource(R.string.action_open_external_torrent))
+                                ScaleToFitWidthBox {
+                                    Text(
+                                        text = stringResource(R.string.action_open_external_torrent),
+                                        maxLines = 1,
+                                        softWrap = false
+                                    )
+                                }
                             }
                         }
 
@@ -212,7 +227,7 @@ fun TorrentInspectorBottomSheet(
                             onClick = onDismiss,
                             modifier = Modifier.defaultMinSize(minHeight = 48.dp)
                         ) {
-                            Text(tr("Отмена", "Cancel"))
+                            Text(tr("Отмена", "Cancel"), maxLines = 1, softWrap = false)
                         }
                     }
                 }
@@ -282,27 +297,30 @@ fun TorrentInspectorBottomSheet(
                     }
 
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Button(
                             onClick = { onPlayEpisode(0) },
+                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 8.dp),
                             modifier = Modifier
                                 .weight(1f)
                                 .defaultMinSize(minHeight = 48.dp)
                                 .testTag("inspector_play_first_button")
                         ) {
                             Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = if (bundle.episodes.size > 1) {
-                                    tr("Смотреть с 1-й", "Watch from ep. 1")
-                                } else {
-                                    stringResource(R.string.action_watch_torrent)
-                                },
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
+                            Spacer(modifier = Modifier.width(5.dp))
+                            ScaleToFitWidthBox {
+                                Text(
+                                    text = if (bundle.episodes.size > 1) {
+                                        tr("Смотреть с 1-й", "Watch from ep. 1")
+                                    } else {
+                                        stringResource(R.string.action_watch_torrent)
+                                    },
+                                    maxLines = 1,
+                                    softWrap = false
+                                )
+                            }
                         }
 
                         OutlinedButton(
@@ -313,6 +331,7 @@ fun TorrentInspectorBottomSheet(
                                     torrent.title
                                 )
                             },
+                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 8.dp),
                             modifier = Modifier
                                 .weight(1f)
                                 .defaultMinSize(minHeight = 48.dp)
@@ -323,12 +342,14 @@ fun TorrentInspectorBottomSheet(
                                 contentDescription = null,
                                 modifier = Modifier.size(18.dp)
                             )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = stringResource(R.string.action_open_external_torrent),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
+                            Spacer(modifier = Modifier.width(5.dp))
+                            ScaleToFitWidthBox {
+                                Text(
+                                    text = stringResource(R.string.action_open_external_torrent),
+                                    maxLines = 1,
+                                    softWrap = false
+                                )
+                            }
                         }
                     }
 
@@ -399,6 +420,7 @@ fun TorrentInspectorBottomSheet(
                         if (isTorrServerInstalled) {
                             Button(
                                 onClick = { TorrentIntentHelper.launchTorrServerApp(context) },
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
                                 modifier = Modifier
                                     .defaultMinSize(minHeight = 48.dp)
                                     .testTag("inspector_launch_torrserver_button")
@@ -409,20 +431,33 @@ fun TorrentInspectorBottomSheet(
                                     modifier = Modifier.size(18.dp)
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Text(tr("Открыть TorrServer", "Open TorrServer"))
+                                ScaleToFitWidthBox {
+                                    Text(
+                                        text = tr("Открыть TorrServer", "Open TorrServer"),
+                                        maxLines = 1,
+                                        softWrap = false
+                                    )
+                                }
                             }
                         }
 
                         if (!retryCandidate.isNullOrBlank()) {
                             FilledTonalButton(
                                 onClick = { onRetryLink(retryCandidate, inspectorState.title) },
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
                                 modifier = Modifier
                                     .defaultMinSize(minHeight = 48.dp)
                                     .testTag("inspector_retry_button")
                             ) {
                                 Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Text(tr("Повторить", "Retry"))
+                                ScaleToFitWidthBox {
+                                    Text(
+                                        text = tr("Повторить", "Retry"),
+                                        maxLines = 1,
+                                        softWrap = false
+                                    )
+                                }
                             }
                         }
 
@@ -431,13 +466,20 @@ fun TorrentInspectorBottomSheet(
                                 onDismiss()
                                 onOpenServerConfig()
                             },
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
                             modifier = Modifier
                                 .defaultMinSize(minHeight = 48.dp)
                                 .testTag("inspector_configure_server_button")
                         ) {
                             Icon(Icons.Default.Settings, contentDescription = null, modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text(tr("Настроить сервер", "Configure server"))
+                            ScaleToFitWidthBox {
+                                Text(
+                                    text = tr("Настроить сервер", "Configure server"),
+                                    maxLines = 1,
+                                    softWrap = false
+                                )
+                            }
                         }
 
                         if (!retryCandidate.isNullOrBlank()) {
@@ -449,6 +491,7 @@ fun TorrentInspectorBottomSheet(
                                         inspectorState.title
                                     )
                                 },
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
                                 modifier = Modifier
                                     .defaultMinSize(minHeight = 48.dp)
                                     .testTag("inspector_error_open_external_button")
@@ -459,7 +502,13 @@ fun TorrentInspectorBottomSheet(
                                     modifier = Modifier.size(18.dp)
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Text(stringResource(R.string.action_open_external_torrent))
+                                ScaleToFitWidthBox {
+                                    Text(
+                                        text = stringResource(R.string.action_open_external_torrent),
+                                        maxLines = 1,
+                                        softWrap = false
+                                    )
+                                }
                             }
                         }
                     }
@@ -872,6 +921,7 @@ fun ManualTorrentInputDialog(
                         onDismiss()
                         onPickTorrentFileForWatch()
                     },
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
                     modifier = Modifier
                         .fillMaxWidth()
                         .defaultMinSize(minHeight = 48.dp)
@@ -879,7 +929,13 @@ fun ManualTorrentInputDialog(
                 ) {
                     Icon(Icons.Default.FileOpen, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text(tr("Выбрать .torrent для просмотра", "Pick .torrent to watch"))
+                    ScaleToFitWidthBox {
+                        Text(
+                            text = tr("Выбрать .torrent для просмотра", "Pick .torrent to watch"),
+                            maxLines = 1,
+                            softWrap = false
+                        )
+                    }
                 }
 
                 OutlinedButton(
@@ -887,6 +943,7 @@ fun ManualTorrentInputDialog(
                         onDismiss()
                         onPickTorrentFileForExternal()
                     },
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
                     modifier = Modifier
                         .fillMaxWidth()
                         .defaultMinSize(minHeight = 48.dp)
@@ -894,7 +951,13 @@ fun ManualTorrentInputDialog(
                 ) {
                     Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text(tr("Выбрать .torrent для другого приложения", "Pick .torrent for external app"))
+                    ScaleToFitWidthBox {
+                        Text(
+                            text = tr("Выбрать .torrent для другого приложения", "Pick .torrent for external app"),
+                            maxLines = 1,
+                            softWrap = false
+                        )
+                    }
                 }
             }
         },
@@ -909,9 +972,10 @@ fun ManualTorrentInputDialog(
                         }
                     },
                     enabled = linkInput.isNotBlank(),
+                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 8.dp),
                     modifier = Modifier.testTag("manual_torrent_external_button")
                 ) {
-                    Text(tr("В приложение", "In App"))
+                    Text(tr("В приложение", "In App"), maxLines = 1, softWrap = false)
                 }
                 Button(
                     onClick = {
@@ -922,9 +986,10 @@ fun ManualTorrentInputDialog(
                         }
                     },
                     enabled = linkInput.isNotBlank(),
+                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 8.dp),
                     modifier = Modifier.testTag("manual_torrent_watch_button")
                 ) {
-                    Text(stringResource(R.string.action_watch_torrent))
+                    Text(stringResource(R.string.action_watch_torrent), maxLines = 1, softWrap = false)
                 }
             }
         },
@@ -1067,6 +1132,7 @@ fun TorrServerQuickConfigDialog(
                             }
                         },
                         enabled = !isTesting,
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 8.dp),
                         modifier = Modifier.weight(1f)
                     ) {
                         if (isTesting) {
@@ -1075,15 +1141,20 @@ fun TorrServerQuickConfigDialog(
                             Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
                         }
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text(tr("Проверить", "Test"))
+                        ScaleToFitWidthBox {
+                            Text(tr("Проверить", "Test"), maxLines = 1, softWrap = false)
+                        }
                     }
 
                     if (isTorrServerInstalled) {
                         OutlinedButton(
                             onClick = { TorrentIntentHelper.launchTorrServerApp(context) },
+                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 8.dp),
                             modifier = Modifier.weight(1f)
                         ) {
-                            Text(tr("Запустить App", "Launch App"))
+                            ScaleToFitWidthBox {
+                                Text(tr("Запустить App", "Launch App"), maxLines = 1, softWrap = false)
+                            }
                         }
                     }
                 }
@@ -1488,7 +1559,7 @@ fun TorrentReleaseDetailsModalSheet(
 
             // Primary actions
             Row(
-                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Button(
@@ -1496,14 +1567,21 @@ fun TorrentReleaseDetailsModalSheet(
                         onDismiss()
                         onWatch(item)
                     },
+                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 8.dp),
                     modifier = Modifier
                         .weight(1f)
                         .defaultMinSize(minHeight = 48.dp)
                         .testTag("release_details_watch_button")
                 ) {
                     Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(stringResource(R.string.action_watch_torrent))
+                    Spacer(modifier = Modifier.width(5.dp))
+                    ScaleToFitWidthBox {
+                        Text(
+                            text = stringResource(R.string.action_watch_torrent),
+                            maxLines = 1,
+                            softWrap = false
+                        )
+                    }
                 }
 
                 OutlinedButton(
@@ -1511,14 +1589,21 @@ fun TorrentReleaseDetailsModalSheet(
                         onDismiss()
                         onOpenExternal(item)
                     },
+                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 8.dp),
                     modifier = Modifier
                         .weight(1f)
                         .defaultMinSize(minHeight = 48.dp)
                         .testTag("release_details_external_button")
                 ) {
                     Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(stringResource(R.string.action_open_external_torrent))
+                    Spacer(modifier = Modifier.width(5.dp))
+                    ScaleToFitWidthBox {
+                        Text(
+                            text = stringResource(R.string.action_open_external_torrent),
+                            maxLines = 1,
+                            softWrap = false
+                        )
+                    }
                 }
             }
 
@@ -1530,21 +1615,27 @@ fun TorrentReleaseDetailsModalSheet(
                 if (!item.magnetUri.isNullOrBlank()) {
                     FilledTonalButton(
                         onClick = { onCopyMagnet(item.magnetUri, item.title) },
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
                         modifier = Modifier.testTag("release_details_copy_magnet_button")
                     ) {
                         Icon(Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text(tr("Скопировать Magnet", "Copy Magnet"))
+                        ScaleToFitWidthBox {
+                            Text(tr("Скопировать Magnet", "Copy Magnet"), maxLines = 1, softWrap = false)
+                        }
                     }
                 }
                 if (!item.topicUrl.isNullOrBlank()) {
                     OutlinedButton(
                         onClick = { TorrentIntentHelper.openUrlInBrowser(context, item.topicUrl) },
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
                         modifier = Modifier.testTag("release_details_open_topic_button")
                     ) {
                         Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text(tr("Страница на трекере", "Tracker page"))
+                        ScaleToFitWidthBox {
+                            Text(tr("Страница на трекере", "Tracker page"), maxLines = 1, softWrap = false)
+                        }
                     }
                 }
             }

@@ -60,6 +60,9 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import com.example.ui.components.InstantSlider
+import com.example.ui.components.ModeInfoIconButton
+import com.example.ui.components.ModeInfoModalDialog
+import com.example.ui.components.ModeInfoTopic
 import com.example.ui.components.ScaleToFitWidthBox
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.TextButton
@@ -68,7 +71,9 @@ import com.example.vulkan.VulkanHardwareCapabilityDetector
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -371,6 +376,16 @@ internal fun AppearanceSettingsPage(
         )
     }
 
+    var pendingAppScale by remember {
+        mutableIntStateOf(settings.appUiScalePercent.coerceIn(75, 140))
+    }
+    var isDraggingAppScale by remember { mutableStateOf(false) }
+    LaunchedEffect(settings.appUiScalePercent) {
+        if (!isDraggingAppScale) {
+            pendingAppScale = settings.appUiScalePercent.coerceIn(75, 140)
+        }
+    }
+
     SettingsSectionCard(
         title = tr("Масштаб интерфейса приложения", "App UI Scale"),
         icon = Icons.Default.Tune
@@ -382,16 +397,20 @@ internal fun AppearanceSettingsPage(
         ) {
             Text(
                 text = tr(
-                    "Масштаб интерфейса приложения: ${settings.appUiScalePercent}%",
-                    "App UI & Text Scale: ${settings.appUiScalePercent}%"
+                    "Масштаб интерфейса приложения: ${pendingAppScale}%",
+                    "App UI & Text Scale: ${pendingAppScale}%"
                 ),
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
                 modifier = Modifier.weight(1f)
             )
             Spacer(modifier = Modifier.width(8.dp))
             FilledTonalButton(
-                onClick = { actions.onUpdateAppUiScalePercent(100) },
-                enabled = settings.appUiScalePercent != 100,
+                onClick = {
+                    isDraggingAppScale = false
+                    pendingAppScale = 100
+                    actions.onUpdateAppUiScalePercent(100)
+                },
+                enabled = settings.appUiScalePercent != 100 || pendingAppScale != 100,
                 shape = RoundedCornerShape(10.dp),
                 contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
                 modifier = Modifier
@@ -407,14 +426,25 @@ internal fun AppearanceSettingsPage(
                 Text(
                     text = "100%",
                     style = MaterialTheme.typography.labelMedium,
-                    maxLines = 1
+                    maxLines = 1,
+                    softWrap = false
                 )
             }
         }
 
-        InstantSlider(
-            value = settings.appUiScalePercent.coerceIn(75, 140).toFloat(),
-            onValueChange = { actions.onUpdateAppUiScalePercent(it.roundToInt().coerceIn(75, 140)) },
+        Slider(
+            value = pendingAppScale.toFloat(),
+            onValueChange = {
+                isDraggingAppScale = true
+                pendingAppScale = it.roundToInt().coerceIn(75, 140)
+            },
+            onValueChangeFinished = {
+                isDraggingAppScale = false
+                val target = pendingAppScale.coerceIn(75, 140)
+                if (target != settings.appUiScalePercent) {
+                    actions.onUpdateAppUiScalePercent(target)
+                }
+            },
             valueRange = 75f..140f,
             modifier = Modifier.testTag("settings_app_ui_scale_slider")
         )
@@ -425,12 +455,26 @@ internal fun AppearanceSettingsPage(
         ) {
             listOf(75, 85, 100, 115, 125, 140).forEach { pct ->
                 FilterChip(
-                    selected = settings.appUiScalePercent == pct,
-                    onClick = { actions.onUpdateAppUiScalePercent(pct) },
+                    selected = pendingAppScale == pct,
+                    onClick = {
+                        isDraggingAppScale = false
+                        pendingAppScale = pct
+                        actions.onUpdateAppUiScalePercent(pct)
+                    },
                     label = { Text("${pct}%") },
                     modifier = Modifier.testTag("app_scale_chip_$pct")
                 )
             }
+        }
+    }
+
+    var pendingPlayerScale by remember {
+        mutableIntStateOf(settings.playerUiScalePercent.coerceIn(75, 140))
+    }
+    var isDraggingPlayerScale by remember { mutableStateOf(false) }
+    LaunchedEffect(settings.playerUiScalePercent) {
+        if (!isDraggingPlayerScale) {
+            pendingPlayerScale = settings.playerUiScalePercent.coerceIn(75, 140)
         }
     }
 
@@ -445,16 +489,20 @@ internal fun AppearanceSettingsPage(
         ) {
             Text(
                 text = tr(
-                    "Масштаб интерфейса плеера: ${settings.playerUiScalePercent}%",
-                    "Player HUD Scale: ${settings.playerUiScalePercent}%"
+                    "Масштаб интерфейса плеера: ${pendingPlayerScale}%",
+                    "Player HUD Scale: ${pendingPlayerScale}%"
                 ),
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
                 modifier = Modifier.weight(1f)
             )
             Spacer(modifier = Modifier.width(8.dp))
             FilledTonalButton(
-                onClick = { actions.onUpdatePlayerUiScalePercent(100) },
-                enabled = settings.playerUiScalePercent != 100,
+                onClick = {
+                    isDraggingPlayerScale = false
+                    pendingPlayerScale = 100
+                    actions.onUpdatePlayerUiScalePercent(100)
+                },
+                enabled = settings.playerUiScalePercent != 100 || pendingPlayerScale != 100,
                 shape = RoundedCornerShape(10.dp),
                 contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
                 modifier = Modifier
@@ -470,14 +518,25 @@ internal fun AppearanceSettingsPage(
                 Text(
                     text = "100%",
                     style = MaterialTheme.typography.labelMedium,
-                    maxLines = 1
+                    maxLines = 1,
+                    softWrap = false
                 )
             }
         }
 
-        InstantSlider(
-            value = settings.playerUiScalePercent.coerceIn(75, 140).toFloat(),
-            onValueChange = { actions.onUpdatePlayerUiScalePercent(it.roundToInt().coerceIn(75, 140)) },
+        Slider(
+            value = pendingPlayerScale.toFloat(),
+            onValueChange = {
+                isDraggingPlayerScale = true
+                pendingPlayerScale = it.roundToInt().coerceIn(75, 140)
+            },
+            onValueChangeFinished = {
+                isDraggingPlayerScale = false
+                val target = pendingPlayerScale.coerceIn(75, 140)
+                if (target != settings.playerUiScalePercent) {
+                    actions.onUpdatePlayerUiScalePercent(target)
+                }
+            },
             valueRange = 75f..140f,
             modifier = Modifier.testTag("settings_player_ui_scale_slider")
         )
@@ -488,8 +547,12 @@ internal fun AppearanceSettingsPage(
         ) {
             listOf(75, 85, 100, 115, 125, 140).forEach { pct ->
                 FilterChip(
-                    selected = settings.playerUiScalePercent == pct,
-                    onClick = { actions.onUpdatePlayerUiScalePercent(pct) },
+                    selected = pendingPlayerScale == pct,
+                    onClick = {
+                        isDraggingPlayerScale = false
+                        pendingPlayerScale = pct
+                        actions.onUpdatePlayerUiScalePercent(pct)
+                    },
                     label = { Text("${pct}%") },
                     modifier = Modifier.testTag("player_scale_chip_$pct")
                 )
@@ -806,7 +869,8 @@ internal fun PlaybackSettingsPage(
 
     SettingsSectionCard(
         title = tr("Декодер видео", "Video Decoder"),
-        icon = Icons.Default.Memory
+        icon = Icons.Default.Memory,
+        infoTopic = ModeInfoTopic.DECODER
     ) {
         TwoColumnSettingsGrid(items = DecoderMode.entries) { mode ->
             val selected = settings.decoderMode == mode
@@ -832,13 +896,21 @@ internal fun PlaybackSettingsPage(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text(
-                        text = mode.localizedTitle(isEnglish),
-                        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f)
-                    )
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = mode.shortBadge,
+                            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Text(
+                            text = mode.localizedSubtitle(isEnglish),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                     RadioButton(
                         selected = selected,
                         onClick = { actions.onUpdateDecoderMode(mode) },
@@ -989,7 +1061,8 @@ internal fun VideoSettingsPage(
 
     SettingsSectionCard(
         title = tr("Интерполяция кадров (MEMC)", "Frame Interpolation (MEMC)"),
-        icon = Icons.Default.MotionPhotosOn
+        icon = Icons.Default.MotionPhotosOn,
+        infoTopic = ModeInfoTopic.FRAME_INTERPOLATION
     ) {
         SettingToggleRow(
             title = tr("Включить интерполяцию кадров (MEMC)", "Enable Frame Interpolation (MEMC)"),
@@ -1039,11 +1112,11 @@ internal fun VideoSettingsPage(
                             overflow = TextOverflow.Ellipsis
                         )
                         Text(
-                            text = mode.localizedSubtitle(isEnglish),
+                            text = mode.localizedBadge(isEnglish),
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = MaterialTheme.colorScheme.primary,
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            softWrap = false
                         )
                     }
                     RadioButton(
@@ -1058,7 +1131,8 @@ internal fun VideoSettingsPage(
 
     SettingsSectionCard(
         title = tr("Anime4K — Реалтайм апскейлинг", "Anime4K — Real-Time Upscaling"),
-        icon = Icons.Default.AutoAwesome
+        icon = Icons.Default.AutoAwesome,
+        infoTopic = ModeInfoTopic.ANIME4K
     ) {
         SettingToggleRow(
             title = stringResource(R.string.anime4k_enable),
@@ -1094,13 +1168,21 @@ internal fun VideoSettingsPage(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text(
-                        text = preset.localizedTitle(isEnglish),
-                        style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f)
-                    )
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = preset.localizedTitle(isEnglish),
+                            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Text(
+                            text = preset.badgeLabel,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            maxLines = 1,
+                            softWrap = false
+                        )
+                    }
                     RadioButton(
                         selected = selected,
                         onClick = {
@@ -1173,12 +1255,9 @@ internal fun AudioSettingsPage(
     }
 
     SettingsSectionCard(
-        title = tr("Очистка от искажений сжатия (De-Artifact DSP)", "Low-Bitrate Audio De-Artifact DSP"),
-        subtitle = tr(
-            "Подавление ВЧ-звона, восстановление гармоник голоса и деклиппер для сжатых дорожек AAC/MP3/Opus",
-            "Dynamic high-frequency de-ringing, harmonic voice exciter & soft-knee de-clipper for compressed tracks"
-        ),
-        icon = Icons.Default.AutoAwesome
+        title = tr("Очистка звука (De-Artifact DSP)", "Audio Cleanup (De-Artifact DSP)"),
+        icon = Icons.Default.AutoAwesome,
+        infoTopic = ModeInfoTopic.AUDIO_CLEANUP
     ) {
         TwoColumnSettingsGrid(
             items = listOf(
@@ -1222,7 +1301,7 @@ internal fun AudioSettingsPage(
                             text = mode.localizedSubtitle(isEnglish),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 2,
+                            maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
                     }
@@ -1814,8 +1893,10 @@ internal fun SettingsSectionCard(
     title: String,
     subtitle: String? = null,
     icon: ImageVector = Icons.Default.HighQuality,
+    infoTopic: ModeInfoTopic? = null,
     content: @Composable () -> Unit
 ) {
+    var showInfoModal by rememberSaveable { mutableStateOf(false) }
     val bg = MaterialTheme.colorScheme.background
     val primary = MaterialTheme.colorScheme.primary
     val sectionCardProps = remember(bg, primary) {
@@ -1840,6 +1921,13 @@ internal fun SettingsSectionCard(
     val isDark = sectionCardProps.isDark
     val isPureOled = sectionCardProps.isPureOled
 
+    if (showInfoModal && infoTopic != null) {
+        ModeInfoModalDialog(
+            topic = infoTopic,
+            onDismiss = { showInfoModal = false }
+        )
+    }
+
     Card(
         shape = cardShape,
         border = sectionCardProps.border,
@@ -1858,6 +1946,7 @@ internal fun SettingsSectionCard(
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Row(
+                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(9.dp)
             ) {
@@ -1881,7 +1970,7 @@ internal fun SettingsSectionCard(
                         modifier = Modifier.size(16.dp)
                     )
                 }
-                Column {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = title,
                         style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
@@ -1894,6 +1983,12 @@ internal fun SettingsSectionCard(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
+                }
+                if (infoTopic != null) {
+                    ModeInfoIconButton(
+                        topic = infoTopic,
+                        onClick = { showInfoModal = true }
+                    )
                 }
             }
             HorizontalDivider(
@@ -2402,23 +2497,32 @@ internal fun MiscellaneousSettingsPage(
     // 2. Графический конвейер (OpenGL ES / Vulkan API)
     SettingsSectionCard(
         title = tr("Графический конвейер (API)", "Graphics Pipeline (API)"),
-        icon = Icons.Default.HighQuality
+        icon = Icons.Default.HighQuality,
+        infoTopic = ModeInfoTopic.GRAPHICS_API
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = tr("Бэкенд рендеринга", "Rendering Backend"),
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Medium),
-                    color = MaterialTheme.colorScheme.onSurface
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = vulkanCapability.localizedDescription(isEnglish),
+                    text = if (vulkanCapability.isSupported) {
+                        tr("Аппаратный Vulkan 1.1+ доступен", "Hardware Vulkan 1.1+ supported")
+                    } else {
+                        tr("Используется OpenGL ES 3.0", "Using OpenGL ES 3.0")
+                    },
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
             Surface(
@@ -2437,12 +2541,14 @@ internal fun MiscellaneousSettingsPage(
                     } else {
                         MaterialTheme.colorScheme.onSurfaceVariant
                     },
+                    maxLines = 1,
+                    softWrap = false,
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         GraphicsBackend.entries.forEach { backend ->
             val isSelected = settings.graphicsBackend == backend
@@ -2469,7 +2575,7 @@ internal fun MiscellaneousSettingsPage(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 14.dp, vertical = 12.dp),
+                        .padding(horizontal = 14.dp, vertical = 11.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
@@ -2479,13 +2585,19 @@ internal fun MiscellaneousSettingsPage(
                     )
                     Column(modifier = Modifier.weight(1f)) {
                         Row(
+                            modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Text(
                                 text = backend.localizedTitle(isEnglish),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(end = 8.dp),
                                 style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
-                                color = MaterialTheme.colorScheme.onSurface
+                                color = MaterialTheme.colorScheme.onSurface,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                             Surface(
                                 color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.6f),
@@ -2495,7 +2607,9 @@ internal fun MiscellaneousSettingsPage(
                                     text = backend.badge,
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                    maxLines = 1,
+                                    softWrap = false,
+                                    modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.dp)
                                 )
                             }
                         }
@@ -2503,7 +2617,9 @@ internal fun MiscellaneousSettingsPage(
                         Text(
                             text = backend.localizedSubtitle(isEnglish),
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                 }

@@ -255,28 +255,28 @@ enum class Anime4KPreset(
         id = "Off",
         title = "Выключен (Оригинал)",
         badgeLabel = "RAW",
-        description = "Прямой вывод аппаратного декодера без постобработки GPU.",
+        description = "Оригинальный кадр без апскейла",
         passCount = 1
     ),
     ANIME4K_FAST(
         id = "Anime4K_Fast",
-        title = "Anime4K Mode C • Fast (Denoise + Upscale)",
+        title = "Anime4K Mode C • Fast",
         badgeLabel = "A4K FAST",
-        description = "Режим C (bloc97/Anime4K): Clamp_Highlights + быстрая очистка ореолов и повышение чёткости контуров с минимальной нагрузкой на мобильный GPU.",
+        description = "Mode C: быстрый денойз и апскейл контуров",
         passCount = 2
     ),
     ANIME4K_UPSCALE_CNN(
         id = "Anime4K_Upscale_CNN",
-        title = "Anime4K Mode B • Restore + Upscale CNN",
+        title = "Anime4K Mode B • Restore CNN",
         badgeLabel = "CNN x2",
-        description = "Режим B (bloc97/Anime4K): Clamp_Highlights + мягкая нейросетевая реконструкция линий CReLU (Restore_CNN_Soft) и направленный апскейлинг без звона.",
+        description = "Mode B: реконструкция линий + CNN-апскейл",
         passCount = 3
     ),
     ANIME4K_UPSCALE_CNNX(
         id = "Anime4K_Upscale_CNNX",
-        title = "Anime4K Mode A • HQ Restore + Upscale CNNX",
-        badgeLabel = "CNNX ULTRA",
-        description = "Режим A (bloc97/Anime4K): Clamp_Highlights + глубокая реконструкция градиентов Собеля, плотная свёртка CNNX и субпиксельный антиалиасинг.",
+        title = "Anime4K Mode A • Ultra CNNX",
+        badgeLabel = "CNNX",
+        description = "Mode A: глубокая реконструкция + CNNX",
         passCount = 4
     );
 
@@ -312,7 +312,7 @@ enum class FrameInterpolationMode(
         id = "OFF",
         title = "Выключена (Оригинал)",
         badgeLabel = "OFF",
-        description = "Прямой вывод исходных кадров декодера (24/30 к/с) без генерации промежуточных фаз.",
+        description = "Оригинальная частота кадров (24/30 к/с)",
         targetFps = 0,
         motionStrength = 0f,
         isAnimeContourProtected = false
@@ -321,7 +321,7 @@ enum class FrameInterpolationMode(
         id = "CINEMA",
         title = "Мягкое кино (×2 / 48–60 к/с)",
         badgeLabel = "MEMC ×2",
-        description = "Деликатное двукратное сглаживание панорам (48/50/60 к/с) с сохранением кинематографической пластики.",
+        description = "Мягкое 2× сглаживание панорам без эффекта мыльной оперы",
         targetFps = 60,
         motionStrength = 0.72f,
         isAnimeContourProtected = false
@@ -330,7 +330,7 @@ enum class FrameInterpolationMode(
         id = "SMOOTH_60",
         title = "Плавность 60 к/с",
         badgeLabel = "MEMC 60",
-        description = "Двунаправленная компенсация движения MEMC до стабильных 60 к/с с экономией энергии на LTPO-экранах.",
+        description = "Стабильные 60 к/с с детектором склеек сцен",
         targetFps = 60,
         motionStrength = 1.0f,
         isAnimeContourProtected = false
@@ -339,7 +339,7 @@ enum class FrameInterpolationMode(
         id = "MAX_FPS",
         title = "Максимум экрана (90–165 Гц)",
         badgeLabel = "MEMC MAX",
-        description = "Фазово-синхронизированная интерполяция каждого кадра под частоту дисплея 90 / 120 / 144 / 165 Гц.",
+        description = "Уплавнение под герцовку дисплея 90–165 Гц",
         targetFps = 165,
         motionStrength = 1.0f,
         isAnimeContourProtected = false
@@ -348,7 +348,7 @@ enum class FrameInterpolationMode(
         id = "ANIME",
         title = "Аниме 2D (Защита контуров)",
         badgeLabel = "MEMC 2D",
-        description = "Режим для 2D-анимации: высокая частота обновления с защитой тонких линий, субтитров и смен сцен.",
+        description = "Профиль для 2D-анимации с защитой линий и титров",
         targetFps = 165,
         motionStrength = 0.90f,
         isAnimeContourProtected = true
@@ -447,19 +447,19 @@ enum class DecoderMode(
         id = "HW_PLUS",
         title = "Аппаратное декодирование (HW+)",
         shortBadge = "HW+",
-        description = "Приоритет аппаратных чипов MediaCodec (HEVC/AVC/AV1/VP9) с авто-резервом при нестандартных профилях."
+        description = "Аппаратный GPU MediaCodec + авто-резерв"
     ),
     HW_STRICT(
         id = "HW_STRICT",
         title = "Строго аппаратное (HW)",
         shortBadge = "HW",
-        description = "Использует исключительно аппаратные декодеры GPU/SoC для максимальной энергоэффективности."
+        description = "Только аппаратный декодер GPU/SoC"
     ),
     SOFTWARE_PREFER(
         id = "SW_PREFER",
         title = "Программный декодер (SW)",
         shortBadge = "SW",
-        description = "Приоритет программных кодеков CPU для редких и повреждённых видеопотоков."
+        description = "Многопоточный декодер на CPU"
     );
 
     companion object {
@@ -477,25 +477,25 @@ enum class AudioDeArtifactMode(
     OFF(
         id = "OFF",
         title = "Откл.",
-        subtitle = "Без дополнительной DSP-фильтрации сжатого звука",
+        subtitle = "Прямой вывод без DSP-фильтрации",
         shortBadge = "Откл."
     ),
     SOFT(
         id = "SOFT",
         title = "Мягкий",
-        subtitle = "Деликатное сглаживание высокочастотного звона и артефактов квантования",
+        subtitle = "Мягкое сглаживание ВЧ-песка",
         shortBadge = "Мягкий"
     ),
     STANDARD(
         id = "STANDARD",
         title = "Стандарт",
-        subtitle = "Оптимальная очистка искажений низкобитрейтного AAC/MP3/Opus и мягкий де-клиппинг",
+        subtitle = "Очистка AAC/Opus + мягкий де-клиппер",
         shortBadge = "Стандарт"
     ),
     AGGRESSIVE(
         id = "AGGRESSIVE",
         title = "Агрессивный",
-        subtitle = "Максимальное подавление металлического песка и восстановление гармоник (≤ 96 кбит/с)",
+        subtitle = "Макс. подавление звона (≤ 96 кбит/с)",
         shortBadge = "Агрессив."
     );
 
@@ -843,17 +843,17 @@ enum class GraphicsBackend(
         id = "OPENGL_ES",
         titleRu = "OpenGL ES (По умолчанию)",
         titleEn = "OpenGL ES (Default)",
-        badge = "GLES 2.0 / 3.0",
-        subtitleRu = "Стабильный zero-copy конвейер через EGLImage & SurfaceTexture с аппаратным декодером",
-        subtitleEn = "Stable zero-copy EGLImage & SurfaceTexture pipeline with hardware decoder"
+        badge = "GLES 3.0",
+        subtitleRu = "Zero-copy конвейер EGLImage & SurfaceTexture",
+        subtitleEn = "Zero-copy EGLImage & SurfaceTexture pipeline"
     ),
     VULKAN(
         id = "VULKAN",
         titleRu = "Vulkan API",
         titleEn = "Vulkan API",
         badge = "Vulkan 1.1+",
-        subtitleRu = "Многопоточный конвейер VkCommandPool, параллельная запись буферов команд и Vulkan Compute для MEMC/Anime4K",
-        subtitleEn = "Multithreaded VkCommandPool pipeline, parallel command recording & Vulkan Compute for MEMC/Anime4K"
+        subtitleRu = "Многопоточный VkCommandPool и Vulkan Compute",
+        subtitleEn = "Multithreaded VkCommandPool & Vulkan Compute"
     );
 
     fun localizedTitle(isEnglish: Boolean): String = if (isEnglish) titleEn else titleRu

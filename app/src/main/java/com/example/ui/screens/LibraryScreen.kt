@@ -213,6 +213,8 @@ fun LibraryScreen(
         }
     }
 
+    var settingsResetTrigger by rememberSaveable { mutableStateOf(0) }
+
     BackHandler(enabled = isFolderSelectionMode || currentTab != HomeTab.FOLDERS) {
         if (isFolderSelectionMode) {
             selectedFolderIds = emptyList()
@@ -509,20 +511,22 @@ fun LibraryScreen(
                                     contentDescription = "Темы оформления и кнопок плеера"
                                 )
                             }
-                            IconButton(
-                                onClick = onRescan,
-                                modifier = Modifier.testTag("rescan_library_button")
-                            ) {
-                                if (isScanning) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.size(20.dp),
-                                        strokeWidth = 2.dp
-                                    )
-                                } else {
-                                    Icon(
-                                        imageVector = Icons.Default.Refresh,
-                                        contentDescription = "Обновить библиотеку"
-                                    )
+                            if (currentTab != HomeTab.SETTINGS) {
+                                IconButton(
+                                    onClick = onRescan,
+                                    modifier = Modifier.testTag("rescan_library_button")
+                                ) {
+                                    if (isScanning) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.size(20.dp),
+                                            strokeWidth = 2.dp
+                                        )
+                                    } else {
+                                        Icon(
+                                            imageVector = Icons.Default.Refresh,
+                                            contentDescription = "Обновить библиотеку"
+                                        )
+                                    }
                                 }
                             }
                         },
@@ -586,7 +590,13 @@ fun LibraryScreen(
                         )
                         NavigationBarItem(
                             selected = currentTab == HomeTab.SETTINGS,
-                            onClick = { onSelectTab(HomeTab.SETTINGS) },
+                            onClick = {
+                                if (currentTab == HomeTab.SETTINGS) {
+                                    settingsResetTrigger++
+                                } else {
+                                    onSelectTab(HomeTab.SETTINGS)
+                                }
+                            },
                             icon = {
                                 Icon(
                                     if (currentTab == HomeTab.SETTINGS) Icons.Filled.Settings else Icons.Outlined.Settings,
@@ -668,7 +678,13 @@ fun LibraryScreen(
                             )
                             NavigationRailItem(
                                 selected = currentTab == HomeTab.SETTINGS,
-                                onClick = { onSelectTab(HomeTab.SETTINGS) },
+                                onClick = {
+                                    if (currentTab == HomeTab.SETTINGS) {
+                                        settingsResetTrigger++
+                                    } else {
+                                        onSelectTab(HomeTab.SETTINGS)
+                                    }
+                                },
                                 icon = {
                                     Icon(
                                         if (currentTab == HomeTab.SETTINGS) Icons.Filled.Settings else Icons.Outlined.Settings,
@@ -766,7 +782,8 @@ fun LibraryScreen(
                             libraryRoots = libraryRoots,
                             hiddenFolders = hiddenFolders,
                             recentCount = recentItems.size,
-                            actions = effectiveSettingsActions
+                            actions = effectiveSettingsActions,
+                            resetToRootTrigger = settingsResetTrigger
                         )
                     }
                 }
