@@ -2470,7 +2470,9 @@ internal fun EpisodesQuickModalSheet(
 @Composable
 internal fun AudioBoostQuickModalSheet(
     audioBoostPercent: Int,
+    maxAudioBoostPercent: Int = 200,
     onSetAudioBoostPercent: (Int) -> Unit,
+    onUpdateMaxAudioBoostPercent: (Int) -> Unit = {},
     onDismiss: () -> Unit
 ) {
     PlayerFrostedModalSheet(
@@ -2485,12 +2487,14 @@ internal fun AudioBoostQuickModalSheet(
         ) {
             AudioBoostControlSection(
                 audioBoostPercent = audioBoostPercent,
-                onSetAudioBoostPercent = onSetAudioBoostPercent
+                maxAudioBoostPercent = maxAudioBoostPercent,
+                onSetAudioBoostPercent = onSetAudioBoostPercent,
+                onUpdateMaxAudioBoostPercent = onUpdateMaxAudioBoostPercent
             )
             Text(
                 text = tr(
-                    "Использует системный DSP LoudnessEnhancer для усиления тихих озвучек без изменения скорости речи.",
-                    "Uses system DSP LoudnessEnhancer to amplify quiet voiceovers without altering speech pitch or speed."
+                    "Использует системный DSP LoudnessEnhancer для усиления звука только выше 100% системной громкости.",
+                    "Uses system DSP LoudnessEnhancer to amplify audio strictly above 100% system volume."
                 ),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant

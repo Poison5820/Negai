@@ -27,6 +27,8 @@ import com.example.model.PlayerControlsTheme
 import com.example.model.PlayerOrientationMode
 import com.example.model.PlayerQuickAction
 import com.example.model.PlayerSettings
+import com.example.model.PreferredTrackLanguage
+import com.example.model.StreamingQualityPreset
 import com.example.model.VideoChapter
 import com.example.model.VideoFolderItem
 import com.example.model.VideoScaleMode
@@ -34,11 +36,14 @@ import com.example.player.AudioTrackUiOption
 import com.example.player.PlaybackRuntimeState
 import com.example.player.PlayerEngine
 import com.example.player.SubtitleTrackUiOption
+import com.example.player.VideoQualityUiOption
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -151,7 +156,7 @@ class NegaiViewModel(application: Application) : AndroidViewModel(application) {
             option = settings.folderSortOption,
             ascending = settings.folderSortAscending
         )
-    }.stateIn(
+    }.flowOn(Dispatchers.Default).stateIn(
         viewModelScope,
         SharingStarted.Eagerly,
         FolderSorter.sortFolders(
@@ -179,7 +184,7 @@ class NegaiViewModel(application: Application) : AndroidViewModel(application) {
                 )
             }
         }
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+    }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     fun selectTab(tab: HomeTab) {
         _currentTab.value = tab
@@ -877,6 +882,10 @@ class NegaiViewModel(application: Application) : AndroidViewModel(application) {
         _anime4kSplitPos.value = pos.coerceIn(0.1f, 0.9f)
     }
 
+    fun selectVideoQualityOption(option: VideoQualityUiOption) {
+        playerEngine.selectVideoQualityOption(option)
+    }
+
     fun selectAudioTrack(option: AudioTrackUiOption) {
         playerEngine.selectAudioTrack(option)
     }
@@ -897,9 +906,21 @@ class NegaiViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun setPreferredAudioLanguage(language: PreferredTrackLanguage) {
+        viewModelScope.launch {
+            repository.preferencesRepository.updatePreferredAudioLanguage(language)
+        }
+    }
+
     fun setDefaultAudioBoostPercent(percent: Int) {
         viewModelScope.launch {
             repository.preferencesRepository.updateDefaultAudioBoostPercent(percent)
+        }
+    }
+
+    fun setMaxAudioBoostPercent(percent: Int) {
+        viewModelScope.launch {
+            repository.preferencesRepository.updateMaxAudioBoostPercent(percent)
         }
     }
 
@@ -957,6 +978,18 @@ class NegaiViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun setPreferExternalSubtitlesOnStart(enabled: Boolean) {
+        viewModelScope.launch {
+            repository.preferencesRepository.updatePreferExternalSubtitlesOnStart(enabled)
+        }
+    }
+
+    fun setPreferredSubtitleLanguage(language: PreferredTrackLanguage) {
+        viewModelScope.launch {
+            repository.preferencesRepository.updatePreferredSubtitleLanguage(language)
+        }
+    }
+
     fun setSubtitleFontSize(sizeSp: Float) {
         viewModelScope.launch {
             repository.preferencesRepository.updateSubtitleFontSize(sizeSp)
@@ -972,6 +1005,12 @@ class NegaiViewModel(application: Application) : AndroidViewModel(application) {
     fun setSubtitleBackground(enabled: Boolean) {
         viewModelScope.launch {
             repository.preferencesRepository.updateSubtitleBackground(enabled)
+        }
+    }
+
+    fun setDefaultStreamingQuality(preset: StreamingQualityPreset) {
+        viewModelScope.launch {
+            repository.preferencesRepository.updateDefaultStreamingQuality(preset)
         }
     }
 

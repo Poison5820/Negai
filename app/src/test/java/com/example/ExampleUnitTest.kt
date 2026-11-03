@@ -232,12 +232,13 @@ class ExampleUnitTest {
 
     @Test
     fun playerExtras_audioBoostOrientationAndPlaybackEndModesWorkAccurately() {
-        // 100% -> 0 mB, 150% -> +600 mB (+6 dB), 200% -> +1200 mB (+12 dB), clamped outside [100, 200]
+        // 100% -> 0 mB, 150% -> +600 mB (+6 dB), 200% -> +1200 mB (+12 dB), 300% -> +2400 mB (+24 dB), clamped outside [100, 300]
         assertEquals(0, AudioBoostController.percentToGainMillibels(100))
         assertEquals(600, AudioBoostController.percentToGainMillibels(150))
         assertEquals(1200, AudioBoostController.percentToGainMillibels(200))
+        assertEquals(2400, AudioBoostController.percentToGainMillibels(300))
         assertEquals(0, AudioBoostController.percentToGainMillibels(50))
-        assertEquals(1200, AudioBoostController.percentToGainMillibels(260))
+        assertEquals(2400, AudioBoostController.percentToGainMillibels(360))
 
         // Orientation cycle: VIDEO_ASPECT -> LANDSCAPE -> PORTRAIT -> AUTO -> VIDEO_ASPECT
         assertEquals(PlayerOrientationMode.LANDSCAPE, PlayerOrientationMode.VIDEO_ASPECT.next())

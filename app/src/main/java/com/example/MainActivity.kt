@@ -115,7 +115,7 @@ class MainActivity : ComponentActivity() {
                 val resolved = settings.themeMode.resolveModeFor(systemInDark)
                 window.setBackgroundDrawable(ColorDrawable(resolved.previewBgArgb.toInt()))
             }
-            LaunchedEffect(settings.highRefreshRateEnabled, isPlayerOpen) {
+            LaunchedEffect(refreshPlan, isPlayerOpen) {
                 targetDisplayHz = DisplayRefreshRateController.applyWindowRefreshPlan(
                     this@MainActivity,
                     refreshPlan
@@ -226,8 +226,10 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         viewModel.onAppResumed()
-        val s = viewModel.playerSettings.value
-        DisplayRefreshRateController.applyWindowRefreshRate(this, s.highRefreshRateEnabled)
+        if (!viewModel.isPlayerOpen.value) {
+            val s = viewModel.playerSettings.value
+            DisplayRefreshRateController.applyWindowRefreshRate(this, s.highRefreshRateEnabled)
+        }
     }
 
     override fun onPause() {
@@ -494,6 +496,8 @@ fun NegaiAppRoot(
                 onUpdateControlsAutoHideSeconds = { sec -> viewModel.setControlsAutoHideSeconds(sec) },
                 onDismissResumeBanner = { viewModel.dismissResumeBanner() },
                 onRestartFromBeginning = { viewModel.restartEpisodeFromBeginning() },
+                onSelectVideoQuality = { opt -> viewModel.selectVideoQualityOption(opt) },
+                onUpdateMaxAudioBoostPercent = { pct -> viewModel.setMaxAudioBoostPercent(pct) },
                 onUiActiveChanged = { active -> viewModel.setPlayerUiActive(active) }
             )
         }
@@ -573,15 +577,20 @@ fun NegaiAppRoot(
                 onUpdateAnime4KStrength = { viewModel.setAnime4KStrength(it) },
                 onUpdateAutoBindAudio = { viewModel.setAutoBindAudio(it) },
                 onUpdatePreferExternalAudioOnStart = { viewModel.setPreferExternalAudioOnStart(it) },
+                onUpdatePreferredAudioLanguage = { viewModel.setPreferredAudioLanguage(it) },
                 onUpdateDefaultAudioBoostPercent = { viewModel.setDefaultAudioBoostPercent(it) },
+                onUpdateMaxAudioBoostPercent = { viewModel.setMaxAudioBoostPercent(it) },
                 onUpdateAudioDeArtifactMode = { viewModel.setAudioDeArtifactMode(it) },
                 onUpdateAutoDeArtifactLowBitrate = { viewModel.setAutoDeArtifactLowBitrate(it) },
                 onUpdateBluetoothAudioAutoSync = { viewModel.setBluetoothAudioAutoSync(it) },
                 onUpdateBluetoothAudioOffsetMs = { viewModel.setBluetoothAudioOffsetMs(it) },
                 onUpdateAutoBindSubs = { viewModel.setAutoBindSubtitles(it) },
+                onUpdatePreferExternalSubtitlesOnStart = { viewModel.setPreferExternalSubtitlesOnStart(it) },
+                onUpdatePreferredSubtitleLanguage = { viewModel.setPreferredSubtitleLanguage(it) },
                 onUpdateSubtitleFontSize = { viewModel.setSubtitleFontSize(it) },
                 onUpdateSubtitleColor = { viewModel.setSubtitleColor(it) },
                 onUpdateSubtitleBg = { viewModel.setSubtitleBackground(it) },
+                onUpdateDefaultStreamingQuality = { viewModel.setDefaultStreamingQuality(it) },
                 onUpdateTorrServerUrl = { viewModel.setTorrServerUrl(it) },
                 onUpdateTorrServerAuth = { u, p -> viewModel.setTorrServerAuth(u, p) },
                 onUpdateTorrServerAutoPlaySingle = { viewModel.setTorrServerAutoPlaySingle(it) },

@@ -821,14 +821,192 @@ enum class SleepTimerPreset(
     END_OF_EPISODE("END_OF_EPISODE", "До конца серии", 0, stopAtEndOfEpisode = true)
 }
 
+@Immutable
+data class ReleaseHistoryEntry(
+    val versionName: String,
+    val versionCode: Int,
+    val tag: String,
+    val summaryRu: String,
+    val summaryEn: String
+)
+
 object AppVersionInfo {
-    const val VERSION_NAME = "3.4.2-pre"
-    const val VERSION_CODE = 12
-    const val BADGE_TEXT = "v3.4.2-pre"
-    const val RELEASE_TAG = "v3.4.2-pre"
+    const val VERSION_NAME = "3.4.3-pre"
+    const val VERSION_CODE = 13
+    const val BADGE_TEXT = "v3.4.3-pre"
+    const val RELEASE_TAG = "v3.4.3-pre"
     const val GITHUB_REPO_URL = "https://github.com/Poison5820/Negai"
     const val ANIME4K_ORIGINAL_REPO_URL = "https://github.com/bloc97/Anime4K"
     const val OBTAINIUM_ADD_URL = "https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/Poison5820/Negai"
+
+    val RELEASE_HISTORY: List<ReleaseHistoryEntry> = listOf(
+        ReleaseHistoryEntry(
+            versionName = "3.4.3-pre",
+            versionCode = 13,
+            tag = "v3.4.3-pre",
+            summaryRu = "Стабилизация потокового воспроизведения, выбор качества по бейджу в плеере, LTPO снижает до 24/30 Гц и минимума на паузе, встроенные стили/шрифты и кодировки субтитров, языки аудио и субтитров, усиление громкости строго свыше 100%, точная синхронизация А/В.",
+            summaryEn = "Streaming stability fix, interactive quality badge in player, LTPO 24/30Hz & pause min-Hz adaptation, ASS embedded fonts/styles & multi-charset subtitles, independent audio/subtitle languages, volume boost strictly above 100%, and exact A/V resync."
+        ),
+        ReleaseHistoryEntry(
+            versionName = "3.4.2-pre",
+            versionCode = 12,
+            tag = "v3.4.2-pre",
+            summaryRu = "Конвейер Vulkan 1.1+ и OpenGL ES 3.0, всплывающие справки режимов, обновлённые темы OLED и Тёмная, полноэкранный режим с вырезом камеры.",
+            summaryEn = "Vulkan 1.1+ & OpenGL ES 3.0 pipeline, floating info cards for modes, updated OLED & Dark themes, display cutout landscape support."
+        ),
+        ReleaseHistoryEntry(
+            versionName = "3.4-pre1",
+            versionCode = 11,
+            tag = "v3.4-pre1",
+            summaryRu = "Оригинальные пресеты Anime4K (Mode A/B/C), компактный HUD-оверлей Инфо, планетарная модель с лицензиями открытого кода.",
+            summaryEn = "Original Anime4K presets (Mode A/B/C), compact Info HUD overlay, planetary model with open-source licenses."
+        )
+    )
+}
+
+enum class StreamingQualityPreset(
+    val id: String,
+    val maxHeight: Int,
+    val titleRu: String,
+    val titleEn: String,
+    val badge: String,
+    val subtitleRu: String,
+    val subtitleEn: String
+) {
+    MAX(
+        id = "MAX",
+        maxHeight = 0,
+        titleRu = "Максимальное доступное (По умолчанию)",
+        titleEn = "Maximum Available (Default)",
+        badge = "MAX",
+        subtitleRu = "Выбирать поток или файл с максимальным разрешением и битрейтом",
+        subtitleEn = "Select stream or file with maximum resolution and bitrate"
+    ),
+    Q_2160P(
+        id = "2160P",
+        maxHeight = 2160,
+        titleRu = "4K Ultra HD (2160p)",
+        titleEn = "4K Ultra HD (2160p)",
+        badge = "4K",
+        subtitleRu = "Ограничить качество потоков до 3840×2160",
+        subtitleEn = "Cap streaming quality up to 3840×2160"
+    ),
+    Q_1080P(
+        id = "1080P",
+        maxHeight = 1080,
+        titleRu = "Full HD (1080p)",
+        titleEn = "Full HD (1080p)",
+        badge = "1080p",
+        subtitleRu = "Оптимальный баланс чёткости и скорости загрузки (1920×1080)",
+        subtitleEn = "Optimal balance of clarity and buffering speed (1920×1080)"
+    ),
+    Q_720P(
+        id = "720P",
+        maxHeight = 720,
+        titleRu = "HD (720p)",
+        titleEn = "HD (720p)",
+        badge = "720p",
+        subtitleRu = "Экономия трафика и быстрый старт (1280×720)",
+        subtitleEn = "Data saver and fast startup (1280×720)"
+    ),
+    Q_480P(
+        id = "480P",
+        maxHeight = 480,
+        titleRu = "SD (480p)",
+        titleEn = "SD (480p)",
+        badge = "480p",
+        subtitleRu = "Минимальная нагрузка на сеть при слабом соединении",
+        subtitleEn = "Minimal network load for slow connections"
+    ),
+    AUTO(
+        id = "AUTO",
+        maxHeight = -1,
+        titleRu = "Авто (Адаптивно по сети)",
+        titleEn = "Auto (Network Adaptive)",
+        badge = "AUTO",
+        subtitleRu = "Динамический выбор качества для HLS/DASH потоков",
+        subtitleEn = "Dynamic quality switching for HLS/DASH streams"
+    );
+
+    val maxHeightPx: Int get() = maxHeight
+
+    fun localizedTitle(isEnglish: Boolean): String = if (isEnglish) titleEn else titleRu
+    fun localizedSubtitle(isEnglish: Boolean): String = if (isEnglish) subtitleEn else subtitleRu
+    fun localizedBadge(isEnglish: Boolean): String = badge
+
+    companion object {
+        fun fromId(id: String?): StreamingQualityPreset =
+            entries.firstOrNull { it.id.equals(id?.trim(), ignoreCase = true) } ?: MAX
+    }
+}
+
+enum class PreferredTrackLanguage(
+    val id: String,
+    val titleRu: String,
+    val titleEn: String,
+    val shortBadge: String,
+    val isoCodes: List<String>,
+    val keywordTokens: List<String>
+) {
+    RU(
+        id = "RU",
+        titleRu = "Русский",
+        titleEn = "Russian",
+        shortBadge = "RU",
+        isoCodes = listOf("ru", "rus", "ru-ru"),
+        keywordTokens = listOf(
+            "ru", "rus", "russian", "рус", "русский", "русская",
+            "дубляж", "многоголос", "одноголос", "anilibria", "studiorum",
+            "shiza", "anidub", "animedia", "jam", "kansai", "crunchyroll", "надписи", "полные"
+        )
+    ),
+    EN(
+        id = "EN",
+        titleRu = "Английский",
+        titleEn = "English",
+        shortBadge = "EN",
+        isoCodes = listOf("en", "eng", "en-us", "en-gb"),
+        keywordTokens = listOf("en", "eng", "english", "англ", "английский", "английская")
+    ),
+    JA(
+        id = "JA",
+        titleRu = "Японский (Оригинал)",
+        titleEn = "Japanese (Original)",
+        shortBadge = "JA",
+        isoCodes = listOf("ja", "jpn", "jp", "ja-jp"),
+        keywordTokens = listOf("ja", "jpn", "jap", "japanese", "яп", "японский", "оригинал", "original")
+    ),
+    AUTO(
+        id = "AUTO",
+        titleRu = "Авто (По умолчанию)",
+        titleEn = "Auto (Default)",
+        shortBadge = "AUTO",
+        isoCodes = emptyList(),
+        keywordTokens = emptyList()
+    );
+
+    fun localizedTitle(isEnglish: Boolean): String = if (isEnglish) titleEn else titleRu
+
+    fun matchesLanguageOrLabel(languageCode: String?, label: String?): Boolean {
+        if (this == AUTO) return false
+        val cleanLang = languageCode?.trim()?.lowercase().orEmpty()
+        if (cleanLang.isNotEmpty()) {
+            if (isoCodes.any { code -> cleanLang == code || cleanLang.startsWith("$code-") || cleanLang.startsWith("${code}_") }) {
+                return true
+            }
+        }
+        val cleanLabel = label?.trim()?.lowercase().orEmpty()
+        if (cleanLabel.isEmpty()) return false
+        val words = cleanLabel.split(Regex("""[^a-zа-яё0-9]+""")).filter { it.isNotBlank() }
+        return keywordTokens.any { token ->
+            words.contains(token) || (token.length >= 4 && cleanLabel.contains(token))
+        }
+    }
+
+    companion object {
+        fun fromId(id: String?): PreferredTrackLanguage =
+            entries.firstOrNull { it.id.equals(id?.trim(), ignoreCase = true) } ?: RU
+    }
 }
 
 enum class GraphicsBackend(
@@ -912,7 +1090,7 @@ enum class SettingsCategory(
     CONTROLS("CONTROLS", "Управление", "Controls"),
     ENHANCEMENTS("ENHANCEMENTS", "Улучшения", "Enhancements"),
     AUDIO_AND_SUBTITLES("AUDIO_AND_SUBTITLES", "Аудио и субтитры", "Audio & Subtitles"),
-    TORRENTS("TORRENTS", "Торренты", "Torrents"),
+    TORRENTS("TORRENTS", "Потоковая передача", "Streaming"),
     STORAGE("STORAGE", "Хранилище", "Storage"),
     MISCELLANEOUS("MISCELLANEOUS", "Прочие", "Miscellaneous"),
     DEVICE_INFO("DEVICE_INFO", "Об устройстве", "About Device");
@@ -924,7 +1102,7 @@ enum class SettingsCategory(
             "GESTURES", "CONTROLS" -> CONTROLS
             "VIDEO_ANIME4K", "ENHANCEMENTS" -> ENHANCEMENTS
             "AUDIO", "SUBTITLES", "AUDIO_AND_SUBTITLES" -> AUDIO_AND_SUBTITLES
-            "TORRSERVER", "TORRENTS" -> TORRENTS
+            "TORRSERVER", "TORRENTS", "STREAMING" -> TORRENTS
             else -> entries.firstOrNull { it.id.equals(id?.trim(), ignoreCase = true) } ?: APPEARANCE
         }
     }
@@ -997,19 +1175,24 @@ data class PlayerSettings(
     // Audio & Voiceover
     val autoBindExternalAudio: Boolean = true,
     val preferExternalAudioOnStart: Boolean = true,
+    val preferredAudioLanguage: PreferredTrackLanguage = PreferredTrackLanguage.RU,
     val defaultAudioBoostPercent: Int = 100,
-    val bluetoothAudioAutoSync: Boolean = true,
+    val maxAudioBoostPercent: Int = 200,
+    val bluetoothAudioAutoSync: Boolean = false,
     val bluetoothAudioOffsetMs: Long = 0L,
     val audioDeArtifactMode: AudioDeArtifactMode = AudioDeArtifactMode.STANDARD,
     val autoDeArtifactLowBitrate: Boolean = true,
 
     // Subtitles
     val autoBindExternalSubtitles: Boolean = true,
+    val preferExternalSubtitlesOnStart: Boolean = true,
+    val preferredSubtitleLanguage: PreferredTrackLanguage = PreferredTrackLanguage.RU,
     val subtitleFontSizeSp: Float = 21f,
     val subtitleColorArgb: Long = SubtitleColorPreset.WHITE.argb,
     val subtitleBackgroundEnabled: Boolean = true,
 
-    // TorrServer & Torrents
+    // Streaming & TorrServer
+    val defaultStreamingQuality: StreamingQualityPreset = StreamingQualityPreset.MAX,
     val torrServerUrl: String = "http://127.0.0.1:8090",
     val torrServerUsername: String = "",
     val torrServerPassword: String = "",

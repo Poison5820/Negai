@@ -580,6 +580,72 @@ fun VersionPlanetaryModalSheet(
                     }
                 }
             }
+
+            // Release History Card (3.4.3-pre, 3.4.2-pre, 3.4-pre1)
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceContainerLowest,
+                shape = RoundedCornerShape(14.dp),
+                border = BorderStroke(0.8.dp, MaterialTheme.colorScheme.outlineVariant),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("planetary_release_history_card")
+            ) {
+                Column(
+                    modifier = Modifier.padding(14.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = tr("История сборок (3.4.x Prerelease)", "Release History (3.4.x Prerelease)"),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    AppVersionInfo.RELEASE_HISTORY.forEachIndexed { idx, entry ->
+                        val isCurrent = idx == 0
+                        Surface(
+                            color = if (isCurrent) {
+                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.32f)
+                            } else {
+                                MaterialTheme.colorScheme.surfaceContainerLow
+                            },
+                            shape = RoundedCornerShape(10.dp),
+                            border = BorderStroke(
+                                0.7.dp,
+                                if (isCurrent) MaterialTheme.colorScheme.primary.copy(alpha = 0.55f)
+                                else MaterialTheme.colorScheme.outlineVariant
+                            ),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+                                verticalArrangement = Arrangement.spacedBy(3.dp)
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    Text(
+                                        text = "${entry.versionName} (build ${entry.versionCode})",
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (isCurrent) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Text(
+                                        text = "• ${entry.tag}",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                Text(
+                                    text = if (isEnglish) entry.summaryEn else entry.summaryRu,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.90f)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

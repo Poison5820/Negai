@@ -24,10 +24,10 @@ class NegaiV2FeaturesTest {
 
     @Test
     fun version3BuildConfig_and_frameInterpolationUserFacingLabels() {
-        assertEquals(12, BuildConfig.VERSION_CODE)
-        assertEquals("3.4.2-pre", BuildConfig.VERSION_NAME)
+        assertEquals(13, BuildConfig.VERSION_CODE)
+        assertEquals("3.4.3-pre", BuildConfig.VERSION_NAME)
         assertEquals("app.negai.player", BuildConfig.APPLICATION_ID)
-        assertEquals("v3.4.2-pre", com.example.model.AppVersionInfo.BADGE_TEXT)
+        assertEquals("v3.4.3-pre", com.example.model.AppVersionInfo.BADGE_TEXT)
         assertEquals("https://github.com/bloc97/Anime4K", com.example.model.AppVersionInfo.ANIME4K_ORIGINAL_REPO_URL)
 
         assertEquals(com.example.model.AppLanguage.SYSTEM, com.example.model.AppLanguage.fromId("system"))
@@ -701,10 +701,79 @@ class NegaiV2FeaturesTest {
         assertTrue(com.example.vulkan.VulkanShaderPipelines.VULKAN_MEMC_MOTION_COMPUTE_SHADER.contains("imageStore(motionVectors"))
         assertTrue(com.example.vulkan.VulkanShaderPipelines.VULKAN_COMPOSITE_FRAGMENT_SHADER.contains("#version 450 core"))
 
-        // 3. Version info
-        assertEquals("3.4.2-pre", com.example.model.AppVersionInfo.VERSION_NAME)
-        assertEquals(12, com.example.model.AppVersionInfo.VERSION_CODE)
-        assertEquals("v3.4.2-pre", com.example.model.AppVersionInfo.BADGE_TEXT)
-        assertEquals("v3.4.2-pre", com.example.model.AppVersionInfo.RELEASE_TAG)
+        // 3. Version info & release history (3.4.3-pre, 3.4.2-pre, 3.4-pre1)
+        assertEquals("3.4.3-pre", com.example.model.AppVersionInfo.VERSION_NAME)
+        assertEquals(13, com.example.model.AppVersionInfo.VERSION_CODE)
+        assertEquals("v3.4.3-pre", com.example.model.AppVersionInfo.BADGE_TEXT)
+        assertEquals("v3.4.3-pre", com.example.model.AppVersionInfo.RELEASE_TAG)
+        assertEquals(3, com.example.model.AppVersionInfo.RELEASE_HISTORY.size)
+        assertEquals("3.4.3-pre", com.example.model.AppVersionInfo.RELEASE_HISTORY[0].versionName)
+        assertEquals("3.4.2-pre", com.example.model.AppVersionInfo.RELEASE_HISTORY[1].versionName)
+        assertEquals("3.4-pre1", com.example.model.AppVersionInfo.RELEASE_HISTORY[2].versionName)
+    }
+
+    @Test
+    fun v343_pre_ltpoRefreshPlan_subtitlesEncoding_and_preferredLanguages() {
+        // 1. LTPO 24fps video without MEMC drops to 24Hz or 30Hz/48Hz/60Hz (never 120Hz), and drops to min Hz on pause
+        val ltpoDisplay = DisplayRefreshInfo(
+            currentHz = 120f,
+            minSupportedHz = 10f,
+            maxSupportedHz = 120f,
+            supportedModesHz = listOf(10, 24, 30, 48, 60, 90, 120)
+        )
+        val planPlaying24 = DisplayRefreshRateController.computeOptimalRefreshPlan(
+            displayInfo = ltpoDisplay,
+            isPlayerActive = true,
+            isPlaying = true,
+            sourceVideoFps = 23.976f,
+            playbackSpeed = 1.0f,
+            highRefreshRateEnabled = true,
+            ltpoAdaptiveEnabled = true,
+            interpolationMode = FrameInterpolationMode.OFF
+        )
+        assertTrue(planPlaying24.targetDisplayHz <= 48f)
+
+        val planPaused = DisplayRefreshRateController.computeOptimalRefreshPlan(
+            displayInfo = ltpoDisplay,
+            isPlayerActive = true,
+            isPlaying = false,
+            sourceVideoFps = 23.976f,
+            playbackSpeed = 1.0f,
+            highRefreshRateEnabled = true,
+            ltpoAdaptiveEnabled = true,
+            interpolationMode = FrameInterpolationMode.OFF
+        )
+        assertEquals(10f, planPaused.targetDisplayHz, 0.01f)
+
+        // 2. Subtitle charset decoding (Windows-1251 Cyrillic & ASS inline overrides)
+        val win1251Bytes = "1\n00:00:01,000 --> 00:00:04,000\nПривет, мир субтитров!\n"
+            .toByteArray(java.nio.charset.Charset.forName("windows-1251"))
+        val decodedWin1251 = com.example.subtitles.SubtitleParser.decodeSubtitleBytes(win1251Bytes)
+        assertTrue(decodedWin1251.contains("Привет, мир субтитров!"))
+
+        val assSample = """
+            [Script Info]
+            PlayResY: 1080
+            [V4+ Styles]
+            Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Alignment
+            Style: Default,Trebuchet MS,54,&H0000FFFF,&H000000FF,&H00102030,&H80000000,-1,0,2
+            [Events]
+            Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+            Dialogue: 0,0:00:01.00,0:00:05.00,Default,,0,0,0,,{\fnGeorgia\fs72\c&H00FF8000&}Тест встроенного стиля
+        """.trimIndent()
+        val parsedAss = com.example.subtitles.SubtitleParser.parse(assSample)
+        assertEquals(1, parsedAss.cues.size)
+        val cue = parsedAss.cues.first()
+        assertEquals("Тест встроенного стиля", cue.text)
+        assertEquals("Georgia", cue.fontFamilyName)
+        assertTrue(cue.isBold)
+        assertTrue(cue.hasExplicitInlineColor)
+
+        // 3. Separate preferred languages for Audio & Subtitles + Streaming Quality default
+        val settings = PlayerSettings()
+        assertEquals(com.example.model.PreferredTrackLanguage.RU, settings.preferredAudioLanguage)
+        assertEquals(com.example.model.PreferredTrackLanguage.RU, settings.preferredSubtitleLanguage)
+        assertEquals(com.example.model.StreamingQualityPreset.MAX, settings.defaultStreamingQuality)
+        assertEquals("Потоковая передача", com.example.model.SettingsCategory.TORRENTS.title)
     }
 }

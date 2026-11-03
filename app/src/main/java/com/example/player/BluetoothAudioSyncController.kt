@@ -159,21 +159,6 @@ class BluetoothAudioSyncController(
     private val audioManager = appContext.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
     private val mainHandler = Handler(Looper.getMainLooper())
 
-    private val latencyPollRunnable = object : Runnable {
-        override fun run() {
-            if (currentRouteState.isBluetoothActive) {
-                val am = audioManager
-                if (am != null) {
-                    val currentHal = queryHalOutputLatencyMs(am)
-                    if (abs(currentHal - currentRouteState.halOutputLatencyMs) >= 6) {
-                        refreshRouteState()
-                    }
-                }
-                mainHandler.postDelayed(this, 1500L)
-            }
-        }
-    }
-
     @Volatile
     var currentRouteState: BluetoothAudioRouteState = queryCurrentRouteState()
         private set
@@ -192,9 +177,6 @@ class BluetoothAudioSyncController(
         runCatching {
             audioManager?.registerAudioDeviceCallback(deviceCallback, mainHandler)
         }
-        if (currentRouteState.isBluetoothActive) {
-            mainHandler.postDelayed(latencyPollRunnable, 1500L)
-        }
     }
 
     fun refreshRouteState(): BluetoothAudioRouteState {
@@ -202,19 +184,9 @@ class BluetoothAudioSyncController(
         val prev = currentRouteState
         currentRouteState = updated
 
-        if (updated.isBluetoothActive && !prev.isBluetoothActive) {
-            mainHandler.removeCallbacks(latencyPollRunnable)
-            mainHandler.postDelayed(latencyPollRunnable, 1500L)
-        } else if (!updated.isBluetoothActive && prev.isBluetoothActive) {
-            mainHandler.removeCallbacks(latencyPollRunnable)
-        }
-
-        val latencyDiff = abs(updated.halOutputLatencyMs - prev.halOutputLatencyMs)
         if (updated.isBluetoothActive != prev.isBluetoothActive ||
             updated.profile != prev.profile ||
-            updated.deviceName != prev.deviceName ||
-            updated.isGamingMode != prev.isGamingMode ||
-            latencyDiff >= 6
+            updated.deviceName != prev.deviceName
         ) {
             onRouteChanged(updated)
         }
@@ -227,7 +199,6 @@ class BluetoothAudioSyncController(
             am.getDevices(AudioManager.GET_DEVICES_OUTPUTS)
         }.getOrNull().orEmpty()
 
-        // Prioritize A2DP / LE Audio / Hearing Aid over SCO when multiple profiles are registered
         var matchedProfile = BluetoothAudioProfile.NONE
         var matchedName: String? = null
 
@@ -248,32 +219,17 @@ class BluetoothAudioSyncController(
             }
         }
 
-        val halLatency = queryHalOutputLatencyMs(am)
-        val isGaming = matchedProfile != BluetoothAudioProfile.NONE && (
-            (halLatency in 1..85) || matchedProfile == BluetoothAudioProfile.LE_AUDIO
-        )
-        val measuredMs = halLatency.toLong().coerceAtLeast(0L)
-
         return BluetoothAudioRouteState(
             isBluetoothActive = matchedProfile != BluetoothAudioProfile.NONE,
             profile = matchedProfile,
             deviceName = matchedName,
-            halOutputLatencyMs = halLatency,
-            isGamingMode = isGaming,
-            measuredLatencyMs = measuredMs
+            halOutputLatencyMs = 0,
+            isGamingMode = matchedProfile == BluetoothAudioProfile.LE_AUDIO,
+            measuredLatencyMs = 0L
         )
     }
 
-    private fun queryHalOutputLatencyMs(am: AudioManager): Int {
-        return runCatching {
-            val method = AudioManager::class.java.getMethod("getOutputLatency", Int::class.javaPrimitiveType)
-            val latency = method.invoke(am, AudioManager.STREAM_MUSIC) as? Int ?: 0
-            latency.coerceIn(0, 1000)
-        }.getOrDefault(0)
-    }
-
     fun release() {
-        mainHandler.removeCallbacks(latencyPollRunnable)
         runCatching {
             audioManager?.unregisterAudioDeviceCallback(deviceCallback)
         }

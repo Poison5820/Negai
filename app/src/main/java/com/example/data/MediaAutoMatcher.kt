@@ -2,6 +2,7 @@ package com.example.data
 
 import com.example.model.ExternalAudioTrack
 import com.example.model.ExternalSubtitleTrack
+import com.example.model.PreferredTrackLanguage
 import com.example.model.SubtitleFormat
 import java.util.Locale
 
@@ -212,6 +213,40 @@ object MediaAutoMatcher {
             .sortedWith(compareByDescending<Pair<Int, ExternalSubtitleTrack>> { it.first }
                 .thenComparator { a, b -> naturalCompare(a.second.formattedLabel, b.second.formattedLabel) })
             .map { it.second }
+    }
+
+    fun pickBestExternalAudioTrack(
+        tracks: List<ExternalAudioTrack>,
+        preferredLanguage: PreferredTrackLanguage
+    ): ExternalAudioTrack? {
+        if (tracks.isEmpty()) return null
+        if (preferredLanguage == PreferredTrackLanguage.AUTO) return tracks.first()
+        val matched = tracks.firstOrNull { track ->
+            preferredLanguage.matchesLanguageOrLabel(null, "${track.sourceFolderName} ${track.displayName}")
+        }
+        return matched ?: tracks.first()
+    }
+
+    fun pickBestExternalSubtitleTrack(
+        tracks: List<ExternalSubtitleTrack>,
+        preferredLanguage: PreferredTrackLanguage
+    ): ExternalSubtitleTrack? {
+        if (tracks.isEmpty()) return null
+        val langCandidates = if (preferredLanguage == PreferredTrackLanguage.AUTO) {
+            tracks
+        } else {
+            val matched = tracks.filter { track ->
+                preferredLanguage.matchesLanguageOrLabel(null, "${track.sourceFolderName} ${track.displayName}")
+            }
+            matched.ifEmpty { tracks }
+        }
+        // Prefer full dialogue subtitles over signs-only ("надписи" / "signs") when multiple exist
+        val fullSubs = langCandidates.filterNot { track ->
+            val lower = "${track.sourceFolderName} ${track.displayName}".lowercase(Locale.ROOT)
+            (lower.contains("надпис") || lower.contains("signs") || lower.contains("forced")) &&
+                !lower.contains("полн") && !lower.contains("full")
+        }
+        return (fullSubs.ifEmpty { langCandidates }).firstOrNull()
     }
 
     private fun computeMatchScore(

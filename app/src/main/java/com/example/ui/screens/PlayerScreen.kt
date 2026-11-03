@@ -162,6 +162,7 @@ private enum class ActivePlayerSheet {
     SKIP_INTRO_CONFIG,
     TOOLS,
     FILE_INFO,
+    VIDEO_QUALITY,
     CUSTOMIZE_QUICK_ACTIONS
 }
 
@@ -232,6 +233,8 @@ fun PlayerScreen(
     onUpdateControlsAutoHideSeconds: (Int) -> Unit = {},
     onDismissResumeBanner: () -> Unit,
     onRestartFromBeginning: () -> Unit,
+    onSelectVideoQuality: (com.example.player.VideoQualityUiOption) -> Unit = {},
+    onUpdateMaxAudioBoostPercent: (Int) -> Unit = {},
     onUiActiveChanged: (Boolean) -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -297,6 +300,8 @@ fun PlayerScreen(
     // Vertical Brightness / Volume Swipe Gesture State
     var verticalGestureMode by remember { mutableStateOf(VerticalGestureMode.NONE) }
     var verticalGestureFraction by remember { mutableFloatStateOf(0.5f) }
+    var verticalGestureDisplayPercent by remember { mutableIntStateOf(50) }
+    var verticalVolumeTotalUnits by remember { mutableFloatStateOf(0.5f) }
 
     // Live state references so pointerInput lambdas always read current values without recomposing
     val latestPlaybackState by rememberUpdatedState(playbackState)
@@ -305,6 +310,7 @@ fun PlayerScreen(
     val latestOnSeekByMs by rememberUpdatedState(onSeekByMs)
     val latestOnSeekToMs by rememberUpdatedState(onSeekToMs)
     val latestOnSetTempSpeedBoost by rememberUpdatedState(onSetTempSpeedBoost)
+    val latestOnSetAudioBoostPercent by rememberUpdatedState(onSetAudioBoostPercent)
 
     // Timeline slider scrubbing & bottom quick bar scrolling state
     var isScrubbing by remember { mutableStateOf(false) }
@@ -602,11 +608,28 @@ fun PlayerScreen(
                                     }.getOrDefault(0.55f).coerceIn(0.05f, 1.0f)
                                 }
                                 verticalGestureFraction = initBright
+                                verticalGestureDisplayPercent = (initBright * 100f).roundToInt().coerceIn(1, 100)
                                 verticalGestureMode = VerticalGestureMode.BRIGHTNESS
                             } else {
                                 val maxVol = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC).coerceAtLeast(1)
-                                val curVol = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
-                                verticalGestureFraction = (curVol.toFloat() / maxVol.toFloat()).coerceIn(0f, 1f)
+                                val curVol = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC).coerceIn(0, maxVol)
+                                val baseFrac = (curVol.toFloat() / maxVol.toFloat()).coerceIn(0f, 1f)
+                                val currentBoost = latestPlaybackState.audioBoostPercent.coerceAtLeast(100)
+                                if (curVol < maxVol && currentBoost > 100) {
+                                    latestOnSetAudioBoostPercent(100)
+                                }
+                                val activeBoostUnits = if (curVol >= maxVol && currentBoost > 100) {
+                                    (currentBoost - 100) / 100f
+                                } else {
+                                    0f
+                                }
+                                verticalVolumeTotalUnits = baseFrac + activeBoostUnits
+                                verticalGestureFraction = baseFrac
+                                verticalGestureDisplayPercent = if (curVol >= maxVol && currentBoost > 100) {
+                                    currentBoost
+                                } else {
+                                    (baseFrac * 100f).roundToInt().coerceIn(0, 100)
+                                }
                                 verticalGestureMode = VerticalGestureMode.VOLUME
                             }
                         }
@@ -618,17 +641,42 @@ fun PlayerScreen(
                             if (verticalGestureMode == VerticalGestureMode.BRIGHTNESS) {
                                 val nextB = (verticalGestureFraction + delta).coerceIn(0.01f, 1.0f)
                                 verticalGestureFraction = nextB
+                                verticalGestureDisplayPercent = (nextB * 100f).roundToInt().coerceIn(1, 100)
                                 (context as? Activity)?.window?.let { win ->
                                     val lp = win.attributes
                                     lp.screenBrightness = nextB
                                     win.attributes = lp
                                 }
                             } else if (verticalGestureMode == VerticalGestureMode.VOLUME) {
-                                val nextV = (verticalGestureFraction + delta).coerceIn(0f, 1f)
-                                verticalGestureFraction = nextV
                                 val maxVol = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC).coerceAtLeast(1)
-                                val targetIndex = (nextV * maxVol).roundToInt().coerceIn(0, maxVol)
-                                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, targetIndex, 0)
+                                val stepPercent = (100f / maxVol.toFloat()).roundToInt().coerceIn(5, 15)
+                                val maxBoostPct = latestSettings.maxAudioBoostPercent.coerceIn(100, 300)
+                                val maxUnits = maxBoostPct / 100f
+                                val nextUnits = (verticalVolumeTotalUnits + delta * 1.15f).coerceIn(0f, maxUnits)
+                                verticalVolumeTotalUnits = nextUnits
+
+                                if (nextUnits <= 1.0f) {
+                                    if (latestPlaybackState.audioBoostPercent > 100) {
+                                        latestOnSetAudioBoostPercent(100)
+                                    }
+                                    val targetIndex = (nextUnits * maxVol).roundToInt().coerceIn(0, maxVol)
+                                    audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, targetIndex, 0)
+                                    val sysPct = ((targetIndex.toFloat() / maxVol.toFloat()) * 100f).roundToInt().coerceIn(0, 100)
+                                    verticalGestureFraction = (sysPct / 100f).coerceIn(0f, 1f)
+                                    verticalGestureDisplayPercent = sysPct
+                                } else {
+                                    if (audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) < maxVol) {
+                                        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, maxVol, 0)
+                                    }
+                                    val rawBoostAbove100 = (nextUnits - 1.0f) * 100f
+                                    val steppedBoost = (100 + ((rawBoostAbove100 / stepPercent).roundToInt() * stepPercent))
+                                        .coerceIn(100, maxBoostPct)
+                                    if (latestPlaybackState.audioBoostPercent != steppedBoost) {
+                                        latestOnSetAudioBoostPercent(steppedBoost)
+                                    }
+                                    verticalGestureFraction = 1.0f
+                                    verticalGestureDisplayPercent = steppedBoost
+                                }
                             }
                         }
                     },
@@ -834,7 +882,8 @@ fun PlayerScreen(
         ) {
             VerticalGestureHudCard(
                 mode = verticalGestureMode,
-                fraction = verticalGestureFraction
+                fraction = verticalGestureFraction,
+                displayPercent = verticalGestureDisplayPercent
             )
         }
 
@@ -1009,16 +1058,16 @@ fun PlayerScreen(
             }
         }
 
-        // Live Stream & Technical Info HUD Overlay (toggled by clicking "Инфо" / FILE_INFO)
+        // Live Stream & Technical Info HUD Overlay (anchored on the side of the "Инфо" button)
         AnimatedVisibility(
             visible = showLiveInfoHud && !isInPipMode,
             enter = fadeIn(tween(140)),
             exit = fadeOut(tween(140)),
             modifier = Modifier
-                .align(Alignment.TopStart)
+                .align(Alignment.BottomEnd)
                 .windowInsetsPadding(WindowInsets.safeDrawing)
                 .padding(
-                    top = if (controlsVisible && !isScreenLocked) 58.dp else 14.dp,
+                    bottom = if (controlsVisible && !isScreenLocked) 108.dp else 18.dp,
                     start = 14.dp,
                     end = 14.dp
                 )
@@ -1241,22 +1290,31 @@ fun PlayerScreen(
                             }
                         }
 
-                        // Clear frosted-glass video resolution badge (4K, 1080p, 720p, etc.)
+                        // Clear frosted-glass video resolution badge (clickable for quality switching)
                         val resolutionBadge = remember(
                             playbackState.videoWidth,
                             playbackState.videoHeight,
-                            playbackState.currentEpisode?.resolutionBadge
+                            playbackState.currentEpisode?.resolutionBadge,
+                            playbackState.videoQualityOptions
                         ) {
                             com.example.model.VideoResolutionFormatter.badgeFromDimensions(
                                 playbackState.videoWidth,
                                 playbackState.videoHeight
                             ) ?: playbackState.currentEpisode?.resolutionBadge
+                                ?: playbackState.videoQualityOptions.firstOrNull { it.isSelected && !it.isAuto }?.badge
+                                ?: if (playbackState.videoQualityOptions.size > 1) "AUTO" else null
                         }
                         if (resolutionBadge != null) {
                             com.example.ui.components.ResolutionBadgeChip(
                                 badge = resolutionBadge,
                                 compact = isCompactTopBar,
-                                modifier = Modifier.testTag("player_resolution_badge")
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(7.dp))
+                                    .clickable {
+                                        interactionTick++
+                                        activeSheet = ActivePlayerSheet.VIDEO_QUALITY
+                                    }
+                                    .testTag("player_resolution_badge")
                             )
                         }
 
@@ -1656,6 +1714,7 @@ fun PlayerScreen(
                 ActivePlayerSheet.AUDIO -> AudioTracksModalSheet(
                     audioOptions = playbackState.audioTrackOptions,
                     audioBoostPercent = playbackState.audioBoostPercent,
+                    maxAudioBoostPercent = settings.maxAudioBoostPercent,
                     audioDeArtifactMode = playbackState.audioDeArtifactMode,
                     autoDeArtifactLowBitrate = playbackState.autoDeArtifactLowBitrate,
                     activeAudioBitrateKbps = playbackState.activeAudioBitrateKbps,
@@ -1670,6 +1729,7 @@ fun PlayerScreen(
                     onToggleBluetoothAutoSync = onToggleBluetoothAutoSync,
                     onSelectAudio = onSelectAudio,
                     onSetAudioBoostPercent = onSetAudioBoostPercent,
+                    onUpdateMaxAudioBoostPercent = onUpdateMaxAudioBoostPercent,
                     onSelectAudioDeArtifactMode = onSelectAudioDeArtifactMode,
                     onToggleAutoDeArtifactLowBitrate = onToggleAutoDeArtifactLowBitrate,
                     onAdjustAudioDelayMs = onAdjustAudioDelay,
@@ -1754,7 +1814,9 @@ fun PlayerScreen(
 
                 ActivePlayerSheet.AUDIO_BOOST -> AudioBoostQuickModalSheet(
                     audioBoostPercent = playbackState.audioBoostPercent,
+                    maxAudioBoostPercent = settings.maxAudioBoostPercent,
                     onSetAudioBoostPercent = onSetAudioBoostPercent,
+                    onUpdateMaxAudioBoostPercent = onUpdateMaxAudioBoostPercent,
                     onDismiss = { activeSheet = ActivePlayerSheet.NONE }
                 )
 
@@ -1781,6 +1843,7 @@ fun PlayerScreen(
                         playbackSpeed = playbackState.playbackSpeed,
                         scaleMode = scaleMode,
                         audioBoostPercent = playbackState.audioBoostPercent,
+                        maxAudioBoostPercent = settings.maxAudioBoostPercent,
                         sleepTimerPreset = playbackState.sleepTimerPreset,
                         sleepTimerRemainingMs = playbackState.sleepTimerRemainingMs,
                         abLoopPointAMs = playbackState.abLoopStartMs,
@@ -1796,6 +1859,7 @@ fun PlayerScreen(
                         onSelectSpeed = onSelectSpeed,
                         onSelectScaleMode = onSelectScaleMode,
                         onSetAudioBoostPercent = onSetAudioBoostPercent,
+                        onUpdateMaxAudioBoostPercent = onUpdateMaxAudioBoostPercent,
                         onSetSleepTimer = onSetSleepTimer,
                         onMarkAbPointA = onMarkAbPointA,
                         onMarkAbPointB = onMarkAbPointB,
@@ -1854,6 +1918,16 @@ fun PlayerScreen(
                         activeSheet = ActivePlayerSheet.NONE
                     }
                 }
+
+                ActivePlayerSheet.VIDEO_QUALITY -> VideoQualityModalSheet(
+                    qualityOptions = playbackState.videoQualityOptions,
+                    videoWidth = playbackState.videoWidth,
+                    videoHeight = playbackState.videoHeight,
+                    videoBitrateBps = playbackState.videoBitrateBps,
+                    activeCodecName = playbackState.activeVideoCodecName,
+                    onSelectQuality = onSelectVideoQuality,
+                    onDismiss = { activeSheet = ActivePlayerSheet.NONE }
+                )
 
                 ActivePlayerSheet.CUSTOMIZE_QUICK_ACTIONS -> QuickActionsCustomizerSheet(
                     selectedActions = settings.quickActions,
@@ -2174,14 +2248,14 @@ private fun PlayerLiveStatsOverlayCard(
         border = playerPopupBorderStroke(),
         shadowElevation = 14.dp,
         modifier = Modifier
-            .widthIn(min = 250.dp, max = 350.dp)
+            .widthIn(min = 260.dp, max = 440.dp)
             .testTag("player_live_stats_overlay")
     ) {
         Column(
             modifier = Modifier
                 .background(playerFrostedGlassBrush(accentAlpha = 0.12f))
-                .padding(horizontal = 12.dp, vertical = 9.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+                .padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalArrangement = Arrangement.spacedBy(5.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -2214,9 +2288,7 @@ private fun PlayerLiveStatsOverlayCard(
                         },
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.SemiBold,
-                        color = Color.White,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        color = Color.White
                     )
                 }
 
@@ -2263,9 +2335,7 @@ private fun PlayerLiveStatsOverlayCard(
                     "Video: ${playbackState.videoWidth}×${playbackState.videoHeight} • ${playbackState.activeVideoCodecName} • $videoBitrateStr"
                 ),
                 style = MaterialTheme.typography.labelSmall,
-                color = Color.White.copy(alpha = 0.92f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                color = Color.White.copy(alpha = 0.92f)
             )
             Text(
                 text = tr(
@@ -2273,9 +2343,7 @@ private fun PlayerLiveStatsOverlayCard(
                     "Cadence: $srcFps fps → Display ${targetHz} Hz • ${settings.graphicsBackend.badge}: $shadersActive"
                 ),
                 style = MaterialTheme.typography.labelSmall,
-                color = Color.White.copy(alpha = 0.86f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                color = Color.White.copy(alpha = 0.86f)
             )
             val dspBadge = if (playbackState.isAudioDeArtifactActive && playbackState.audioDeArtifactMode != AudioDeArtifactMode.OFF) {
                 "DSP ${playbackState.audioDeArtifactMode.localizedTitle(isEnglish)}"
@@ -2288,9 +2356,7 @@ private fun PlayerLiveStatsOverlayCard(
                     "Audio: ${activeAudio?.badge ?: "Auto"} ($audioBitrateStr) • $dspBadge"
                 ),
                 style = MaterialTheme.typography.labelSmall,
-                color = Color.White.copy(alpha = 0.80f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                color = Color.White.copy(alpha = 0.80f)
             )
         }
     }

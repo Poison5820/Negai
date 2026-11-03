@@ -1228,12 +1228,6 @@ internal fun AudioSettingsPage(
     actions: SettingsActions
 ) {
     val isEnglish = LocalIsEnglish.current
-    val boostPresets = listOf(100, 125, 150, 175, 200)
-    val fineTuneOffsetMs = if (settings.bluetoothAudioOffsetMs == BluetoothAudioSyncController.DEFAULT_BT_OFFSET_MS) {
-        0L
-    } else {
-        settings.bluetoothAudioOffsetMs.coerceIn(-300L, 300L)
-    }
 
     SettingsSectionCard(
         title = tr("Внешние звуковые дорожки и озвучки", "External Audio Tracks & Voiceovers"),
@@ -1247,11 +1241,29 @@ internal fun AudioSettingsPage(
         )
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         SettingToggleRow(
-            title = tr("Приоритет внешней озвучки при запуске", "Prefer External Voiceover on Startup"),
+            title = tr("Приоритет внешней озвучки из папки при запуске", "Prefer External Folder Voiceover on Startup"),
             checked = settings.preferExternalAudioOnStart,
             onCheckedChange = actions.onUpdatePreferExternalAudioOnStart,
             testTag = "prefer_external_audio_switch"
         )
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+        Text(
+            text = tr("Предпочитаемый язык озвучки (встроенной и из папки)", "Preferred Audio Language (Embedded & Folder)"),
+            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+        )
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            com.example.model.PreferredTrackLanguage.entries.forEach { lang ->
+                FilterChip(
+                    selected = settings.preferredAudioLanguage == lang,
+                    onClick = { actions.onUpdatePreferredAudioLanguage(lang) },
+                    label = { Text(lang.localizedTitle(isEnglish)) },
+                    modifier = Modifier.testTag("preferred_audio_lang_${lang.id}")
+                )
+            }
+        }
     }
 
     SettingsSectionCard(
@@ -1330,156 +1342,6 @@ internal fun AudioSettingsPage(
             testTag = "auto_de_artifact_low_bitrate_switch"
         )
     }
-
-    SettingsSectionCard(
-        title = tr("Синхронизация звука Bluetooth", "Bluetooth Audio Sync"),
-        icon = Icons.Default.BluetoothAudio
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = tr("Ручная коррекция к авто-задержке Bluetooth", "Manual Fine-Tune for Auto Bluetooth Delay"),
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                modifier = Modifier.weight(1f)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = AudioDelayProcessor.formatDelayLabel(fineTuneOffsetMs),
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.testTag("bluetooth_fine_tune_value_text")
-            )
-        }
-
-        InstantSlider(
-            value = fineTuneOffsetMs.toFloat(),
-            onValueChange = { actions.onUpdateBluetoothAudioOffsetMs(((it / 5f).roundToInt() * 5L).coerceIn(-300L, 300L)) },
-            valueRange = -300f..300f,
-            modifier = Modifier.testTag("bluetooth_offset_slider")
-        )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            OutlinedButton(
-                onClick = { actions.onUpdateBluetoothAudioOffsetMs((fineTuneOffsetMs - 50L).coerceIn(-300L, 300L)) },
-                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
-                shape = RoundedCornerShape(10.dp),
-                modifier = Modifier
-                    .weight(1f)
-                    .height(36.dp)
-                    .testTag("bt_offset_minus_50")
-            ) {
-                ScaleToFitWidthBox {
-                    Text(tr("-50 мс", "-50ms"), style = MaterialTheme.typography.labelMedium, maxLines = 1, softWrap = false)
-                }
-            }
-            OutlinedButton(
-                onClick = { actions.onUpdateBluetoothAudioOffsetMs((fineTuneOffsetMs - 10L).coerceIn(-300L, 300L)) },
-                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
-                shape = RoundedCornerShape(10.dp),
-                modifier = Modifier
-                    .weight(1f)
-                    .height(36.dp)
-                    .testTag("bt_offset_minus_10")
-            ) {
-                ScaleToFitWidthBox {
-                    Text(tr("-10 мс", "-10ms"), style = MaterialTheme.typography.labelMedium, maxLines = 1, softWrap = false)
-                }
-            }
-            FilledTonalButton(
-                onClick = { actions.onUpdateBluetoothAudioOffsetMs(0L) },
-                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
-                shape = RoundedCornerShape(10.dp),
-                modifier = Modifier
-                    .weight(1f)
-                    .height(36.dp)
-                    .testTag("bt_offset_reset")
-            ) {
-                ScaleToFitWidthBox {
-                    Text(tr("0 мс", "0ms"), style = MaterialTheme.typography.labelMedium, maxLines = 1, softWrap = false)
-                }
-            }
-            OutlinedButton(
-                onClick = { actions.onUpdateBluetoothAudioOffsetMs((fineTuneOffsetMs + 10L).coerceIn(-300L, 300L)) },
-                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
-                shape = RoundedCornerShape(10.dp),
-                modifier = Modifier
-                    .weight(1f)
-                    .height(36.dp)
-                    .testTag("bt_offset_plus_10")
-            ) {
-                ScaleToFitWidthBox {
-                    Text(tr("+10 мс", "+10ms"), style = MaterialTheme.typography.labelMedium, maxLines = 1, softWrap = false)
-                }
-            }
-            OutlinedButton(
-                onClick = { actions.onUpdateBluetoothAudioOffsetMs((fineTuneOffsetMs + 50L).coerceIn(-300L, 300L)) },
-                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
-                shape = RoundedCornerShape(10.dp),
-                modifier = Modifier
-                    .weight(1f)
-                    .height(36.dp)
-                    .testTag("bt_offset_plus_50")
-            ) {
-                ScaleToFitWidthBox {
-                    Text(tr("+50 мс", "+50ms"), style = MaterialTheme.typography.labelMedium, maxLines = 1, softWrap = false)
-                }
-            }
-        }
-    }
-
-    SettingsSectionCard(
-        title = tr("Программное усиление громкости (Audio Boost)", "Software Volume Boost (Audio Boost)"),
-        icon = Icons.Default.VolumeUp
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = tr("Уровень громкости по умолчанию", "Default Volume Level"),
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
-            )
-            Text(
-                text = "${settings.defaultAudioBoostPercent}%",
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                color = if (settings.defaultAudioBoostPercent > 100) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.onSurface
-                }
-            )
-        }
-        InstantSlider(
-            value = settings.defaultAudioBoostPercent.toFloat(),
-            onValueChange = { actions.onUpdateDefaultAudioBoostPercent(it.roundToInt()) },
-            valueRange = 100f..200f,
-            steps = 19,
-            modifier = Modifier.testTag("default_audio_boost_slider")
-        )
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            boostPresets.forEach { pct ->
-                FilterChip(
-                    selected = settings.defaultAudioBoostPercent == pct,
-                    onClick = { actions.onUpdateDefaultAudioBoostPercent(pct) },
-                    label = {
-                        Text(if (pct == 100) tr("100% (Норма)", "100% (Normal)") else "$pct%")
-                    },
-                    modifier = Modifier.testTag("audio_boost_preset_$pct")
-                )
-            }
-        }
-    }
 }
 
 // ============================================================================
@@ -1498,11 +1360,40 @@ internal fun SubtitlesSettingsPage(
         icon = Icons.Default.Subtitles
     ) {
         SettingToggleRow(
-            title = tr("Автоподключение внешних субтитров", "Auto-Bind External Subtitles"),
+            title = tr("Автоподключение внешних субтитров из папки", "Auto-Bind External Folder Subtitles"),
             checked = settings.autoBindExternalSubtitles,
             onCheckedChange = actions.onUpdateAutoBindSubs,
             testTag = "auto_bind_subs_switch"
         )
+
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+        SettingToggleRow(
+            title = tr("Автовыбор субтитров из папки при запуске серии", "Auto-Select Folder Subtitles on Episode Start"),
+            checked = settings.preferExternalSubtitlesOnStart,
+            onCheckedChange = actions.onUpdatePreferExternalSubtitlesOnStart,
+            testTag = "prefer_external_subs_switch"
+        )
+
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+        Text(
+            text = tr("Предпочитаемый язык субтитров (из папки и встроенных)", "Preferred Subtitle Language (Folder & Embedded)"),
+            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+        )
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            com.example.model.PreferredTrackLanguage.entries.forEach { lang ->
+                FilterChip(
+                    selected = settings.preferredSubtitleLanguage == lang,
+                    onClick = { actions.onUpdatePreferredSubtitleLanguage(lang) },
+                    label = { Text(lang.localizedTitle(isEnglish)) },
+                    modifier = Modifier.testTag("preferred_subtitle_lang_${lang.id}")
+                )
+            }
+        }
 
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 

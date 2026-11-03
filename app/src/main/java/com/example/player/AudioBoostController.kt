@@ -22,7 +22,7 @@ class AudioBoostController {
     }
 
     fun setBoostPercent(percent: Int): Int {
-        val clamped = percent.coerceIn(100, 200)
+        val clamped = percent.coerceIn(100, 300)
         boostPercent = clamped
         syncEnhancer()
         return clamped
@@ -55,10 +55,10 @@ class AudioBoostController {
 
     companion object {
         /**
-         * Maps 100%..200% linearly to 0..1200 millibels (0 dB .. +12 dB).
+         * Maps 100%..300% linearly to 0..2400 millibels (0 dB .. +24 dB).
          */
         fun percentToGainMillibels(percent: Int): Int {
-            val clamped = percent.coerceIn(100, 200)
+            val clamped = percent.coerceIn(100, 300)
             return (clamped - 100) * 12
         }
     }

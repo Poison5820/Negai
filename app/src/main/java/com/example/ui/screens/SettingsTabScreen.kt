@@ -69,7 +69,9 @@ import com.example.model.PlayerControlsTheme
 import com.example.model.PlayerOrientationMode
 import com.example.model.PlayerQuickAction
 import com.example.model.PlayerSettings
+import com.example.model.PreferredTrackLanguage
 import com.example.model.SettingsCategory
+import com.example.model.StreamingQualityPreset
 import com.example.model.SubtitleColorPreset
 import com.example.model.VideoScaleMode
 import com.example.ui.i18n.LocalIsEnglish
@@ -128,15 +130,20 @@ data class SettingsActions(
     val onUpdateAnime4KStrength: (Float) -> Unit,
     val onUpdateAutoBindAudio: (Boolean) -> Unit,
     val onUpdatePreferExternalAudioOnStart: (Boolean) -> Unit,
-    val onUpdateDefaultAudioBoostPercent: (Int) -> Unit,
+    val onUpdatePreferredAudioLanguage: (PreferredTrackLanguage) -> Unit = {},
+    val onUpdateDefaultAudioBoostPercent: (Int) -> Unit = {},
+    val onUpdateMaxAudioBoostPercent: (Int) -> Unit = {},
     val onUpdateAudioDeArtifactMode: (AudioDeArtifactMode) -> Unit = {},
     val onUpdateAutoDeArtifactLowBitrate: (Boolean) -> Unit = {},
     val onUpdateBluetoothAudioAutoSync: (Boolean) -> Unit = {},
     val onUpdateBluetoothAudioOffsetMs: (Long) -> Unit = {},
     val onUpdateAutoBindSubs: (Boolean) -> Unit,
+    val onUpdatePreferExternalSubtitlesOnStart: (Boolean) -> Unit = {},
+    val onUpdatePreferredSubtitleLanguage: (PreferredTrackLanguage) -> Unit = {},
     val onUpdateSubtitleFontSize: (Float) -> Unit,
     val onUpdateSubtitleColor: (Long) -> Unit,
     val onUpdateSubtitleBg: (Boolean) -> Unit,
+    val onUpdateDefaultStreamingQuality: (StreamingQualityPreset) -> Unit = {},
     val onUpdateTorrServerUrl: (String) -> Unit = {},
     val onUpdateTorrServerAuth: (String, String) -> Unit = { _, _ -> },
     val onUpdateTorrServerAutoPlaySingle: (Boolean) -> Unit = {},
@@ -498,27 +505,23 @@ private fun categorySummary(
         "${settings.decoderMode.shortBadge} • $memc • Anime4K: $a4k"
     }
     SettingsCategory.AUDIO_AND_SUBTITLES -> {
-        val colorLabel = SubtitleColorPreset.fromArgb(settings.subtitleColorArgb).label
         val dspBadge = settings.audioDeArtifactMode.localizedBadge(isEnglish)
+        val audioLang = settings.preferredAudioLanguage.shortBadge
+        val subLang = settings.preferredSubtitleLanguage.shortBadge
         if (isEnglish) {
-            "De-Artifact: $dspBadge • Boost ${settings.defaultAudioBoostPercent}% • ${settings.subtitleFontSizeSp.roundToInt()} sp • $colorLabel"
+            "Audio: $audioLang • Subs: $subLang • De-Artifact: $dspBadge • ${settings.subtitleFontSizeSp.roundToInt()} sp"
         } else {
-            "Очистка: $dspBadge • Усиление ${settings.defaultAudioBoostPercent}% • ${settings.subtitleFontSizeSp.roundToInt()} sp • $colorLabel"
+            "Аудио: $audioLang • Субтитры: $subLang • Очистка: $dspBadge • ${settings.subtitleFontSizeSp.roundToInt()} sp"
         }
     }
     SettingsCategory.TORRENTS -> {
-        val indexerHost = settings.torrentIndexerUrl
-            .substringBefore(',')
-            .trim()
-            .removePrefix("https://")
-            .removePrefix("http://")
-            .substringBefore('/')
+        val qualityBadge = settings.defaultStreamingQuality.localizedBadge(isEnglish)
         val dohLabel = if (settings.enableTrackerDoh) {
             if (isEnglish) "DoH ON" else "DoH вкл"
         } else {
             if (isEnglish) "DoH OFF" else "DoH выкл"
         }
-        "${settings.torrServerUrl.removePrefix("http://")} • $indexerHost • $dohLabel"
+        "$qualityBadge • ${settings.torrServerUrl.removePrefix("http://")} • $dohLabel"
     }
     SettingsCategory.STORAGE -> {
         if (isEnglish) {

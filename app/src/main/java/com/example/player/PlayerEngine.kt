@@ -22,8 +22,10 @@ import androidx.media3.common.text.CueGroup
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.DefaultHttpDataSource
+import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.SeekParameters
 import androidx.media3.exoplayer.analytics.AnalyticsListener
 import androidx.media3.exoplayer.audio.AudioSink
 import androidx.media3.exoplayer.audio.DefaultAudioSink
@@ -44,8 +46,11 @@ import com.example.model.EpisodeItem
 import com.example.model.ExternalAudioTrack
 import com.example.model.ExternalSubtitleTrack
 import com.example.model.PlaybackEndMode
+import com.example.model.PreferredTrackLanguage
 import com.example.model.SleepTimerPreset
+import com.example.model.StreamingQualityPreset
 import com.example.model.VideoChapter
+import com.example.model.VideoResolutionFormatter
 import com.example.subtitles.ParsedSubtitleDocument
 import com.example.subtitles.SubtitleAlignment
 import com.example.subtitles.SubtitleCue
@@ -68,6 +73,23 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
+@Immutable
+data class VideoQualityUiOption(
+    val id: String,
+    val label: String,
+    val badge: String,
+    val width: Int = 0,
+    val height: Int = 0,
+    val heightPx: Int = height,
+    val bitrateBps: Long = 0L,
+    val groupIndex: Int = -1,
+    val trackIndex: Int = -1,
+    val playlistEpisodeIndex: Int = -1,
+    val maxHeightCap: Int = 0,
+    val isAuto: Boolean = false,
+    val isSelected: Boolean = false
+)
 
 @Immutable
 data class AudioTrackUiOption(
@@ -112,6 +134,8 @@ data class PlaybackRuntimeState(
     val videoBitrateBps: Long = 0L,
     val isHardwareAccelerated: Boolean = true,
     val activeDecoderMode: DecoderMode = DecoderMode.HW_PLUS,
+    val videoQualityOptions: List<VideoQualityUiOption> = emptyList(),
+    val selectedVideoQualityId: String = "max",
     val audioTrackOptions: List<AudioTrackUiOption> = emptyList(),
     val subtitleTrackOptions: List<SubtitleTrackUiOption> = emptyList(),
     val selectedSubtitleId: String = "off",
@@ -127,8 +151,8 @@ data class PlaybackRuntimeState(
     val audioChannelCount: Int = 0,
     val isAudioDeArtifactActive: Boolean = true,
     val bluetoothAudioRoute: BluetoothAudioRouteState = BluetoothAudioRouteState(),
-    val bluetoothAutoSyncEnabled: Boolean = true,
-    val bluetoothConfiguredOffsetMs: Long = BluetoothAudioSyncController.DEFAULT_BT_OFFSET_MS,
+    val bluetoothAutoSyncEnabled: Boolean = false,
+    val bluetoothConfiguredOffsetMs: Long = 0L,
     val bluetoothAppliedOffsetMs: Long = 0L,
     val effectiveAudioDelayMs: Long = 0L,
     val lastAudioResyncTimestampMs: Long = 0L,
@@ -192,14 +216,15 @@ class PlayerEngine private constructor(
     private val extraAudioByVideo = mutableMapOf<String, MutableList<ExternalAudioTrack>>()
     private val extraSubsByVideo = mutableMapOf<String, MutableList<ExternalSubtitleTrack>>()
     private val autoAppliedDefaultAudioForVideo = mutableSetOf<String>()
+    private val autoAppliedDefaultSubForVideo = mutableSetOf<String>()
 
     private val audioBoostController = AudioBoostController()
     private val audioDelayProcessor = AudioDelayProcessor()
     private var manualAudioDelayMs: Long = 0L
-    private var bluetoothAutoSyncEnabled: Boolean = true
-    private var bluetoothConfiguredOffsetMs: Long = BluetoothAudioSyncController.DEFAULT_BT_OFFSET_MS
+    private var bluetoothAutoSyncEnabled: Boolean = false
+    private var bluetoothConfiguredOffsetMs: Long = 0L
     private val bluetoothSyncController = BluetoothAudioSyncController(appContext) {
-        recalculateEffectiveAudioDelay(resyncIfPlaying = true)
+        recalculateEffectiveAudioDelay(resyncIfPlaying = false)
     }
     private var activeExternalSubtitleDoc: ParsedSubtitleDocument? = null
     private var latestEmbeddedCues: List<SubtitleCue> = emptyList()
@@ -210,6 +235,16 @@ class PlayerEngine private constructor(
     private var basePlaybackSpeed: Float = 1.0f
     @Volatile
     private var preferExternalAudioOnStart: Boolean = true
+    @Volatile
+    private var preferredAudioLanguage: PreferredTrackLanguage = PreferredTrackLanguage.RU
+    @Volatile
+    private var autoBindExternalSubtitles: Boolean = true
+    @Volatile
+    private var preferExternalSubtitlesOnStart: Boolean = true
+    @Volatile
+    private var preferredSubtitleLanguage: PreferredTrackLanguage = PreferredTrackLanguage.RU
+    @Volatile
+    private var defaultStreamingQuality: StreamingQualityPreset = StreamingQualityPreset.MAX
     @Volatile
     private var enableEmbeddedChapters: Boolean = true
     @Volatile
@@ -235,10 +270,11 @@ class PlayerEngine private constructor(
     private var ptsSampleCount: Int = 0
 
     private val videoFrameMetadataListener = VideoFrameMetadataListener { presentationTimeUs, _, format, _ ->
-        val headerFps = format.frameRate
-        if (headerFps > 1f) {
-            if (kotlin.math.abs(_state.value.sourceFrameRate - headerFps) > 0.2f) {
-                _state.update { it.copy(sourceFrameRate = headerFps) }
+        val declaredFps = format.frameRate
+        if (declaredFps > 1f) {
+            lastFramePtsUs = presentationTimeUs
+            if ((_state.value.sourceFrameRate - declaredFps).let { it < -0.05f || it > 0.05f }) {
+                _state.update { it.copy(sourceFrameRate = declaredFps) }
             }
             return@VideoFrameMetadataListener
         }
@@ -246,23 +282,30 @@ class PlayerEngine private constructor(
         lastFramePtsUs = presentationTimeUs
         if (prevPts != C.TIME_UNSET) {
             val deltaUs = presentationTimeUs - prevPts
-            if (deltaUs in 10_000L..100_000L) {
+            if (deltaUs in 4_000L..100_000L) {
+                val deltaF = deltaUs.toFloat()
                 smoothedPtsDeltaUs = if (ptsSampleCount == 0) {
-                    deltaUs.toFloat()
+                    deltaF
                 } else {
-                    smoothedPtsDeltaUs * 0.82f + deltaUs.toFloat() * 0.18f
+                    smoothedPtsDeltaUs * 0.85f + deltaF * 0.15f
                 }
                 ptsSampleCount++
-                if (ptsSampleCount >= 6 && smoothedPtsDeltaUs > 1_000f) {
-                    val estimatedFps = DisplayRefreshRateController.normalizeSourceFps(
-                        1_000_000f / smoothedPtsDeltaUs
-                    )
-                    if (kotlin.math.abs(_state.value.sourceFrameRate - estimatedFps) > 0.4f) {
-                        _state.update { it.copy(sourceFrameRate = estimatedFps) }
+                if (ptsSampleCount >= 8 && smoothedPtsDeltaUs > 1_000f) {
+                    val rawFps = 1_000_000f / smoothedPtsDeltaUs
+                    val snappedFps = when {
+                        rawFps in 23.5f..24.1f -> 23.976f
+                        rawFps in 24.8f..25.2f -> 25f
+                        rawFps in 29.5f..30.2f -> 29.97f
+                        rawFps in 47.5f..48.5f -> 48f
+                        rawFps in 49.5f..50.5f -> 50f
+                        rawFps in 59.0f..60.5f -> 59.94f
+                        else -> rawFps
+                    }
+                    val currentFps = _state.value.sourceFrameRate
+                    if (currentFps <= 1f || kotlin.math.abs(currentFps - snappedFps) >= 0.4f) {
+                        _state.update { it.copy(sourceFrameRate = snappedFps) }
                     }
                 }
-            } else if (deltaUs < 0L || deltaUs > 500_000L) {
-                ptsSampleCount = 0
             }
         }
     }
@@ -271,16 +314,18 @@ class PlayerEngine private constructor(
     private var lastManualEpisodeStartIndex: Int = -1
     private var lastManualEpisodeStartRealtimeMs: Long = 0L
     private var lastManualEpisodeInitialPosMs: Long = 0L
+    private var suppressNextPlaylistChangedTransition: Boolean = false
 
     private fun verifyAndResetIfResumedAtEnd(player: ExoPlayer, resolvedDur: Long) {
-        if (resolvedDur <= 0L) return
+        if (resolvedDur <= 10_000L) return
         val currentIdx = player.currentMediaItemIndex
         if (awaitingInitialDurationVerifyIndex != currentIdx) return
         awaitingInitialDurationVerifyIndex = -1
-        val currentPos = player.currentPosition.coerceAtLeast(_positionMs.value).coerceAtLeast(0L)
-        if (currentPos > 0L &&
+        // Only reset if we actually resumed from a non-zero saved position (> 5s) that is at EOF
+        val initialResumePos = lastManualEpisodeInitialPosMs
+        if (initialResumePos > 5_000L &&
             PlaybackResumeHelper.computeResumePositionMs(
-                positionMs = currentPos,
+                positionMs = initialResumePos,
                 durationMs = resolvedDur,
                 resumeEnabled = true
             ) == 0L
@@ -508,6 +553,10 @@ class PlayerEngine private constructor(
             val idx = player.currentMediaItemIndex
             val playlist = _state.value.playlist
             if (idx in playlist.indices) {
+                if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_PLAYLIST_CHANGED && suppressNextPlaylistChangedTransition) {
+                    suppressNextPlaylistChangedTransition = false
+                    return
+                }
                 val elapsedSinceManualStart = SystemClock.elapsedRealtime() - lastManualEpisodeStartRealtimeMs
                 if (reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO &&
                     lastManualEpisodeStartIndex in playlist.indices &&
@@ -760,6 +809,12 @@ class PlayerEngine private constructor(
         val boot = repository.preferencesRepository.readBootSettingsSnapshot()
         configuredDecoderMode = boot.decoderMode
         highRefreshOrInterpActive = boot.highRefreshRateEnabled || boot.effectiveFrameInterpolationMode.isEnabled
+        preferExternalAudioOnStart = boot.preferExternalAudioOnStart
+        preferredAudioLanguage = boot.preferredAudioLanguage
+        autoBindExternalSubtitles = boot.autoBindExternalSubtitles
+        preferExternalSubtitlesOnStart = boot.preferExternalSubtitlesOnStart
+        preferredSubtitleLanguage = boot.preferredSubtitleLanguage
+        defaultStreamingQuality = boot.defaultStreamingQuality
         bluetoothAutoSyncEnabled = boot.bluetoothAudioAutoSync
         bluetoothConfiguredOffsetMs = boot.bluetoothAudioOffsetMs
         audioDelayProcessor.deArtifactMode = boot.audioDeArtifactMode
@@ -783,6 +838,11 @@ class PlayerEngine private constructor(
                 val prevBtAuto = bluetoothAutoSyncEnabled
                 val prevBtOffset = bluetoothConfiguredOffsetMs
                 preferExternalAudioOnStart = s.preferExternalAudioOnStart
+                preferredAudioLanguage = s.preferredAudioLanguage
+                autoBindExternalSubtitles = s.autoBindExternalSubtitles
+                preferExternalSubtitlesOnStart = s.preferExternalSubtitlesOnStart
+                preferredSubtitleLanguage = s.preferredSubtitleLanguage
+                defaultStreamingQuality = s.defaultStreamingQuality
                 enableEmbeddedChapters = s.enableEmbeddedChapters
                 bluetoothAutoSyncEnabled = s.bluetoothAudioAutoSync
                 bluetoothConfiguredOffsetMs = s.bluetoothAudioOffsetMs
@@ -814,7 +874,11 @@ class PlayerEngine private constructor(
                         chapterExtractionJob?.cancel()
                         _state.update { it.copy(chapters = emptyList()) }
                     } else {
-                        _state.value.currentEpisode?.let { ep -> loadEmbeddedChaptersAsync(ep) }
+                        _state.value.currentEpisode?.let { ep ->
+                            if (PlaybackResumeHelper.isLocalFileUri(ep.uri)) {
+                                loadEmbeddedChaptersAsync(ep)
+                            }
+                        }
                     }
                 }
             }
@@ -938,7 +1002,21 @@ class PlayerEngine private constructor(
             .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
             .build()
 
+        val loadControl = DefaultLoadControl.Builder()
+            .setBufferDurationsMs(
+                /* minBufferMs = */ 15_000,
+                /* maxBufferMs = */ 50_000,
+                /* bufferForPlaybackMs = */ 2_000,
+                /* bufferForPlaybackAfterRebufferMs = */ 4_000
+            )
+            .setBackBuffer(
+                /* backBufferDurationMs = */ 30_000,
+                /* retainBackBufferFromKeyframe = */ true
+            )
+            .build()
+
         return ExoPlayer.Builder(appContext, renderersFactory)
+            .setLoadControl(loadControl)
             .setAudioAttributes(audioAttributes, true)
             .setHandleAudioBecomingNoisy(true)
             .setSeekBackIncrementMs(10_000L)
@@ -1002,6 +1080,12 @@ class PlayerEngine private constructor(
                 s to map
             }
 
+            preferExternalAudioOnStart = settings.preferExternalAudioOnStart
+            preferredAudioLanguage = settings.preferredAudioLanguage
+            autoBindExternalSubtitles = settings.autoBindExternalSubtitles
+            preferExternalSubtitlesOnStart = settings.preferExternalSubtitlesOnStart
+            preferredSubtitleLanguage = settings.preferredSubtitleLanguage
+            defaultStreamingQuality = settings.defaultStreamingQuality
             bluetoothAutoSyncEnabled = settings.bluetoothAudioAutoSync
             bluetoothConfiguredOffsetMs = settings.bluetoothAudioOffsetMs
             bluetoothSyncController.refreshRouteState()
@@ -1077,6 +1161,7 @@ class PlayerEngine private constructor(
             lastFramePtsUs = C.TIME_UNSET
             ptsSampleCount = 0
             autoAppliedDefaultAudioForVideo.clear()
+            autoAppliedDefaultSubForVideo.clear()
             val sources = withContext(Dispatchers.IO) {
                 episodes.map { buildMediaSourceForEpisode(it) }
             }
@@ -1090,8 +1175,29 @@ class PlayerEngine private constructor(
             }
             basePlaybackSpeed = effectiveSpd
             activePlayer.playbackParameters = PlaybackParameters(effectiveSpd)
-            val appliedBoost = audioBoostController.setBoostPercent(settings.defaultAudioBoostPercent)
+            // Volume boost is player-only above 100% system volume, so always start at 100%
+            val appliedBoost = audioBoostController.setBoostPercent(100)
             _positionMs.value = startPos
+
+            val initialQualityPreset = settings.defaultStreamingQuality
+            val initialQualityId = if (initialQualityPreset.maxHeightPx in 1..4320) {
+                "cap:${initialQualityPreset.maxHeightPx}"
+            } else {
+                "auto"
+            }
+
+            // Apply initial video quality constraint BEFORE prepare() so ExoPlayer never restarts buffering
+            activePlayer.trackSelectionParameters = activePlayer.trackSelectionParameters
+                .buildUpon()
+                .clearOverridesOfType(C.TRACK_TYPE_VIDEO)
+                .apply {
+                    if (initialQualityPreset.maxHeightPx in 1..4320) {
+                        setMaxVideoSize(Int.MAX_VALUE, initialQualityPreset.maxHeightPx)
+                    } else {
+                        clearVideoSizeConstraints()
+                    }
+                }
+                .build()
 
             _state.update {
                 it.copy(
@@ -1108,6 +1214,7 @@ class PlayerEngine private constructor(
                     audioMimeType = "",
                     audioSampleRateHz = 0,
                     audioChannelCount = 0,
+                    selectedVideoQualityId = initialQualityId,
                     playbackSpeed = effectiveSpd,
                     isTempSpeedBoostActive = false,
                     audioBoostPercent = appliedBoost,
@@ -1124,6 +1231,7 @@ class PlayerEngine private constructor(
             manualAudioDelayMs = 0L
             bluetoothSyncController.refreshRouteState()
             recalculateEffectiveAudioDelay(resyncIfPlaying = false)
+            suppressNextPlaylistChangedTransition = true
             activePlayer.setMediaSources(sources, safeIndex, startPos)
             activePlayer.prepare()
             activePlayer.playWhenReady = true
@@ -1217,15 +1325,31 @@ class PlayerEngine private constructor(
         engineScope.launch {
             val settings = repository.settingsFlow.first()
             enableEmbeddedChapters = settings.enableEmbeddedChapters
-            if (settings.enableEmbeddedChapters) {
+            // For HTTP/TorrServer streams, avoid opening a parallel Range request to the end of the MKV
+            // stream while ExoPlayer is buffering the start of the stream (which causes TorrServer cache drops).
+            // Embedded chapters on streams are extracted from Media3 tracks in refreshTracksState instead.
+            if (settings.enableEmbeddedChapters && PlaybackResumeHelper.isLocalFileUri(episode.uri)) {
                 loadEmbeddedChaptersAsync(episode)
-            } else {
+            } else if (!settings.enableEmbeddedChapters) {
                 _state.update { it.copy(chapters = emptyList()) }
             }
 
             val extSubs = combinedExternalSubtitlesFor(episode)
-            if (extSubs.isNotEmpty() && (settings.autoBindExternalSubtitles || !extSubs.first().isAutoMatched)) {
-                selectExternalSubtitle(extSubs.first())
+            val hasManualExtSub = extSubs.any { !it.isAutoMatched }
+            val shouldAutoSelectExtSub = extSubs.isNotEmpty() &&
+                (hasManualExtSub || (settings.autoBindExternalSubtitles && settings.preferExternalSubtitlesOnStart))
+            val chosenExtSub = if (shouldAutoSelectExtSub) {
+                MediaAutoMatcher.pickBestExternalSubtitleTrack(
+                    tracks = extSubs,
+                    preferredLanguage = settings.preferredSubtitleLanguage
+                ) ?: extSubs.first()
+            } else {
+                null
+            }
+
+            if (chosenExtSub != null) {
+                autoAppliedDefaultSubForVideo.add(episode.uri)
+                selectExternalSubtitle(chosenExtSub)
             } else {
                 activeExternalSubtitleDoc = null
                 _state.update {
@@ -1281,26 +1405,105 @@ class PlayerEngine private constructor(
             }
 
         val embeddedAudioCount = (audioGroups.size - extAudioList.size).coerceAtLeast(0)
-
         val hasManualExtAudio = extAudioList.any { !it.isAutoMatched }
-        if (extAudioList.isNotEmpty() &&
-            (preferExternalAudioOnStart || hasManualExtAudio) &&
-            audioGroups.size >= extAudioList.size &&
-            episode.uri !in autoAppliedDefaultAudioForVideo
-        ) {
-            autoAppliedDefaultAudioForVideo.add(episode.uri)
-            val targetAudioListIdx = extAudioList.indexOfFirst { !it.isAutoMatched }
-                .takeIf { it >= 0 } ?: 0
-            val targetGroupPair = audioGroups.getOrNull(embeddedAudioCount + targetAudioListIdx)
+
+        if (audioGroups.isNotEmpty() && episode.uri !in autoAppliedDefaultAudioForVideo) {
+            var targetGroupPair: Pair<Int, Tracks.Group>? = null
+            var targetTrackIdx = 0
+
+            if (extAudioList.isNotEmpty() &&
+                (preferExternalAudioOnStart || hasManualExtAudio) &&
+                audioGroups.size >= extAudioList.size
+            ) {
+                val bestExt = MediaAutoMatcher.pickBestExternalAudioTrack(extAudioList, preferredAudioLanguage)
+                val targetAudioListIdx = if (bestExt != null) {
+                    extAudioList.indexOf(bestExt).takeIf { it >= 0 } ?: 0
+                } else {
+                    0
+                }
+                targetGroupPair = audioGroups.getOrNull(embeddedAudioCount + targetAudioListIdx)
+                targetTrackIdx = 0
+            } else if (preferredAudioLanguage != PreferredTrackLanguage.AUTO) {
+                // Search embedded audio tracks for preferred language
+                outer@ for (seqIdx in 0 until embeddedAudioCount.coerceAtMost(audioGroups.size)) {
+                    val pair = audioGroups[seqIdx]
+                    val grp = pair.second
+                    for (tIdx in 0 until grp.length) {
+                        val fmt = grp.getTrackFormat(tIdx)
+                        if (preferredAudioLanguage.matchesLanguageOrLabel(fmt.language, fmt.label.orEmpty())) {
+                            targetGroupPair = pair
+                            targetTrackIdx = tIdx
+                            break@outer
+                        }
+                    }
+                }
+            }
+
             if (targetGroupPair != null) {
-                val override = TrackSelectionOverride(targetGroupPair.second.mediaTrackGroup, 0)
-                player.trackSelectionParameters = player.trackSelectionParameters
-                    .buildUpon()
-                    .setTrackTypeDisabled(C.TRACK_TYPE_AUDIO, false)
-                    .clearOverridesOfType(C.TRACK_TYPE_AUDIO)
-                    .addOverride(override)
-                    .build()
-                return
+                autoAppliedDefaultAudioForVideo.add(episode.uri)
+                val group = targetGroupPair.second
+                // Only mutate trackSelectionParameters if the target track is not already selected!
+                // Mutating trackSelectionParameters unnecessarily causes MergingMediaSource to flush & re-buffer.
+                if (!group.isTrackSelected(targetTrackIdx)) {
+                    val override = TrackSelectionOverride(group.mediaTrackGroup, targetTrackIdx)
+                    player.trackSelectionParameters = player.trackSelectionParameters
+                        .buildUpon()
+                        .setTrackTypeDisabled(C.TRACK_TYPE_AUDIO, false)
+                        .clearOverridesOfType(C.TRACK_TYPE_AUDIO)
+                        .addOverride(override)
+                        .build()
+                    return
+                }
+            } else if (tracks.groups.isNotEmpty()) {
+                autoAppliedDefaultAudioForVideo.add(episode.uri)
+            }
+        }
+
+        // Auto-select preferred embedded subtitle language if no external subtitle was activated
+        if (episode.uri !in autoAppliedDefaultSubForVideo &&
+            _state.value.selectedSubtitleId == "off" &&
+            activeExternalSubtitleDoc == null &&
+            preferredSubtitleLanguage != PreferredTrackLanguage.AUTO
+        ) {
+            val textGroups = tracks.groups.mapIndexedNotNull { idx, group ->
+                if (group.type == C.TRACK_TYPE_TEXT) idx to group else null
+            }
+            if (textGroups.isNotEmpty()) {
+                autoAppliedDefaultSubForVideo.add(episode.uri)
+                var matchedSubGroup: Pair<Int, Tracks.Group>? = null
+                var matchedSubTrackIdx = 0
+                // Prefer full subtitles over signs-only
+                for ((rawGroupIdx, grp) in textGroups) {
+                    for (tIdx in 0 until grp.length) {
+                        val fmt = grp.getTrackFormat(tIdx)
+                        val label = fmt.label.orEmpty()
+                        if (preferredSubtitleLanguage.matchesLanguageOrLabel(fmt.language, label)) {
+                            val isSigns = label.contains("sign", ignoreCase = true) ||
+                                label.contains("надпис", ignoreCase = true) ||
+                                label.contains("forced", ignoreCase = true)
+                            if (matchedSubGroup == null || !isSigns) {
+                                matchedSubGroup = rawGroupIdx to grp
+                                matchedSubTrackIdx = tIdx
+                                if (!isSigns) break
+                            }
+                        }
+                    }
+                }
+                if (matchedSubGroup != null) {
+                    val (rawGroupIdx, grp) = matchedSubGroup
+                    val newSubId = "emb:$rawGroupIdx:$matchedSubTrackIdx"
+                    _state.update { it.copy(selectedSubtitleId = newSubId) }
+                    if (!grp.isTrackSelected(matchedSubTrackIdx)) {
+                        val override = TrackSelectionOverride(grp.mediaTrackGroup, matchedSubTrackIdx)
+                        player.trackSelectionParameters = player.trackSelectionParameters
+                            .buildUpon()
+                            .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, false)
+                            .clearOverridesOfType(C.TRACK_TYPE_TEXT)
+                            .addOverride(override)
+                            .build()
+                        return
+                    }
+                }
             }
         }
 
@@ -1391,6 +1594,8 @@ class PlayerEngine private constructor(
             }
         }
 
+        val videoQualityOptions = buildVideoQualityOptions(tracks, episode)
+
         val fallbackId3Chapters = if (enableEmbeddedChapters && _state.value.chapters.isEmpty()) {
             VideoChapterExtractor.extractFromMedia3Tracks(tracks, _state.value.durationMs)
         } else {
@@ -1401,12 +1606,180 @@ class PlayerEngine private constructor(
             it.copy(
                 audioTrackOptions = audioOptions,
                 subtitleTrackOptions = subOptions,
+                videoQualityOptions = videoQualityOptions,
                 chapters = if (it.chapters.isEmpty() && fallbackId3Chapters.isNotEmpty()) {
                     fallbackId3Chapters
                 } else {
                     it.chapters
                 }
             )
+        }
+    }
+
+    private fun buildVideoQualityOptions(
+        tracks: Tracks,
+        currentEpisode: EpisodeItem
+    ): List<VideoQualityUiOption> {
+        val currentQualityId = _state.value.selectedVideoQualityId
+        val options = mutableListOf<VideoQualityUiOption>()
+
+        options.add(
+            VideoQualityUiOption(
+                id = "auto",
+                label = "Авто (Макс. доступное)",
+                badge = "AUTO",
+                isSelected = currentQualityId == "auto"
+            )
+        )
+
+        val videoGroups = tracks.groups.mapIndexedNotNull { idx, group ->
+            if (group.type == C.TRACK_TYPE_VIDEO) idx to group else null
+        }
+
+        val seenTrackHeights = mutableSetOf<Int>()
+        for ((rawGroupIdx, group) in videoGroups) {
+            for (tIdx in 0 until group.length) {
+                val fmt = group.getTrackFormat(tIdx)
+                val w = fmt.width.coerceAtLeast(0)
+                val h = fmt.height.coerceAtLeast(0)
+                if (h <= 0) continue
+                val brMbps = if (fmt.bitrate > 0) String.format(java.util.Locale.US, "%.1f Мбит/с", fmt.bitrate / 1_000_000f) else ""
+                val codec = fmt.sampleMimeType?.substringAfter('/')?.uppercase().orEmpty()
+                val badge = listOfNotNull(
+                    "${h}p",
+                    codec.takeIf { it.isNotBlank() },
+                    brMbps.takeIf { it.isNotBlank() }
+                ).joinToString(" • ")
+                val trackId = "trk:$rawGroupIdx:$tIdx"
+                seenTrackHeights.add(h)
+                options.add(
+                    VideoQualityUiOption(
+                        id = trackId,
+                        label = if (w > 0) "${h}p ($w×$h)" else "${h}p",
+                        badge = badge,
+                        width = w,
+                        height = h,
+                        heightPx = h,
+                        bitrateBps = fmt.bitrate.coerceAtLeast(0).toLong(),
+                        groupIndex = rawGroupIdx,
+                        trackIndex = tIdx,
+                        isSelected = currentQualityId == trackId
+                    )
+                )
+            }
+        }
+
+        // Check if the playlist contains sibling resolution files for the same episode number (e.g., in torrents/folders)
+        val playlist = _state.value.playlist
+        val currentEpNum = currentEpisode.episodeNumber
+        val resRegex = Regex("""(2160p|4k|1440p|2k|1080p|fhd|720p|hd|480p|360p)""", RegexOption.IGNORE_CASE)
+        if (playlist.size > 1) {
+            playlist.forEachIndexed { epIdx, candidate ->
+                val sameEpisode = (currentEpNum != null && candidate.episodeNumber == currentEpNum) ||
+                    candidate.cleanTitle.equals(currentEpisode.cleanTitle, ignoreCase = true)
+                if (sameEpisode && candidate.uri != currentEpisode.uri) {
+                    val resMatch = resRegex.find(candidate.fileName)?.value?.uppercase()
+                    if (resMatch != null) {
+                        val epOptId = "ep:$epIdx"
+                        options.add(
+                            VideoQualityUiOption(
+                                id = epOptId,
+                                label = "Файл $resMatch — ${candidate.fileName}",
+                                badge = "ТОРРЕНТ / ФАЙЛ • $resMatch",
+                                playlistEpisodeIndex = epIdx,
+                                isSelected = _state.value.currentEpisodeIndex == epIdx || currentQualityId == epOptId
+                            )
+                        )
+                    }
+                }
+            }
+        }
+
+        // Always provide standard streaming resolution caps (2160p, 1080p, 720p, 480p) if not already covered by multi-tracks
+        val standardCaps = listOf(
+            2160 to "4K Ultra HD (до 2160p)",
+            1080 to "Full HD (до 1080p)",
+            720 to "HD (до 720p)",
+            480 to "SD (до 480p)"
+        )
+        for ((capH, capLabel) in standardCaps) {
+            val capId = "cap:$capH"
+            if (options.none { it.heightPx == capH && it.groupIndex >= 0 }) {
+                options.add(
+                    VideoQualityUiOption(
+                        id = capId,
+                        label = capLabel,
+                        badge = "${capH}p MAX",
+                        heightPx = capH,
+                        isSelected = currentQualityId == capId
+                    )
+                )
+            }
+        }
+
+        if (options.none { it.isSelected } && options.isNotEmpty()) {
+            options[0] = options[0].copy(isSelected = true)
+        }
+        return options
+    }
+
+    fun selectVideoQualityOption(option: VideoQualityUiOption) {
+        val player = ensureExoPlayer()
+        when {
+            option.playlistEpisodeIndex >= 0 -> {
+                val targetIdx = option.playlistEpisodeIndex
+                val playlist = _state.value.playlist
+                if (targetIdx in playlist.indices && targetIdx != player.currentMediaItemIndex) {
+                    val currentPos = player.currentPosition.coerceAtLeast(0L)
+                    val wasPlaying = player.playWhenReady
+                    lastTrackedEpisodeIndex = targetIdx
+                    lastManualEpisodeStartIndex = targetIdx
+                    lastManualEpisodeStartRealtimeMs = SystemClock.elapsedRealtime()
+                    lastManualEpisodeInitialPosMs = currentPos
+                    _state.update {
+                        it.copy(
+                            currentEpisodeIndex = targetIdx,
+                            currentPositionMs = currentPos,
+                            selectedVideoQualityId = option.id
+                        )
+                    }
+                    player.seekTo(targetIdx, currentPos)
+                    player.playWhenReady = wasPlaying
+                }
+            }
+            option.groupIndex >= 0 && option.trackIndex >= 0 -> {
+                val group = player.currentTracks.groups.getOrNull(option.groupIndex) ?: return
+                val override = TrackSelectionOverride(group.mediaTrackGroup, option.trackIndex)
+                player.trackSelectionParameters = player.trackSelectionParameters
+                    .buildUpon()
+                    .setTrackTypeDisabled(C.TRACK_TYPE_VIDEO, false)
+                    .clearVideoSizeConstraints()
+                    .clearOverridesOfType(C.TRACK_TYPE_VIDEO)
+                    .addOverride(override)
+                    .build()
+                _state.update { it.copy(selectedVideoQualityId = option.id) }
+                refreshTracksState(player.currentTracks)
+            }
+            option.id.startsWith("cap:") && option.heightPx > 0 -> {
+                player.trackSelectionParameters = player.trackSelectionParameters
+                    .buildUpon()
+                    .setTrackTypeDisabled(C.TRACK_TYPE_VIDEO, false)
+                    .clearOverridesOfType(C.TRACK_TYPE_VIDEO)
+                    .setMaxVideoSize(Int.MAX_VALUE, option.heightPx)
+                    .build()
+                _state.update { it.copy(selectedVideoQualityId = option.id) }
+                refreshTracksState(player.currentTracks)
+            }
+            else -> {
+                player.trackSelectionParameters = player.trackSelectionParameters
+                    .buildUpon()
+                    .setTrackTypeDisabled(C.TRACK_TYPE_VIDEO, false)
+                    .clearOverridesOfType(C.TRACK_TYPE_VIDEO)
+                    .clearVideoSizeConstraints()
+                    .build()
+                _state.update { it.copy(selectedVideoQualityId = "auto") }
+                refreshTracksState(player.currentTracks)
+            }
         }
     }
 
@@ -2016,12 +2389,30 @@ class PlayerEngine private constructor(
         val wasPlaying = player.playWhenReady
         val pos = player.currentPosition.coerceAtLeast(0L)
         val idx = player.currentMediaItemIndex.coerceAtLeast(0)
+        val savedParams = player.trackSelectionParameters
+
+        // Force MediaCodecAudioRenderer & DefaultAudioSink to release their drifted hardware
+        // AudioTimestamp anchor and re-anchor strictly to the video frame PTS
         player.playWhenReady = false
+        player.trackSelectionParameters = savedParams
+            .buildUpon()
+            .setTrackTypeDisabled(C.TRACK_TYPE_AUDIO, true)
+            .build()
+        player.trackSelectionParameters = savedParams
+            .buildUpon()
+            .setTrackTypeDisabled(C.TRACK_TYPE_AUDIO, false)
+            .build()
+        player.setSeekParameters(SeekParameters.EXACT)
         player.seekTo(idx, pos)
+        player.setSeekParameters(SeekParameters.DEFAULT)
         player.playWhenReady = wasPlaying
+
         _positionMs.value = pos
         _state.update {
-            it.copy(lastAudioResyncTimestampMs = System.currentTimeMillis())
+            it.copy(
+                currentPositionMs = pos,
+                lastAudioResyncTimestampMs = System.currentTimeMillis()
+            )
         }
         updatePositionAndSubtitlesNow(forceSyncRuntimePosition = true)
     }

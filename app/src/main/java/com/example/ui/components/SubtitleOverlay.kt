@@ -17,15 +17,41 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.model.SubtitleColorPreset
 import com.example.subtitles.SubtitleAlignment
 import com.example.subtitles.SubtitleCue
 import com.example.ui.theme.ManropeFontFamily
 import java.util.Locale
+
+private fun resolveSubtitleFontFamily(fontFamilyName: String?): FontFamily {
+    val clean = fontFamilyName?.trim()?.lowercase(Locale.ROOT).orEmpty()
+    if (clean.isEmpty()) return ManropeFontFamily
+    return when {
+        clean.contains("serif") && !clean.contains("sans") ||
+            clean.contains("times") ||
+            clean.contains("georgia") ||
+            clean.contains("mincho") ||
+            clean.contains("garamond") ||
+            clean.contains("palatino") ||
+            clean.contains("book") -> FontFamily.Serif
+        clean.contains("mono") ||
+            clean.contains("courier") ||
+            clean.contains("consolas") ||
+            clean.contains("code") ||
+            clean.contains("fixed") -> FontFamily.Monospace
+        clean.contains("comic") ||
+            clean.contains("script") ||
+            clean.contains("cursive") ||
+            clean.contains("brush") -> FontFamily.Cursive
+        else -> ManropeFontFamily
+    }
+}
 
 @Composable
 fun SubtitleOverlay(
@@ -45,6 +71,7 @@ fun SubtitleOverlay(
         fontSizeSp
     }
     val textColor = Color(colorArgb)
+    val isUserDefaultWhite = colorArgb == SubtitleColorPreset.WHITE.argb
 
     val topCues = cues.filter {
         it.alignment in setOf(
@@ -82,6 +109,7 @@ fun SubtitleOverlay(
                 cues = topCues,
                 fontSizeSp = effectiveSizeSp,
                 textColor = textColor,
+                isUserDefaultWhite = isUserDefaultWhite,
                 showBackground = showBackground,
                 modifier = Modifier
                     .align(Alignment.TopCenter)
@@ -94,6 +122,7 @@ fun SubtitleOverlay(
                 cues = midCues,
                 fontSizeSp = effectiveSizeSp,
                 textColor = textColor,
+                isUserDefaultWhite = isUserDefaultWhite,
                 showBackground = showBackground,
                 modifier = Modifier.align(Alignment.Center)
             )
@@ -104,6 +133,7 @@ fun SubtitleOverlay(
                 cues = bottomCues,
                 fontSizeSp = effectiveSizeSp,
                 textColor = textColor,
+                isUserDefaultWhite = isUserDefaultWhite,
                 showBackground = showBackground,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
@@ -118,6 +148,7 @@ private fun SubtitleGroupColumn(
     cues: List<SubtitleCue>,
     fontSizeSp: Float,
     textColor: Color,
+    isUserDefaultWhite: Boolean,
     showBackground: Boolean,
     modifier: Modifier = Modifier
 ) {
@@ -139,6 +170,14 @@ private fun SubtitleGroupColumn(
                 else -> TextAlign.Center
             }
 
+            val cueFontSizeSp = (fontSizeSp * cue.fontSizeScale).coerceIn(11f, 52f)
+            val resolvedCueColor = when {
+                cue.hasExplicitInlineColor && cue.assStyleColorArgb != null -> Color(cue.assStyleColorArgb)
+                isUserDefaultWhite && cue.assStyleColorArgb != null -> Color(cue.assStyleColorArgb)
+                else -> textColor
+            }
+            val resolvedShadowColor = cue.assOutlineColorArgb?.let { Color(it) } ?: Color.Black
+
             Box(
                 modifier = if (showBackground) {
                     Modifier
@@ -155,14 +194,14 @@ private fun SubtitleGroupColumn(
                     text = cue.text,
                     textAlign = align,
                     style = TextStyle(
-                        fontFamily = ManropeFontFamily,
-                        fontSize = fontSizeSp.sp,
-                        lineHeight = (fontSizeSp * 1.28f).sp,
+                        fontFamily = resolveSubtitleFontFamily(cue.fontFamilyName),
+                        fontSize = cueFontSizeSp.sp,
+                        lineHeight = (cueFontSizeSp * 1.28f).sp,
                         fontWeight = if (cue.isBold) FontWeight.Bold else FontWeight.SemiBold,
                         fontStyle = if (cue.isItalic) FontStyle.Italic else FontStyle.Normal,
-                        color = textColor,
+                        color = resolvedCueColor,
                         shadow = Shadow(
-                            color = Color.Black,
+                            color = resolvedShadowColor,
                             offset = Offset(1.5f, 2.0f),
                             blurRadius = 5f
                         )

@@ -84,6 +84,7 @@ import com.example.player.AudioDelayProcessor
 import com.example.player.AudioTrackUiOption
 import com.example.player.BluetoothAudioRouteState
 import com.example.player.SubtitleTrackUiOption
+import com.example.player.VideoQualityUiOption
 import com.example.ui.components.InstantSlider
 import com.example.ui.components.ModeInfoIconButton
 import com.example.ui.components.ModeInfoModalDialog
@@ -287,6 +288,7 @@ internal val PlayerPopupCardColor: Color
 fun AudioTracksModalSheet(
     audioOptions: List<AudioTrackUiOption>,
     audioBoostPercent: Int,
+    maxAudioBoostPercent: Int = 200,
     audioDeArtifactMode: AudioDeArtifactMode = AudioDeArtifactMode.STANDARD,
     autoDeArtifactLowBitrate: Boolean = true,
     activeAudioBitrateKbps: Int = 0,
@@ -301,6 +303,7 @@ fun AudioTracksModalSheet(
     onToggleBluetoothAutoSync: (Boolean) -> Unit = {},
     onSelectAudio: (AudioTrackUiOption) -> Unit,
     onSetAudioBoostPercent: (Int) -> Unit,
+    onUpdateMaxAudioBoostPercent: (Int) -> Unit = {},
     onSelectAudioDeArtifactMode: (AudioDeArtifactMode) -> Unit = {},
     onToggleAutoDeArtifactLowBitrate: (Boolean) -> Unit = {},
     onAdjustAudioDelayMs: (Long) -> Unit = {},
@@ -725,7 +728,9 @@ fun AudioTracksModalSheet(
 
             AudioBoostControlSection(
                 audioBoostPercent = audioBoostPercent,
-                onSetAudioBoostPercent = onSetAudioBoostPercent
+                maxAudioBoostPercent = maxAudioBoostPercent,
+                onSetAudioBoostPercent = onSetAudioBoostPercent,
+                onUpdateMaxAudioBoostPercent = onUpdateMaxAudioBoostPercent
             )
         }
     }
@@ -1368,6 +1373,149 @@ fun DecoderAndVideoModalSheet(
                                 color = MaterialTheme.colorScheme.onSecondaryContainer,
                                 modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp)
                             )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun VideoQualityModalSheet(
+    qualityOptions: List<VideoQualityUiOption>,
+    videoWidth: Int,
+    videoHeight: Int,
+    videoBitrateBps: Long,
+    activeCodecName: String,
+    onSelectQuality: (VideoQualityUiOption) -> Unit,
+    onDismiss: () -> Unit
+) {
+    PlayerFrostedModalSheet(
+        onDismissRequest = onDismiss,
+        modifier = Modifier.testTag("video_quality_modal_sheet")
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 12.dp)
+                .padding(bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    Icons.Default.AutoAwesome,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        tr("Качество видео и потока", "Stream & Video Quality"),
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    val bitrateStr = if (videoBitrateBps > 0L) {
+                        String.format(java.util.Locale.US, " • %.1f Mbps", videoBitrateBps / 1_000_000f)
+                    } else {
+                        ""
+                    }
+                    Text(
+                        text = tr(
+                            "Текущий поток: ${videoWidth}×${videoHeight} • $activeCodecName$bitrateStr",
+                            "Active stream: ${videoWidth}×${videoHeight} • $activeCodecName$bitrateStr"
+                        ),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+
+            if (qualityOptions.isEmpty()) {
+                Surface(
+                    color = PlayerPopupCardColor,
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = tr(
+                            "Воспроизводится единственная доступная видеодорожка (${videoWidth}×${videoHeight}).",
+                            "Playing the single available video stream (${videoWidth}×${videoHeight})."
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(12.dp)
+                    )
+                }
+            } else {
+                qualityOptions.forEachIndexed { idx, opt ->
+                    Surface(
+                        color = if (opt.isSelected) {
+                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.65f)
+                        } else {
+                            PlayerPopupCardColor
+                        },
+                        shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(
+                            1.dp,
+                            if (opt.isSelected) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                            }
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .clickable {
+                                onSelectQuality(opt)
+                                onDismiss()
+                            }
+                            .testTag("video_quality_option_$idx")
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 9.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            RadioButton(
+                                selected = opt.isSelected,
+                                onClick = {
+                                    onSelectQuality(opt)
+                                    onDismiss()
+                                }
+                            )
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = opt.label,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                                if (opt.width > 0 && opt.height > 0) {
+                                    val kbps = (opt.bitrateBps / 1000L).toInt()
+                                    val kbpsTxt = if (kbps > 0) " • $kbps kbps" else ""
+                                    Text(
+                                        text = "${opt.width}×${opt.height}$kbpsTxt",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                            Surface(
+                                color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.75f),
+                                shape = RoundedCornerShape(6.dp)
+                            ) {
+                                Text(
+                                    text = opt.badge,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp)
+                                )
+                            }
                         }
                     }
                 }

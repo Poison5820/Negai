@@ -47,6 +47,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.model.PlayerSettings
+import com.example.model.StreamingQualityPreset
 import com.example.torrent.TorrServerClient
 import com.example.torrent.TorrentIntentHelper
 import com.example.torrent.TorrentSearchService
@@ -90,6 +91,36 @@ internal fun TorrServerSettingsPage(
 
     val isTorrServerInstalled = remember {
         TorrentIntentHelper.isTorrServerAppInstalled(context)
+    }
+
+    // 0. Default Streaming Quality Card
+    SettingsSectionCard(
+        title = tr("Качество потоковой передачи", "Streaming Video Quality"),
+        icon = Icons.Default.Download
+    ) {
+        Text(
+            text = tr(
+                "Стандартное качество для сетевых трансляций (HLS/DASH/HTTP) и раздач с несколькими вариантами разрешения",
+                "Default quality for network streams (HLS/DASH/HTTP) and multi-resolution torrents"
+            ),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            StreamingQualityPreset.entries.forEach { preset ->
+                FilterChip(
+                    selected = settings.defaultStreamingQuality == preset,
+                    onClick = { actions.onUpdateDefaultStreamingQuality(preset) },
+                    label = {
+                        Text(preset.localizedTitle(isEnglish))
+                    },
+                    modifier = Modifier.testTag("streaming_quality_preset_${preset.id}")
+                )
+            }
+        }
     }
 
     // 1. TorrServer Connection Card

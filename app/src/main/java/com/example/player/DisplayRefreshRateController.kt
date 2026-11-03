@@ -154,12 +154,17 @@ object DisplayRefreshRateController {
             )
         }
 
-        // 3. Player paused: drop VSync loop & let LTPO throttle panel down to idle Hz
+        // 3. Player paused: drop VSync loop & let LTPO throttle panel down to minimum supported Hz
         if (!isPlaying) {
+            val minPanelHz = when {
+                displayInfo.minSupportedHz < 58f -> displayInfo.minSupportedHz.coerceAtLeast(1f)
+                displayInfo.isLtpoCapable -> 10f
+                else -> displayInfo.minSupportedHz.coerceAtMost(60f)
+            }
             val idleHz = if (ltpoAdaptiveEnabled) {
-                displayInfo.minSupportedHz.coerceAtMost(60f)
+                minPanelHz
             } else {
-                allowedCapHz
+                60f.coerceAtMost(maxPanelHz)
             }
             return RefreshRatePlan(
                 sourceFps = normalizedSrcFps,
@@ -167,14 +172,14 @@ object DisplayRefreshRateController {
                 effectiveVideoFps = effectiveFps,
                 targetDisplayHz = idleHz,
                 targetRenderFps = 0f,
-                surfaceFrameRateHz = 0f,
+                surfaceFrameRateHz = if (ltpoAdaptiveEnabled) 1f else 0f,
                 preferSystemIdleWindowMode = ltpoAdaptiveEnabled,
                 useContinuousVsync = false,
                 memcActive = false,
                 isLtpoSavingActive = ltpoAdaptiveEnabled,
-                hudBadgeText = if (ltpoAdaptiveEnabled) "LTPO Пауза" else "${idleHz.roundToInt()}Гц",
+                hudBadgeText = if (ltpoAdaptiveEnabled) "LTPO ${idleHz.roundToInt()}Гц" else "${idleHz.roundToInt()}Гц",
                 statusSummary = if (ltpoAdaptiveEnabled) {
-                    "Пауза • LTPO снижает частоту экрана для экономии заряда"
+                    "Пауза • LTPO снижает частоту до минимума (${idleHz.roundToInt()} Гц)"
                 } else {
                     "Пауза • Экран удерживает ${idleHz.roundToInt()} Гц"
                 }
@@ -197,7 +202,8 @@ object DisplayRefreshRateController {
                     effectiveFps = effectiveFps,
                     candidateModes = candidateModes,
                     allowedCapHz = allowedCapHz,
-                    ltpoAdaptiveEnabled = ltpoAdaptiveEnabled
+                    ltpoAdaptiveEnabled = ltpoAdaptiveEnabled,
+                    isLtpoCapable = displayInfo.isLtpoCapable
                 )
                 val saving = ltpoAdaptiveEnabled && nativeTargetHz < maxPanelHz - 1.5f
                 return RefreshRatePlan(
@@ -249,13 +255,14 @@ object DisplayRefreshRateController {
             )
         }
 
-        // 4. Active video playback WITHOUT Frame Interpolation (native cadence matching)
+        // 5. Active video playback WITHOUT Frame Interpolation (LTPO native cadence matching)
         val targetHz = if (ltpoAdaptiveEnabled) {
             pickNativeCadenceDisplayHz(
                 effectiveFps = effectiveFps,
                 candidateModes = candidateModes,
                 allowedCapHz = allowedCapHz,
-                ltpoAdaptiveEnabled = true
+                ltpoAdaptiveEnabled = true,
+                isLtpoCapable = displayInfo.isLtpoCapable
             )
         } else {
             if (highRefreshRateEnabled) allowedCapHz else 60f.coerceAtMost(maxPanelHz)
@@ -299,24 +306,49 @@ object DisplayRefreshRateController {
         effectiveFps: Float,
         candidateModes: List<Float>,
         allowedCapHz: Float,
-        ltpoAdaptiveEnabled: Boolean
+        ltpoAdaptiveEnabled: Boolean,
+        isLtpoCapable: Boolean = true
     ): Float {
-        if (!ltpoAdaptiveEnabled || candidateModes.isEmpty()) return allowedCapHz
+        if (!ltpoAdaptiveEnabled) return allowedCapHz
 
-        // Find exact integer harmonic multiples of effectiveFps (k = 1, 2, 3, 4, 5, 6), e.g.:
-        // 24fps -> 24Hz (x1), 48Hz (x2), 72Hz (x3), 96Hz (x4), 120Hz (x5), 144Hz (x6)
-        // 30fps -> 30Hz (x1), 60Hz (x2), 90Hz (x3), 120Hz (x4)
-        // 24fps * 2.0x = 48fps -> 48Hz (x1), 96Hz (x2)
-        // 30fps * 1.5x = 45fps -> 90Hz (x2)
+        // For 24 / 25 / 30 fps video without interpolation, NEVER jump to 90 / 120 / 144 Hz!
+        // Adapt for LTPO by lowering display refresh rate to 24 / 25 / 30 / 48 / 60 Hz.
+        if (effectiveFps <= 31f) {
+            val lowHzModes = candidateModes.filter { it <= 62f }
+            // 1. Check if an exact 1x or 2x low-Hz mode is exposed (e.g. 24Hz, 25Hz, 30Hz, 48Hz, 50Hz, 60Hz)
+            val lowHarmonic = lowHzModes.firstOrNull { modeHz ->
+                modeHz >= effectiveFps - 0.6f && isNearHarmonicMultiple(modeHz, effectiveFps)
+            }
+            if (lowHarmonic != null) return lowHarmonic
+
+            // 2. On LTPO screens where Display.supportedModes only exposes [60, 120] and VRR is driven by
+            // Surface.setFrameRate + Window.preferredRefreshRate, target 24Hz/30Hz directly!
+            if (isLtpoCapable) {
+                return when {
+                    effectiveFps <= 24.5f -> 24f.coerceAtLeast(
+                        candidateModes.firstOrNull { it in 23f..31f } ?: 30f
+                    )
+                    effectiveFps <= 25.5f -> 25f.coerceAtLeast(
+                        candidateModes.firstOrNull { it in 24f..31f } ?: 30f
+                    )
+                    else -> 30f
+                }
+            }
+
+            // 3. Non-LTPO 60Hz fallback (never 120Hz for <=30fps without MEMC)
+            return lowHzModes.firstOrNull { it >= effectiveFps - 0.5f }
+                ?: candidateModes.firstOrNull()
+                ?: 60f.coerceAtMost(allowedCapHz)
+        }
+
+        if (candidateModes.isEmpty()) return effectiveFps.coerceAtMost(allowedCapHz)
+
         val exactHarmonic = candidateModes.firstOrNull { modeHz ->
             modeHz >= effectiveFps - 0.6f && isNearHarmonicMultiple(modeHz, effectiveFps)
         }
         if (exactHarmonic != null) return exactHarmonic
 
-        // If no exact harmonic mode is listed in Display.supportedModes (e.g. only [60, 120]),
-        // pick the lowest mode >= effectiveFps * 2 (reduces judder) or allowedCapHz.
-        return candidateModes.firstOrNull { it >= effectiveFps * 1.9f }
-            ?: candidateModes.firstOrNull { it >= effectiveFps - 0.5f }
+        return candidateModes.firstOrNull { it >= effectiveFps - 0.5f }
             ?: allowedCapHz
     }
 
@@ -381,8 +413,9 @@ object DisplayRefreshRateController {
         String.format(Locale.US, "%.2fx", speed).replace("0x", "x").replace(".x", ".0x")
 
     /**
-     * Applies [RefreshRatePlan] to the Activity window without causing redundant layout flashes
-     * or resolution changes.
+     * Applies [RefreshRatePlan] to the Activity window so LTPO / multi-rate panels can lower
+     * refresh rate to 24/30/60 Hz during native video playback and to minimum Hz on pause,
+     * while restoring 120 Hz when UI controls or app navigation are active.
      */
     fun applyWindowRefreshPlan(activity: Activity, plan: RefreshRatePlan): Float {
         val window = activity.window ?: return 60f
@@ -390,47 +423,59 @@ object DisplayRefreshRateController {
         val currentMode = display.mode
         val supported = display.supportedModes.orEmpty()
 
-        if (plan.preferSystemIdleWindowMode || supported.size <= 1) {
-            val attrs = window.attributes
-            if (attrs.preferredDisplayModeId != 0 || attrs.preferredRefreshRate != 0f) {
-                attrs.preferredDisplayModeId = 0
-                attrs.preferredRefreshRate = 0f
-                window.attributes = attrs
-            }
-            return currentMode?.refreshRate ?: plan.targetDisplayHz
-        }
-
-        val targetWidth = currentMode?.physicalWidth ?: supported.maxOf { it.physicalWidth }
-        val targetHeight = currentMode?.physicalHeight ?: supported.maxOf { it.physicalHeight }
+        val targetWidth = currentMode?.physicalWidth ?: supported.maxOfOrNull { it.physicalWidth } ?: 0
+        val targetHeight = currentMode?.physicalHeight ?: supported.maxOfOrNull { it.physicalHeight } ?: 0
         val sameResModes = supported.filter {
             it.physicalWidth == targetWidth && it.physicalHeight == targetHeight
         }.ifEmpty { supported.toList() }
 
+        // On pause / idle with LTPO: select lowest supported mode & set preferredRefreshRate to min Hz
+        if (plan.preferSystemIdleWindowMode) {
+            val minMode = sameResModes.minByOrNull { it.refreshRate }
+            val desiredIdleRate = plan.targetDisplayHz.coerceAtLeast(1f)
+            val attrs = window.attributes
+            val targetModeId = minMode?.modeId ?: 0
+            if (attrs.preferredDisplayModeId != targetModeId || abs(attrs.preferredRefreshRate - desiredIdleRate) > 0.5f) {
+                attrs.preferredDisplayModeId = targetModeId
+                attrs.preferredRefreshRate = desiredIdleRate
+                window.attributes = attrs
+            }
+            return desiredIdleRate
+        }
+
+        if (sameResModes.isEmpty()) {
+            return currentMode?.refreshRate ?: plan.targetDisplayHz
+        }
+
         val bestMode = sameResModes.minByOrNull { mode ->
             val diff = abs(mode.refreshRate - plan.targetDisplayHz)
-            // Slight penalty for picking a rate lower than targetRenderFps when MEMC is active
+            // When MEMC is NOT active and targetDisplayHz <= 60Hz, strongly penalize 90/120Hz modes!
+            val highHzPenalty = if (!plan.memcActive && plan.targetDisplayHz <= 62f && mode.refreshRate > 65f) {
+                500f + mode.refreshRate
+            } else {
+                0f
+            }
             val undershootPenalty = if (plan.memcActive && mode.refreshRate + 0.8f < plan.targetRenderFps) 200f else 0f
-            diff + undershootPenalty
+            diff + highHzPenalty + undershootPenalty
         }
 
         if (bestMode != null) {
             val attrs = window.attributes
-            val currentRate = attrs.preferredRefreshRate
-            // CRITICAL: On real Android devices, changing preferredDisplayModeId or preferredRefreshRate
-            // triggers a hardware display controller modeset (150-300ms display pipeline freeze).
-            // When the window is already set to high refresh rate (e.g. 120Hz), we must NEVER downgrade
-            // the Activity Window during playback or UI toggle, avoiding freezes completely.
-            val alreadyHighHz = currentRate >= 88f
-            val isDowngrade = alreadyHighHz && bestMode.refreshRate < 88f
-            val isSame = attrs.preferredDisplayModeId == bestMode.modeId ||
-                abs(currentRate - bestMode.refreshRate) <= 0.5f
+            // Hint the exact LTPO target rate (e.g. 24f or 30f) via preferredRefreshRate
+            val desiredRefreshRate = if (!plan.memcActive && plan.targetDisplayHz <= 62f) {
+                plan.targetDisplayHz
+            } else {
+                bestMode.refreshRate
+            }
+            val isSame = attrs.preferredDisplayModeId == bestMode.modeId &&
+                abs(attrs.preferredRefreshRate - desiredRefreshRate) <= 0.5f
 
-            if (!isSame && !isDowngrade) {
+            if (!isSame) {
                 attrs.preferredDisplayModeId = bestMode.modeId
-                attrs.preferredRefreshRate = bestMode.refreshRate
+                attrs.preferredRefreshRate = desiredRefreshRate
                 window.attributes = attrs
             }
-            return if (alreadyHighHz) currentRate else bestMode.refreshRate
+            return desiredRefreshRate
         }
         return currentMode?.refreshRate ?: plan.targetDisplayHz
     }
@@ -463,12 +508,23 @@ object DisplayRefreshRateController {
         if (surface == null || !surface.isValid) return
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             runCatching {
-                if (highRefreshOrInterpActive && targetFps >= 12f) {
+                if (targetFps in 0.5f..5f) {
+                    // Paused / LTPO minimum refresh hint
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        surface.setFrameRate(
+                            targetFps,
+                            Surface.FRAME_RATE_COMPATIBILITY_DEFAULT,
+                            Surface.CHANGE_FRAME_RATE_ONLY_IF_SEAMLESS
+                        )
+                    } else {
+                        surface.setFrameRate(targetFps, Surface.FRAME_RATE_COMPATIBILITY_DEFAULT)
+                    }
+                } else if (highRefreshOrInterpActive && targetFps >= 12f) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                         surface.setFrameRate(
                             targetFps,
                             compatibility,
-                            Surface.CHANGE_FRAME_RATE_ONLY_IF_SEAMLESS
+                            Surface.CHANGE_FRAME_RATE_ALWAYS
                         )
                     } else {
                         surface.setFrameRate(targetFps, compatibility)

@@ -25,7 +25,9 @@ import com.example.model.PlayerControlsTheme
 import com.example.model.PlayerOrientationMode
 import com.example.model.PlayerQuickAction
 import com.example.model.PlayerSettings
+import com.example.model.PreferredTrackLanguage
 import com.example.model.QuickActionsSerializer
+import com.example.model.StreamingQualityPreset
 import com.example.model.SubtitleColorPreset
 import com.example.model.VideoScaleMode
 import kotlinx.coroutines.flow.Flow
@@ -96,17 +98,22 @@ class PlayerPreferencesRepository(private val context: Context) {
 
         val AUTO_BIND_AUDIO = booleanPreferencesKey("auto_bind_external_audio")
         val PREFER_EXTERNAL_AUDIO_ON_START = booleanPreferencesKey("prefer_external_audio_on_start")
+        val PREFERRED_AUDIO_LANGUAGE = stringPreferencesKey("preferred_audio_language")
         val DEFAULT_AUDIO_BOOST_PERCENT = intPreferencesKey("default_audio_boost_percent")
+        val MAX_AUDIO_BOOST_PERCENT = intPreferencesKey("max_audio_boost_percent")
         val BLUETOOTH_AUDIO_AUTO_SYNC = booleanPreferencesKey("bluetooth_audio_auto_sync")
         val BLUETOOTH_AUDIO_OFFSET_MS = longPreferencesKey("bluetooth_audio_fine_offset_ms")
         val AUDIO_DE_ARTIFACT_MODE = stringPreferencesKey("audio_de_artifact_mode")
         val AUTO_DE_ARTIFACT_LOW_BITRATE = booleanPreferencesKey("auto_de_artifact_low_bitrate")
 
         val AUTO_BIND_SUBS = booleanPreferencesKey("auto_bind_external_subtitles")
+        val PREFER_EXTERNAL_SUBS_ON_START = booleanPreferencesKey("prefer_external_subtitles_on_start")
+        val PREFERRED_SUBTITLE_LANGUAGE = stringPreferencesKey("preferred_subtitle_language")
         val SUB_FONT_SIZE = floatPreferencesKey("subtitle_font_size_sp")
         val SUB_COLOR_ARGB = longPreferencesKey("subtitle_color_argb")
         val SUB_BG_ENABLED = booleanPreferencesKey("subtitle_bg_enabled")
 
+        val DEFAULT_STREAMING_QUALITY = stringPreferencesKey("default_streaming_quality")
         val TORRSERVER_URL = stringPreferencesKey("torrserver_url")
         val TORRSERVER_USERNAME = stringPreferencesKey("torrserver_username")
         val TORRSERVER_PASSWORD = stringPreferencesKey("torrserver_password")
@@ -283,15 +290,18 @@ class PlayerPreferencesRepository(private val context: Context) {
                 ?: (if (hasBoot && sp.contains("auto_bind_audio")) sp.getBoolean("auto_bind_audio", true) else true),
             preferExternalAudioOnStart = prefs[Keys.PREFER_EXTERNAL_AUDIO_ON_START]
                 ?: (if (hasBoot && sp.contains("prefer_ext_audio")) sp.getBoolean("prefer_ext_audio", true) else true),
-            defaultAudioBoostPercent = (
-                prefs[Keys.DEFAULT_AUDIO_BOOST_PERCENT]
-                    ?: (if (hasBoot && sp.contains("default_audio_boost")) sp.getInt("default_audio_boost", 100) else 100)
-                ).coerceIn(100, 200),
-            bluetoothAudioAutoSync = true,
-            bluetoothAudioOffsetMs = (
-                prefs[Keys.BLUETOOTH_AUDIO_OFFSET_MS]
-                    ?: (if (hasBoot && sp.contains("bt_fine_offset_ms")) sp.getLong("bt_fine_offset_ms", 0L) else 0L)
-                ).coerceIn(-300L, 300L),
+            preferredAudioLanguage = PreferredTrackLanguage.fromId(
+                prefs[Keys.PREFERRED_AUDIO_LANGUAGE]
+                    ?: (if (hasBoot) sp.getString("pref_audio_lang", null) else null)
+                    ?: PreferredTrackLanguage.RU.id
+            ),
+            defaultAudioBoostPercent = 100,
+            maxAudioBoostPercent = (
+                prefs[Keys.MAX_AUDIO_BOOST_PERCENT]
+                    ?: (if (hasBoot && sp.contains("max_audio_boost")) sp.getInt("max_audio_boost", 200) else 200)
+                ).coerceIn(120, 300),
+            bluetoothAudioAutoSync = false,
+            bluetoothAudioOffsetMs = 0L,
             audioDeArtifactMode = AudioDeArtifactMode.fromId(
                 prefs[Keys.AUDIO_DE_ARTIFACT_MODE]
                     ?: (if (hasBoot) sp.getString("audio_de_artifact_mode", null) else null)
@@ -302,6 +312,13 @@ class PlayerPreferencesRepository(private val context: Context) {
 
             autoBindExternalSubtitles = prefs[Keys.AUTO_BIND_SUBS]
                 ?: (if (hasBoot && sp.contains("auto_bind_subs")) sp.getBoolean("auto_bind_subs", true) else true),
+            preferExternalSubtitlesOnStart = prefs[Keys.PREFER_EXTERNAL_SUBS_ON_START]
+                ?: (if (hasBoot && sp.contains("prefer_ext_subs")) sp.getBoolean("prefer_ext_subs", true) else true),
+            preferredSubtitleLanguage = PreferredTrackLanguage.fromId(
+                prefs[Keys.PREFERRED_SUBTITLE_LANGUAGE]
+                    ?: (if (hasBoot) sp.getString("pref_sub_lang", null) else null)
+                    ?: PreferredTrackLanguage.RU.id
+            ),
             subtitleFontSizeSp = (
                 prefs[Keys.SUB_FONT_SIZE]
                     ?: (if (hasBoot && sp.contains("sub_font_size")) sp.getFloat("sub_font_size", 21f) else 21f)
@@ -311,6 +328,11 @@ class PlayerPreferencesRepository(private val context: Context) {
             subtitleBackgroundEnabled = prefs[Keys.SUB_BG_ENABLED]
                 ?: (if (hasBoot && sp.contains("sub_bg_enabled")) sp.getBoolean("sub_bg_enabled", true) else true),
 
+            defaultStreamingQuality = StreamingQualityPreset.fromId(
+                prefs[Keys.DEFAULT_STREAMING_QUALITY]
+                    ?: (if (hasBoot) sp.getString("default_stream_quality", null) else null)
+                    ?: StreamingQualityPreset.MAX.id
+            ),
             torrServerUrl = (
                 prefs[Keys.TORRSERVER_URL]
                     ?: (if (hasBoot) sp.getString("torr_url", null) else null)
@@ -684,21 +706,30 @@ class PlayerPreferencesRepository(private val context: Context) {
         context.playerDataStore.edit { it[Keys.PREFER_EXTERNAL_AUDIO_ON_START] = enabled }
     }
 
+    suspend fun updatePreferredAudioLanguage(language: PreferredTrackLanguage) {
+        bootPrefs(context).edit().putString("pref_audio_lang", language.id).apply()
+        context.playerDataStore.edit { it[Keys.PREFERRED_AUDIO_LANGUAGE] = language.id }
+    }
+
     suspend fun updateDefaultAudioBoostPercent(percent: Int) {
-        val clamped = percent.coerceIn(100, 200)
-        bootPrefs(context).edit().putInt("default_audio_boost", clamped).apply()
-        context.playerDataStore.edit { it[Keys.DEFAULT_AUDIO_BOOST_PERCENT] = clamped }
+        bootPrefs(context).edit().putInt("default_audio_boost", 100).apply()
+        context.playerDataStore.edit { it[Keys.DEFAULT_AUDIO_BOOST_PERCENT] = 100 }
+    }
+
+    suspend fun updateMaxAudioBoostPercent(percent: Int) {
+        val clamped = percent.coerceIn(120, 300)
+        bootPrefs(context).edit().putInt("max_audio_boost", clamped).apply()
+        context.playerDataStore.edit { it[Keys.MAX_AUDIO_BOOST_PERCENT] = clamped }
     }
 
     suspend fun updateBluetoothAudioAutoSync(enabled: Boolean) {
-        bootPrefs(context).edit().putBoolean("bt_auto_sync", true).apply()
-        context.playerDataStore.edit { it[Keys.BLUETOOTH_AUDIO_AUTO_SYNC] = true }
+        bootPrefs(context).edit().putBoolean("bt_auto_sync", false).apply()
+        context.playerDataStore.edit { it[Keys.BLUETOOTH_AUDIO_AUTO_SYNC] = false }
     }
 
     suspend fun updateBluetoothAudioOffsetMs(offsetMs: Long) {
-        val clamped = offsetMs.coerceIn(-300L, 300L)
-        bootPrefs(context).edit().putLong("bt_fine_offset_ms", clamped).apply()
-        context.playerDataStore.edit { it[Keys.BLUETOOTH_AUDIO_OFFSET_MS] = clamped }
+        bootPrefs(context).edit().putLong("bt_fine_offset_ms", 0L).apply()
+        context.playerDataStore.edit { it[Keys.BLUETOOTH_AUDIO_OFFSET_MS] = 0L }
     }
 
     suspend fun updateAudioDeArtifactMode(mode: AudioDeArtifactMode) {
@@ -714,6 +745,16 @@ class PlayerPreferencesRepository(private val context: Context) {
     suspend fun updateAutoBindSubtitles(enabled: Boolean) {
         bootPrefs(context).edit().putBoolean("auto_bind_subs", enabled).apply()
         context.playerDataStore.edit { it[Keys.AUTO_BIND_SUBS] = enabled }
+    }
+
+    suspend fun updatePreferExternalSubtitlesOnStart(enabled: Boolean) {
+        bootPrefs(context).edit().putBoolean("prefer_ext_subs", enabled).apply()
+        context.playerDataStore.edit { it[Keys.PREFER_EXTERNAL_SUBS_ON_START] = enabled }
+    }
+
+    suspend fun updatePreferredSubtitleLanguage(language: PreferredTrackLanguage) {
+        bootPrefs(context).edit().putString("pref_sub_lang", language.id).apply()
+        context.playerDataStore.edit { it[Keys.PREFERRED_SUBTITLE_LANGUAGE] = language.id }
     }
 
     suspend fun updateSubtitleFontSize(sizeSp: Float) {
@@ -732,6 +773,11 @@ class PlayerPreferencesRepository(private val context: Context) {
     suspend fun updateSubtitleBackground(enabled: Boolean) {
         bootPrefs(context).edit().putBoolean("sub_bg_enabled", enabled).apply()
         context.playerDataStore.edit { it[Keys.SUB_BG_ENABLED] = enabled }
+    }
+
+    suspend fun updateDefaultStreamingQuality(preset: StreamingQualityPreset) {
+        bootPrefs(context).edit().putString("default_stream_quality", preset.id).apply()
+        context.playerDataStore.edit { it[Keys.DEFAULT_STREAMING_QUALITY] = preset.id }
     }
 
     suspend fun updateIgnoreNomediaFolders(enabled: Boolean) {
@@ -836,11 +882,6 @@ class PlayerPreferencesRepository(private val context: Context) {
         private fun bootPrefs(context: Context) =
             context.applicationContext.getSharedPreferences(BOOT_SNAPSHOT_PREFS, Context.MODE_PRIVATE)
 
-        /**
-         * Reads synchronous boot snapshot in < 0.5ms so [com.example.MainActivity] and
-         * [com.example.ui.KinoViewModel] render the user's exact saved theme, sort order,
-         * and layout density on frame #1 with zero flash and zero settings loss across updates.
-         */
         fun readBootSettingsSnapshot(context: Context): PlayerSettings {
             val sp = bootPrefs(context)
             if (!sp.contains("theme_mode")) return PlayerSettings()
@@ -912,19 +953,30 @@ class PlayerPreferencesRepository(private val context: Context) {
 
                 autoBindExternalAudio = sp.getBoolean("auto_bind_audio", true),
                 preferExternalAudioOnStart = sp.getBoolean("prefer_ext_audio", true),
-                defaultAudioBoostPercent = sp.getInt("default_audio_boost", 100).coerceIn(100, 200),
-                bluetoothAudioAutoSync = true,
-                bluetoothAudioOffsetMs = sp.getLong("bt_fine_offset_ms", 0L).coerceIn(-300L, 300L),
+                preferredAudioLanguage = PreferredTrackLanguage.fromId(
+                    sp.getString("pref_audio_lang", PreferredTrackLanguage.RU.id)
+                ),
+                defaultAudioBoostPercent = 100,
+                maxAudioBoostPercent = sp.getInt("max_audio_boost", 200).coerceIn(120, 300),
+                bluetoothAudioAutoSync = false,
+                bluetoothAudioOffsetMs = 0L,
                 audioDeArtifactMode = AudioDeArtifactMode.fromId(
                     sp.getString("audio_de_artifact_mode", AudioDeArtifactMode.STANDARD.id)
                 ),
                 autoDeArtifactLowBitrate = sp.getBoolean("auto_de_artifact_low_bitrate", true),
 
                 autoBindExternalSubtitles = sp.getBoolean("auto_bind_subs", true),
+                preferExternalSubtitlesOnStart = sp.getBoolean("prefer_ext_subs", true),
+                preferredSubtitleLanguage = PreferredTrackLanguage.fromId(
+                    sp.getString("pref_sub_lang", PreferredTrackLanguage.RU.id)
+                ),
                 subtitleFontSizeSp = sp.getFloat("sub_font_size", 21f).coerceIn(13f, 42f),
                 subtitleColorArgb = sp.getLong("sub_color_argb", SubtitleColorPreset.WHITE.argb),
                 subtitleBackgroundEnabled = sp.getBoolean("sub_bg_enabled", true),
 
+                defaultStreamingQuality = StreamingQualityPreset.fromId(
+                    sp.getString("default_stream_quality", StreamingQualityPreset.MAX.id)
+                ),
                 torrServerUrl = sp.getString("torr_url", "http://127.0.0.1:8090") ?: "http://127.0.0.1:8090",
                 torrServerUsername = sp.getString("torr_user", "") ?: "",
                 torrServerPassword = sp.getString("torr_pass", "") ?: "",
@@ -990,15 +1042,20 @@ class PlayerPreferencesRepository(private val context: Context) {
                 .putFloat("a4k_strength", s.anime4kStrength)
                 .putBoolean("auto_bind_audio", s.autoBindExternalAudio)
                 .putBoolean("prefer_ext_audio", s.preferExternalAudioOnStart)
-                .putInt("default_audio_boost", s.defaultAudioBoostPercent)
-                .putBoolean("bt_auto_sync", true)
-                .putLong("bt_fine_offset_ms", s.bluetoothAudioOffsetMs)
+                .putString("pref_audio_lang", s.preferredAudioLanguage.id)
+                .putInt("default_audio_boost", 100)
+                .putInt("max_audio_boost", s.maxAudioBoostPercent)
+                .putBoolean("bt_auto_sync", false)
+                .putLong("bt_fine_offset_ms", 0L)
                 .putString("audio_de_artifact_mode", s.audioDeArtifactMode.id)
                 .putBoolean("auto_de_artifact_low_bitrate", s.autoDeArtifactLowBitrate)
                 .putBoolean("auto_bind_subs", s.autoBindExternalSubtitles)
+                .putBoolean("prefer_ext_subs", s.preferExternalSubtitlesOnStart)
+                .putString("pref_sub_lang", s.preferredSubtitleLanguage.id)
                 .putFloat("sub_font_size", s.subtitleFontSizeSp)
                 .putLong("sub_color_argb", s.subtitleColorArgb)
                 .putBoolean("sub_bg_enabled", s.subtitleBackgroundEnabled)
+                .putString("default_stream_quality", s.defaultStreamingQuality.id)
                 .putString("torr_url", s.torrServerUrl)
                 .putString("torr_user", s.torrServerUsername)
                 .putString("torr_pass", s.torrServerPassword)

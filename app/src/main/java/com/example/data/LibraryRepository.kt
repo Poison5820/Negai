@@ -142,22 +142,22 @@ class LibraryRepository private constructor(
     }
 
     fun onStoragePermissionUpdated() {
-        val prevAccess = _hasStorageAccess.value
-        val prevAllFiles = _hasAllFilesAccess.value
-        val nowAllFiles = StorageAccessHelper.hasAllFilesAccess(appContext)
-        val nowAccess = StorageAccessHelper.hasStorageAccess(appContext)
-        _hasAllFilesAccess.value = nowAllFiles
-        _hasStorageAccess.value = nowAccess
+        repoScope.launch {
+            val prevAccess = _hasStorageAccess.value
+            val prevAllFiles = _hasAllFilesAccess.value
+            val nowAllFiles = StorageAccessHelper.hasAllFilesAccess(appContext)
+            val nowAccess = StorageAccessHelper.hasStorageAccess(appContext)
+            _hasAllFilesAccess.value = nowAllFiles
+            _hasStorageAccess.value = nowAccess
 
-        val permissionNewlyGranted = (nowAccess && !prevAccess) || (nowAllFiles && !prevAllFiles)
-        val needsFallbackScan = nowAccess &&
-            _allScannedFolders.value.isEmpty() &&
-            !_isScanning.value &&
-            initialAutoScanTriggered &&
-            !scanMutex.isLocked
+            val permissionNewlyGranted = (nowAccess && !prevAccess) || (nowAllFiles && !prevAllFiles)
+            val needsFallbackScan = nowAccess &&
+                _allScannedFolders.value.isEmpty() &&
+                !_isScanning.value &&
+                initialAutoScanTriggered &&
+                !scanMutex.isLocked
 
-        if (permissionNewlyGranted || needsFallbackScan) {
-            repoScope.launch {
+            if (permissionNewlyGranted || needsFallbackScan) {
                 rescan(showIndicator = _allScannedFolders.value.isEmpty())
             }
         }
@@ -197,9 +197,9 @@ class LibraryRepository private constructor(
         }
 
         val nowRealtime = android.os.SystemClock.elapsedRealtime()
-        if (nowRealtime - lastAvailabilityCleanRealtimeMs >= 15_000L) {
+        if (nowRealtime - lastAvailabilityCleanRealtimeMs >= 45_000L) {
             lastAvailabilityCleanRealtimeMs = nowRealtime
-            progressList.take(30).forEach { entry ->
+            progressList.take(20).forEach { entry ->
                 if (entry.videoUri != candidate?.videoUri &&
                     PlaybackResumeHelper.isLocalFileUri(entry.videoUri) &&
                     !PlaybackResumeHelper.isMediaFileExists(appContext, entry.videoUri)
@@ -222,7 +222,7 @@ class LibraryRepository private constructor(
 
     fun refreshMediaAvailabilityAsync(force: Boolean = false) {
         val nowRealtime = android.os.SystemClock.elapsedRealtime()
-        if (!force && _lastPlayedFile.value != null && nowRealtime - lastAvailabilityCleanRealtimeMs < 12_000L) {
+        if (!force && nowRealtime - lastAvailabilityCleanRealtimeMs < 30_000L) {
             return
         }
         repoScope.launch {

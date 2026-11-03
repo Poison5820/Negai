@@ -37,7 +37,11 @@ data class SubtitleCue(
     val alignment: SubtitleAlignment = SubtitleAlignment.BOTTOM_CENTER,
     val isItalic: Boolean = false,
     val isBold: Boolean = false,
-    val assStyleColorArgb: Long? = null
+    val assStyleColorArgb: Long? = null,
+    val assOutlineColorArgb: Long? = null,
+    val fontFamilyName: String? = null,
+    val fontSizeScale: Float = 1.0f,
+    val hasExplicitInlineColor: Boolean = false
 )
 
 @Immutable
