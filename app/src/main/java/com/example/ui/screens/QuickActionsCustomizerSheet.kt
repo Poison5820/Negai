@@ -75,8 +75,13 @@ import com.example.ui.i18n.localizedSubtitle
 import com.example.ui.i18n.localizedTitle
 import com.example.ui.i18n.tr
 
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+
 /**
- * Interactive bottom sheet that lets the user choose which quick buttons appear
+ * Floating modal dialog that lets the user choose which quick buttons appear
  * in the bottom player bar, reorder them with Up/Down controls, or apply a preset.
  */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -93,18 +98,46 @@ fun QuickActionsCustomizerSheet(
         .ifEmpty { PlayerQuickAction.defaultActions }
     val availableToAdd = com.example.model.QuickActionsSerializer.availableToAdd(activeList)
 
-    PlayerFrostedModalSheet(
-        onDismissRequest = onDismiss
+    val bg = MaterialTheme.colorScheme.background
+    val isPureOled = bg.red < 0.01f && bg.green < 0.01f && bg.blue < 0.01f
+    val containerColor = if (isPureOled) {
+        Color(0xFF050505)
+    } else {
+        MaterialTheme.colorScheme.surfaceContainerHigh
+    }
+
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
-        Column(
+        Surface(
+            shape = RoundedCornerShape(24.dp),
+            color = containerColor,
+            border = BorderStroke(
+                1.dp,
+                MaterialTheme.colorScheme.primary.copy(alpha = if (isPureOled) 0.22f else 0.35f)
+            ),
+            tonalElevation = if (isPureOled) 0.dp else 6.dp,
+            shadowElevation = if (isPureOled) 0.dp else 16.dp,
             modifier = Modifier
-                .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 12.dp)
-                .padding(bottom = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+                .fillMaxWidth(0.94f)
+                .widthIn(max = 520.dp)
+                .heightIn(max = 660.dp)
+                .padding(vertical = 16.dp)
         ) {
-            // Header
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f, fill = false)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    // Header
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -317,14 +350,21 @@ fun QuickActionsCustomizerSheet(
                 }
             }
 
-            Spacer(modifier = Modifier.height(4.dp))
-            Button(
-                onClick = onDismiss,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("quick_actions_done_button")
-            ) {
-                Text(tr("Готово", "Done"))
+                }
+
+                Button(
+                    onClick = onDismiss,
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("quick_actions_done_button")
+                ) {
+                    Text(
+                        text = tr("Готово", "Done"),
+                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                        modifier = Modifier.padding(vertical = 2.dp)
+                    )
+                }
             }
         }
     }

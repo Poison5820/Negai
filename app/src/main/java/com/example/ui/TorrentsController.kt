@@ -65,6 +65,10 @@ class TorrentsController(
     private var activeResolveJob: Job? = null
     private var activeDetailsJob: Job? = null
 
+    init {
+        TorrentSearchService.ensureConfigLoaded(application)
+    }
+
     fun checkTorrServerConnection() {
         scope.launch {
             val s = settingsFlow.value

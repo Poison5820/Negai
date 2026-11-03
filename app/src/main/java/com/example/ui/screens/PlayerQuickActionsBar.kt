@@ -199,6 +199,7 @@ internal fun PlayerQuickActionsBar(
     onOpenCustomizer: () -> Unit,
     onUserInteraction: () -> Unit = {},
     onScrollStateChanged: (Boolean) -> Unit = {},
+    onHoldMenuStateChange: (Boolean) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val isEnglish = LocalIsEnglish.current
@@ -238,6 +239,10 @@ internal fun PlayerQuickActionsBar(
 
     var activeHoldAction by remember { mutableStateOf<PlayerQuickAction?>(null) }
     var hoveredMenuIndex by remember { mutableIntStateOf(-1) }
+
+    LaunchedEffect(activeHoldAction) {
+        onHoldMenuStateChange(activeHoldAction != null)
+    }
 
     val leftScrollState = rememberScrollState()
     val rightScrollState = rememberScrollState()
@@ -917,6 +922,7 @@ private fun QuickActionHoldButton(
                             }
                         } catch (_: PointerEventTimeoutCancellationException) {
                             holdTriggered = true
+                            down.consume()
                         }
 
                         if (releasedAsTap) {
@@ -928,52 +934,20 @@ private fun QuickActionHoldButton(
 
                         if (!holdTriggered) return@awaitEachGesture
 
-                        // Long press activated: open the mini popup menu immediately and orient selection
-                        // directly to the finger's vertical position over the interface (no virtual scroll offset).
+                        // Long press activated: tracking begins directly at the button's Y coordinate.
+                        // Moving finger upward from the button traverses items from bottom (closest) to top without horizontal drift.
                         val initialItems = currentBuildMenuItems()
                         if (initialItems.isEmpty()) return@awaitEachGesture
 
-                        itemBoundsInWindow.keys.retainAll(initialItems.indices.toSet())
-                        val activeSelectedIdx = initialItems.indexOfFirst { it.isSelected }
-
                         fun mapFingerPositionToMenuIndex(
-                            localY: Float,
+                            currentLocalY: Float,
                             itemsList: List<QuickHoldMenuItem>
                         ): Int {
                             if (itemsList.isEmpty()) return 0
-                            val fingerWindowY = buttonWindowPos.y + localY
-                            val validBounds = itemBoundsInWindow.entries
-                                .filter { it.key in itemsList.indices }
-                                .sortedBy { it.key }
-
-                            if (validBounds.isNotEmpty()) {
-                                // Direct hit inside an item's window Y range
-                                validBounds.firstOrNull { (_, range) ->
-                                    fingerWindowY in range
-                                }?.let { return it.key }
-
-                                val topBound = validBounds.first()
-                                val bottomBound = validBounds.last()
-                                if (fingerWindowY <= topBound.value.start) {
-                                    return topBound.key
-                                }
-                                // When finger is on the button or at/below the bottom of the popup,
-                                // it points directly at the bottom "Откл." ("Off") item.
-                                if (fingerWindowY >= bottomBound.value.start) {
-                                    return itemsList.lastIndex
-                                }
-                                return validBounds.minByOrNull { (_, range) ->
-                                    val center = (range.start + range.endInclusive) * 0.5f
-                                    abs(fingerWindowY - center)
-                                }?.key ?: itemsList.lastIndex
-                            }
-
-                            // Geometric fallback before first layout pass:
-                            // Bottom of the menu (localY >= -6dp, on or right above the button) = lastIndex ("Откл."),
-                            // moving finger upward above the button selects progressively higher items.
-                            val heightAboveButtonPx = (-localY - with(density) { 6.dp.toPx() }).coerceAtLeast(0f)
-                            val stepsUpFromBottom = (heightAboveButtonPx / stepPx).toInt()
-                            return (itemsList.lastIndex - stepsUpFromBottom).coerceIn(0, itemsList.lastIndex)
+                            val slotPx = with(density) { 36.dp.toPx() }
+                            val deltaUpPx = (downPos.y - currentLocalY).coerceAtLeast(0f)
+                            val stepsUp = (deltaUpPx / slotPx).toInt()
+                            return (itemsList.lastIndex - stepsUp).coerceIn(0, itemsList.lastIndex)
                         }
 
                         var localHoveredIdx = mapFingerPositionToMenuIndex(downPos.y, initialItems)
@@ -1102,23 +1076,30 @@ private fun QuickActionHoldMiniPopupCard(
     onItemWindowBoundsChanged: (Int, ClosedFloatingPointRange<Float>) -> Unit = { _, _ -> },
     onSelectItem: (QuickHoldMenuItem) -> Unit
 ) {
-    val glassBg = Color(0xC80B1220)
+    val isPureOled = MaterialTheme.colorScheme.background.red < 0.01f &&
+        MaterialTheme.colorScheme.background.green < 0.01f &&
+        MaterialTheme.colorScheme.background.blue < 0.01f
+    val glassBg = if (isPureOled) Color(0xF5050505) else Color(0xC80B1220)
     val readableAccent = MaterialTheme.colorScheme.primary.ensureReadableOn(glassBg, minContrast = 5.4f)
     val glassShape = RoundedCornerShape(16.dp)
 
     Surface(
         color = glassBg,
         shape = glassShape,
-        border = BorderStroke(
-            width = 1.dp,
-            brush = Brush.verticalGradient(
-                colors = listOf(
-                    Color.White.copy(alpha = 0.44f),
-                    readableAccent.copy(alpha = 0.62f),
-                    Color.White.copy(alpha = 0.20f)
+        border = if (isPureOled) {
+            BorderStroke(1.dp, readableAccent.copy(alpha = 0.25f))
+        } else {
+            BorderStroke(
+                width = 1.dp,
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        Color.White.copy(alpha = 0.44f),
+                        readableAccent.copy(alpha = 0.62f),
+                        Color.White.copy(alpha = 0.20f)
+                    )
                 )
             )
-        ),
+        },
         shadowElevation = 16.dp,
         modifier = Modifier
             .widthIn(min = 176.dp, max = 248.dp)

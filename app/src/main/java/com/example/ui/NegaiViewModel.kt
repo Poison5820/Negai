@@ -54,6 +54,13 @@ enum class HomeTab {
     SETTINGS
 }
 
+data class HardwareVolumeHudEvent(
+    val fraction: Float,
+    val displayPercent: Int,
+    val maxBoostPercent: Int,
+    val timestampMs: Long = System.currentTimeMillis()
+)
+
 class NegaiViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = LibraryRepository.getInstance(application)
@@ -80,6 +87,18 @@ class NegaiViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _isInPipMode = MutableStateFlow(false)
     val isInPipMode: StateFlow<Boolean> = _isInPipMode.asStateFlow()
+
+    private val _hardwareVolumeHudEvent = MutableStateFlow<HardwareVolumeHudEvent?>(null)
+    val hardwareVolumeHudEvent: StateFlow<HardwareVolumeHudEvent?> = _hardwareVolumeHudEvent.asStateFlow()
+
+    fun emitHardwareVolumeHud(fraction: Float, displayPercent: Int, maxBoostPercent: Int) {
+        _hardwareVolumeHudEvent.value = HardwareVolumeHudEvent(
+            fraction = fraction,
+            displayPercent = displayPercent,
+            maxBoostPercent = maxBoostPercent,
+            timestampMs = System.currentTimeMillis()
+        )
+    }
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
@@ -919,8 +938,12 @@ class NegaiViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun setMaxAudioBoostPercent(percent: Int) {
+        val clamped = percent.coerceIn(100, 300)
+        if (playerEngine.state.value.audioBoostPercent > clamped) {
+            playerEngine.setAudioBoostPercent(clamped)
+        }
         viewModelScope.launch {
-            repository.preferencesRepository.updateMaxAudioBoostPercent(percent)
+            repository.preferencesRepository.updateMaxAudioBoostPercent(clamped)
         }
     }
 

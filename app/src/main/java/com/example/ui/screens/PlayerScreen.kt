@@ -178,6 +178,7 @@ fun PlayerScreen(
     scaleMode: VideoScaleMode,
     splitCompareEnabled: Boolean,
     splitPosition: Float,
+    hardwareVolumeHudEvent: com.example.ui.HardwareVolumeHudEvent? = null,
     onSurfaceReady: (Surface) -> Unit,
     onSurfaceDestroyed: (Surface) -> Unit,
     onBack: () -> Unit,
@@ -316,13 +317,33 @@ fun PlayerScreen(
     var isScrubbing by remember { mutableStateOf(false) }
     var scrubValueMs by remember { mutableFloatStateOf(0f) }
     var isQuickBarScrolling by remember { mutableStateOf(false) }
+    var isQuickActionHoldMenuOpen by remember { mutableStateOf(false) }
+    var showHardwareVolumeHud by remember { mutableStateOf(false) }
+    val latestIsQuickActionHoldMenuOpen by rememberUpdatedState(isQuickActionHoldMenuOpen)
+    val latestControlsVisible by rememberUpdatedState(controlsVisible)
+
+    LaunchedEffect(isQuickActionHoldMenuOpen) {
+        if (isQuickActionHoldMenuOpen && playbackState.isTempSpeedBoostActive) {
+            latestOnSetTempSpeedBoost(false)
+        }
+    }
+
+    LaunchedEffect(hardwareVolumeHudEvent?.timestampMs) {
+        if (hardwareVolumeHudEvent != null) {
+            showHardwareVolumeHud = true
+            delay(1300L)
+            showHardwareVolumeHud = false
+        }
+    }
 
     val isUiActive = controlsVisible ||
         activeSheet != ActivePlayerSheet.NONE ||
         isScrubbing ||
         isSwipeSeeking ||
         isQuickBarScrolling ||
+        isQuickActionHoldMenuOpen ||
         verticalGestureMode != VerticalGestureMode.NONE ||
+        showHardwareVolumeHud ||
         playbackState.isTempSpeedBoostActive
 
     LaunchedEffect(isUiActive) {
@@ -418,6 +439,7 @@ fun PlayerScreen(
         isScrubbing,
         isSwipeSeeking,
         isQuickBarScrolling,
+        isQuickActionHoldMenuOpen,
         verticalGestureMode,
         autoHideTimeoutMs
     ) {
@@ -428,6 +450,7 @@ fun PlayerScreen(
             !isScrubbing &&
             !isSwipeSeeking &&
             !isQuickBarScrolling &&
+            !isQuickActionHoldMenuOpen &&
             verticalGestureMode == VerticalGestureMode.NONE
         ) {
             delay(autoHideTimeoutMs)
@@ -515,8 +538,17 @@ fun PlayerScreen(
                         doubleTapFeedbackTick++
                         interactionTick++
                     },
-                    onLongPress = {
-                        if (latestSettings.gestureLongPress2x && latestPlaybackState.isPlaying) {
+                    onLongPress = { offset ->
+                        val inBottomControlsZone = latestControlsVisible &&
+                            offset.y > (size.height - 172.dp.toPx())
+                        val inTopControlsZone = latestControlsVisible &&
+                            offset.y < 84.dp.toPx()
+                        if (latestSettings.gestureLongPress2x &&
+                            latestPlaybackState.isPlaying &&
+                            !latestIsQuickActionHoldMenuOpen &&
+                            !inBottomControlsZone &&
+                            !inTopControlsZone
+                        ) {
                             boostTriggeredThisPress = true
                             latestOnSetTempSpeedBoost(true)
                         }
@@ -873,17 +905,38 @@ fun PlayerScreen(
             )
         }
 
-        // Vertical Brightness / Volume Gesture Live OLED HUD
+        // Vertical Brightness / Volume Gesture & Hardware Volume Keys Live OLED HUD
+        val activeHudMode = when {
+            verticalGestureMode != VerticalGestureMode.NONE -> verticalGestureMode
+            showHardwareVolumeHud -> VerticalGestureMode.VOLUME
+            else -> VerticalGestureMode.NONE
+        }
+        val activeHudFraction = if (verticalGestureMode != VerticalGestureMode.NONE) {
+            verticalGestureFraction
+        } else {
+            hardwareVolumeHudEvent?.fraction ?: 1f
+        }
+        val activeHudPercent = if (verticalGestureMode != VerticalGestureMode.NONE) {
+            verticalGestureDisplayPercent
+        } else {
+            hardwareVolumeHudEvent?.displayPercent ?: 100
+        }
+        val activeHudMaxBoost = if (verticalGestureMode != VerticalGestureMode.NONE) {
+            settings.maxAudioBoostPercent
+        } else {
+            hardwareVolumeHudEvent?.maxBoostPercent ?: settings.maxAudioBoostPercent
+        }
         AnimatedVisibility(
-            visible = verticalGestureMode != VerticalGestureMode.NONE && !isInPipMode,
+            visible = activeHudMode != VerticalGestureMode.NONE && !isInPipMode,
             enter = fadeIn(tween(100)),
             exit = fadeOut(tween(100)),
             modifier = Modifier.align(Alignment.Center)
         ) {
             VerticalGestureHudCard(
-                mode = verticalGestureMode,
-                fraction = verticalGestureFraction,
-                displayPercent = verticalGestureDisplayPercent
+                mode = activeHudMode,
+                fraction = activeHudFraction,
+                displayPercent = activeHudPercent,
+                maxBoostPercent = activeHudMaxBoost
             )
         }
 
@@ -1681,6 +1734,15 @@ fun PlayerScreen(
                         onScrollStateChanged = { scrolling ->
                             isQuickBarScrolling = scrolling
                             if (scrolling) interactionTick++
+                        },
+                        onHoldMenuStateChange = { open ->
+                            isQuickActionHoldMenuOpen = open
+                            if (open) {
+                                interactionTick++
+                                if (playbackState.isTempSpeedBoostActive) {
+                                    latestOnSetTempSpeedBoost(false)
+                                }
+                            }
                         }
                     )
                 }

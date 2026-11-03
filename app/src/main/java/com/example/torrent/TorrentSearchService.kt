@@ -39,36 +39,26 @@ internal sealed interface MirrorFetchOutcome<out T> {
 
 object TorrentSearchService {
 
-    val DEFAULT_JACRED_MIRRORS = listOf(
-        "https://jacred.xyz",
-        "https://jacred.pro",
-        "https://jac-red.ru",
-        "https://jr.maxvol.pro",
-        "https://jacred.viewbox.dev"
-    )
+    var DEFAULT_JACRED_MIRRORS: List<String> = emptyList()
+    var RUTOR_MIRRORS: List<String> = emptyList()
+    var NYAA_MIRRORS: List<String> = emptyList()
+    var ANILIBRIA_MIRRORS: List<String> = emptyList()
+    var APIBAY_MIRRORS: List<String> = emptyList()
 
-    val RUTOR_MIRRORS = listOf(
-        "https://rutor.info",
-        "https://rutor.is",
-        "https://6tor.org",
-        "http://rutor.info",
-        "http://rutor.is"
-    )
+    fun updateMirrorsFromConfig(model: P2PTrackerModel) {
+        DEFAULT_JACRED_MIRRORS = model.jacredMirrors
+        RUTOR_MIRRORS = model.rutorMirrors
+        NYAA_MIRRORS = model.nyaaMirrors
+        ANILIBRIA_MIRRORS = model.anilibriaMirrors
+        APIBAY_MIRRORS = model.apibayMirrors
+    }
 
-    val NYAA_MIRRORS = listOf(
-        "https://nyaa.si",
-        "https://nyaa.iss.one",
-        "https://nyaa.land"
-    )
-
-    val ANILIBRIA_MIRRORS = listOf(
-        "https://anilibria.top",
-        "https://api.anilibria.tv"
-    )
-
-    val APIBAY_MIRRORS = listOf(
-        "https://apibay.org"
-    )
+    fun ensureConfigLoaded(context: android.content.Context) {
+        if (DEFAULT_JACRED_MIRRORS.isEmpty() && RUTOR_MIRRORS.isEmpty() && NYAA_MIRRORS.isEmpty()) {
+            val model = P2PTrackerConfig.loadConfig(context)
+            updateMirrorsFromConfig(model)
+        }
+    }
 
     suspend fun searchAll(
         rawQuery: String,
@@ -81,6 +71,16 @@ object TorrentSearchService {
         val query = rawQuery.trim()
         if (query.isEmpty()) {
             return@withContext Result.success(TorrentSearchResponse(emptyList(), emptyList()))
+        }
+
+        if (DEFAULT_JACRED_MIRRORS.isEmpty() && RUTOR_MIRRORS.isEmpty() && NYAA_MIRRORS.isEmpty() && indexerUrl.isBlank()) {
+            return@withContext Result.success(
+                TorrentSearchResponse(
+                    results = emptyList(),
+                    activeSources = emptyList(),
+                    warningMessage = "Конфигурация P2P-узлов не загружена. Загрузите JSON или укажите URL в настройках P2P."
+                )
+            )
         }
 
         val httpClient = ResilientTrackerNetwork.client(enableDoh)

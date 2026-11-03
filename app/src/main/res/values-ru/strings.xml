@@ -5,18 +5,18 @@
     <!-- Navigation -->
     <string name="nav_folders">Папки</string>
     <string name="nav_recent">Недавние</string>
-    <string name="nav_torrents">Торренты</string>
+    <string name="nav_torrents">P2P</string>
     <string name="nav_settings">Настройки</string>
 
     <!-- Torrents & TorrServer -->
-    <string name="torrents_search_placeholder">Поиск: RuTracker, Rutor и другие трекеры…</string>
+    <string name="torrents_search_placeholder">Поиск по P2P-индексаторам и децентрализованным сетям…</string>
     <string name="action_watch_torrent">Смотреть</string>
     <string name="action_open_external_torrent">В другом приложении</string>
-    <string name="action_open_magnet_or_file">Magnet / .torrent</string>
-    <string name="action_saved_torrserver_list">Торренты сервера</string>
-    <string name="torrserver_online_badge">TorrServer онлайн</string>
-    <string name="torrserver_offline_badge">TorrServer не подключён</string>
-    <string name="toast_magnet_copied_no_app">Внешний торрент-клиент не найден — Magnet-ссылка скопирована</string>
+    <string name="action_open_magnet_or_file">Magnet / P2P-файл</string>
+    <string name="action_saved_torrserver_list">Потоки P2P-сервера</string>
+    <string name="torrserver_online_badge">P2P-сервер онлайн</string>
+    <string name="torrserver_offline_badge">P2P-сервер не подключён</string>
+    <string name="toast_magnet_copied_no_app">Внешний P2P-клиент не найден — Magnet-ссылка скопирована</string>
 
     <!-- Library, Storage & Exclusions -->
     <string name="action_grant_storage">Разрешить доступ к хранилищу</string>
@@ -58,7 +58,7 @@
     <string name="settings_cat_video">Видео, декодер и Anime4K</string>
     <string name="settings_cat_audio">Аудио и озвучка</string>
     <string name="settings_cat_subtitles">Субтитры (SRT / ASS)</string>
-    <string name="settings_cat_torrserver">TorrServer и торренты</string>
+    <string name="settings_cat_torrserver">P2P и потоковая передача</string>
     <string name="settings_cat_storage">Хранилище и исключения</string>
 
     <!-- Player & PiP & Notifications -->

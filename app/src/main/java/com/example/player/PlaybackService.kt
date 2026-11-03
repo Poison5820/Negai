@@ -53,20 +53,8 @@ class PlaybackService : MediaSessionService() {
      */
     private fun wrapForEpisodeNotification(exoPlayer: ExoPlayer): Player {
         return object : ForwardingPlayer(exoPlayer) {
-            override fun seekToPrevious() {
-                engine.playPreviousEpisode()
-            }
-
-            override fun seekToPreviousMediaItem() {
-                engine.playPreviousEpisode()
-            }
-
-            override fun seekToNext() {
-                engine.playNextEpisode()
-            }
-
-            override fun seekToNextMediaItem() {
-                engine.playNextEpisode()
+            override fun play() {
+                super.play()
             }
 
             override fun pause() {
@@ -79,9 +67,58 @@ class PlaybackService : MediaSessionService() {
                 super.stop()
             }
 
+            override fun seekBack() {
+                val stepMs = engine.state.value.let { 10_000L }
+                engine.seekBy(-stepMs)
+            }
+
+            override fun seekForward() {
+                val stepMs = engine.state.value.let { 10_000L }
+                engine.seekBy(stepMs)
+            }
+
+            override fun seekToPrevious() {
+                val st = engine.state.value
+                if (st.currentEpisodeIndex > 0) {
+                    engine.playPreviousEpisode()
+                } else {
+                    engine.seekTo(0L)
+                }
+            }
+
+            override fun seekToPreviousMediaItem() {
+                val st = engine.state.value
+                if (st.currentEpisodeIndex > 0) {
+                    engine.playPreviousEpisode()
+                } else {
+                    engine.seekTo(0L)
+                }
+            }
+
+            override fun seekToNext() {
+                val st = engine.state.value
+                if (st.currentEpisodeIndex in 0 until st.playlist.lastIndex) {
+                    engine.playNextEpisode()
+                } else if (hasNextMediaItem()) {
+                    super.seekToNext()
+                }
+            }
+
+            override fun seekToNextMediaItem() {
+                val st = engine.state.value
+                if (st.currentEpisodeIndex in 0 until st.playlist.lastIndex) {
+                    engine.playNextEpisode()
+                } else if (hasNextMediaItem()) {
+                    super.seekToNextMediaItem()
+                }
+            }
+
             override fun getAvailableCommands(): Player.Commands {
                 return super.getAvailableCommands()
                     .buildUpon()
+                    .add(Player.COMMAND_PLAY_PAUSE)
+                    .add(Player.COMMAND_SEEK_BACK)
+                    .add(Player.COMMAND_SEEK_FORWARD)
                     .add(Player.COMMAND_SEEK_TO_PREVIOUS)
                     .add(Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM)
                     .add(Player.COMMAND_SEEK_TO_NEXT)
@@ -90,11 +127,17 @@ class PlaybackService : MediaSessionService() {
             }
 
             override fun isCommandAvailable(command: Int): Boolean {
+                val st = engine.state.value
+                val hasPlaylistPrev = st.currentEpisodeIndex > 0 || currentPosition > 0L || mediaItemCount > 1
+                val hasPlaylistNext = (st.currentEpisodeIndex in 0 until st.playlist.lastIndex) || hasNextMediaItem()
                 return when (command) {
+                    Player.COMMAND_PLAY_PAUSE,
+                    Player.COMMAND_SEEK_BACK,
+                    Player.COMMAND_SEEK_FORWARD -> true
                     Player.COMMAND_SEEK_TO_PREVIOUS,
-                    Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM -> mediaItemCount > 1 || currentPosition > 0L
+                    Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM -> hasPlaylistPrev
                     Player.COMMAND_SEEK_TO_NEXT,
-                    Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM -> hasNextMediaItem()
+                    Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM -> hasPlaylistNext
                     else -> super.isCommandAvailable(command)
                 }
             }

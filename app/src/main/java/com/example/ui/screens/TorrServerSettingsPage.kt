@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
@@ -32,6 +33,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,6 +50,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.model.PlayerSettings
 import com.example.model.StreamingQualityPreset
+import com.example.torrent.P2PTrackerConfig
 import com.example.torrent.TorrServerClient
 import com.example.torrent.TorrentIntentHelper
 import com.example.torrent.TorrentSearchService
@@ -343,13 +346,99 @@ internal fun TorrServerSettingsPage(
         )
     }
 
-    // 2. Tracker Search & RuTracker / Rutor / Torznab Configuration
+    var p2pModel by remember { mutableStateOf(P2PTrackerConfig.loadConfig(context)) }
+    var showP2pConfigDialog by remember { mutableStateOf(false) }
+    var remoteConfigUrl by remember { mutableStateOf("https://raw.githubusercontent.com/Poison5820/Negai/main/app/src/main/assets/p2p_trackers.json") }
+    var isLoadingRemote by remember { mutableStateOf(false) }
+    var p2pDialogMessage by remember { mutableStateOf<String?>(null) }
+
+    // 2. P2P Indexers & Decentralized Nodes (Play Store Compliant)
     SettingsSectionCard(
-        title = tr("Поиск по трекерам (RuTracker, Rutor, Аниме)", "Tracker Search (RuTracker, Rutor, Anime)"),
+        title = tr("P2P-индексаторы и децентрализованные узлы", "P2P Indexers & Decentralized Nodes"),
         icon = Icons.Default.Search
     ) {
+        // P2P Configuration Status Pill
+        Surface(
+            color = if (p2pModel.isConfigured) {
+                MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+            } else {
+                MaterialTheme.colorScheme.error.copy(alpha = 0.10f)
+            },
+            shape = RoundedCornerShape(12.dp),
+            border = BorderStroke(
+                1.dp,
+                if (p2pModel.isConfigured) {
+                    MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
+                } else {
+                    MaterialTheme.colorScheme.error.copy(alpha = 0.30f)
+                }
+            ),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = if (p2pModel.isConfigured) {
+                        tr(
+                            "Конфигурация P2P активна: ${p2pModel.totalNodes} узлов",
+                            "P2P Configuration active: ${p2pModel.totalNodes} nodes"
+                        )
+                    } else {
+                        tr(
+                            "Конфигурация P2P не загружена (требуется для поиска)",
+                            "P2P Configuration not loaded (required for search)"
+                        )
+                    },
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                    color = if (p2pModel.isConfigured) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                )
+                Text(
+                    text = if (p2pModel.isConfigured) {
+                        p2pModel.sourceDescription
+                    } else {
+                        tr(
+                            "Для соблюдения правил Google Play список публичных P2P-узлов не встроен в приложение и загружается по вашему запросу.",
+                            "In compliance with Google Play policies, public P2P node mirrors are not bundled in the binary and are loaded on-demand by user request."
+                        )
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Button(
+                onClick = { showP2pConfigDialog = true },
+                modifier = Modifier
+                    .weight(1f)
+                    .testTag("p2p_config_button")
+            ) {
+                Icon(Icons.Default.Download, contentDescription = null, modifier = Modifier.size(16.dp))
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(tr("Загрузить JSON узлов", "Load Node JSON"))
+            }
+
+            if (p2pModel.isConfigured) {
+                OutlinedButton(
+                    onClick = {
+                        P2PTrackerConfig.resetConfig(context)
+                        p2pModel = P2PTrackerConfig.loadConfig(context)
+                        TorrentSearchService.updateMirrorsFromConfig(p2pModel)
+                    },
+                    modifier = Modifier.testTag("p2p_reset_config_button")
+                ) {
+                    Text(tr("Сбросить", "Reset"))
+                }
+            }
+        }
+
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
         SettingToggleRow(
-            title = tr("Прямой поиск по Rutor и публичным агрегаторам", "Direct Search on Rutor & Public Aggregators"),
+            title = tr("Прямой поиск по пиринговым узлам и агрегаторам", "Direct Search on P2P Nodes & Aggregators"),
             checked = settings.enableDirectRutorSearch,
             onCheckedChange = actions.onUpdateEnableDirectRutorSearch,
             testTag = "enable_direct_rutor_switch"
@@ -358,7 +447,7 @@ internal fun TorrServerSettingsPage(
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
         SettingToggleRow(
-            title = tr("Прямой поиск по аниме-трекерам (AniLibria / Nyaa)", "Direct Anime Tracker Search (AniLibria / Nyaa)"),
+            title = tr("Прямой поиск по аниме-узлам (AniLibria / Nyaa)", "Direct Anime P2P Node Search (AniLibria / Nyaa)"),
             checked = settings.enableAnimeTrackerSearch,
             onCheckedChange = actions.onUpdateEnableAnimeTrackerSearch,
             testTag = "enable_anime_tracker_switch"
@@ -367,7 +456,7 @@ internal fun TorrServerSettingsPage(
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
         SettingToggleRow(
-            title = tr("Обход блокировок зеркал через DNS-over-HTTPS (DoH)", "Bypass Mirror Blocks via DNS-over-HTTPS (DoH)"),
+            title = tr("Безопасное разрешение доменов узлов через DNS-over-HTTPS (DoH)", "Secure Domain Resolution via DNS-over-HTTPS (DoH)"),
             checked = settings.enableTrackerDoh,
             onCheckedChange = actions.onUpdateEnableTrackerDoh,
             testTag = "enable_tracker_doh_switch"
@@ -376,14 +465,14 @@ internal fun TorrServerSettingsPage(
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
 
         Text(
-            text = tr("Индексатор Jackett / Prowlarr / Torznab (RuTracker, Kinozal)", "Jackett / Prowlarr / Torznab Indexer (RuTracker, Kinozal)"),
+            text = tr("Пользовательский P2P / Torznab / JacRed индексатор", "Custom P2P / Torznab / JacRed Indexer"),
             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
         )
 
         OutlinedTextField(
             value = indexerUrlInput,
             onValueChange = { indexerUrlInput = it },
-            label = { Text("URL Jackett / Prowlarr / Torznab") },
+            label = { Text("URL Torznab / JacRed / API") },
             placeholder = { Text("http://192.168.1.100:9117") },
             singleLine = true,
             shape = RoundedCornerShape(14.dp),
@@ -396,7 +485,7 @@ internal fun TorrServerSettingsPage(
             value = indexerKeyInput,
             onValueChange = { indexerKeyInput = it },
             label = { Text(tr("API Key (если требуется)", "API Key (if required)")) },
-            placeholder = { Text(tr("Ключ API из Jackett / Prowlarr", "API key from Jackett / Prowlarr")) },
+            placeholder = { Text(tr("Ключ API индексатора", "Indexer API key")) },
             singleLine = true,
             shape = RoundedCornerShape(14.dp),
             modifier = Modifier
@@ -469,9 +558,9 @@ internal fun TorrServerSettingsPage(
                                     searchTestOk = true
                                     val srcSummary = resp.activeSources.joinToString(", ")
                                     searchTestResultText = if (isEnglish) {
-                                        "Search works! Found ${resp.results.size} torrents ($srcSummary)"
+                                        "Search works! Found ${resp.results.size} streams ($srcSummary)"
                                     } else {
-                                        "Поиск работает! Найдено ${resp.results.size} раздач ($srcSummary)"
+                                        "Поиск работает! Найдено ${resp.results.size} P2P-потоков ($srcSummary)"
                                     }
                                 } else {
                                     searchTestOk = false
@@ -501,5 +590,105 @@ internal fun TorrServerSettingsPage(
                 Text(tr("Тест поиска", "Test Search"))
             }
         }
+    }
+
+    if (showP2pConfigDialog) {
+        val isPureOled = MaterialTheme.colorScheme.background.red < 0.01f &&
+            MaterialTheme.colorScheme.background.green < 0.01f &&
+            MaterialTheme.colorScheme.background.blue < 0.01f
+
+        AlertDialog(
+            onDismissRequest = { showP2pConfigDialog = false },
+            containerColor = if (isPureOled) androidx.compose.ui.graphics.Color(0xFF050505) else MaterialTheme.colorScheme.surface,
+            shape = RoundedCornerShape(20.dp),
+            title = {
+                Text(
+                    text = tr("Конфигурация P2P-узлов", "P2P Node Configuration"),
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(
+                        text = tr(
+                            "Вы можете загрузить стандартную конфигурацию публичных узлов или указать собственный URL внешнего JSON (GitHub RAW, личный сервер).",
+                            "You can load standard public node configuration or specify a custom external JSON URL (GitHub RAW, personal server)."
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    OutlinedTextField(
+                        value = remoteConfigUrl,
+                        onValueChange = { remoteConfigUrl = it },
+                        label = { Text("URL JSON-файла") },
+                        singleLine = true,
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    if (p2pDialogMessage != null) {
+                        Text(
+                            text = p2pDialogMessage.orEmpty(),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        FilledTonalButton(
+                            onClick = {
+                                val outcome = P2PTrackerConfig.saveConfig(context, P2PTrackerConfig.SAMPLE_INDEXER_JSON)
+                                outcome.fold(
+                                    onSuccess = { model ->
+                                        p2pModel = model
+                                        TorrentSearchService.updateMirrorsFromConfig(model)
+                                        p2pDialogMessage = if (isEnglish) "Loaded ${model.totalNodes} nodes" else "Загружено ${model.totalNodes} узлов"
+                                    },
+                                    onFailure = { p2pDialogMessage = it.message }
+                                )
+                            },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(tr("Стандартный список", "Standard List"), style = MaterialTheme.typography.labelSmall)
+                        }
+
+                        Button(
+                            onClick = {
+                                scope.launch {
+                                    isLoadingRemote = true
+                                    val res = P2PTrackerConfig.fetchRemoteConfig(context, remoteConfigUrl, settings.enableTrackerDoh)
+                                    isLoadingRemote = false
+                                    res.fold(
+                                        onSuccess = { model ->
+                                            p2pModel = model
+                                            TorrentSearchService.updateMirrorsFromConfig(model)
+                                            p2pDialogMessage = if (isEnglish) "Downloaded ${model.totalNodes} nodes" else "Скачано ${model.totalNodes} узлов"
+                                        },
+                                        onFailure = { p2pDialogMessage = it.message }
+                                    )
+                                }
+                            },
+                            enabled = !isLoadingRemote,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            if (isLoadingRemote) {
+                                CircularProgressIndicator(modifier = Modifier.size(14.dp), strokeWidth = 2.dp)
+                            } else {
+                                Text(tr("Загрузить с URL", "Download URL"), style = MaterialTheme.typography.labelSmall)
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showP2pConfigDialog = false }) {
+                    Text(tr("Готово", "Done"), fontWeight = FontWeight.Bold)
+                }
+            }
+        )
     }
 }

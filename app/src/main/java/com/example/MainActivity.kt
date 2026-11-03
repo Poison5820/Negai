@@ -1,12 +1,17 @@
 package com.example
 
 import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.res.Configuration
 import android.graphics.drawable.ColorDrawable
+import android.media.AudioManager
 import android.os.Build
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.WindowManager
+import kotlin.math.roundToInt
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -45,6 +50,7 @@ class MainActivity : ComponentActivity() {
 
     private val viewModel: NegaiViewModel by viewModels()
     private var pipReceiver: BroadcastReceiver? = null
+    private var noisyReceiver: BroadcastReceiver? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val bootSettings = PlayerPreferencesRepository.readBootSettingsSnapshot(this)
@@ -71,6 +77,23 @@ class MainActivity : ComponentActivity() {
                 viewModel.playerEngine.seekBy(stepMs)
             }
         )
+
+        val becomingNoisyReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                if (intent?.action == AudioManager.ACTION_AUDIO_BECOMING_NOISY) {
+                    if (viewModel.isPlayerOpen.value && viewModel.playbackState.value.isPlaying) {
+                        viewModel.playerEngine.pauseAndPersist()
+                    }
+                }
+            }
+        }
+        runCatching {
+            registerReceiver(
+                becomingNoisyReceiver,
+                IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
+            )
+            noisyReceiver = becomingNoisyReceiver
+        }
 
         handleIncomingVideoIntent(intent)
 
@@ -249,10 +272,123 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (viewModel.isPlayerOpen.value) {
+            when (keyCode) {
+                KeyEvent.KEYCODE_VOLUME_UP -> {
+                    val audioManager = getSystemService(Context.AUDIO_SERVICE) as? AudioManager
+                    if (audioManager != null) {
+                        val maxVol = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC).coerceAtLeast(1)
+                        val curVol = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC).coerceIn(0, maxVol)
+                        val stepPercent = (100f / maxVol.toFloat()).roundToInt().coerceIn(5, 15)
+                        val maxBoostPct = viewModel.playerSettings.value.maxAudioBoostPercent.coerceIn(100, 300)
+                        val curBoost = viewModel.playbackState.value.audioBoostPercent.coerceIn(100, maxBoostPct)
+                        if (curVol < maxVol) {
+                            val nextVol = (curVol + 1).coerceAtMost(maxVol)
+                            runCatching {
+                                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, nextVol, 0)
+                            }
+                            if (curBoost > 100) {
+                                viewModel.playerEngine.setAudioBoostPercent(100)
+                            }
+                            val frac = (nextVol.toFloat() / maxVol.toFloat()).coerceIn(0f, 1f)
+                            val pct = (frac * 100f).roundToInt().coerceIn(0, 100)
+                            viewModel.emitHardwareVolumeHud(frac, pct, maxBoostPct)
+                        } else {
+                            if (maxBoostPct > 100) {
+                                val nextBoost = (curBoost + stepPercent).coerceIn(100, maxBoostPct)
+                                viewModel.playerEngine.setAudioBoostPercent(nextBoost)
+                                viewModel.emitHardwareVolumeHud(1.0f, nextBoost, maxBoostPct)
+                            } else {
+                                viewModel.playerEngine.setAudioBoostPercent(100)
+                                viewModel.emitHardwareVolumeHud(1.0f, 100, 100)
+                            }
+                        }
+                        return true
+                    }
+                }
+
+                KeyEvent.KEYCODE_VOLUME_DOWN -> {
+                    val audioManager = getSystemService(Context.AUDIO_SERVICE) as? AudioManager
+                    if (audioManager != null) {
+                        val maxVol = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC).coerceAtLeast(1)
+                        val curVol = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC).coerceIn(0, maxVol)
+                        val stepPercent = (100f / maxVol.toFloat()).roundToInt().coerceIn(5, 15)
+                        val maxBoostPct = viewModel.playerSettings.value.maxAudioBoostPercent.coerceIn(100, 300)
+                        val curBoost = viewModel.playbackState.value.audioBoostPercent.coerceIn(100, maxBoostPct)
+                        // First step down software audio boost before lowering system volume
+                        if (curBoost > 100) {
+                            val nextBoost = (curBoost - stepPercent).coerceAtLeast(100)
+                            viewModel.playerEngine.setAudioBoostPercent(nextBoost)
+                            viewModel.emitHardwareVolumeHud(1.0f, nextBoost, maxBoostPct)
+                        } else {
+                            val nextVol = (curVol - 1).coerceAtLeast(0)
+                            runCatching {
+                                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, nextVol, 0)
+                            }
+                            val frac = (nextVol.toFloat() / maxVol.toFloat()).coerceIn(0f, 1f)
+                            val pct = (frac * 100f).roundToInt().coerceIn(0, 100)
+                            viewModel.emitHardwareVolumeHud(frac, pct, maxBoostPct)
+                        }
+                        return true
+                    }
+                }
+
+                KeyEvent.KEYCODE_MEDIA_PLAY -> {
+                    if (!viewModel.playbackState.value.isPlaying) {
+                        viewModel.playerEngine.togglePlayPause()
+                    }
+                    return true
+                }
+
+                KeyEvent.KEYCODE_MEDIA_PAUSE,
+                KeyEvent.KEYCODE_MEDIA_STOP -> {
+                    if (viewModel.playbackState.value.isPlaying) {
+                        viewModel.playerEngine.pauseAndPersist()
+                    }
+                    return true
+                }
+
+                KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE,
+                KeyEvent.KEYCODE_HEADSETHOOK -> {
+                    viewModel.playerEngine.togglePlayPause()
+                    return true
+                }
+
+                KeyEvent.KEYCODE_MEDIA_NEXT -> {
+                    viewModel.playerEngine.playNextEpisode()
+                    return true
+                }
+
+                KeyEvent.KEYCODE_MEDIA_PREVIOUS -> {
+                    viewModel.playerEngine.playPreviousEpisode()
+                    return true
+                }
+
+                KeyEvent.KEYCODE_MEDIA_FAST_FORWARD -> {
+                    val stepMs = viewModel.playerSettings.value.seekStepSeconds.coerceAtLeast(3) * 1000L
+                    viewModel.playerEngine.seekBy(stepMs)
+                    return true
+                }
+
+                KeyEvent.KEYCODE_MEDIA_REWIND -> {
+                    val stepMs = viewModel.playerSettings.value.seekStepSeconds.coerceAtLeast(3) * 1000L
+                    viewModel.playerEngine.seekBy(-stepMs)
+                    return true
+                }
+            }
+        }
+        return super.onKeyDown(keyCode, event)
+    }
+
     override fun onDestroy() {
         pipReceiver?.let {
             runCatching { unregisterReceiver(it) }
             pipReceiver = null
+        }
+        noisyReceiver?.let {
+            runCatching { unregisterReceiver(it) }
+            noisyReceiver = null
         }
         super.onDestroy()
     }
@@ -287,6 +423,7 @@ fun NegaiAppRoot(
     val scaleMode by viewModel.videoScaleMode.collectAsStateWithLifecycle()
     val splitCompare by viewModel.anime4kSplitCompare.collectAsStateWithLifecycle()
     val splitPos by viewModel.anime4kSplitPos.collectAsStateWithLifecycle()
+    val hardwareVolumeHudEvent by viewModel.hardwareVolumeHudEvent.collectAsStateWithLifecycle()
 
     LaunchedEffect(
         isPlayerOpen,
@@ -423,6 +560,7 @@ fun NegaiAppRoot(
                 scaleMode = scaleMode,
                 splitCompareEnabled = splitCompare,
                 splitPosition = splitPos,
+                hardwareVolumeHudEvent = hardwareVolumeHudEvent,
                 onSurfaceReady = { surface -> viewModel.playerEngine.attachVideoSurface(surface) },
                 onSurfaceDestroyed = { surface -> viewModel.playerEngine.detachVideoSurface(surface) },
                 onBack = { viewModel.exitPlayer() },

@@ -580,13 +580,13 @@ fun QuickBarPreset.localizedSubtitle(isEnglish: Boolean): String = when (this) {
 }
 
 fun TorrentTrackerGroup.localizedLabel(isEnglish: Boolean): String = if (!isEnglish) label else when (this) {
-    TorrentTrackerGroup.ALL -> "All"
-    TorrentTrackerGroup.RUTRACKER -> "RuTracker"
-    TorrentTrackerGroup.RUTOR -> "Rutor"
-    TorrentTrackerGroup.KINOZAL -> "Kinozal"
-    TorrentTrackerGroup.NNMCLUB -> "NNM-Club"
-    TorrentTrackerGroup.ANIME -> "Anime"
-    TorrentTrackerGroup.OTHER -> "Other"
+    TorrentTrackerGroup.ALL -> "All Nodes"
+    TorrentTrackerGroup.RUTRACKER -> "P2P Index"
+    TorrentTrackerGroup.RUTOR -> "Open P2P"
+    TorrentTrackerGroup.KINOZAL -> "Cinema Node"
+    TorrentTrackerGroup.NNMCLUB -> "Community"
+    TorrentTrackerGroup.ANIME -> "Anime P2P"
+    TorrentTrackerGroup.OTHER -> "Other Nodes"
 }
 
 fun TorrentQualityFilter.localizedLabel(isEnglish: Boolean): String = if (!isEnglish) label else when (this) {
@@ -598,15 +598,15 @@ fun TorrentQualityFilter.localizedLabel(isEnglish: Boolean): String = if (!isEng
 }
 
 fun TorrentSortMode.localizedTitle(isEnglish: Boolean): String = if (!isEnglish) title else when (this) {
-    TorrentSortMode.PRIORITY -> "Priority (RuTracker / Rutor)"
-    TorrentSortMode.SEEDERS -> "By Seeders Count"
-    TorrentSortMode.SIZE -> "By Torrent Size"
+    TorrentSortMode.PRIORITY -> "Priority (Primary P2P Nodes)"
+    TorrentSortMode.SEEDERS -> "By Peers Count"
+    TorrentSortMode.SIZE -> "By Stream Size"
     TorrentSortMode.DATE -> "By Date Added"
 }
 
 fun TorrentSortMode.localizedShortLabel(isEnglish: Boolean): String = if (!isEnglish) shortLabel else when (this) {
     TorrentSortMode.PRIORITY -> "Priority"
-    TorrentSortMode.SEEDERS -> "Seeds"
+    TorrentSortMode.SEEDERS -> "Peers"
     TorrentSortMode.SIZE -> "Size"
     TorrentSortMode.DATE -> "Newest"
 }

@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "description": "Пользовательские P2P-индексаторы и децентрализованные узлы",
+  "jacred_mirrors": [
+    "https://jacred.xyz",
+    "https://jacred.pro",
+    "https://jac-red.ru",
+    "https://jr.maxvol.pro",
+    "https://jacred.viewbox.dev"
+  ],
+  "rutor_mirrors": [
+    "https://rutor.info",
+    "https://rutor.is",
+    "https://6tor.org"
+  ],
+  "nyaa_mirrors": [
+    "https://nyaa.si",
+    "https://nyaa.iss.one",
+    "https://nyaa.land"
+  ],
+  "anilibria_mirrors": [
+    "https://anilibria.top",
+    "https://api.anilibria.tv"
+  ],
+  "apibay_mirrors": [
+    "https://apibay.org"
+  ]
+}

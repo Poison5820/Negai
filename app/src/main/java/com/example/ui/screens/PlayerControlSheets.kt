@@ -104,52 +104,72 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import kotlin.math.roundToInt
 
-internal val PlayerFrostedGlassBaseColor = Color(0xC80B1220)
+internal val PlayerFrostedGlassBaseColor = Color(0xF2050505)
 
 @Composable
 internal fun playerPopupSheetContainerColor(): Color {
-    val accent = MaterialTheme.colorScheme.primary.ensureReadableOn(PlayerFrostedGlassBaseColor, minContrast = 5.2f)
-    return lerp(PlayerFrostedGlassBaseColor, accent, 0.08f).copy(alpha = 0.80f)
+    val bg = MaterialTheme.colorScheme.background
+    val bgLum = bg.red * 0.2126f + bg.green * 0.7152f + bg.blue * 0.0722f
+    val isDark = bgLum < 0.35f
+    val isPureOled = bg.red < 0.01f && bg.green < 0.01f && bg.blue < 0.01f
+    return when {
+        !isDark -> Color(0xF8FFFFFF)
+        isPureOled -> Color(0xFA040404)
+        else -> Color(0xF20A101C)
+    }
 }
 
 @Composable
 internal fun playerPopupCardColor(): Color {
-    val accent = MaterialTheme.colorScheme.primary.ensureReadableOn(PlayerFrostedGlassBaseColor, minContrast = 5.2f)
-    return lerp(Color(0xB8131E33), accent, 0.08f).copy(alpha = 0.68f)
+    val bg = MaterialTheme.colorScheme.background
+    val bgLum = bg.red * 0.2126f + bg.green * 0.7152f + bg.blue * 0.0722f
+    val isDark = bgLum < 0.35f
+    val isPureOled = bg.red < 0.01f && bg.green < 0.01f && bg.blue < 0.01f
+    return when {
+        !isDark -> MaterialTheme.colorScheme.surfaceContainerLow
+        isPureOled -> Color(0xFF0A0A0A)
+        else -> Color(0xD9111A2C)
+    }
 }
 
 @Composable
 internal fun playerPopupBorderStroke(): BorderStroke {
-    val accent = MaterialTheme.colorScheme.primary.ensureReadableOn(PlayerFrostedGlassBaseColor, minContrast = 5.4f)
-    return BorderStroke(
-        width = 1.dp,
-        brush = Brush.verticalGradient(
-            colors = listOf(
-                Color.White.copy(alpha = 0.44f),
-                accent.copy(alpha = 0.62f),
-                Color.White.copy(alpha = 0.20f)
-            )
-        )
-    )
+    val bg = MaterialTheme.colorScheme.background
+    val isPureOled = bg.red < 0.01f && bg.green < 0.01f && bg.blue < 0.01f
+    val accent = MaterialTheme.colorScheme.primary
+    return if (isPureOled) {
+        BorderStroke(0.8.dp, accent.copy(alpha = 0.22f))
+    } else {
+        BorderStroke(1.dp, accent.copy(alpha = 0.38f))
+    }
 }
 
 @Composable
-internal fun playerFrostedGlassBrush(accentAlpha: Float = 0.10f): Brush {
-    val accent = MaterialTheme.colorScheme.primary.ensureReadableOn(PlayerFrostedGlassBaseColor, minContrast = 5.4f)
-    return Brush.verticalGradient(
-        colors = listOf(
-            Color.White.copy(alpha = 0.16f),
-            accent.copy(alpha = accentAlpha),
-            Color(0x38040812)
+internal fun playerFrostedGlassBrush(accentAlpha: Float = 0.04f): Brush {
+    val bg = MaterialTheme.colorScheme.background
+    val isPureOled = bg.red < 0.01f && bg.green < 0.01f && bg.blue < 0.01f
+    val accent = MaterialTheme.colorScheme.primary
+    return if (isPureOled) {
+        Brush.verticalGradient(
+            colors = listOf(
+                Color(0xFF050505),
+                Color(0xFF030303)
+            )
         )
-    )
+    } else {
+        Brush.verticalGradient(
+            colors = listOf(
+                accent.copy(alpha = accentAlpha.coerceAtMost(0.06f)),
+                Color.Transparent
+            )
+        )
+    }
 }
 
 /**
- * Unified Frosted Glass ModalBottomSheet for all player pop-ups:
+ * Unified Theme-Adaptive ModalBottomSheet for all player pop-ups:
  * - Horizontally compact (`sheetMaxWidth = 440.dp`)
- * - Same frosted glass material as the quick-action mini pop-up menus
- * - Preserves the active accent color as a subtle glass tint and specular border
+ * - Adapts to the active theme (Light, Dark, and Pure OLED with pitch-black surface)
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -159,29 +179,73 @@ internal fun PlayerFrostedModalSheet(
     maxWidth: Dp = 440.dp,
     content: @Composable () -> Unit
 ) {
-    val glassBg = PlayerFrostedGlassBaseColor
-    val readableAccent = MaterialTheme.colorScheme.primary.ensureReadableOn(glassBg, minContrast = 5.4f)
-    val readableSecondary = MaterialTheme.colorScheme.secondary.ensureReadableOn(glassBg, minContrast = 5.2f)
-    val readableTertiary = MaterialTheme.colorScheme.tertiary.ensureReadableOn(glassBg, minContrast = 5.0f)
-    val frostedScheme = MaterialTheme.colorScheme.copy(
-        primary = readableAccent,
-        onPrimary = Color(0xFF070D19),
-        primaryContainer = lerp(Color(0xD9142138), readableAccent, 0.34f),
-        onPrimaryContainer = Color.White,
-        secondary = readableSecondary,
-        onSecondary = Color(0xFF070D19),
-        secondaryContainer = lerp(Color(0xD9142138), readableSecondary, 0.30f),
-        onSecondaryContainer = Color.White,
-        tertiary = readableTertiary,
-        tertiaryContainer = lerp(Color(0xD9142138), readableTertiary, 0.28f),
-        onTertiaryContainer = Color.White,
-        surface = glassBg,
-        onSurface = Color(0xFFF8FAFC),
-        surfaceVariant = Color(0xB8152036),
-        onSurfaceVariant = Color(0xFFCBD5E1),
-        outline = readableAccent.copy(alpha = 0.52f),
-        outlineVariant = Color.White.copy(alpha = 0.18f)
+    val bg = MaterialTheme.colorScheme.background
+    val bgLum = bg.red * 0.2126f + bg.green * 0.7152f + bg.blue * 0.0722f
+    val isDark = bgLum < 0.35f
+    val isPureOled = bg.red < 0.01f && bg.green < 0.01f && bg.blue < 0.01f
+
+    val sheetBg = when {
+        !isDark -> Color(0xFAFFFFFF)
+        isPureOled -> Color(0xFC040404)
+        else -> Color(0xF50B111E)
+    }
+    val readableAccent = MaterialTheme.colorScheme.primary.ensureReadableOn(
+        sheetBg,
+        minContrast = if (isDark) 5.2f else 4.8f
     )
+    val readableSecondary = MaterialTheme.colorScheme.secondary.ensureReadableOn(
+        sheetBg,
+        minContrast = if (isDark) 5.0f else 4.6f
+    )
+    val readableTertiary = MaterialTheme.colorScheme.tertiary.ensureReadableOn(
+        sheetBg,
+        minContrast = if (isDark) 4.8f else 4.5f
+    )
+    val adaptiveScheme = if (!isDark) {
+        MaterialTheme.colorScheme.copy(
+            surface = sheetBg,
+            surfaceContainerLowest = Color.White,
+            surfaceContainerLow = Color(0xFFF6F8FC),
+            surfaceContainer = Color(0xFFEEF2F8),
+            surfaceContainerHigh = Color(0xFFE4EAF3)
+        )
+    } else {
+        MaterialTheme.colorScheme.copy(
+            primary = readableAccent,
+            onPrimary = Color(0xFF05070C),
+            primaryContainer = if (isPureOled) {
+                lerp(Color(0xFF0E0E0E), readableAccent, 0.14f)
+            } else {
+                lerp(Color(0xD9142138), readableAccent, 0.30f)
+            },
+            onPrimaryContainer = Color.White,
+            secondary = readableSecondary,
+            onSecondary = Color(0xFF05070C),
+            secondaryContainer = if (isPureOled) {
+                lerp(Color(0xFF0E0E0E), readableSecondary, 0.12f)
+            } else {
+                lerp(Color(0xD9142138), readableSecondary, 0.26f)
+            },
+            onSecondaryContainer = Color.White,
+            tertiary = readableTertiary,
+            tertiaryContainer = if (isPureOled) {
+                lerp(Color(0xFF0E0E0E), readableTertiary, 0.12f)
+            } else {
+                lerp(Color(0xD9142138), readableTertiary, 0.24f)
+            },
+            onTertiaryContainer = Color.White,
+            surface = sheetBg,
+            onSurface = Color(0xFFF8FAFC),
+            surfaceVariant = if (isPureOled) Color(0xFF0C0C0C) else Color(0xD9131D30),
+            onSurfaceVariant = Color(0xFFCBD5E1),
+            surfaceContainerLowest = if (isPureOled) Color(0xFF030303) else Color(0xFF070B14),
+            surfaceContainerLow = if (isPureOled) Color(0xFF080808) else Color(0xFF0C1220),
+            surfaceContainer = if (isPureOled) Color(0xFF0D0D0D) else Color(0xFF121A2B),
+            surfaceContainerHigh = if (isPureOled) Color(0xFF141414) else Color(0xFF192338),
+            outline = readableAccent.copy(alpha = if (isPureOled) 0.25f else 0.42f),
+            outlineVariant = if (isPureOled) Color(0xFF1A1A1A) else Color.White.copy(alpha = 0.14f)
+        )
+    }
     val sheetShape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
 
     ModalBottomSheet(
@@ -194,36 +258,20 @@ internal fun PlayerFrostedModalSheet(
         modifier = modifier
     ) {
         KeepPlayerSheetImmersive()
-        MaterialTheme(colorScheme = frostedScheme) {
-            CompositionLocalProvider(LocalContentColor provides frostedScheme.onSurface) {
+        MaterialTheme(colorScheme = adaptiveScheme) {
+            CompositionLocalProvider(LocalContentColor provides adaptiveScheme.onSurface) {
                 Surface(
-                    color = glassBg,
+                    color = sheetBg,
                     shape = sheetShape,
                     border = BorderStroke(
-                        width = 1.dp,
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                Color.White.copy(alpha = 0.44f),
-                                readableAccent.copy(alpha = 0.62f),
-                                Color.White.copy(alpha = 0.18f)
-                            )
-                        )
+                        width = if (isPureOled) 0.8.dp else 1.dp,
+                        color = readableAccent.copy(alpha = if (isPureOled) 0.22f else 0.36f)
                     ),
-                    shadowElevation = 18.dp,
+                    shadowElevation = if (isPureOled) 0.dp else 14.dp,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(
-                                Brush.verticalGradient(
-                                    colors = listOf(
-                                        Color.White.copy(alpha = 0.15f),
-                                        readableAccent.copy(alpha = 0.09f),
-                                        Color(0x38040812)
-                                    )
-                                )
-                            )
+                        modifier = Modifier.fillMaxWidth()
                     ) {
                         Box(
                             modifier = Modifier
@@ -236,7 +284,7 @@ internal fun PlayerFrostedModalSheet(
                                     .width(36.dp)
                                     .height(4.dp)
                                     .clip(CircleShape)
-                                    .background(readableAccent.copy(alpha = 0.55f))
+                                    .background(readableAccent.copy(alpha = 0.45f))
                             )
                         }
                         content()

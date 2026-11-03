@@ -1267,6 +1267,37 @@ internal fun AudioSettingsPage(
     }
 
     SettingsSectionCard(
+        title = tr("Режим максимального усиления громкости", "Max Allowed Volume Boost Mode"),
+        icon = Icons.Default.GraphicEq
+    ) {
+        Text(
+            text = tr(
+                "Усиление громкости свыше 100% включается автоматически свайпом вверх или кнопками громкости, когда системная громкость достигает максимума.",
+                "Volume boost above 100% activates automatically via vertical swipe or hardware volume keys when system volume reaches 100%."
+            ),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            listOf(100, 150, 200, 250, 300).forEach { maxPct ->
+                FilterChip(
+                    selected = settings.maxAudioBoostPercent.coerceIn(100, 300) == maxPct,
+                    onClick = { actions.onUpdateMaxAudioBoostPercent(maxPct) },
+                    label = {
+                        Text(
+                            if (maxPct == 100) tr("100% (Выкл)", "100% (Off)") else "$maxPct%"
+                        )
+                    },
+                    modifier = Modifier.testTag("settings_max_audio_boost_$maxPct")
+                )
+            }
+        }
+    }
+
+    SettingsSectionCard(
         title = tr("Очистка звука (De-Artifact DSP)", "Audio Cleanup (De-Artifact DSP)"),
         icon = Icons.Default.AutoAwesome,
         infoTopic = ModeInfoTopic.AUDIO_CLEANUP
@@ -2549,10 +2580,15 @@ internal fun MiscellaneousSettingsPage(
         }
     }
 
-    // Диалог подтверждения сброса настроек
     if (showResetConfirmDialog) {
+        val isPureOled = MaterialTheme.colorScheme.background.red < 0.01f &&
+            MaterialTheme.colorScheme.background.green < 0.01f &&
+            MaterialTheme.colorScheme.background.blue < 0.01f
+
         AlertDialog(
             onDismissRequest = { showResetConfirmDialog = false },
+            containerColor = if (isPureOled) androidx.compose.ui.graphics.Color(0xFF050505) else MaterialTheme.colorScheme.surface,
+            shape = RoundedCornerShape(22.dp),
             title = {
                 Text(
                     text = tr("Сброс настроек плеера?", "Reset Player Settings?"),

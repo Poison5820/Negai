@@ -5,18 +5,18 @@
     <!-- Navigation -->
     <string name="nav_folders">Folders</string>
     <string name="nav_recent">Recent</string>
-    <string name="nav_torrents">Torrents</string>
+    <string name="nav_torrents">P2P</string>
     <string name="nav_settings">Settings</string>
 
     <!-- Torrents & TorrServer -->
-    <string name="torrents_search_placeholder">Search: RuTracker, Rutor and more…</string>
+    <string name="torrents_search_placeholder">Search P2P indexers &amp; decentralized streams…</string>
     <string name="action_watch_torrent">Watch</string>
     <string name="action_open_external_torrent">In external app</string>
-    <string name="action_open_magnet_or_file">Magnet / .torrent</string>
-    <string name="action_saved_torrserver_list">Server torrents</string>
-    <string name="torrserver_online_badge">TorrServer online</string>
-    <string name="torrserver_offline_badge">TorrServer offline</string>
-    <string name="toast_magnet_copied_no_app">External torrent client not found — Magnet link copied</string>
+    <string name="action_open_magnet_or_file">Magnet / P2P file</string>
+    <string name="action_saved_torrserver_list">P2P Server Streams</string>
+    <string name="torrserver_online_badge">P2P Server online</string>
+    <string name="torrserver_offline_badge">P2P Server offline</string>
+    <string name="toast_magnet_copied_no_app">External P2P client not found — Magnet link copied</string>
 
     <!-- Library, Storage & Exclusions -->
     <string name="action_grant_storage">Grant storage access</string>
@@ -58,7 +58,7 @@
     <string name="settings_cat_video">Enhancements</string>
     <string name="settings_cat_audio">Audio &amp; Subtitles</string>
     <string name="settings_cat_subtitles">Subtitles (SRT / ASS)</string>
-    <string name="settings_cat_torrserver">Torrents</string>
+    <string name="settings_cat_torrserver">P2P</string>
     <string name="settings_cat_storage">Storage</string>
 
     <!-- Player & PiP & Notifications -->

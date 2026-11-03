@@ -98,7 +98,8 @@ enum class GestureHudType {
 
 data class GestureHudState(
     val type: GestureHudType,
-    val percent: Int
+    val percent: Int,
+    val maxBoostPercent: Int = 200
 )
 
 @Composable
@@ -106,12 +107,13 @@ fun VerticalGestureHudCard(
     mode: VerticalGestureMode,
     fraction: Float,
     displayPercent: Int? = null,
+    maxBoostPercent: Int = 200,
     modifier: Modifier = Modifier
 ) {
     val type = if (mode == VerticalGestureMode.BRIGHTNESS) GestureHudType.BRIGHTNESS else GestureHudType.VOLUME
     val pct = displayPercent ?: (fraction.coerceIn(0f, 1f) * 100f).roundToInt()
     VerticalGestureHudCard(
-        hudState = GestureHudState(type = type, percent = pct),
+        hudState = GestureHudState(type = type, percent = pct, maxBoostPercent = maxBoostPercent),
         modifier = modifier
     )
 }
@@ -133,7 +135,7 @@ fun VerticalGestureHudCard(
     ) {
         Column(
             modifier = Modifier
-                .width(152.dp)
+                .width(160.dp)
                 .background(playerFrostedGlassBrush(accentAlpha = if (isBoostedVolume) 0.20f else 0.12f))
                 .padding(horizontal = 12.dp, vertical = 9.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -154,7 +156,7 @@ fun VerticalGestureHudCard(
                     hudState.type == GestureHudType.BRIGHTNESS ->
                         tr("Яркость ${hudState.percent}%", "Brightness ${hudState.percent}%")
                     isBoostedVolume ->
-                        tr("Усиление ${hudState.percent}%", "Volume Boost ${hudState.percent}%")
+                        tr("Усиление ${hudState.percent}% / ${hudState.maxBoostPercent}%", "Boost ${hudState.percent}% / ${hudState.maxBoostPercent}%")
                     else ->
                         tr("Громкость ${hudState.percent}%", "Volume ${hudState.percent}%")
                 },
@@ -166,7 +168,8 @@ fun VerticalGestureHudCard(
             LinearProgressIndicator(
                 progress = {
                     if (isBoostedVolume) {
-                        ((hudState.percent - 100f) / 100f).coerceIn(0f, 1f)
+                        val span = (hudState.maxBoostPercent - 100f).coerceAtLeast(10f)
+                        ((hudState.percent - 100f) / span).coerceIn(0f, 1f)
                     } else {
                         (hudState.percent / 100f).coerceIn(0f, 1f)
                     }
@@ -790,79 +793,19 @@ fun AudioBoostControlSection(
     val maxSysVol = remember(audioManager) {
         (audioManager?.getStreamMaxVolume(android.media.AudioManager.STREAM_MUSIC) ?: 15).coerceAtLeast(1)
     }
-    var curSysVol by remember(audioManager, audioBoostPercent) {
-        mutableIntStateOf(
-            (audioManager?.getStreamVolume(android.media.AudioManager.STREAM_MUSIC) ?: maxSysVol)
-                .coerceIn(0, maxSysVol)
-        )
+    val curSysVol = remember(audioManager, audioBoostPercent) {
+        (audioManager?.getStreamVolume(android.media.AudioManager.STREAM_MUSIC) ?: maxSysVol)
+            .coerceIn(0, maxSysVol)
     }
-    val stepPercent = remember(maxSysVol) {
-        (100f / maxSysVol.toFloat()).roundToInt().coerceIn(5, 15)
-    }
-    val ceiling = maxAudioBoostPercent.coerceIn(150, 300)
-    val effectiveBoost = if (curSysVol < maxSysVol) 100 else audioBoostPercent.coerceIn(100, ceiling)
+    val ceiling = maxAudioBoostPercent.coerceIn(100, 300)
+    val effectiveBoost = if (curSysVol < maxSysVol || ceiling <= 100) 100 else audioBoostPercent.coerceIn(100, ceiling)
     val combinedVolumePercent = if (curSysVol < maxSysVol) {
         ((curSysVol.toFloat() / maxSysVol.toFloat()) * 100f).roundToInt()
     } else {
         effectiveBoost
     }
 
-    val applyBoostWithSystemMax: (Int) -> Unit = { targetPct ->
-        val clamped = targetPct.coerceIn(100, ceiling)
-        if (clamped > 100 && curSysVol < maxSysVol) {
-            runCatching {
-                audioManager?.setStreamVolume(android.media.AudioManager.STREAM_MUSIC, maxSysVol, 0)
-            }
-            curSysVol = maxSysVol
-        }
-        onSetAudioBoostPercent(clamped)
-    }
-
-    val stepVolumeOrBoostDown: () -> Unit = {
-        val liveVol = (audioManager?.getStreamVolume(android.media.AudioManager.STREAM_MUSIC) ?: curSysVol)
-            .coerceIn(0, maxSysVol)
-        curSysVol = liveVol
-        if (effectiveBoost > 100) {
-            val nextBoost = (effectiveBoost - stepPercent).coerceAtLeast(100)
-            onSetAudioBoostPercent(nextBoost)
-        } else if (liveVol > 0) {
-            val nextVol = (liveVol - 1).coerceAtLeast(0)
-            runCatching {
-                audioManager?.setStreamVolume(android.media.AudioManager.STREAM_MUSIC, nextVol, 0)
-            }
-            curSysVol = nextVol
-            onSetAudioBoostPercent(100)
-        }
-    }
-
-    val stepVolumeOrBoostUp: () -> Unit = {
-        val liveVol = (audioManager?.getStreamVolume(android.media.AudioManager.STREAM_MUSIC) ?: curSysVol)
-            .coerceIn(0, maxSysVol)
-        curSysVol = liveVol
-        if (liveVol < maxSysVol) {
-            val nextVol = (liveVol + 1).coerceAtMost(maxSysVol)
-            runCatching {
-                audioManager?.setStreamVolume(android.media.AudioManager.STREAM_MUSIC, nextVol, 0)
-            }
-            curSysVol = nextVol
-            onSetAudioBoostPercent(100)
-        } else {
-            val nextBoost = (effectiveBoost + stepPercent).coerceAtMost(ceiling)
-            onSetAudioBoostPercent(nextBoost)
-        }
-    }
-
-    val boostPresets = remember(ceiling) {
-        buildList {
-            add(100)
-            add(125)
-            add(150)
-            if (ceiling >= 175) add(175)
-            if (ceiling >= 200) add(200)
-            if (ceiling >= 250) add(250)
-            if (ceiling >= 300) add(300)
-        }.distinct()
-    }
+    val maxBoostModes = remember { listOf(100, 150, 200, 250, 300) }
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(
@@ -878,19 +821,22 @@ fun AudioBoostControlSection(
                 Icon(Icons.Default.GraphicEq, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                 Column {
                     Text(
-                        text = tr("Усиление громкости (свыше 100%)", "Volume Booster (above 100%)"),
+                        text = tr("Режим максимального усиления громкости", "Max Allowed Volume Boost Mode"),
                         style = MaterialTheme.typography.titleSmall
                     )
                     Text(
-                        text = if (curSysVol < maxSysVol) {
-                            tr(
-                                "Системная громкость: $combinedVolumePercent% ($curSysVol/$maxSysVol) • Бустер включится на 100%",
-                                "System volume: $combinedVolumePercent% ($curSysVol/$maxSysVol) • Boost activates at 100%"
+                        text = when {
+                            ceiling <= 100 -> tr(
+                                "Усиление свыше 100% выключено • Системная громкость: $combinedVolumePercent%",
+                                "Boost above 100% disabled • System volume: $combinedVolumePercent%"
                             )
-                        } else {
-                            tr(
-                                "Система 100% + Бустер: $effectiveBoost% (шаг +$stepPercent%)",
-                                "System 100% + Booster: $effectiveBoost% (step +$stepPercent%)"
+                            effectiveBoost > 100 -> tr(
+                                "Активно усиление: $effectiveBoost% из $ceiling% (управляется жестом или кнопками громкости)",
+                                "Active boost: $effectiveBoost% of $ceiling% (controlled via swipe or volume keys)"
+                            )
+                            else -> tr(
+                                "Текущая громкость: $combinedVolumePercent% • Лимит усиления кнопками/жестом: до $ceiling%",
+                                "Current volume: $combinedVolumePercent% • Boost limit via keys/swipe: up to $ceiling%"
                             )
                         },
                         style = MaterialTheme.typography.labelSmall,
@@ -899,7 +845,7 @@ fun AudioBoostControlSection(
                 }
             }
             Text(
-                text = "$combinedVolumePercent%",
+                text = if (ceiling <= 100) tr("Выкл", "Off") else "$combinedVolumePercent%",
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 color = if (effectiveBoost > 100) {
                     MaterialTheme.colorScheme.primary
@@ -909,105 +855,43 @@ fun AudioBoostControlSection(
             )
         }
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            OutlinedButton(
-                onClick = stepVolumeOrBoostDown,
-                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp),
-                modifier = Modifier
-                    .weight(1f)
-                    .testTag("player_boost_step_down")
-            ) {
-                ScaleToFitWidthBox {
-                    Text(
-                        text = tr("− Шаг ($stepPercent%)", "− Step ($stepPercent%)"),
-                        style = MaterialTheme.typography.labelSmall,
-                        maxLines = 1,
-                        softWrap = false
-                    )
-                }
-            }
-            FilledTonalButton(
-                onClick = { applyBoostWithSystemMax(100) },
-                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp),
-                modifier = Modifier
-                    .weight(1f)
-                    .testTag("player_boost_reset_100")
-            ) {
-                ScaleToFitWidthBox {
-                    Text(
-                        text = tr("100% (Норма)", "100% (Normal)"),
-                        style = MaterialTheme.typography.labelSmall,
-                        maxLines = 1,
-                        softWrap = false
-                    )
-                }
-            }
-            OutlinedButton(
-                onClick = stepVolumeOrBoostUp,
-                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp),
-                modifier = Modifier
-                    .weight(1f)
-                    .testTag("player_boost_step_up")
-            ) {
-                ScaleToFitWidthBox {
-                    Text(
-                        text = tr("+ Шаг ($stepPercent%)", "+ Step ($stepPercent%)"),
-                        style = MaterialTheme.typography.labelSmall,
-                        maxLines = 1,
-                        softWrap = false
-                    )
-                }
-            }
-        }
-
-        InstantSlider(
-            value = effectiveBoost.toFloat(),
-            onValueChange = { applyBoostWithSystemMax(it.roundToInt()) },
-            valueRange = 100f..ceiling.toFloat(),
-            modifier = Modifier.testTag("player_audio_boost_slider")
-        )
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth()
         ) {
-            boostPresets.forEach { pct ->
+            maxBoostModes.forEach { maxPct ->
                 FilterChip(
-                    selected = effectiveBoost == pct,
-                    onClick = { applyBoostWithSystemMax(pct) },
-                    label = { Text(if (pct == 100) tr("100% (Норма)", "100% (Normal)") else "$pct%") },
-                    modifier = Modifier.testTag("player_boost_chip_$pct")
+                    selected = ceiling == maxPct,
+                    onClick = {
+                        onUpdateMaxAudioBoostPercent(maxPct)
+                        if (audioBoostPercent > maxPct) {
+                            onSetAudioBoostPercent(maxPct)
+                        }
+                    },
+                    label = {
+                        Text(
+                            text = if (maxPct == 100) tr("100% (Выкл)", "100% (Off)") else "$maxPct%",
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    },
+                    modifier = Modifier.testTag("player_max_boost_limit_$maxPct")
                 )
             }
         }
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = tr("Лимит усиления:", "Max boost limit:"),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                listOf(150, 200, 250, 300).forEach { maxPct ->
-                    FilterChip(
-                        selected = ceiling == maxPct,
-                        onClick = {
-                            onUpdateMaxAudioBoostPercent(maxPct)
-                            if (audioBoostPercent > maxPct) {
-                                onSetAudioBoostPercent(maxPct)
-                            }
-                        },
-                        label = { Text("$maxPct%", style = MaterialTheme.typography.labelSmall) },
-                        modifier = Modifier.testTag("player_max_boost_limit_$maxPct")
-                    )
-                }
+        if (effectiveBoost > 100) {
+            FilledTonalButton(
+                onClick = { onSetAudioBoostPercent(100) },
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("player_boost_reset_100")
+            ) {
+                Text(
+                    text = tr("Сбросить текущее усиление до 100%", "Reset current boost to 100%"),
+                    style = MaterialTheme.typography.labelSmall
+                )
             }
         }
     }

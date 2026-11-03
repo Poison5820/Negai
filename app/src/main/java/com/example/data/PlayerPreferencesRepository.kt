@@ -299,7 +299,7 @@ class PlayerPreferencesRepository(private val context: Context) {
             maxAudioBoostPercent = (
                 prefs[Keys.MAX_AUDIO_BOOST_PERCENT]
                     ?: (if (hasBoot && sp.contains("max_audio_boost")) sp.getInt("max_audio_boost", 200) else 200)
-                ).coerceIn(120, 300),
+                ).coerceIn(100, 300),
             bluetoothAudioAutoSync = false,
             bluetoothAudioOffsetMs = 0L,
             audioDeArtifactMode = AudioDeArtifactMode.fromId(
@@ -717,7 +717,7 @@ class PlayerPreferencesRepository(private val context: Context) {
     }
 
     suspend fun updateMaxAudioBoostPercent(percent: Int) {
-        val clamped = percent.coerceIn(120, 300)
+        val clamped = percent.coerceIn(100, 300)
         bootPrefs(context).edit().putInt("max_audio_boost", clamped).apply()
         context.playerDataStore.edit { it[Keys.MAX_AUDIO_BOOST_PERCENT] = clamped }
     }
@@ -957,7 +957,7 @@ class PlayerPreferencesRepository(private val context: Context) {
                     sp.getString("pref_audio_lang", PreferredTrackLanguage.RU.id)
                 ),
                 defaultAudioBoostPercent = 100,
-                maxAudioBoostPercent = sp.getInt("max_audio_boost", 200).coerceIn(120, 300),
+                maxAudioBoostPercent = sp.getInt("max_audio_boost", 200).coerceIn(100, 300),
                 bluetoothAudioAutoSync = false,
                 bluetoothAudioOffsetMs = 0L,
                 audioDeArtifactMode = AudioDeArtifactMode.fromId(

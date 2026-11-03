@@ -5,18 +5,18 @@
     <!-- Navigation -->
     <string name="nav_folders">Folders</string>
     <string name="nav_recent">Recent</string>
-    <string name="nav_torrents">Torrents</string>
+    <string name="nav_torrents">P2P</string>
     <string name="nav_settings">Settings</string>
 
     <!-- Torrents & TorrServer -->
-    <string name="torrents_search_placeholder">Search: RuTracker, Rutor &amp; anime trackers…</string>
+    <string name="torrents_search_placeholder">Search P2P indexers &amp; decentralized streams…</string>
     <string name="action_watch_torrent">Watch</string>
     <string name="action_open_external_torrent">Open in external app</string>
-    <string name="action_open_magnet_or_file">Magnet / .torrent</string>
-    <string name="action_saved_torrserver_list">Server Torrents</string>
-    <string name="torrserver_online_badge">TorrServer Online</string>
-    <string name="torrserver_offline_badge">TorrServer Offline</string>
-    <string name="toast_magnet_copied_no_app">No external torrent client found — Magnet link copied</string>
+    <string name="action_open_magnet_or_file">Magnet / P2P file</string>
+    <string name="action_saved_torrserver_list">P2P Server Streams</string>
+    <string name="torrserver_online_badge">P2P Server Online</string>
+    <string name="torrserver_offline_badge">P2P Server Offline</string>
+    <string name="toast_magnet_copied_no_app">No external P2P client found — Magnet link copied</string>
 
     <!-- Library, Storage & Exclusions -->
     <string name="action_grant_storage">Grant storage access</string>
@@ -58,7 +58,7 @@
     <string name="settings_cat_video">Video, Decoder &amp; Anime4K</string>
     <string name="settings_cat_audio">Audio &amp; Voiceover</string>
     <string name="settings_cat_subtitles">Subtitles (SRT / ASS)</string>
-    <string name="settings_cat_torrserver">TorrServer &amp; Torrents</string>
+    <string name="settings_cat_torrserver">P2P &amp; Streaming</string>
     <string name="settings_cat_storage">Storage &amp; Exclusions</string>
 
     <!-- Player & PiP & Notifications -->

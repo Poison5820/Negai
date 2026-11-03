@@ -33,14 +33,18 @@ import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.GraphicEq
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Subtitles
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
@@ -174,21 +178,47 @@ fun VersionPlanetaryModalSheet(
     val selectedFeature = PLANETARY_FEATURES.getOrElse(selectedOrbitIndex) { PLANETARY_FEATURES.first() }
 
     val uriHandler = LocalUriHandler.current
+    val bg = MaterialTheme.colorScheme.background
+    val isPureOled = bg.red < 0.01f && bg.green < 0.01f && bg.blue < 0.01f
+    val containerColor = if (isPureOled) {
+        Color(0xFF050505)
+    } else {
+        MaterialTheme.colorScheme.surfaceContainerHigh
+    }
 
-    ModalBottomSheet(
+    Dialog(
         onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-        modifier = Modifier.testTag("version_planetary_modal_sheet")
+        properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
-        Column(
+        Surface(
+            shape = RoundedCornerShape(24.dp),
+            color = containerColor,
+            border = BorderStroke(
+                1.dp,
+                MaterialTheme.colorScheme.primary.copy(alpha = if (isPureOled) 0.22f else 0.35f)
+            ),
+            tonalElevation = if (isPureOled) 0.dp else 6.dp,
+            shadowElevation = if (isPureOled) 0.dp else 16.dp,
             modifier = Modifier
-                .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 18.dp)
-                .padding(bottom = 28.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .fillMaxWidth(0.94f)
+                .widthIn(max = 520.dp)
+                .heightIn(max = 680.dp)
+                .padding(vertical = 16.dp)
+                .testTag("version_planetary_modal_sheet")
         ) {
-            // Header
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f, fill = false)
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // Header
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -644,6 +674,21 @@ fun VersionPlanetaryModalSheet(
                             }
                         }
                     }
+                }
+            }
+            }
+            Button(
+                    onClick = onDismiss,
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("version_planetary_done_button")
+                ) {
+                    Text(
+                        text = tr("Готово", "Done"),
+                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                        modifier = Modifier.padding(vertical = 2.dp)
+                    )
                 }
             }
         }

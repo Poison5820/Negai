@@ -831,15 +831,22 @@ data class ReleaseHistoryEntry(
 )
 
 object AppVersionInfo {
-    const val VERSION_NAME = "3.4.3-pre"
-    const val VERSION_CODE = 13
-    const val BADGE_TEXT = "v3.4.3-pre"
-    const val RELEASE_TAG = "v3.4.3-pre"
+    const val VERSION_NAME = "3.4.4"
+    const val VERSION_CODE = 14
+    const val BADGE_TEXT = "v3.4.4"
+    const val RELEASE_TAG = "v3.4.4"
     const val GITHUB_REPO_URL = "https://github.com/Poison5820/Negai"
     const val ANIME4K_ORIGINAL_REPO_URL = "https://github.com/bloc97/Anime4K"
     const val OBTAINIUM_ADD_URL = "https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/Poison5820/Negai"
 
     val RELEASE_HISTORY: List<ReleaseHistoryEntry> = listOf(
+        ReleaseHistoryEntry(
+            versionName = "3.4.4",
+            versionCode = 14,
+            tag = "v3.4.4",
+            summaryRu = "Изоляция удержания кнопок плеера от ускорения 2x, точный вертикальный трекинг мини-меню от уровня кнопки, левитирующие диалоги без крестика с кнопкой «Готово», адаптация под чистый чёрный цвет OLED, переименование раздела в P2P и вынесение трекеров в отдельный загружаемый JSON, управление усилением звука аппаратными клавишами громкости и Bluetooth-гарнитурами.",
+            summaryEn = "Quick actions hold gesture isolation from 2x boost, precise vertical mini-menu tracking from button origin, floating dialogs with 'Done' button and true OLED pitch black, P2P rebranding with external on-demand tracker JSON config, hardware volume keys integration with audio boost, and Bluetooth media controls."
+        ),
         ReleaseHistoryEntry(
             versionName = "3.4.3-pre",
             versionCode = 13,
@@ -1090,7 +1097,7 @@ enum class SettingsCategory(
     CONTROLS("CONTROLS", "Управление", "Controls"),
     ENHANCEMENTS("ENHANCEMENTS", "Улучшения", "Enhancements"),
     AUDIO_AND_SUBTITLES("AUDIO_AND_SUBTITLES", "Аудио и субтитры", "Audio & Subtitles"),
-    TORRENTS("TORRENTS", "Потоковая передача", "Streaming"),
+    TORRENTS("TORRENTS", "P2P", "P2P"),
     STORAGE("STORAGE", "Хранилище", "Storage"),
     MISCELLANEOUS("MISCELLANEOUS", "Прочие", "Miscellaneous"),
     DEVICE_INFO("DEVICE_INFO", "Об устройстве", "About Device");
@@ -1102,7 +1109,7 @@ enum class SettingsCategory(
             "GESTURES", "CONTROLS" -> CONTROLS
             "VIDEO_ANIME4K", "ENHANCEMENTS" -> ENHANCEMENTS
             "AUDIO", "SUBTITLES", "AUDIO_AND_SUBTITLES" -> AUDIO_AND_SUBTITLES
-            "TORRSERVER", "TORRENTS", "STREAMING" -> TORRENTS
+            "TORRSERVER", "TORRENTS", "STREAMING", "P2P" -> TORRENTS
             else -> entries.firstOrNull { it.id.equals(id?.trim(), ignoreCase = true) } ?: APPEARANCE
         }
     }

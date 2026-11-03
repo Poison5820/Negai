@@ -8,13 +8,13 @@ enum class TorrentTrackerGroup(
     val label: String,
     val priorityRank: Int
 ) {
-    ALL("ALL", "Все", 0),
-    RUTRACKER("RUTRACKER", "RuTracker", 1),
-    RUTOR("RUTOR", "Rutor", 2),
-    KINOZAL("KINOZAL", "Kinozal", 3),
-    NNMCLUB("NNMCLUB", "NNM-Club", 4),
-    ANIME("ANIME", "Аниме", 5),
-    OTHER("OTHER", "Другие", 6);
+    ALL("ALL", "Все узлы", 0),
+    RUTRACKER("RUTRACKER", "Индекс P2P", 1),
+    RUTOR("RUTOR", "Открытый P2P", 2),
+    KINOZAL("KINOZAL", "Кино-узел", 3),
+    NNMCLUB("NNMCLUB", "Сообщество", 4),
+    ANIME("ANIME", "Аниме P2P", 5),
+    OTHER("OTHER", "Другие узлы", 6);
 
     companion object {
         fun classify(rawTrackerName: String): TorrentTrackerGroup {
@@ -35,20 +35,20 @@ enum class TorrentTrackerGroup(
 
         fun formatDisplayTracker(rawTrackerName: String): String {
             val trimmed = rawTrackerName.trim()
-            if (trimmed.isEmpty()) return "Tracker"
+            if (trimmed.isEmpty()) return "P2P Node"
             val lower = trimmed.lowercase(Locale.ROOT)
             return when {
-                lower.contains("rutracker") -> "RuTracker"
-                lower.contains("rutor") -> "Rutor"
-                lower.contains("kinozal") -> "Kinozal"
-                lower.contains("nnm") -> "NNM-Club"
-                lower.contains("selezen") -> "Selezen"
-                lower.contains("anilibria") -> "AniLibria"
-                lower.contains("nyaa") -> "Nyaa"
-                lower.contains("megapeer") -> "MegaPeer"
-                lower.contains("bitru") -> "Bitru"
-                lower.contains("toloka") -> "Toloka"
-                lower.contains("lostfilm") -> "LostFilm"
+                lower.contains("rutracker") -> "P2P Index"
+                lower.contains("rutor") -> "Open P2P"
+                lower.contains("kinozal") -> "Cinema P2P"
+                lower.contains("nnm") -> "Community P2P"
+                lower.contains("selezen") -> "Media Node"
+                lower.contains("anilibria") -> "AniLibria P2P"
+                lower.contains("nyaa") -> "Anime P2P"
+                lower.contains("megapeer") -> "Peer Node"
+                lower.contains("bitru") -> "Bit Node"
+                lower.contains("toloka") -> "Hub Node"
+                lower.contains("lostfilm") -> "Series Node"
                 else -> trimmed.replaceFirstChar {
                     if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString()
                 }
@@ -62,10 +62,10 @@ enum class TorrentSortMode(
     val title: String,
     val shortLabel: String
 ) {
-    PRIORITY("PRIORITY", "Приоритет (RuTracker / Rutor)", "Приоритет"),
-    SEEDERS("SEEDERS", "По количеству сидов", "Сиды"),
-    SIZE("SIZE", "По размеру раздачи", "Размер"),
-    DATE("DATE", "По дате добавления", "Новые");
+    PRIORITY("PRIORITY", "Приоритет (Основные P2P-узлы)", "Приоритет"),
+    SEEDERS("SEEDERS", "По количеству пиров", "Пиры"),
+    SIZE("SIZE", "По размеру потока", "Размер"),
+    DATE("DATE", "По дате публикации", "Новые");
 
     companion object {
         fun fromId(id: String): TorrentSortMode =
