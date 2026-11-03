@@ -437,6 +437,53 @@ enum class PlayerControlsTheme(
     }
 }
 
+enum class PlayerSurfaceStyle(
+    val id: String,
+    val titleRu: String,
+    val titleEn: String,
+    val badgeRu: String,
+    val badgeEn: String,
+    val subtitleRu: String,
+    val subtitleEn: String
+) {
+    FROSTED_GLASS(
+        id = "FROSTED_GLASS",
+        titleRu = "Матовое стекло",
+        titleEn = "Frosted Glass",
+        badgeRu = "Стекло",
+        badgeEn = "Glass",
+        subtitleRu = "Полупрозрачные стеклянные кнопки и панели с бликом верхней грани",
+        subtitleEn = "Translucent frosted glass buttons and panels with specular edge sheen"
+    ),
+    FRAMELESS(
+        id = "FRAMELESS",
+        titleRu = "Без фона и рамок",
+        titleEn = "Frameless (No Background)",
+        badgeRu = "Без фона",
+        badgeEn = "Frameless",
+        subtitleRu = "Чистые иконки и подписи без фоновых подложек и обводок (как кнопки в плеере)",
+        subtitleEn = "Clean icons and labels without background pills or borders"
+    ),
+    SOLID_ACCENT(
+        id = "SOLID_ACCENT",
+        titleRu = "Монолитный акцент",
+        titleEn = "Solid Theme Accent",
+        badgeRu = "Акцент",
+        badgeEn = "Accent",
+        subtitleRu = "Монолитный полупрозрачный фон кнопок и панелей в цвет акцента темы",
+        subtitleEn = "Uniform semi-transparent background tinted with the active theme accent"
+    );
+
+    fun localizedTitle(isEnglish: Boolean): String = if (isEnglish) titleEn else titleRu
+    fun localizedBadge(isEnglish: Boolean): String = if (isEnglish) badgeEn else badgeRu
+    fun localizedSubtitle(isEnglish: Boolean): String = if (isEnglish) subtitleEn else subtitleRu
+
+    companion object {
+        fun fromId(id: String?): PlayerSurfaceStyle =
+            entries.firstOrNull { it.id.equals(id?.trim(), ignoreCase = true) } ?: FROSTED_GLASS
+    }
+}
+
 enum class DecoderMode(
     val id: String,
     val title: String,
@@ -1133,6 +1180,7 @@ data class PlayerSettings(
     val themeMode: AppThemeMode = AppThemeMode.AUTO_OLED,
     val accentColor: AppAccentColor = AppAccentColor.CYAN,
     val playerControlsTheme: PlayerControlsTheme = PlayerControlsTheme.CLASSIC_OLED,
+    val playerSurfaceStyle: PlayerSurfaceStyle = PlayerSurfaceStyle.FROSTED_GLASS,
     val compactUiMode: Boolean = true,
     val showEpisodeThumbnails: Boolean = true,
     val showEpisodesButtonInHud: Boolean = true,

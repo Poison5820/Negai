@@ -104,6 +104,7 @@ import com.example.model.PlaybackEndMode
 import com.example.model.PlayerOrientationMode
 import com.example.model.PlayerQuickAction
 import com.example.model.PlayerSettings
+import com.example.model.PlayerSurfaceStyle
 import com.example.model.SubtitleColorPreset
 import com.example.model.VideoScaleMode
 import com.example.ui.components.PlayerControlsThemeSelectorSection
@@ -331,6 +332,64 @@ internal fun AppearanceSettingsPage(
     }
 
     SettingsSectionCard(
+        title = tr("Режим подложек плеера (Стекло / Без стекла)", "Player Surface Mode (Glass / Non-Glass)"),
+        icon = Icons.Default.Palette
+    ) {
+        Text(
+            text = tr(
+                "Выберите оформление верхних и нижних кнопок в проигрывателе: матовое стекло, чистые иконки без фона или монолитный полупрозрачный фон в цвет акцента темы.",
+                "Choose how top and bottom HUD buttons are styled in the player: frosted glass, frameless icons without background, or a solid semi-transparent theme accent background."
+            ),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        PlayerSurfaceStyle.entries.forEach { style ->
+            val selected = settings.playerSurfaceStyle == style
+            Surface(
+                color = if (selected) {
+                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f)
+                } else {
+                    MaterialTheme.colorScheme.surfaceContainerLow
+                },
+                shape = RoundedCornerShape(12.dp),
+                border = BorderStroke(
+                    width = if (selected) 1.5.dp else 1.dp,
+                    color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .clickable { actions.onUpdatePlayerSurfaceStyle(style) }
+                    .testTag("settings_surface_style_${style.id}")
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = style.localizedTitle(isEnglish),
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+                        )
+                        Text(
+                            text = style.localizedSubtitle(isEnglish),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    RadioButton(
+                        selected = selected,
+                        onClick = { actions.onUpdatePlayerSurfaceStyle(style) }
+                    )
+                }
+            }
+        }
+    }
+
+    SettingsSectionCard(
         title = tr("Быстрые кнопки в плеере", "Player Quick Action Buttons"),
         icon = Icons.Default.Tune
     ) {
@@ -453,7 +512,7 @@ internal fun AppearanceSettingsPage(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            listOf(75, 85, 100, 115, 125, 140).forEach { pct ->
+            listOf(85, 90, 100, 110, 125).forEach { pct ->
                 FilterChip(
                     selected = pendingAppScale == pct,
                     onClick = {
@@ -463,98 +522,6 @@ internal fun AppearanceSettingsPage(
                     },
                     label = { Text("${pct}%") },
                     modifier = Modifier.testTag("app_scale_chip_$pct")
-                )
-            }
-        }
-    }
-
-    var pendingPlayerScale by remember {
-        mutableIntStateOf(settings.playerUiScalePercent.coerceIn(75, 140))
-    }
-    var isDraggingPlayerScale by remember { mutableStateOf(false) }
-    LaunchedEffect(settings.playerUiScalePercent) {
-        if (!isDraggingPlayerScale) {
-            pendingPlayerScale = settings.playerUiScalePercent.coerceIn(75, 140)
-        }
-    }
-
-    SettingsSectionCard(
-        title = tr("Масштаб проигрывателя (HUD)", "Player HUD Scale"),
-        icon = Icons.Default.Tune
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = tr(
-                    "Масштаб интерфейса плеера: ${pendingPlayerScale}%",
-                    "Player HUD Scale: ${pendingPlayerScale}%"
-                ),
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                modifier = Modifier.weight(1f)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            FilledTonalButton(
-                onClick = {
-                    isDraggingPlayerScale = false
-                    pendingPlayerScale = 100
-                    actions.onUpdatePlayerUiScalePercent(100)
-                },
-                enabled = settings.playerUiScalePercent != 100 || pendingPlayerScale != 100,
-                shape = RoundedCornerShape(10.dp),
-                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
-                modifier = Modifier
-                    .height(34.dp)
-                    .testTag("reset_player_ui_scale_btn")
-            ) {
-                Icon(
-                    imageVector = Icons.Default.RestartAlt,
-                    contentDescription = tr("Сбросить масштаб до 100%", "Reset scale to 100%"),
-                    modifier = Modifier.size(15.dp)
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = "100%",
-                    style = MaterialTheme.typography.labelMedium,
-                    maxLines = 1,
-                    softWrap = false
-                )
-            }
-        }
-
-        Slider(
-            value = pendingPlayerScale.toFloat(),
-            onValueChange = {
-                isDraggingPlayerScale = true
-                pendingPlayerScale = it.roundToInt().coerceIn(75, 140)
-            },
-            onValueChangeFinished = {
-                isDraggingPlayerScale = false
-                val target = pendingPlayerScale.coerceIn(75, 140)
-                if (target != settings.playerUiScalePercent) {
-                    actions.onUpdatePlayerUiScalePercent(target)
-                }
-            },
-            valueRange = 75f..140f,
-            modifier = Modifier.testTag("settings_player_ui_scale_slider")
-        )
-
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            listOf(75, 85, 100, 115, 125, 140).forEach { pct ->
-                FilterChip(
-                    selected = pendingPlayerScale == pct,
-                    onClick = {
-                        isDraggingPlayerScale = false
-                        pendingPlayerScale = pct
-                        actions.onUpdatePlayerUiScalePercent(pct)
-                    },
-                    label = { Text("${pct}%") },
-                    modifier = Modifier.testTag("player_scale_chip_$pct")
                 )
             }
         }
@@ -604,7 +571,7 @@ internal fun AppearanceSettingsPage(
         )
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         SettingToggleRow(
-            title = tr("Кнопка «Серии» в верхней панели плеера", "Show 'Episodes' Button in Top Player Bar"),
+            title = tr("Кнопка «Плейлист» в верхней панели плеера", "Show 'Playlist' Button in Top Player Bar"),
             checked = settings.showEpisodesButtonInHud,
             onCheckedChange = actions.onUpdateShowEpisodesButtonInHud,
             testTag = "show_episodes_hud_button_switch"

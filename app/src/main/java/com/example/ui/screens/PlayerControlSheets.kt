@@ -448,6 +448,20 @@ fun AudioTracksModalSheet(
                                     maxLines = 2,
                                     overflow = TextOverflow.Ellipsis
                                 )
+                                if (opt.bitrateKbps > 0) {
+                                    Text(
+                                        text = tr(
+                                            "Битрейт: ${opt.bitrateKbps} кбит/с",
+                                            "Bitrate: ${opt.bitrateKbps} kbps"
+                                        ),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = if (opt.isSelected) {
+                                            MaterialTheme.colorScheme.primary
+                                        } else {
+                                            MaterialTheme.colorScheme.onSurfaceVariant
+                                        }
+                                    )
+                                }
                             }
                             Surface(
                                 color = if (opt.isExternal) {

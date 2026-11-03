@@ -316,6 +316,7 @@ class SafMediaScanner(private val context: Context) {
                 add(MediaStore.Video.Media.BUCKET_ID)
                 add(MediaStore.Video.Media.BUCKET_DISPLAY_NAME)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    add(MediaStore.Video.Media.ORIENTATION)
                     add(MediaStore.Video.Media.RELATIVE_PATH)
                 }
             }.toTypedArray()
@@ -343,6 +344,11 @@ class SafMediaScanner(private val context: Context) {
                 val dateCol = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_MODIFIED)
                 val widthCol = cursor.getColumnIndex(MediaStore.Video.Media.WIDTH)
                 val heightCol = cursor.getColumnIndex(MediaStore.Video.Media.HEIGHT)
+                val orientationCol = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    cursor.getColumnIndex(MediaStore.Video.Media.ORIENTATION)
+                } else {
+                    -1
+                }
                 val durationCol = cursor.getColumnIndex(MediaStore.Video.Media.DURATION)
                 val bucketIdCol = cursor.getColumnIndex(MediaStore.Video.Media.BUCKET_ID)
                 val bucketNameCol = cursor.getColumnIndex(MediaStore.Video.Media.BUCKET_DISPLAY_NAME)
@@ -358,8 +364,12 @@ class SafMediaScanner(private val context: Context) {
                     val sizeBytes = cursor.getLong(sizeCol)
                     if (sizeBytes < minSizeBytes) continue
                     val dateModifiedSec = cursor.getLong(dateCol)
-                    val vidW = if (widthCol >= 0) cursor.getInt(widthCol).coerceAtLeast(0) else 0
-                    val vidH = if (heightCol >= 0) cursor.getInt(heightCol).coerceAtLeast(0) else 0
+                    val rawW = if (widthCol >= 0) cursor.getInt(widthCol).coerceAtLeast(0) else 0
+                    val rawH = if (heightCol >= 0) cursor.getInt(heightCol).coerceAtLeast(0) else 0
+                    val rot = if (orientationCol >= 0) cursor.getInt(orientationCol) else 0
+                    val swapped = rot == 90 || rot == 270
+                    val vidW = if (swapped) rawH else rawW
+                    val vidH = if (swapped) rawW else rawH
                     val durMs = if (durationCol >= 0) cursor.getLong(durationCol).coerceAtLeast(0L) else 0L
                     val bucketId = if (bucketIdCol >= 0) cursor.getString(bucketIdCol) ?: "default" else "default"
                     val bucketName = (if (bucketNameCol >= 0) cursor.getString(bucketNameCol) else null)
@@ -752,6 +762,7 @@ class SafMediaScanner(private val context: Context) {
                 add(MediaStore.Video.Media.DURATION)
                 add(MediaStore.Video.Media.DATA)
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    add(MediaStore.Video.Media.ORIENTATION)
                     add(MediaStore.Video.Media.RELATIVE_PATH)
                 }
             }.toTypedArray()
@@ -761,6 +772,11 @@ class SafMediaScanner(private val context: Context) {
                 val sizeCol = cursor.getColumnIndex(MediaStore.Video.Media.SIZE)
                 val widthCol = cursor.getColumnIndex(MediaStore.Video.Media.WIDTH)
                 val heightCol = cursor.getColumnIndex(MediaStore.Video.Media.HEIGHT)
+                val orientationCol = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    cursor.getColumnIndex(MediaStore.Video.Media.ORIENTATION)
+                } else {
+                    -1
+                }
                 val durCol = cursor.getColumnIndex(MediaStore.Video.Media.DURATION)
                 @Suppress("DEPRECATION")
                 val dataCol = cursor.getColumnIndex(MediaStore.Video.Media.DATA)
@@ -771,8 +787,12 @@ class SafMediaScanner(private val context: Context) {
                 }
 
                 while (cursor.moveToNext()) {
-                    val w = if (widthCol >= 0) cursor.getInt(widthCol).coerceAtLeast(0) else 0
-                    val h = if (heightCol >= 0) cursor.getInt(heightCol).coerceAtLeast(0) else 0
+                    val rawW = if (widthCol >= 0) cursor.getInt(widthCol).coerceAtLeast(0) else 0
+                    val rawH = if (heightCol >= 0) cursor.getInt(heightCol).coerceAtLeast(0) else 0
+                    val rot = if (orientationCol >= 0) cursor.getInt(orientationCol) else 0
+                    val swapped = rot == 90 || rot == 270
+                    val w = if (swapped) rawH else rawW
+                    val h = if (swapped) rawW else rawH
                     val dur = if (durCol >= 0) cursor.getLong(durCol).coerceAtLeast(0L) else 0L
                     if (w <= 0 && h <= 0 && dur <= 0L) continue
 

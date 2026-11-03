@@ -498,7 +498,7 @@ fun EpisodeSortOption.localizedActiveHint(ascending: Boolean, isEnglish: Boolean
 fun PlayerQuickAction.localizedTitle(isEnglish: Boolean): String = if (!isEnglish) title else when (this) {
     PlayerQuickAction.AUDIO -> "Audio Tracks & Sync"
     PlayerQuickAction.SUBTITLES -> "Subtitles (SRT / ASS)"
-    PlayerQuickAction.EPISODES -> "Episode List"
+    PlayerQuickAction.EPISODES -> "Playlist"
     PlayerQuickAction.CHAPTERS -> "Embedded Chapters"
     PlayerQuickAction.SPEED -> "Playback Speed"
     PlayerQuickAction.ANIME4K -> "Anime4K Upscaling"
@@ -519,7 +519,7 @@ fun PlayerQuickAction.localizedTitle(isEnglish: Boolean): String = if (!isEnglis
 fun PlayerQuickAction.localizedShortTitle(isEnglish: Boolean): String = if (!isEnglish) shortTitle else when (this) {
     PlayerQuickAction.AUDIO -> "Audio"
     PlayerQuickAction.SUBTITLES -> "Subs"
-    PlayerQuickAction.EPISODES -> "Episodes"
+    PlayerQuickAction.EPISODES -> "Playlist"
     PlayerQuickAction.CHAPTERS -> "Chapters"
     PlayerQuickAction.SPEED -> "Speed"
     PlayerQuickAction.ANIME4K -> "Anime4K"
@@ -540,7 +540,7 @@ fun PlayerQuickAction.localizedShortTitle(isEnglish: Boolean): String = if (!isE
 fun PlayerQuickAction.localizedDescription(isEnglish: Boolean): String = if (!isEnglish) subtitle else when (this) {
     PlayerQuickAction.AUDIO -> "Switch voiceovers, external .mka, DSP boost, and ±5s audio delay"
     PlayerQuickAction.SUBTITLES -> "Select subtitle track, adjust timing delay, font size, and color"
-    PlayerQuickAction.EPISODES -> "Independent modal window with all episodes of the current folder"
+    PlayerQuickAction.EPISODES -> "Independent modal window with all items of the current playlist or folder"
     PlayerQuickAction.CHAPTERS -> "Independent modal window with embedded MKV/MP4 chapters"
     PlayerQuickAction.SPEED -> "Fine playback rate control from 0.25x to 3.0x"
     PlayerQuickAction.ANIME4K -> "Real-time GLSL CNN/CNNX upscaling and Before/After split comparison"
@@ -573,9 +573,9 @@ fun QuickBarPreset.localizedTitle(isEnglish: Boolean): String = if (!isEnglish) 
 }
 
 fun QuickBarPreset.localizedSubtitle(isEnglish: Boolean): String = when (this) {
-    QuickBarPreset.DEFAULT -> if (isEnglish) "Audio, Subtitles, Episodes, Chapters, Speed, Scale, MEMC, Anime4K, Boost, More" else "Аудио, Субтитры, Серии, Главы, Скорость, Масштаб, Плавность, Anime4K, Усиление, Ещё"
-    QuickBarPreset.ANIME -> if (isEnglish) "Audio, Subtitles, Episodes, Chapters, +85s Intro, Speed, Scale, MEMC, Anime4K, More" else "Аудио, Субтитры, Серии, Главы, Опенинг +85с, Скорость, Масштаб, Плавность, Anime4K, Ещё"
-    QuickBarPreset.MINIMAL -> if (isEnglish) "Audio, Subtitles, Episodes, Speed, More" else "Только Аудио, Субтитры, Серии, Скорость и Ещё"
+    QuickBarPreset.DEFAULT -> if (isEnglish) "Audio, Subtitles, Playlist, Chapters, Speed, Scale, MEMC, Anime4K, Boost, More" else "Аудио, Субтитры, Плейлист, Главы, Скорость, Масштаб, Плавность, Anime4K, Усиление, Ещё"
+    QuickBarPreset.ANIME -> if (isEnglish) "Audio, Subtitles, Playlist, Chapters, +85s Intro, Speed, Scale, MEMC, Anime4K, More" else "Аудио, Субтитры, Плейлист, Главы, Опенинг +85с, Скорость, Масштаб, Плавность, Anime4K, Ещё"
+    QuickBarPreset.MINIMAL -> if (isEnglish) "Audio, Subtitles, Playlist, Speed, More" else "Только Аудио, Субтитры, Плейлист, Скорость и Ещё"
     QuickBarPreset.PRO -> if (isEnglish) "All core actions including A–B Loop, Sleep Timer, Audio Boost & Skip Intro" else "Полный набор инструментов включая A–B повтор, Таймер сна, Усиление и Пропуск опенинга"
 }
 

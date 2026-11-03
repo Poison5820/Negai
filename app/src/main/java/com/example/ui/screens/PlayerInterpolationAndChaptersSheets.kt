@@ -430,7 +430,7 @@ fun EpisodesModalSheet(
                     )
                     Column {
                         Text(
-                            text = tr("Серии (${playlist.size})", "Episodes (${playlist.size})"),
+                            text = tr("Плейлист (${playlist.size})", "Playlist (${playlist.size})"),
                             style = MaterialTheme.typography.titleMedium
                         )
                         if (playlist.isNotEmpty()) {

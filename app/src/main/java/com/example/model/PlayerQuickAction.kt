@@ -25,9 +25,9 @@ enum class PlayerQuickAction(
     ),
     EPISODES(
         id = "EPISODES",
-        title = "Список серий",
-        shortTitle = "Серии",
-        subtitle = "Быстрый переход между эпизодами текущей папки или торрента"
+        title = "Плейлист",
+        shortTitle = "Плейлист",
+        subtitle = "Быстрый переход между файлами и эпизодами текущего плейлиста или папки"
     ),
     CHAPTERS(
         id = "CHAPTERS",

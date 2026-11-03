@@ -69,6 +69,7 @@ import com.example.model.PlayerControlsTheme
 import com.example.model.PlayerOrientationMode
 import com.example.model.PlayerQuickAction
 import com.example.model.PlayerSettings
+import com.example.model.PlayerSurfaceStyle
 import com.example.model.PreferredTrackLanguage
 import com.example.model.SettingsCategory
 import com.example.model.StreamingQualityPreset
@@ -93,6 +94,7 @@ data class SettingsActions(
     val onUpdateThemeMode: (AppThemeMode) -> Unit,
     val onUpdateAccentColor: (AppAccentColor) -> Unit = {},
     val onUpdatePlayerControlsTheme: (PlayerControlsTheme) -> Unit = {},
+    val onUpdatePlayerSurfaceStyle: (PlayerSurfaceStyle) -> Unit = {},
     val onUpdateCompactUiMode: (Boolean) -> Unit = {},
     val onUpdateShowEpisodeThumbnails: (Boolean) -> Unit,
     val onUpdateShowEpisodesButtonInHud: (Boolean) -> Unit = {},
@@ -478,8 +480,9 @@ private fun categorySummary(
 ): String = when (category) {
     SettingsCategory.APPEARANCE -> {
         val langTxt = settings.appLanguage.shortBadge
-        val scaleTxt = "${settings.playerUiScalePercent}%"
-        "${settings.themeMode.localizedBadge(isEnglish)} • ${settings.accentColor.localizedTitle(isEnglish)} • $langTxt • $scaleTxt"
+        val scaleTxt = "${settings.appUiScalePercent}%"
+        val surfaceTxt = settings.playerSurfaceStyle.localizedBadge(isEnglish)
+        "${settings.themeMode.localizedBadge(isEnglish)} • ${settings.accentColor.localizedTitle(isEnglish)} • $surfaceTxt • $langTxt • $scaleTxt"
     }
     SettingsCategory.PLAYBACK -> {
         if (isEnglish) {

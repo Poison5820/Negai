@@ -217,6 +217,8 @@ class PlayerEngine private constructor(
     private val extraSubsByVideo = mutableMapOf<String, MutableList<ExternalSubtitleTrack>>()
     private val autoAppliedDefaultAudioForVideo = mutableSetOf<String>()
     private val autoAppliedDefaultSubForVideo = mutableSetOf<String>()
+    private val probedContainerAudioBitratesKbps = java.util.concurrent.ConcurrentHashMap<String, List<Int>>()
+    private val probedExternalAudioBitratesKbps = java.util.concurrent.ConcurrentHashMap<String, Int>()
 
     private val audioBoostController = AudioBoostController()
     private val audioDelayProcessor = AudioDelayProcessor()
@@ -478,10 +480,8 @@ class PlayerEngine private constructor(
                 val currentH = _state.value.videoHeight
                 val hasEstablishedSize = currentW > 0 && currentH > 0
                 val aspectFlipped = hasEstablishedSize && ((finalW >= finalH) != (currentW >= currentH))
-                val isNearEpisodeEnd = dur > 1_500L && pos >= (dur - 8_000L)
-                if (hasEstablishedSize && (isNearEpisodeEnd || (aspectFlipped && pos > 800L))) {
-                    // ExoPlayer pre-renders/initializes the next playlist item before the current item finishes.
-                    // Defer applying the new dimensions until onMediaItemTransition so orientation never flips early!
+                val isVeryEndBeforeNext = _state.value.hasNextEpisode && dur > 5_000L && pos >= (dur - 1_200L)
+                if (isVeryEndBeforeNext && aspectFlipped) {
                     pendingNextVideoWidth = finalW
                     pendingNextVideoHeight = finalH
                     return
@@ -755,15 +755,6 @@ class PlayerEngine private constructor(
                 if (eventTime.windowIndex != activeIdx) {
                     // Pre-buffered next episode in playlist: cache dimensions for onMediaItemTransition
                     // so the screen never rotates before the current episode finishes!
-                    pendingNextVideoWidth = dispW
-                    pendingNextVideoHeight = dispH
-                    return
-                }
-
-                val currentW = _state.value.videoWidth
-                val currentH = _state.value.videoHeight
-                val pos = _exoPlayer?.currentPosition?.coerceAtLeast(0L) ?: _positionMs.value
-                if (currentW > 0 && currentH > 0 && pos > 800L && ((dispW >= dispH) != (currentW >= currentH))) {
                     pendingNextVideoWidth = dispW
                     pendingNextVideoHeight = dispH
                     return
@@ -1071,6 +1062,19 @@ class PlayerEngine private constructor(
         // Persist any currently playing episode before replacing the playlist (e.g., when switching while in PiP)
         persistCurrentProgress()
         val safeIndex = startIndex.coerceIn(episodes.indices)
+        val initialEpisode = episodes[safeIndex]
+        pendingNextVideoWidth = 0
+        pendingNextVideoHeight = 0
+        detectedVideoWidth = initialEpisode.videoWidth.coerceAtLeast(0)
+        detectedVideoHeight = initialEpisode.videoHeight.coerceAtLeast(0)
+        _state.update {
+            it.copy(
+                playlist = episodes,
+                currentEpisodeIndex = safeIndex,
+                videoWidth = detectedVideoWidth,
+                videoHeight = detectedVideoHeight
+            )
+        }
         ensurePlaybackServiceStarted()
 
         engineScope.launch {
@@ -1205,8 +1209,8 @@ class PlayerEngine private constructor(
                     currentEpisodeIndex = safeIndex,
                     currentPositionMs = startPos,
                     durationMs = effectiveSavedDuration,
-                    videoWidth = if (detectedVideoWidth > 0) detectedVideoWidth else it.videoWidth,
-                    videoHeight = if (detectedVideoHeight > 0) detectedVideoHeight else it.videoHeight,
+                    videoWidth = detectedVideoWidth,
+                    videoHeight = detectedVideoHeight,
                     chapters = emptyList(),
                     sourceFrameRate = 0f,
                     videoMimeType = "",
@@ -1509,6 +1513,7 @@ class PlayerEngine private constructor(
 
         val audioOptions = mutableListOf<AudioTrackUiOption>()
         var selectedAudioFormat: Format? = null
+        var selectedResolvedBitrateKbps = 0
         audioGroups.forEachIndexed { audioSeqIndex, (rawGroupIndex, group) ->
             val isExt = audioSeqIndex >= embeddedAudioCount && extAudioList.isNotEmpty()
             val extMeta = if (isExt) extAudioList.getOrNull(audioSeqIndex - embeddedAudioCount) else null
@@ -1516,16 +1521,22 @@ class PlayerEngine private constructor(
             for (tIdx in 0 until group.length) {
                 val format = group.getTrackFormat(tIdx)
                 val selected = group.isTrackSelected(tIdx)
+                val bitrateKbps = resolveAudioTrackBitrateKbps(
+                    format = format,
+                    episode = episode,
+                    extMeta = extMeta,
+                    embeddedAudioIndex = audioSeqIndex
+                )
                 if (selected) {
                     selectedAudioFormat = format
+                    selectedResolvedBitrateKbps = bitrateKbps
                 }
-                val bitrateKbps = if (format.bitrate > 0) (format.bitrate / 1000).coerceAtLeast(1) else 0
                 val label = if (extMeta != null) {
                     extMeta.formattedLabel
                 } else {
                     buildEmbeddedTrackLabel(format, audioSeqIndex + 1, "Аудиодорожка")
                 }
-                val codecShort = format.sampleMimeType?.substringAfter('/')?.uppercase() ?: "ВСТРОЕННАЯ"
+                val codecShort = formatShortAudioCodecBadge(format.sampleMimeType)
                 val bitrateSuffix = if (bitrateKbps > 0) " • ${bitrateKbps}k" else ""
                 val badge = when {
                     extMeta != null && extMeta.isAutoMatched -> "АВТО • ${extMeta.extension.uppercase()}$bitrateSuffix"
@@ -1546,7 +1557,7 @@ class PlayerEngine private constructor(
                 )
             }
         }
-        selectedAudioFormat?.let { updateDetectedAudioFormat(it) }
+        selectedAudioFormat?.let { updateDetectedAudioFormat(it, selectedResolvedBitrateKbps) }
 
         val currentSubId = _state.value.selectedSubtitleId
         val subOptions = mutableListOf<SubtitleTrackUiOption>()
@@ -1621,16 +1632,8 @@ class PlayerEngine private constructor(
         currentEpisode: EpisodeItem
     ): List<VideoQualityUiOption> {
         val currentQualityId = _state.value.selectedVideoQualityId
-        val options = mutableListOf<VideoQualityUiOption>()
-
-        options.add(
-            VideoQualityUiOption(
-                id = "auto",
-                label = "Авто (Макс. доступное)",
-                badge = "AUTO",
-                isSelected = currentQualityId == "auto"
-            )
-        )
+        val isLocalFile = PlaybackResumeHelper.isLocalFileUri(currentEpisode.uri)
+        val concreteOptions = mutableListOf<VideoQualityUiOption>()
 
         val videoGroups = tracks.groups.mapIndexedNotNull { idx, group ->
             if (group.type == C.TRACK_TYPE_VIDEO) idx to group else null
@@ -1652,7 +1655,7 @@ class PlayerEngine private constructor(
                 ).joinToString(" • ")
                 val trackId = "trk:$rawGroupIdx:$tIdx"
                 seenTrackHeights.add(h)
-                options.add(
+                concreteOptions.add(
                     VideoQualityUiOption(
                         id = trackId,
                         label = if (w > 0) "${h}p ($w×$h)" else "${h}p",
@@ -1681,7 +1684,7 @@ class PlayerEngine private constructor(
                     val resMatch = resRegex.find(candidate.fileName)?.value?.uppercase()
                     if (resMatch != null) {
                         val epOptId = "ep:$epIdx"
-                        options.add(
+                        concreteOptions.add(
                             VideoQualityUiOption(
                                 id = epOptId,
                                 label = "Файл $resMatch — ${candidate.fileName}",
@@ -1695,25 +1698,43 @@ class PlayerEngine private constructor(
             }
         }
 
-        // Always provide standard streaming resolution caps (2160p, 1080p, 720p, 480p) if not already covered by multi-tracks
-        val standardCaps = listOf(
-            2160 to "4K Ultra HD (до 2160p)",
-            1080 to "Full HD (до 1080p)",
-            720 to "HD (до 720p)",
-            480 to "SD (до 480p)"
+        // For local files with only a single video quality, do not expose artificial streaming caps or multi-option selector
+        if (isLocalFile && concreteOptions.size <= 1) {
+            return concreteOptions.map { it.copy(isSelected = true) }
+        }
+
+        val options = mutableListOf<VideoQualityUiOption>()
+        options.add(
+            VideoQualityUiOption(
+                id = "auto",
+                label = "Авто (Макс. доступное)",
+                badge = "AUTO",
+                isSelected = currentQualityId == "auto"
+            )
         )
-        for ((capH, capLabel) in standardCaps) {
-            val capId = "cap:$capH"
-            if (options.none { it.heightPx == capH && it.groupIndex >= 0 }) {
-                options.add(
-                    VideoQualityUiOption(
-                        id = capId,
-                        label = capLabel,
-                        badge = "${capH}p MAX",
-                        heightPx = capH,
-                        isSelected = currentQualityId == capId
+        options.addAll(concreteOptions)
+
+        // Only provide standard streaming resolution caps for network streams
+        if (!isLocalFile) {
+            val standardCaps = listOf(
+                2160 to "4K Ultra HD (до 2160p)",
+                1080 to "Full HD (до 1080p)",
+                720 to "HD (до 720p)",
+                480 to "SD (до 480p)"
+            )
+            for ((capH, capLabel) in standardCaps) {
+                val capId = "cap:$capH"
+                if (options.none { it.heightPx == capH && it.groupIndex >= 0 }) {
+                    options.add(
+                        VideoQualityUiOption(
+                            id = capId,
+                            label = capLabel,
+                            badge = "${capH}p MAX",
+                            heightPx = capH,
+                            isSelected = currentQualityId == capId
+                        )
                     )
-                )
+                }
             }
         }
 
@@ -2190,12 +2211,20 @@ class PlayerEngine private constructor(
                 lastManualEpisodeStartIndex = index
                 lastManualEpisodeStartRealtimeMs = SystemClock.elapsedRealtime()
                 lastManualEpisodeInitialPosMs = resumePos
+                val nextW = targetEpisode.videoWidth.takeIf { it > 0 } ?: (saved?.videoWidth ?: 0)
+                val nextH = targetEpisode.videoHeight.takeIf { it > 0 } ?: (saved?.videoHeight ?: 0)
+                pendingNextVideoWidth = 0
+                pendingNextVideoHeight = 0
+                detectedVideoWidth = nextW
+                detectedVideoHeight = nextH
                 _positionMs.value = resumePos
                 _state.update {
                     it.copy(
                         currentEpisodeIndex = index,
                         currentPositionMs = resumePos,
                         durationMs = effectiveDur,
+                        videoWidth = nextW,
+                        videoHeight = nextH,
                         chapters = emptyList(),
                         resumedFromPositionMs = resumePos.takeIf { p -> p > 0L },
                         resumeEventId = System.currentTimeMillis(),
@@ -2298,9 +2327,174 @@ class PlayerEngine private constructor(
         }
     }
 
-    private fun updateDetectedAudioFormat(format: Format) {
+    private fun formatShortAudioCodecBadge(mimeType: String?): String {
+        val sub = mimeType?.substringAfter('/')?.lowercase().orEmpty()
+        return when {
+            sub.contains("mp4a") || sub.contains("aac") -> "AAC"
+            sub.contains("opus") -> "OPUS"
+            sub.contains("vorbis") -> "VORBIS"
+            sub.contains("eac3") -> "E-AC3"
+            sub.contains("ac3") -> "AC3"
+            sub.contains("flac") -> "FLAC"
+            sub.contains("truehd") -> "TRUEHD"
+            sub.contains("dts") -> "DTS"
+            sub.contains("mpeg") || sub.contains("mp3") -> "MP3"
+            sub.contains("raw") || sub.contains("pcm") -> "PCM"
+            sub.isNotBlank() -> sub.uppercase()
+            else -> "AUDIO"
+        }
+    }
+
+    private fun resolveAudioTrackBitrateKbps(
+        format: Format,
+        episode: EpisodeItem,
+        extMeta: ExternalAudioTrack?,
+        embeddedAudioIndex: Int
+    ): Int {
+        val directBps = when {
+            format.bitrate > 0 -> format.bitrate
+            format.averageBitrate > 0 -> format.averageBitrate
+            format.peakBitrate > 0 -> format.peakBitrate
+            else -> 0
+        }
+        if (directBps > 0) {
+            return (directBps / 1000).coerceAtLeast(1)
+        }
+
+        if (extMeta != null) {
+            val cachedExt = probedExternalAudioBitratesKbps[extMeta.uri]
+            if (cachedExt != null && cachedExt > 0) return cachedExt
+            val probedExt = probeExternalAudioBitrateKbps(extMeta.uri, episode)
+            if (probedExt > 0) {
+                probedExternalAudioBitratesKbps[extMeta.uri] = probedExt
+                return probedExt
+            }
+        } else if (PlaybackResumeHelper.isLocalFileUri(episode.uri)) {
+            val containerRates = probedContainerAudioBitratesKbps.getOrPut(episode.uri) {
+                probeContainerAudioBitratesKbps(episode.uri)
+            }
+            val probed = containerRates.getOrNull(embeddedAudioIndex) ?: 0
+            if (probed > 0) return probed
+        }
+
+        return estimateAudioBitrateFromFormatKbps(format, extMeta?.extension)
+    }
+
+    private fun probeExternalAudioBitrateKbps(extUriStr: String, episode: EpisodeItem): Int {
+        val parsedUri = runCatching { Uri.parse(extUriStr) }.getOrNull() ?: return 0
+        // 1. Try MediaExtractor KEY_BIT_RATE
+        val extractorRate = probeContainerAudioBitratesKbps(extUriStr).firstOrNull { it > 0 } ?: 0
+        if (extractorRate > 0) return extractorRate
+
+        // 2. Compute from external audio file size and duration
+        val durationMs = (_state.value.durationMs.takeIf { it > 0L } ?: episode.durationMs).coerceAtLeast(0L)
+        if (durationMs >= 5_000L) {
+            val sizeBytes = queryUriByteSize(parsedUri)
+            if (sizeBytes > 16_384L) {
+                val kbps = ((sizeBytes * 8L) / durationMs).toInt().coerceIn(24, 6000)
+                return kbps
+            }
+        }
+        return 0
+    }
+
+    private fun probeContainerAudioBitratesKbps(uriStr: String): List<Int> {
+        if (!PlaybackResumeHelper.isLocalFileUri(uriStr)) return emptyList()
+        val extractor = android.media.MediaExtractor()
+        return try {
+            val uri = Uri.parse(uriStr)
+            if (uri.scheme.equals("file", ignoreCase = true)) {
+                val path = uri.path
+                if (!path.isNullOrBlank()) {
+                    extractor.setDataSource(path)
+                } else {
+                    extractor.setDataSource(appContext, uri, null)
+                }
+            } else {
+                extractor.setDataSource(appContext, uri, null)
+            }
+            val result = mutableListOf<Int>()
+            val count = extractor.trackCount
+            for (i in 0 until count) {
+                val mf = runCatching { extractor.getTrackFormat(i) }.getOrNull() ?: continue
+                val mime = runCatching { mf.getString(android.media.MediaFormat.KEY_MIME) }.getOrNull().orEmpty()
+                if (mime.startsWith("audio/", ignoreCase = true)) {
+                    val bps = if (mf.containsKey(android.media.MediaFormat.KEY_BIT_RATE)) {
+                        runCatching { mf.getInteger(android.media.MediaFormat.KEY_BIT_RATE) }.getOrDefault(0)
+                    } else 0
+                    result.add(if (bps > 0) (bps / 1000).coerceAtLeast(1) else 0)
+                }
+            }
+            result
+        } catch (_: Throwable) {
+            emptyList()
+        } finally {
+            runCatching { extractor.release() }
+        }
+    }
+
+    private fun queryUriByteSize(uri: Uri): Long {
+        if (uri.scheme.equals("file", ignoreCase = true)) {
+            val path = uri.path ?: return 0L
+            return runCatching { File(path).length() }.getOrDefault(0L)
+        }
+        return runCatching {
+            appContext.contentResolver.openAssetFileDescriptor(uri, "r")?.use { afd ->
+                afd.length.takeIf { it > 0L } ?: 0L
+            } ?: 0L
+        }.getOrDefault(0L)
+    }
+
+    private fun estimateAudioBitrateFromFormatKbps(format: Format, extHint: String?): Int {
+        val mime = format.sampleMimeType.orEmpty().lowercase()
+        val ext = extHint.orEmpty().lowercase()
+        val channels = format.channelCount.takeIf { it > 0 } ?: 2
+        val sampleRate = format.sampleRate.takeIf { it > 0 } ?: 48_000
+        return when {
+            mime.contains("flac") || ext == "flac" ->
+                ((sampleRate * channels * 16) / 1000 * 58 / 100).coerceIn(320, 2400)
+            mime.contains("truehd") ->
+                if (channels >= 6) 2560 else 1400
+            mime.contains("raw") || mime.contains("pcm") || ext == "wav" ->
+                ((sampleRate * channels * 16) / 1000).coerceIn(256, 6144)
+            mime.contains("dts") ->
+                if (channels >= 6) 1509 else 768
+            mime.contains("eac3") || ext == "eac3" ->
+                if (channels >= 6) 640 else 384
+            mime.contains("ac3") || ext == "ac3" ->
+                if (channels >= 6) 448 else 192
+            mime.contains("opus") || ext == "opus" ->
+                when {
+                    channels >= 6 -> 320
+                    channels == 1 -> 96
+                    else -> 160
+                }
+            mime.contains("vorbis") || ext == "ogg" ->
+                when {
+                    channels >= 6 -> 320
+                    channels == 1 -> 96
+                    else -> 160
+                }
+            mime.contains("mpeg") || mime.contains("mp3") || ext == "mp3" ->
+                if (channels == 1) 128 else 192
+            else ->
+                when {
+                    channels >= 8 -> 512
+                    channels >= 6 -> 384
+                    channels == 1 -> 96
+                    sampleRate >= 48_000 -> 192
+                    else -> 160
+                }
+        }
+    }
+
+    private fun updateDetectedAudioFormat(format: Format, resolvedBitrateKbps: Int = 0) {
         val rawBitrate = format.bitrate
-        val kbps = if (rawBitrate > 0) (rawBitrate / 1000).coerceAtLeast(1) else 0
+        val kbps = when {
+            rawBitrate > 0 -> (rawBitrate / 1000).coerceAtLeast(1)
+            resolvedBitrateKbps > 0 -> resolvedBitrateKbps
+            else -> estimateAudioBitrateFromFormatKbps(format, null)
+        }
         val mime = format.sampleMimeType.orEmpty().lowercase()
         val isLosslessCodec = mime.contains("flac") || mime.contains("raw") || mime.contains("pcm") ||
             mime.contains("truehd") || mime.contains("alac")
@@ -2308,7 +2502,7 @@ class PlayerEngine private constructor(
         // (AAC/MP3/Opus/Vorbis in MKV/MKA) omits container bitrate metadata.
         val isLowBitrate = when {
             isLosslessCodec -> false
-            kbps > 0 -> kbps <= AudioDelayProcessor.LOW_BITRATE_THRESHOLD_KBPS
+            rawBitrate > 0 -> kbps <= AudioDelayProcessor.LOW_BITRATE_THRESHOLD_KBPS
             else -> format.channelCount in 1..2
         }
         audioDelayProcessor.isLowBitrateStream = isLowBitrate

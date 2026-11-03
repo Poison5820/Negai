@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -72,6 +73,7 @@ import com.example.model.PlaybackEndMode
 import com.example.ui.components.InstantSlider
 import com.example.model.PlayerControlsTheme
 import com.example.model.PlayerOrientationMode
+import com.example.model.PlayerSurfaceStyle
 import com.example.model.SleepTimerPreset
 import com.example.model.VideoScaleMode
 import com.example.ui.components.PlayerControlsThemeSelectorSection
@@ -126,60 +128,74 @@ fun VerticalGestureHudCard(
     val glassBg = PlayerFrostedGlassBaseColor
     val readableAccent = MaterialTheme.colorScheme.primary.ensureReadableOn(glassBg, minContrast = 5.4f)
     val isBoostedVolume = hudState.type == GestureHudType.VOLUME && hudState.percent > 100
+    val fillFraction = if (isBoostedVolume) {
+        val span = (hudState.maxBoostPercent - 100f).coerceAtLeast(10f)
+        ((hudState.percent - 100f) / span).coerceIn(0f, 1f)
+    } else {
+        (hudState.percent / 100f).coerceIn(0f, 1f)
+    }
+
     Surface(
-        color = glassBg,
-        shape = RoundedCornerShape(16.dp),
+        color = glassBg.copy(alpha = 0.88f),
+        shape = RoundedCornerShape(50),
         border = playerPopupBorderStroke(),
-        shadowElevation = 14.dp,
+        shadowElevation = 10.dp,
         modifier = modifier.testTag("vertical_gesture_hud")
     ) {
         Column(
             modifier = Modifier
-                .width(160.dp)
-                .background(playerFrostedGlassBrush(accentAlpha = if (isBoostedVolume) 0.20f else 0.12f))
-                .padding(horizontal = 12.dp, vertical = 9.dp),
+                .width(34.dp)
+                .background(playerFrostedGlassBrush(accentAlpha = if (isBoostedVolume) 0.20f else 0.10f))
+                .padding(horizontal = 4.dp, vertical = 10.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(5.dp)
+            verticalArrangement = Arrangement.spacedBy(7.dp)
         ) {
+            ScaleToFitWidthBox(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "${hudState.percent}%",
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                    color = if (isBoostedVolume) readableAccent else Color.White,
+                    maxLines = 1,
+                    softWrap = false
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .width(5.dp)
+                    .height(104.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(Color.White.copy(alpha = 0.20f)),
+                contentAlignment = Alignment.BottomCenter
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(fillFraction)
+                        .clip(RoundedCornerShape(50))
+                        .background(readableAccent)
+                )
+            }
+
             Icon(
                 imageVector = when {
                     hudState.type == GestureHudType.BRIGHTNESS -> Icons.Default.BrightnessHigh
                     isBoostedVolume -> Icons.Default.GraphicEq
                     else -> Icons.Default.VolumeUp
                 },
-                contentDescription = null,
-                tint = readableAccent,
-                modifier = Modifier.size(20.dp)
-            )
-            Text(
-                text = when {
+                contentDescription = when {
                     hudState.type == GestureHudType.BRIGHTNESS ->
                         tr("Яркость ${hudState.percent}%", "Brightness ${hudState.percent}%")
                     isBoostedVolume ->
-                        tr("Усиление ${hudState.percent}% / ${hudState.maxBoostPercent}%", "Boost ${hudState.percent}% / ${hudState.maxBoostPercent}%")
+                        tr("Усиление ${hudState.percent}%", "Boost ${hudState.percent}%")
                     else ->
                         tr("Громкость ${hudState.percent}%", "Volume ${hudState.percent}%")
                 },
-                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
-                color = if (isBoostedVolume) readableAccent else Color.White,
-                maxLines = 1,
-                softWrap = false
-            )
-            LinearProgressIndicator(
-                progress = {
-                    if (isBoostedVolume) {
-                        val span = (hudState.maxBoostPercent - 100f).coerceAtLeast(10f)
-                        ((hudState.percent - 100f) / span).coerceIn(0f, 1f)
-                    } else {
-                        (hudState.percent / 100f).coerceIn(0f, 1f)
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(4.dp)
-                    .clip(RoundedCornerShape(2.dp)),
-                color = readableAccent,
-                trackColor = Color.White.copy(alpha = 0.22f)
+                tint = readableAccent,
+                modifier = Modifier.size(16.dp)
             )
         }
     }
@@ -289,6 +305,7 @@ fun PlayerToolsModalSheet(
     currentPositionMs: Long,
     playbackEndMode: PlaybackEndMode,
     controlsTheme: PlayerControlsTheme = PlayerControlsTheme.CLASSIC_OLED,
+    surfaceStyle: PlayerSurfaceStyle = PlayerSurfaceStyle.FROSTED_GLASS,
     activeOrientationMode: PlayerOrientationMode = PlayerOrientationMode.VIDEO_ASPECT,
     playerUiScalePercent: Int = 100,
     playerAutoDpiScale: Boolean = true,
@@ -304,6 +321,7 @@ fun PlayerToolsModalSheet(
     onClearAbLoop: () -> Unit,
     onSelectPlaybackEndMode: (PlaybackEndMode) -> Unit,
     onSelectControlsTheme: (PlayerControlsTheme) -> Unit = {},
+    onSelectSurfaceStyle: (PlayerSurfaceStyle) -> Unit = {},
     onSelectOrientationMode: (PlayerOrientationMode) -> Unit = {},
     onUpdatePlayerUiScalePercent: (Int) -> Unit = {},
     onUpdatePlayerAutoDpiScale: (Boolean) -> Unit = {},
@@ -406,6 +424,28 @@ fun PlayerToolsModalSheet(
                     onSelectTheme = onSelectControlsTheme,
                     compactChipsOnly = true
                 )
+
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = tr(
+                        "Режим подложек кнопок: ${surfaceStyle.localizedTitle(isEnglish)}",
+                        "HUD Button Surface Mode: ${surfaceStyle.localizedTitle(isEnglish)}"
+                    ),
+                    style = MaterialTheme.typography.titleSmall
+                )
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    PlayerSurfaceStyle.entries.forEach { style ->
+                        FilterChip(
+                            selected = surfaceStyle == style,
+                            onClick = { onSelectSurfaceStyle(style) },
+                            label = { Text(style.localizedTitle(isEnglish)) },
+                            modifier = Modifier.testTag("tools_surface_style_chip_${style.id}")
+                        )
+                    }
+                }
             }
 
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -475,7 +515,7 @@ fun PlayerToolsModalSheet(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    listOf(80, 90, 100, 110, 125, 140).forEach { pct ->
+                    listOf(85, 90, 100, 110, 125).forEach { pct ->
                         FilterChip(
                             selected = pendingPlayerScale == pct,
                             onClick = {

@@ -1,6 +1,8 @@
 package com.example.ui.screens
 
 import android.app.Activity
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.media.AudioManager
@@ -21,6 +23,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
@@ -53,6 +56,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.PlaylistPlay
 import androidx.compose.material.icons.filled.Bookmarks
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.material.icons.filled.FastRewind
 import androidx.compose.material.icons.filled.Forward10
@@ -125,6 +129,7 @@ import com.example.model.PlayerControlsTheme
 import com.example.model.PlayerOrientationMode
 import com.example.model.PlayerQuickAction
 import com.example.model.PlayerSettings
+import com.example.model.PlayerSurfaceStyle
 import com.example.model.SleepTimerPreset
 import com.example.model.VideoChapter
 import com.example.model.VideoScaleMode
@@ -227,6 +232,7 @@ fun PlayerScreen(
     onClearAbLoop: () -> Unit,
     onSelectPlaybackEndMode: (PlaybackEndMode) -> Unit,
     onSelectControlsTheme: (PlayerControlsTheme) -> Unit = {},
+    onSelectSurfaceStyle: (PlayerSurfaceStyle) -> Unit = {},
     onUpdateQuickActions: (List<PlayerQuickAction>) -> Unit,
     onUpdateSkipIntroSeconds: (Int) -> Unit = {},
     onUpdatePlayerUiScalePercent: (Int) -> Unit = {},
@@ -255,14 +261,14 @@ fun PlayerScreen(
     var showLiveInfoHud by rememberSaveable { mutableStateOf(false) }
     var interactionTick by remember { mutableIntStateOf(0) }
 
-    LaunchedEffect(playbackState.currentEpisodeIndex) {
+    LaunchedEffect(playbackState.currentEpisode?.uri, playbackState.currentEpisodeIndex) {
         if (!isOrientationLocked) {
             orientationMode = settings.defaultPlayerOrientation
         }
     }
 
     val exitPlayerCleanly: () -> Unit = {
-        val activity = context as? Activity
+        val activity = context.findActivity()
         if (activity != null) {
             activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
             activity.window?.let { win ->
@@ -319,6 +325,11 @@ fun PlayerScreen(
     var isQuickBarScrolling by remember { mutableStateOf(false) }
     var isQuickActionHoldMenuOpen by remember { mutableStateOf(false) }
     var showHardwareVolumeHud by remember { mutableStateOf(false) }
+    var lastHandledVolumeEventTimestamp by remember {
+        mutableLongStateOf(hardwareVolumeHudEvent?.timestampMs ?: 0L)
+    }
+    var showTitleCopiedBanner by remember { mutableStateOf(false) }
+    var titleCopiedTick by remember { mutableIntStateOf(0) }
     val latestIsQuickActionHoldMenuOpen by rememberUpdatedState(isQuickActionHoldMenuOpen)
     val latestControlsVisible by rememberUpdatedState(controlsVisible)
 
@@ -329,10 +340,20 @@ fun PlayerScreen(
     }
 
     LaunchedEffect(hardwareVolumeHudEvent?.timestampMs) {
-        if (hardwareVolumeHudEvent != null) {
+        val ts = hardwareVolumeHudEvent?.timestampMs ?: 0L
+        if (ts > 0L && ts != lastHandledVolumeEventTimestamp) {
+            lastHandledVolumeEventTimestamp = ts
             showHardwareVolumeHud = true
             delay(1300L)
             showHardwareVolumeHud = false
+        }
+    }
+
+    LaunchedEffect(titleCopiedTick) {
+        if (titleCopiedTick > 0) {
+            showTitleCopiedBanner = true
+            delay(1800L)
+            showTitleCopiedBanner = false
         }
     }
 
@@ -356,36 +377,31 @@ fun PlayerScreen(
         onDispose { view.keepScreenOn = false }
     }
 
-    // Lock video aspect dimensions per episode so pre-buffered next items can never flip orientation early
-    var lockedEpisodeIndexForAspect by remember { mutableIntStateOf(-1) }
-    var lockedEpisodeWidth by remember { mutableIntStateOf(0) }
-    var lockedEpisodeHeight by remember { mutableIntStateOf(0) }
-
-    if (playbackState.currentEpisodeIndex != lockedEpisodeIndexForAspect) {
-        lockedEpisodeIndexForAspect = playbackState.currentEpisodeIndex
-        val epW = playbackState.currentEpisode?.videoWidth?.takeIf { it > 0 } ?: playbackState.videoWidth
-        val epH = playbackState.currentEpisode?.videoHeight?.takeIf { it > 0 } ?: playbackState.videoHeight
-        lockedEpisodeWidth = epW
-        lockedEpisodeHeight = epH
-    } else if ((lockedEpisodeWidth <= 0 || lockedEpisodeHeight <= 0) &&
-        playbackState.videoWidth > 0 &&
-        playbackState.videoHeight > 0
-    ) {
-        lockedEpisodeWidth = playbackState.videoWidth
-        lockedEpisodeHeight = playbackState.videoHeight
+    // Resolve effective video aspect dimensions: prioritize ExoPlayer's decoded & rotation-corrected
+    // videoWidth/videoHeight, falling back to EpisodeItem metadata only before decoder initialization.
+    val effectiveVideoWidth = if (playbackState.videoWidth > 0) {
+        playbackState.videoWidth
+    } else {
+        playbackState.currentEpisode?.videoWidth ?: 0
+    }
+    val effectiveVideoHeight = if (playbackState.videoHeight > 0) {
+        playbackState.videoHeight
+    } else {
+        playbackState.currentEpisode?.videoHeight ?: 0
     }
 
-    // Apply & dynamically update Activity screen orientation strictly once per episode or manual mode change
+    // Apply & dynamically update Activity screen orientation per episode, decoded video size, or manual mode change
     DisposableEffect(
         orientationMode,
+        playbackState.currentEpisode?.uri,
         playbackState.currentEpisodeIndex,
-        lockedEpisodeWidth,
-        lockedEpisodeHeight
+        effectiveVideoWidth,
+        effectiveVideoHeight
     ) {
-        val activity = context as? Activity
+        val activity = context.findActivity()
         val targetOrientation = orientationMode.resolveActivityOrientation(
-            videoWidth = lockedEpisodeWidth,
-            videoHeight = lockedEpisodeHeight
+            videoWidth = effectiveVideoWidth,
+            videoHeight = effectiveVideoHeight
         )
         if (activity != null && activity.requestedOrientation != targetOrientation) {
             activity.requestedOrientation = targetOrientation
@@ -395,7 +411,7 @@ fun PlayerScreen(
 
     DisposableEffect(Unit) {
         onDispose {
-            val activity = context as? Activity
+            val activity = context.findActivity()
             if (activity != null) {
                 activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
                 activity.window?.let { win ->
@@ -414,7 +430,7 @@ fun PlayerScreen(
     // Fullscreen immersive mode: keep system bars permanently hidden while the player is active
     // and allow layout to occupy camera cutout and notification bar in landscape mode.
     DisposableEffect(isInPipMode, activeSheet) {
-        val window = (context as? Activity)?.window
+        val window = context.findActivity()?.window
         if (window != null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 window.attributes.layoutInDisplayCutoutMode =
@@ -480,7 +496,16 @@ fun PlayerScreen(
     }
 
     val pipSupported = remember(context) { PipController.isPipSupported(context) }
+    val basePlayerDensity = LocalDensity.current
+    val effectivePlayerScale = rememberPlayerEffectiveScale(settings)
+    val scaledPlayerDensity = remember(basePlayerDensity, effectivePlayerScale) {
+        Density(
+            density = basePlayerDensity.density * effectivePlayerScale,
+            fontScale = basePlayerDensity.fontScale * effectivePlayerScale
+        )
+    }
 
+    CompositionLocalProvider(LocalDensity provides scaledPlayerDensity) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -893,6 +918,50 @@ fun PlayerScreen(
             }
         }
 
+        // Floating Notification Pill when Video Title is Copied
+        AnimatedVisibility(
+            visible = showTitleCopiedBanner && !isInPipMode,
+            enter = fadeIn(tween(120)),
+            exit = fadeOut(tween(120)),
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .windowInsetsPadding(WindowInsets.safeDrawing)
+                .padding(top = 56.dp, start = 16.dp, end = 16.dp)
+        ) {
+            val copiedAccent = MaterialTheme.colorScheme.primary.ensureReadableOn(
+                PlayerFrostedGlassBaseColor,
+                minContrast = 5.4f
+            )
+            Surface(
+                color = PlayerFrostedGlassBaseColor,
+                shape = RoundedCornerShape(14.dp),
+                border = playerPopupBorderStroke(),
+                shadowElevation = 12.dp,
+                modifier = Modifier.testTag("player_title_copied_banner")
+            ) {
+                Row(
+                    modifier = Modifier
+                        .background(playerFrostedGlassBrush(accentAlpha = 0.14f))
+                        .padding(horizontal = 12.dp, vertical = 7.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ContentCopy,
+                        contentDescription = null,
+                        tint = copiedAccent,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Text(
+                        text = tr("Название скопировано", "Title copied"),
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color.White
+                    )
+                }
+            }
+        }
+
         // Buffering Spinner
         if (playbackState.isBuffering &&
             !isInPipMode &&
@@ -905,11 +974,25 @@ fun PlayerScreen(
             )
         }
 
-        // Vertical Brightness / Volume Gesture & Hardware Volume Keys Live OLED HUD
+        // Vertical Brightness / Volume Gesture & Hardware Volume Keys Live Slim Side HUD
         val activeHudMode = when {
             verticalGestureMode != VerticalGestureMode.NONE -> verticalGestureMode
             showHardwareVolumeHud -> VerticalGestureMode.VOLUME
             else -> VerticalGestureMode.NONE
+        }
+        var lastVisibleHudMode by remember { mutableStateOf(VerticalGestureMode.VOLUME) }
+        if (activeHudMode != VerticalGestureMode.NONE) {
+            lastVisibleHudMode = activeHudMode
+        }
+        val renderedHudMode = if (activeHudMode != VerticalGestureMode.NONE) {
+            activeHudMode
+        } else {
+            lastVisibleHudMode
+        }
+        val hudSideAlignment = if (renderedHudMode == VerticalGestureMode.BRIGHTNESS) {
+            Alignment.CenterStart
+        } else {
+            Alignment.CenterEnd
         }
         val activeHudFraction = if (verticalGestureMode != VerticalGestureMode.NONE) {
             verticalGestureFraction
@@ -930,10 +1013,13 @@ fun PlayerScreen(
             visible = activeHudMode != VerticalGestureMode.NONE && !isInPipMode,
             enter = fadeIn(tween(100)),
             exit = fadeOut(tween(100)),
-            modifier = Modifier.align(Alignment.Center)
+            modifier = Modifier
+                .align(hudSideAlignment)
+                .windowInsetsPadding(WindowInsets.safeDrawing)
+                .padding(horizontal = 16.dp)
         ) {
             VerticalGestureHudCard(
-                mode = activeHudMode,
+                mode = renderedHudMode,
                 fraction = activeHudFraction,
                 displayPercent = activeHudPercent,
                 maxBoostPercent = activeHudMaxBoost
@@ -1233,7 +1319,7 @@ fun PlayerScreen(
                     )
             ) {
                 val accentFreeHud = settings.playerControlsTheme.isAccentFree
-                val framelessHud = settings.playerControlsTheme.isFrameless
+                val surfaceStyle = settings.playerSurfaceStyle
                 val darkGlassBase = Color(0xFF0C1322)
                 val hudAccentColor = if (accentFreeHud) {
                     Color.White.copy(alpha = 0.92f)
@@ -1241,36 +1327,78 @@ fun PlayerScreen(
                     MaterialTheme.colorScheme.primary.ensureReadableOn(darkGlassBase, minContrast = 5.2f)
                 }
                 val hudButtonShape = RoundedCornerShape(12.dp)
-                val hudPillBorder = when {
-                    framelessHud -> null
-                    accentFreeHud -> BorderStroke(0.75.dp, Color.White.copy(alpha = 0.24f))
-                    else -> BorderStroke(0.75.dp, Color.White.copy(alpha = 0.20f))
-                }
-                val hudActiveLockedBorder = when {
-                    framelessHud -> null
-                    accentFreeHud -> BorderStroke(0.9.dp, Color.White.copy(alpha = 0.45f))
-                    else -> BorderStroke(0.9.dp, hudAccentColor.copy(alpha = 0.72f))
-                }
-                val hudPillBg = if (framelessHud) Color.Transparent else Color(0x88101828)
-                val hudActiveLockedBg = when {
-                    framelessHud -> Color.Transparent
-                    accentFreeHud -> Color(0x991E293B)
-                    else -> lerp(Color(0xCC0E1729), hudAccentColor, 0.28f)
-                }
-                val hudGlassSheenBrush = remember(framelessHud) {
-                    if (framelessHud) {
-                        Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent))
-                    } else {
-                        Brush.verticalGradient(
+                val hudPillBorder: BorderStroke? = when (surfaceStyle) {
+                    PlayerSurfaceStyle.FRAMELESS -> null
+                    PlayerSurfaceStyle.SOLID_ACCENT -> BorderStroke(
+                        0.85.dp,
+                        hudAccentColor.copy(alpha = if (accentFreeHud) 0.35f else 0.58f)
+                    )
+                    PlayerSurfaceStyle.FROSTED_GLASS -> BorderStroke(
+                        width = 0.85.dp,
+                        brush = Brush.verticalGradient(
                             colors = listOf(
-                                Color.White.copy(alpha = 0.10f),
+                                Color.White.copy(alpha = 0.36f),
+                                hudAccentColor.copy(alpha = if (accentFreeHud) 0.16f else 0.36f),
+                                Color.White.copy(alpha = 0.14f)
+                            )
+                        )
+                    )
+                }
+                val hudActiveLockedBorder: BorderStroke? = when (surfaceStyle) {
+                    PlayerSurfaceStyle.FRAMELESS -> null
+                    PlayerSurfaceStyle.SOLID_ACCENT -> BorderStroke(
+                        1.dp,
+                        hudAccentColor.copy(alpha = 0.88f)
+                    )
+                    PlayerSurfaceStyle.FROSTED_GLASS -> if (accentFreeHud) {
+                        BorderStroke(0.95.dp, Color.White.copy(alpha = 0.52f))
+                    } else {
+                        BorderStroke(0.95.dp, hudAccentColor.copy(alpha = 0.78f))
+                    }
+                }
+                val hudPillBg: Color = when (surfaceStyle) {
+                    PlayerSurfaceStyle.FRAMELESS -> Color.Transparent
+                    PlayerSurfaceStyle.SOLID_ACCENT -> lerp(
+                        Color(0xD90E1626),
+                        hudAccentColor,
+                        if (accentFreeHud) 0.18f else 0.32f
+                    )
+                    PlayerSurfaceStyle.FROSTED_GLASS -> PlayerFrostedGlassBaseColor
+                }
+                val hudActiveLockedBg: Color = when (surfaceStyle) {
+                    PlayerSurfaceStyle.FRAMELESS -> if (accentFreeHud) {
+                        Color.White.copy(alpha = 0.14f)
+                    } else {
+                        hudAccentColor.copy(alpha = 0.22f)
+                    }
+                    PlayerSurfaceStyle.SOLID_ACCENT -> lerp(
+                        Color(0xEB0E1626),
+                        hudAccentColor,
+                        if (accentFreeHud) 0.32f else 0.50f
+                    )
+                    PlayerSurfaceStyle.FROSTED_GLASS -> if (accentFreeHud) {
+                        Color(0xCC1E293B)
+                    } else {
+                        lerp(PlayerFrostedGlassBaseColor, hudAccentColor, 0.28f)
+                    }
+                }
+                val hudGlassSheenBrush = remember(surfaceStyle, hudAccentColor, accentFreeHud) {
+                    when (surfaceStyle) {
+                        PlayerSurfaceStyle.FROSTED_GLASS -> Brush.verticalGradient(
+                            colors = listOf(
+                                Color.White.copy(alpha = 0.16f),
+                                hudAccentColor.copy(alpha = if (accentFreeHud) 0.04f else 0.08f),
                                 Color.Transparent
                             )
+                        )
+                        PlayerSurfaceStyle.FRAMELESS,
+                        PlayerSurfaceStyle.SOLID_ACCENT -> Brush.verticalGradient(
+                            listOf(Color.Transparent, Color.Transparent)
                         )
                     }
                 }
 
-                // TOP BAR (compact, frosted-glass grouped controls + resolution badge + direct Episodes access)
+                // TOP BAR (compact, surface-styled grouped controls + resolution badge + direct Playlist access)
                 BoxWithConstraints(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -1309,26 +1437,56 @@ fun PlayerScreen(
                             }
                         }
 
+                        val currentTitleText = playbackState.currentEpisode?.cleanTitle
+                            ?: tr("Воспроизведение", "Now Playing")
                         Column(
                             modifier = Modifier
                                 .weight(1f)
                                 .widthIn(min = 64.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .combinedClickable(
+                                    enabled = showHud,
+                                    onClick = {
+                                        controlsVisible = !controlsVisible
+                                        interactionTick++
+                                    },
+                                    onLongClick = {
+                                        val titleToCopy = playbackState.currentEpisode?.cleanTitle
+                                            ?.takeIf { it.isNotBlank() }
+                                            ?: playbackState.currentEpisode?.fileName
+                                            ?: currentTitleText
+                                        if (titleToCopy.isNotBlank()) {
+                                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+                                            clipboard?.setPrimaryClip(ClipData.newPlainText("video_title", titleToCopy))
+                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            titleCopiedTick++
+                                            interactionTick++
+                                        }
+                                    }
+                                )
+                                .padding(horizontal = 4.dp, vertical = 2.dp)
+                                .testTag("player_top_title_box")
                         ) {
                             Text(
-                                text = playbackState.currentEpisode?.cleanTitle ?: tr("Воспроизведение", "Now Playing"),
+                                text = currentTitleText,
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.SemiBold,
                                 color = Color.White,
                                 maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = if (showHud) {
+                                    Modifier.basicMarquee(iterations = Int.MAX_VALUE)
+                                } else {
+                                    Modifier
+                                }
                             )
                             val subInfo = buildString {
                                 playbackState.currentEpisode?.folderName?.let { append(it) }
                                 if (playbackState.playlist.size > 1 && !settings.showEpisodesButtonInHud) {
                                     if (isEnglish) {
-                                        append(" • Episode ${playbackState.currentEpisodeIndex + 1}/${playbackState.playlist.size}")
+                                        append(" • Playlist ${playbackState.currentEpisodeIndex + 1}/${playbackState.playlist.size}")
                                     } else {
-                                        append(" • Серия ${playbackState.currentEpisodeIndex + 1}/${playbackState.playlist.size}")
+                                        append(" • Плейлист ${playbackState.currentEpisodeIndex + 1}/${playbackState.playlist.size}")
                                     }
                                 }
                             }
@@ -1343,7 +1501,7 @@ fun PlayerScreen(
                             }
                         }
 
-                        // Clear frosted-glass video resolution badge (clickable for quality switching)
+                        // Video resolution badge (clickable ONLY when multiple qualities are available)
                         val resolutionBadge = remember(
                             playbackState.videoWidth,
                             playbackState.videoHeight,
@@ -1357,29 +1515,36 @@ fun PlayerScreen(
                                 ?: playbackState.videoQualityOptions.firstOrNull { it.isSelected && !it.isAuto }?.badge
                                 ?: if (playbackState.videoQualityOptions.size > 1) "AUTO" else null
                         }
+                        val canSwitchVideoQuality = playbackState.videoQualityOptions.size > 1
                         if (resolutionBadge != null) {
                             com.example.ui.components.ResolutionBadgeChip(
                                 badge = resolutionBadge,
                                 compact = isCompactTopBar,
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(7.dp))
-                                    .clickable {
-                                        interactionTick++
-                                        activeSheet = ActivePlayerSheet.VIDEO_QUALITY
-                                    }
+                                    .then(
+                                        if (canSwitchVideoQuality) {
+                                            Modifier.clickable(enabled = showHud) {
+                                                interactionTick++
+                                                activeSheet = ActivePlayerSheet.VIDEO_QUALITY
+                                            }
+                                        } else {
+                                            Modifier
+                                        }
+                                    )
                                     .testTag("player_resolution_badge")
                             )
                         }
 
-                        // Direct immediate access to Episodes in Player Top Bar
+                        // Direct immediate access to Playlist in Player Top Bar
                         if (settings.showEpisodesButtonInHud) {
                             val epFullDesc = if (playbackState.playlist.size > 1) {
                                 tr(
-                                    "Серии ${playbackState.currentEpisodeIndex + 1}/${playbackState.playlist.size}",
-                                    "Episodes ${playbackState.currentEpisodeIndex + 1}/${playbackState.playlist.size}"
+                                    "Плейлист ${playbackState.currentEpisodeIndex + 1}/${playbackState.playlist.size}",
+                                    "Playlist ${playbackState.currentEpisodeIndex + 1}/${playbackState.playlist.size}"
                                 )
                             } else {
-                                tr("Серии", "Episodes")
+                                tr("Плейлист", "Playlist")
                             }
                             val epVisibleLabel = when {
                                 isCompactTopBar && playbackState.playlist.size > 1 ->
@@ -1913,6 +2078,7 @@ fun PlayerScreen(
                         currentPositionMs = toolsPosMs,
                         playbackEndMode = playbackState.playbackEndMode,
                         controlsTheme = settings.playerControlsTheme,
+                        surfaceStyle = settings.playerSurfaceStyle,
                         activeOrientationMode = orientationMode,
                         playerUiScalePercent = settings.playerUiScalePercent,
                         playerAutoDpiScale = settings.playerAutoDpiScale,
@@ -1928,6 +2094,7 @@ fun PlayerScreen(
                         onClearAbLoop = onClearAbLoop,
                         onSelectPlaybackEndMode = onSelectPlaybackEndMode,
                         onSelectControlsTheme = onSelectControlsTheme,
+                        onSelectSurfaceStyle = onSelectSurfaceStyle,
                         onSelectOrientationMode = { orientationMode = it },
                         onUpdatePlayerUiScalePercent = onUpdatePlayerUiScalePercent,
                         onUpdatePlayerAutoDpiScale = onUpdatePlayerAutoDpiScale,
@@ -2000,6 +2167,7 @@ fun PlayerScreen(
                 ActivePlayerSheet.NONE -> Unit
             }
         }
+    }
     }
 }
 
@@ -2423,4 +2591,11 @@ private fun PlayerLiveStatsOverlayCard(
         }
     }
 }
+
+private tailrec fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is android.content.ContextWrapper -> baseContext.findActivity()
+    else -> null
+}
+
 

@@ -27,6 +27,7 @@ import com.example.model.PlayerControlsTheme
 import com.example.model.PlayerOrientationMode
 import com.example.model.PlayerQuickAction
 import com.example.model.PlayerSettings
+import com.example.model.PlayerSurfaceStyle
 import com.example.model.PreferredTrackLanguage
 import com.example.model.StreamingQualityPreset
 import com.example.model.VideoChapter
@@ -643,6 +644,12 @@ class NegaiViewModel(application: Application) : AndroidViewModel(application) {
     fun setPlayerControlsTheme(theme: PlayerControlsTheme) {
         viewModelScope.launch {
             repository.preferencesRepository.updatePlayerControlsTheme(theme)
+        }
+    }
+
+    fun setPlayerSurfaceStyle(style: PlayerSurfaceStyle) {
+        viewModelScope.launch {
+            repository.preferencesRepository.updatePlayerSurfaceStyle(style)
         }
     }
 

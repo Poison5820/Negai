@@ -25,6 +25,7 @@ import com.example.model.PlayerControlsTheme
 import com.example.model.PlayerOrientationMode
 import com.example.model.PlayerQuickAction
 import com.example.model.PlayerSettings
+import com.example.model.PlayerSurfaceStyle
 import com.example.model.PreferredTrackLanguage
 import com.example.model.QuickActionsSerializer
 import com.example.model.StreamingQualityPreset
@@ -44,6 +45,7 @@ class PlayerPreferencesRepository(private val context: Context) {
         val THEME_MODE = stringPreferencesKey("app_theme_mode")
         val ACCENT_COLOR = stringPreferencesKey("app_accent_color")
         val PLAYER_CONTROLS_THEME = stringPreferencesKey("player_controls_theme")
+        val PLAYER_SURFACE_STYLE = stringPreferencesKey("player_surface_style")
         val COMPACT_UI_MODE = booleanPreferencesKey("compact_ui_mode")
         val SHOW_EPISODE_THUMBNAILS = booleanPreferencesKey("show_episode_thumbnails")
         val SHOW_EPISODES_BUTTON_IN_HUD = booleanPreferencesKey("show_episodes_button_in_hud")
@@ -192,6 +194,11 @@ class PlayerPreferencesRepository(private val context: Context) {
                 prefs[Keys.PLAYER_CONTROLS_THEME]
                     ?: (if (hasBoot) sp.getString("controls_theme", null) else null)
                     ?: PlayerControlsTheme.CLASSIC_OLED.id
+            ),
+            playerSurfaceStyle = PlayerSurfaceStyle.fromId(
+                prefs[Keys.PLAYER_SURFACE_STYLE]
+                    ?: (if (hasBoot) sp.getString("surface_style", null) else null)
+                    ?: PlayerSurfaceStyle.FROSTED_GLASS.id
             ),
             compactUiMode = true,
             showEpisodeThumbnails = prefs[Keys.SHOW_EPISODE_THUMBNAILS]
@@ -408,6 +415,11 @@ class PlayerPreferencesRepository(private val context: Context) {
     suspend fun updatePlayerControlsTheme(theme: PlayerControlsTheme) {
         bootPrefs(context).edit().putString("controls_theme", theme.id).apply()
         context.playerDataStore.edit { it[Keys.PLAYER_CONTROLS_THEME] = theme.id }
+    }
+
+    suspend fun updatePlayerSurfaceStyle(style: PlayerSurfaceStyle) {
+        bootPrefs(context).edit().putString("surface_style", style.id).apply()
+        context.playerDataStore.edit { it[Keys.PLAYER_SURFACE_STYLE] = style.id }
     }
 
     suspend fun updateCompactUiMode(enabled: Boolean) {
@@ -896,6 +908,9 @@ class PlayerPreferencesRepository(private val context: Context) {
                 playerControlsTheme = PlayerControlsTheme.fromId(
                     sp.getString("controls_theme", PlayerControlsTheme.CLASSIC_OLED.id) ?: PlayerControlsTheme.CLASSIC_OLED.id
                 ),
+                playerSurfaceStyle = PlayerSurfaceStyle.fromId(
+                    sp.getString("surface_style", PlayerSurfaceStyle.FROSTED_GLASS.id) ?: PlayerSurfaceStyle.FROSTED_GLASS.id
+                ),
                 compactUiMode = true,
                 showEpisodeThumbnails = sp.getBoolean("show_thumbs", true),
                 showEpisodesButtonInHud = sp.getBoolean("show_ep_hud", true),
@@ -1002,6 +1017,7 @@ class PlayerPreferencesRepository(private val context: Context) {
                 .putString("theme_mode", s.themeMode.id)
                 .putString("accent_color", s.accentColor.id)
                 .putString("controls_theme", s.playerControlsTheme.id)
+                .putString("surface_style", s.playerSurfaceStyle.id)
                 .putBoolean("compact_ui", true)
                 .putBoolean("show_thumbs", s.showEpisodeThumbnails)
                 .putBoolean("show_ep_hud", s.showEpisodesButtonInHud)

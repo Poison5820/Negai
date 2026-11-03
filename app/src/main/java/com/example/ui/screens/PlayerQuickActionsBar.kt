@@ -110,6 +110,7 @@ import com.example.model.FrameInterpolationMode
 import com.example.model.PlayerOrientationMode
 import com.example.model.PlayerQuickAction
 import com.example.model.PlayerSettings
+import com.example.model.PlayerSurfaceStyle
 import com.example.model.SleepTimerPreset
 import com.example.model.VideoScaleMode
 import com.example.player.AudioTrackUiOption
@@ -263,8 +264,10 @@ internal fun PlayerQuickActionsBar(
 
     val chipGap = if (settings.compactUiMode) 5.dp else 6.dp
     val buttonShape = RoundedCornerShape(12.dp)
-    val accentFree = settings.playerControlsTheme.isAccentFree
-    val frameless = settings.playerControlsTheme.isFrameless
+    val surfaceStyle = settings.playerSurfaceStyle
+    val accentFree = settings.playerControlsTheme.isAccentFree &&
+        surfaceStyle != PlayerSurfaceStyle.SOLID_ACCENT
+    val frameless = surfaceStyle == PlayerSurfaceStyle.FRAMELESS
 
     val buildMenuForAction: (PlayerQuickAction) -> List<QuickHoldMenuItem> = { action ->
         buildHoldMenuItemsForAction(
@@ -302,10 +305,32 @@ internal fun PlayerQuickActionsBar(
         Color(0xFF0C1322),
         minContrast = 5.2f
     )
-    val customizeBorder = when {
-        frameless -> null
-        accentFree -> BorderStroke(0.85.dp, Color.White.copy(alpha = 0.28f))
-        else -> BorderStroke(0.85.dp, readableAccent.copy(alpha = 0.52f))
+    val customizeContainerColor = when (surfaceStyle) {
+        PlayerSurfaceStyle.FRAMELESS -> Color.Transparent
+        PlayerSurfaceStyle.SOLID_ACCENT -> lerp(Color(0xD90B111E), readableAccent, 0.28f)
+        PlayerSurfaceStyle.FROSTED_GLASS -> Color(0x99101828)
+    }
+    val customizeSheenBrush = when (surfaceStyle) {
+        PlayerSurfaceStyle.FROSTED_GLASS -> Brush.verticalGradient(
+            colors = listOf(
+                Color.White.copy(alpha = 0.14f),
+                Color.White.copy(alpha = 0.03f),
+                Color.Transparent
+            )
+        )
+        PlayerSurfaceStyle.FRAMELESS,
+        PlayerSurfaceStyle.SOLID_ACCENT -> Brush.verticalGradient(
+            listOf(Color.Transparent, Color.Transparent)
+        )
+    }
+    val customizeBorder = when (surfaceStyle) {
+        PlayerSurfaceStyle.FRAMELESS -> null
+        PlayerSurfaceStyle.SOLID_ACCENT -> BorderStroke(0.85.dp, readableAccent.copy(alpha = 0.52f))
+        PlayerSurfaceStyle.FROSTED_GLASS -> if (accentFree) {
+            BorderStroke(0.85.dp, Color.White.copy(alpha = 0.28f))
+        } else {
+            BorderStroke(0.85.dp, readableAccent.copy(alpha = 0.52f))
+        }
     }
 
     BoxWithConstraints(
@@ -512,7 +537,7 @@ internal fun PlayerQuickActionsBar(
                     }
 
                     Surface(
-                        color = if (frameless) Color.Transparent else Color(0x88101828),
+                        color = customizeContainerColor,
                         shape = buttonShape,
                         border = customizeBorder,
                         modifier = Modifier
@@ -527,18 +552,7 @@ internal fun PlayerQuickActionsBar(
                     ) {
                         Box(
                             modifier = Modifier
-                                .background(
-                                    if (frameless) {
-                                        Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent))
-                                    } else {
-                                        Brush.verticalGradient(
-                                            colors = listOf(
-                                                Color.White.copy(alpha = 0.10f),
-                                                Color.Transparent
-                                            )
-                                        )
-                                    }
-                                )
+                                .background(customizeSheenBrush)
                                 .padding(horizontal = 9.dp, vertical = 8.dp),
                             contentAlignment = Alignment.Center
                         ) {
@@ -758,7 +772,7 @@ internal fun PlayerQuickActionsBar(
                         }
 
                         Surface(
-                            color = if (frameless) Color.Transparent else Color(0x88101828),
+                            color = customizeContainerColor,
                             shape = buttonShape,
                             border = customizeBorder,
                             modifier = Modifier
@@ -773,18 +787,7 @@ internal fun PlayerQuickActionsBar(
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .background(
-                                        if (frameless) {
-                                            Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent))
-                                        } else {
-                                            Brush.verticalGradient(
-                                                colors = listOf(
-                                                    Color.White.copy(alpha = 0.10f),
-                                                    Color.Transparent
-                                                )
-                                            )
-                                        }
-                                    )
+                                    .background(customizeSheenBrush)
                                     .padding(horizontal = 9.dp, vertical = 8.dp),
                                 contentAlignment = Alignment.Center
                             ) {
@@ -944,9 +947,13 @@ private fun QuickActionHoldButton(
                             itemsList: List<QuickHoldMenuItem>
                         ): Int {
                             if (itemsList.isEmpty()) return 0
-                            val slotPx = with(density) { 36.dp.toPx() }
-                            val deltaUpPx = (downPos.y - currentLocalY).coerceAtLeast(0f)
-                            val stepsUp = (deltaUpPx / slotPx).toInt()
+                            // Account for the vertical distance between the initial touch point inside
+                            // the button (downPos.y) and the center of the bottom-most mini-menu item so
+                            // selection happens directly under the finger rather than above it.
+                            val initialDeadzonePx = with(density) { 22.dp.toPx() }
+                            val slotPx = with(density) { 34.dp.toPx() }
+                            val effectiveDeltaUpPx = (downPos.y - currentLocalY - initialDeadzonePx).coerceAtLeast(0f)
+                            val stepsUp = (effectiveDeltaUpPx / slotPx).toInt()
                             return (itemsList.lastIndex - stepsUp).coerceIn(0, itemsList.lastIndex)
                         }
 
@@ -992,16 +999,22 @@ private fun QuickActionHoldButton(
                 .semantics { contentDescription = chipState.accessibilityLabel }
                 .testTag(chipState.testTag)
         ) {
+            val rowSheenBrush = when (settings.playerSurfaceStyle) {
+                PlayerSurfaceStyle.FROSTED_GLASS -> Brush.verticalGradient(
+                    colors = listOf(
+                        Color.White.copy(alpha = 0.14f),
+                        Color.White.copy(alpha = 0.03f),
+                        Color.Transparent
+                    )
+                )
+                PlayerSurfaceStyle.FRAMELESS,
+                PlayerSurfaceStyle.SOLID_ACCENT -> Brush.verticalGradient(
+                    listOf(Color.Transparent, Color.Transparent)
+                )
+            }
             Row(
                 modifier = Modifier
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(
-                                Color.White.copy(alpha = 0.10f),
-                                Color.Transparent
-                            )
-                        )
-                    )
+                    .background(rowSheenBrush)
                     .padding(
                         horizontal = if (chipState.counterBadge != null) 9.dp else 10.dp,
                         vertical = 8.dp
@@ -1609,8 +1622,9 @@ private fun resolveQuickChipVisuals(
     isInfoOverlayVisible: Boolean = false
 ): QuickChipVisualState {
     val isEnglish = LocalIsEnglish.current
-    val accentFree = settings.playerControlsTheme.isAccentFree
-    val frameless = settings.playerControlsTheme.isFrameless
+    val surfaceStyle = settings.playerSurfaceStyle
+    val accentFree = settings.playerControlsTheme.isAccentFree &&
+        surfaceStyle != PlayerSurfaceStyle.SOLID_ACCENT
     val darkHudGlass = Color(0xFF0C1322)
     val primary = if (accentFree) {
         Color.White.copy(alpha = 0.92f)
@@ -1622,26 +1636,46 @@ private fun resolveQuickChipVisuals(
     } else {
         MaterialTheme.colorScheme.secondary.ensureReadableOn(darkHudGlass, minContrast = 5.2f)
     }
-    val activePrimaryBg = when {
-        frameless -> Color.Transparent
-        accentFree -> Color(0x991E293B)
-        else -> lerp(Color(0xCC0E1729), primary, 0.28f)
+    val activePrimaryBg = when (surfaceStyle) {
+        PlayerSurfaceStyle.FRAMELESS -> Color.Transparent
+        PlayerSurfaceStyle.SOLID_ACCENT -> lerp(Color(0xE00B111E), primary, 0.44f)
+        PlayerSurfaceStyle.FROSTED_GLASS -> if (accentFree) {
+            Color(0x991E293B)
+        } else {
+            lerp(Color(0xCC0E1729), primary, 0.28f)
+        }
     }
-    val activeSecondaryBg = when {
-        frameless -> Color.Transparent
-        accentFree -> Color(0x991E293B)
-        else -> lerp(Color(0xCC0E1729), secondary, 0.28f)
+    val activeSecondaryBg = when (surfaceStyle) {
+        PlayerSurfaceStyle.FRAMELESS -> Color.Transparent
+        PlayerSurfaceStyle.SOLID_ACCENT -> lerp(Color(0xE00B111E), secondary, 0.44f)
+        PlayerSurfaceStyle.FROSTED_GLASS -> if (accentFree) {
+            Color(0x991E293B)
+        } else {
+            lerp(Color(0xCC0E1729), secondary, 0.28f)
+        }
     }
-    val neutralBg = if (frameless) Color.Transparent else Color(0x88101828)
-    val neutralBorder = when {
-        frameless -> null
-        accentFree -> BorderStroke(0.75.dp, Color.White.copy(alpha = 0.24f))
-        else -> BorderStroke(0.75.dp, Color.White.copy(alpha = 0.20f))
+    val neutralBg = when (surfaceStyle) {
+        PlayerSurfaceStyle.FRAMELESS -> Color.Transparent
+        PlayerSurfaceStyle.SOLID_ACCENT -> lerp(Color(0xD90B111E), primary, 0.26f)
+        PlayerSurfaceStyle.FROSTED_GLASS -> Color(0x99101828)
     }
-    val activeBorder = when {
-        frameless -> null
-        accentFree -> BorderStroke(0.9.dp, Color.White.copy(alpha = 0.45f))
-        else -> BorderStroke(0.9.dp, primary.copy(alpha = 0.72f))
+    val neutralBorder = when (surfaceStyle) {
+        PlayerSurfaceStyle.FRAMELESS -> null
+        PlayerSurfaceStyle.SOLID_ACCENT -> BorderStroke(0.8.dp, primary.copy(alpha = 0.42f))
+        PlayerSurfaceStyle.FROSTED_GLASS -> if (accentFree) {
+            BorderStroke(0.75.dp, Color.White.copy(alpha = 0.24f))
+        } else {
+            BorderStroke(0.75.dp, Color.White.copy(alpha = 0.22f))
+        }
+    }
+    val activeBorder = when (surfaceStyle) {
+        PlayerSurfaceStyle.FRAMELESS -> null
+        PlayerSurfaceStyle.SOLID_ACCENT -> BorderStroke(1.dp, primary.copy(alpha = 0.82f))
+        PlayerSurfaceStyle.FROSTED_GLASS -> if (accentFree) {
+            BorderStroke(0.9.dp, Color.White.copy(alpha = 0.45f))
+        } else {
+            BorderStroke(0.9.dp, primary.copy(alpha = 0.72f))
+        }
     }
 
     return when (action) {
@@ -1729,7 +1763,7 @@ private fun resolveQuickChipVisuals(
             val total = playbackState.playlist.size.coerceAtLeast(1)
             val currentNum = (playbackState.currentEpisodeIndex + 1).coerceIn(1, total)
             QuickChipVisualState(
-                accessibilityLabel = if (isEnglish) "Episodes $currentNum/$total" else "Серии $currentNum/$total",
+                accessibilityLabel = if (isEnglish) "Playlist $currentNum/$total" else "Плейлист $currentNum/$total",
                 counterBadge = "$currentNum/$total",
                 iconTint = primary,
                 containerColor = neutralBg,
@@ -2355,7 +2389,7 @@ internal fun EpisodesQuickModalSheet(
                     modifier = Modifier.size(20.dp)
                 )
                 Text(
-                    text = tr("Серии в плейлисте (${playlist.size})", "Episodes in Playlist (${playlist.size})"),
+                    text = tr("Плейлист (${playlist.size})", "Playlist (${playlist.size})"),
                     style = MaterialTheme.typography.titleMedium
                 )
             }
