@@ -99,10 +99,10 @@ private val PLANETARY_FEATURES = listOf(
         badge = "GLSL • Anime4K",
         titleRu = "Апскейлинг Anime4K в реальном времени",
         titleEn = "Real-Time Anime4K GLSL Upscaling",
-        subtitleRu = "Многопроходная реконструкция контуров Собеля, CNN / CNNX, авто-Fast с MEMC и живое сравнение До/После",
-        subtitleEn = "Multi-pass Sobel contour reconstruction, CNN / CNNX shaders, Auto-Fast with MEMC & live split-screen compare",
-        specsRu = "OpenGL ES 2.0 • 4 пресета • Авто-Fast с MEMC • 0 задержки",
-        specsEn = "OpenGL ES 2.0 • 4 Presets • Auto-Fast with MEMC • Zero latency",
+        subtitleRu = "Шейдерный конвейер по архитектуре bloc97/Anime4K (Clamp_Highlights, Mode C Fast, Mode B CNN, Mode A CNNX) и живое сравнение До/После",
+        subtitleEn = "Shader pipeline based on bloc97/Anime4K (Clamp_Highlights, Mode C Fast, Mode B CNN, Mode A CNNX) & live split-screen compare",
+        specsRu = "OpenGL ES & Vulkan API • Mode A/B/C • MIT License (bloc97/Anime4K)",
+        specsEn = "OpenGL ES & Vulkan API • Mode A/B/C • MIT License (bloc97/Anime4K)",
         color = Color(0xFF00E5FF),
         orbitRadiusFraction = 0.28f,
         speedMultiplier = 1.6f,
@@ -116,10 +116,10 @@ private val PLANETARY_FEATURES = listOf(
         badge = "MEMC • LTPO",
         titleRu = "Интерполяция кадров MEMC и адаптивная герцовка",
         titleEn = "MEMC Frame Interpolation & LTPO Cadence",
-        subtitleRu = "Фазово-согласованный двунаправленный варпинг до 165 Гц с защитой от артефактов на сменах сцен",
-        subtitleEn = "Phase-consistent bidirectional motion warp up to 165Hz with scene-cut artifact protection",
-        specsRu = "24/30 → 60/90/120/144/165 Гц • Highp векторы движения",
-        specsEn = "24/30 → 60/90/120/144/165Hz • Highp motion vectors",
+        subtitleRu = "Собственная реализация двунаправленного фазового варпинга до 165 Гц с защитой контуров 2D-анимации и детектором смены сцен",
+        subtitleEn = "Custom in-house bidirectional phase-consistent motion warp up to 165Hz with 2D anime contour guard & scene-cut protection",
+        specsRu = "Собственная реализация • 24/30 → 60–165 Гц • Highp векторы движения",
+        specsEn = "In-House GLSL Pipeline • 24/30 → 60–165Hz • Highp motion vectors",
         color = Color(0xFFFF4D8D),
         orbitRadiusFraction = 0.48f,
         speedMultiplier = 1.1f,
@@ -486,51 +486,95 @@ fun VersionPlanetaryModalSheet(
                 }
             }
 
-            // Official Release v3.1 Changelog Card (relative to v3.1-pre1)
+            // Open Source Attribution & Technology Credits Card (Anime4K MIT + Custom MEMC)
             Surface(
                 color = MaterialTheme.colorScheme.surfaceContainerLowest,
                 shape = RoundedCornerShape(14.dp),
                 border = BorderStroke(0.8.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.42f)),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .testTag("release_v3_1_changelog_card")
+                    .testTag("planetary_licenses_and_credits_card")
             ) {
                 Column(
                     modifier = Modifier.padding(14.dp),
-                    verticalArrangement = Arrangement.spacedBy(5.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
                         text = tr(
-                            "Релиз v3.2 — Что нового в версии 3.2",
-                            "Release v3.2 — What's New in v3.2"
+                            "Исходные репозитории и лицензии технологий",
+                            "Open Source Repositories & Technology Licenses"
                         ),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.primary
                     )
-                    val notes = if (isEnglish) {
-                        listOf(
-                            "• Smart restart of completed videos: episodes watched to ≥95% (or ending in ≤15s) automatically start at 00:00 instead of instantly skipping to the next episode",
-                            "• Comprehensive 120Hz scroll performance: non-blocking IO thumbnail decoding, stable LazyColumn keys, and memoized gradient cards eliminate list stutter",
-                            "• Frosted Glass top-right HUD: episodes/chapters, rotation lock, touch lock, and PiP buttons use the same translucent frosted glass style as the bottom quick-actions panel",
-                            "• Updated Planetary Easter Egg: live orbital specs updated with Bluetooth Gaming Mode, Anime4K+MEMC auto-balance, and Voiceover parsing",
-                            "• Enhanced torrent metadata parsing: release cards clearly separate audio voiceovers (Dub/MVO/JacRed) from external subtitles",
-                            "• Hardware inspector & Device specs: display capabilities, refresh rates, HDR formats, and active MediaCodec decoders in Settings"
-                        )
-                    } else {
-                        listOf(
-                            "• Умный сброс завершённых серий: серии с просмотром ≥95% (или остатком ≤15 с) стартуют с 00:00 и не переключаются мгновенно на следующую",
-                            "• Комплексная оптимизация плавности 120 Гц: неблокирующая фоновая загрузка миниатюр, стабильные ключи LazyColumn и мемоизация карточек убирают микрофризы",
-                            "• Верхние правые кнопки плеера в стиле матового стекла (Frosted Glass): кнопки серий/глав, поворота, блокировки касаний и PiP оформлены идентично нижней панели",
-                            "• Обновлённая планетарная модель: актуализированы характеристики орбит (Игровой режим Bluetooth, авто-баланс Anime4K+MEMC, распознавание озвучек)",
-                            "• Разделение озвучек и субтитров в торрентах: карточки релизов чётко отделяют переводы (RUS/Дубляж/MVO/JacRed) от субтитров",
-                            "• Сведения об устройстве в настройках: разрешение, герцовка экрана, поддержка HDR и список доступных декодеров MediaCodec"
-                        )
-                    }
-                    notes.forEach { line ->
+
+                    // 1. Anime4K Attribution (bloc97/Anime4K - MIT License)
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text(
-                            text = line,
+                            text = tr(
+                                "• Апскейлинг Anime4K — основано на алгоритмах и пресетах Mode A / B / C проекта bloc97/Anime4K, адаптированных и оптимизированных под мобильные GPU Android (OpenGL ES 2.0 и Vulkan API).",
+                                "• Anime4K Upscaling — based on the Mode A / B / C algorithms and presets from bloc97/Anime4K, adapted and optimized for Android mobile GPUs (OpenGL ES 2.0 & Vulkan API)."
+                            ),
                             style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = tr(
+                                "Лицензия: MIT License (Copyright © 2019–2021 bloc97)",
+                                "License: MIT License (Copyright © 2019–2021 bloc97)"
+                            ),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Surface(
+                            onClick = {
+                                runCatching { uriHandler.openUri(AppVersionInfo.ANIME4K_ORIGINAL_REPO_URL) }
+                            },
+                            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                            shape = RoundedCornerShape(8.dp),
+                            border = BorderStroke(0.8.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.45f)),
+                            modifier = Modifier.testTag("planetary_anime4k_repo_button")
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.AutoAwesome,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                Text(
+                                    text = "github.com/bloc97/Anime4K (MIT)",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
+                    }
+
+                    // 2. MEMC Frame Interpolation Attribution (In-House Negai Implementation)
+                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Text(
+                            text = tr(
+                                "• Интерполяция кадров MEMC (Motion Estimation / Motion Compensation) — собственная разработка Negai на базе 3-проходного конвейера OpenGL ES 2.0 и многопоточного Vulkan API (иерархический поиск векторов движения по яркости, сглаживание поля скоростей с детектором смены сцен и двунаправленный фазово-согласованный варпинг с защитой контуров 2D-анимации).",
+                                "• MEMC Frame Interpolation (Motion Estimation / Motion Compensation) — custom in-house Negai implementation built on a 3-pass OpenGL ES 2.0 and multi-threaded Vulkan API pipeline (hierarchical luminance block motion estimation, vector field smoothing with scene-cut detection, and bidirectional phase-consistent warp with 2D anime contour guard)."
+                            ),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = tr(
+                                "Статус: Собственная реализация Negai (без сторонних проприетарных библиотек)",
+                                "Status: Original in-house Negai implementation (no third-party proprietary libraries)"
+                            ),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }

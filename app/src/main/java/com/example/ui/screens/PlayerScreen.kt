@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.media.AudioManager
+import android.os.Build
 import android.provider.Settings
 import android.view.Surface
 import android.view.WindowManager
@@ -27,6 +28,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
@@ -41,7 +43,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
+import java.util.Locale
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -244,6 +248,7 @@ fun PlayerScreen(
         mutableStateOf(settings.defaultPlayerOrientation)
     }
     var activeSheet by remember { mutableStateOf(ActivePlayerSheet.NONE) }
+    var showLiveInfoHud by rememberSaveable { mutableStateOf(false) }
     var interactionTick by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(playbackState.currentEpisodeIndex) {
@@ -379,10 +384,15 @@ fun PlayerScreen(
         }
     }
 
-    // Fullscreen immersive mode: keep system bars permanently hidden while the player is active.
+    // Fullscreen immersive mode: keep system bars permanently hidden while the player is active
+    // and allow layout to occupy camera cutout and notification bar in landscape mode.
     DisposableEffect(isInPipMode, activeSheet) {
         val window = (context as? Activity)?.window
         if (window != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                window.attributes.layoutInDisplayCutoutMode =
+                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+            }
             val controller = WindowCompat.getInsetsController(window, view)
             controller.systemBarsBehavior =
                 WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
@@ -653,6 +663,7 @@ fun PlayerScreen(
             surfaceFrameRateHz = refreshPlan.surfaceFrameRateHz,
             frameRateCompatibility = refreshPlan.frameRateCompatibility,
             memcActive = refreshPlan.memcActive,
+            graphicsBackend = settings.graphicsBackend,
             splitCompareEnabled = splitCompareEnabled && hasVisualProcessing,
             splitPosition = splitPosition,
             scaleMode = scaleMode,
@@ -998,6 +1009,35 @@ fun PlayerScreen(
             }
         }
 
+        // Live Stream & Technical Info HUD Overlay (toggled by clicking "Инфо" / FILE_INFO)
+        AnimatedVisibility(
+            visible = showLiveInfoHud && !isInPipMode,
+            enter = fadeIn(tween(140)),
+            exit = fadeOut(tween(140)),
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .windowInsetsPadding(WindowInsets.safeDrawing)
+                .padding(
+                    top = if (controlsVisible && !isScreenLocked) 58.dp else 14.dp,
+                    start = 14.dp,
+                    end = 14.dp
+                )
+        ) {
+            PlayerLiveStatsOverlayCard(
+                playbackState = playbackState,
+                settings = settings,
+                refreshPlan = refreshPlan,
+                onOpenFullDetails = {
+                    interactionTick++
+                    activeSheet = ActivePlayerSheet.FILE_INFO
+                },
+                onClose = {
+                    showLiveInfoHud = false
+                    interactionTick++
+                }
+            )
+        }
+
         // 3. Full Player HUD:
         // CRITICAL: Keep the HUD subtree permanently mounted in the Composition (when !isInPipMode)
         // and animate only graphicsLayer.alpha. Unmounting and recreating the HUD on every tap
@@ -1089,7 +1129,6 @@ fun PlayerScreen(
                             1.0f to Color.Black.copy(alpha = 0.92f)
                         )
                     )
-                    .windowInsetsPadding(WindowInsets.displayCutout)
             ) {
                 val accentFreeHud = settings.playerControlsTheme.isAccentFree
                 val framelessHud = settings.playerControlsTheme.isFrameless
@@ -1130,97 +1169,19 @@ fun PlayerScreen(
                 }
 
                 // TOP BAR (compact, frosted-glass grouped controls + resolution badge + direct Episodes access)
-                Row(
+                BoxWithConstraints(
                     modifier = Modifier
                         .fillMaxWidth()
                         .align(Alignment.TopCenter)
-                        .padding(horizontal = 8.dp, vertical = 6.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        .windowInsetsPadding(WindowInsets.displayCutout)
+                        .padding(horizontal = 8.dp, vertical = 6.dp)
                 ) {
-                    Surface(
-                        color = hudPillBg,
-                        shape = hudButtonShape,
-                        border = hudPillBorder,
-                        modifier = Modifier
-                            .defaultMinSize(minWidth = 38.dp, minHeight = 36.dp)
-                            .clip(hudButtonShape)
-                            .clickable(enabled = showHud) { exitPlayerCleanly() }
-                            .testTag("player_back_button")
+                    val isCompactTopBar = maxWidth < 440.dp
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(if (isCompactTopBar) 4.dp else 6.dp)
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .background(hudGlassSheenBrush)
-                                .padding(horizontal = 10.dp, vertical = 8.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = tr("Закрыть плеер", "Close player"),
-                                tint = Color.White,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
-                    }
-
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = playbackState.currentEpisode?.cleanTitle ?: tr("Воспроизведение", "Now Playing"),
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.SemiBold,
-                            color = Color.White,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        val subInfo = buildString {
-                            playbackState.currentEpisode?.folderName?.let { append(it) }
-                            if (playbackState.playlist.size > 1 && !settings.showEpisodesButtonInHud) {
-                                if (isEnglish) {
-                                    append(" • Episode ${playbackState.currentEpisodeIndex + 1}/${playbackState.playlist.size}")
-                                } else {
-                                    append(" • Серия ${playbackState.currentEpisodeIndex + 1}/${playbackState.playlist.size}")
-                                }
-                            }
-                        }
-                        if (subInfo.isNotEmpty()) {
-                            Text(
-                                text = subInfo,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = Color.White.copy(alpha = 0.76f),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                    }
-
-                    // Clear frosted-glass video resolution badge (4K, 1080p, 720p, etc.)
-                    val resolutionBadge = remember(
-                        playbackState.videoWidth,
-                        playbackState.videoHeight,
-                        playbackState.currentEpisode?.resolutionBadge
-                    ) {
-                        com.example.model.VideoResolutionFormatter.badgeFromDimensions(
-                            playbackState.videoWidth,
-                            playbackState.videoHeight
-                        ) ?: playbackState.currentEpisode?.resolutionBadge
-                    }
-                    if (resolutionBadge != null) {
-                        com.example.ui.components.ResolutionBadgeChip(
-                            badge = resolutionBadge,
-                            modifier = Modifier.testTag("player_resolution_badge")
-                        )
-                    }
-
-                    // Direct immediate access to Episodes in Player Top Bar
-                    if (settings.showEpisodesButtonInHud) {
-                        val epButtonLabel = if (playbackState.playlist.size > 1) {
-                            tr(
-                                "Серии ${playbackState.currentEpisodeIndex + 1}/${playbackState.playlist.size}",
-                                "Episodes ${playbackState.currentEpisodeIndex + 1}/${playbackState.playlist.size}"
-                            )
-                        } else {
-                            tr("Серии", "Episodes")
-                        }
                         Surface(
                             color = hudPillBg,
                             shape = hudButtonShape,
@@ -1228,41 +1189,138 @@ fun PlayerScreen(
                             modifier = Modifier
                                 .defaultMinSize(minWidth = 38.dp, minHeight = 36.dp)
                                 .clip(hudButtonShape)
-                                .clickable {
-                                    interactionTick++
-                                    activeSheet = ActivePlayerSheet.EPISODES
-                                }
-                                .testTag("player_top_episodes_button")
+                                .clickable(enabled = showHud) { exitPlayerCleanly() }
+                                .testTag("player_back_button")
                         ) {
-                            Row(
+                            Box(
                                 modifier = Modifier
                                     .background(hudGlassSheenBrush)
-                                    .padding(horizontal = 9.dp, vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    .padding(horizontal = 10.dp, vertical = 8.dp),
+                                contentAlignment = Alignment.Center
                             ) {
                                 Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.PlaylistPlay,
-                                    contentDescription = epButtonLabel,
-                                    tint = hudAccentColor,
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = tr("Закрыть плеер", "Close player"),
+                                    tint = Color.White,
                                     modifier = Modifier.size(18.dp)
-                                )
-                                Text(
-                                    text = epButtonLabel,
-                                    style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = Color.White,
-                                    maxLines = 1
                                 )
                             }
                         }
-                    }
 
-                    // Grouped compact top-right frosted-glass utility buttons (matched to bottom panel)
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(if (settings.compactUiMode) 5.dp else 6.dp)
-                    ) {
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .widthIn(min = 64.dp)
+                        ) {
+                            Text(
+                                text = playbackState.currentEpisode?.cleanTitle ?: tr("Воспроизведение", "Now Playing"),
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color.White,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            val subInfo = buildString {
+                                playbackState.currentEpisode?.folderName?.let { append(it) }
+                                if (playbackState.playlist.size > 1 && !settings.showEpisodesButtonInHud) {
+                                    if (isEnglish) {
+                                        append(" • Episode ${playbackState.currentEpisodeIndex + 1}/${playbackState.playlist.size}")
+                                    } else {
+                                        append(" • Серия ${playbackState.currentEpisodeIndex + 1}/${playbackState.playlist.size}")
+                                    }
+                                }
+                            }
+                            if (subInfo.isNotEmpty()) {
+                                Text(
+                                    text = subInfo,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = Color.White.copy(alpha = 0.76f),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                        }
+
+                        // Clear frosted-glass video resolution badge (4K, 1080p, 720p, etc.)
+                        val resolutionBadge = remember(
+                            playbackState.videoWidth,
+                            playbackState.videoHeight,
+                            playbackState.currentEpisode?.resolutionBadge
+                        ) {
+                            com.example.model.VideoResolutionFormatter.badgeFromDimensions(
+                                playbackState.videoWidth,
+                                playbackState.videoHeight
+                            ) ?: playbackState.currentEpisode?.resolutionBadge
+                        }
+                        if (resolutionBadge != null) {
+                            com.example.ui.components.ResolutionBadgeChip(
+                                badge = resolutionBadge,
+                                compact = isCompactTopBar,
+                                modifier = Modifier.testTag("player_resolution_badge")
+                            )
+                        }
+
+                        // Direct immediate access to Episodes in Player Top Bar
+                        if (settings.showEpisodesButtonInHud) {
+                            val epFullDesc = if (playbackState.playlist.size > 1) {
+                                tr(
+                                    "Серии ${playbackState.currentEpisodeIndex + 1}/${playbackState.playlist.size}",
+                                    "Episodes ${playbackState.currentEpisodeIndex + 1}/${playbackState.playlist.size}"
+                                )
+                            } else {
+                                tr("Серии", "Episodes")
+                            }
+                            val epVisibleLabel = when {
+                                isCompactTopBar && playbackState.playlist.size > 1 ->
+                                    "${playbackState.currentEpisodeIndex + 1}/${playbackState.playlist.size}"
+                                isCompactTopBar -> null
+                                else -> epFullDesc
+                            }
+                            Surface(
+                                color = hudPillBg,
+                                shape = hudButtonShape,
+                                border = hudPillBorder,
+                                modifier = Modifier
+                                    .defaultMinSize(minWidth = 38.dp, minHeight = 36.dp)
+                                    .clip(hudButtonShape)
+                                    .clickable {
+                                        interactionTick++
+                                        activeSheet = ActivePlayerSheet.EPISODES
+                                    }
+                                    .testTag("player_top_episodes_button")
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .background(hudGlassSheenBrush)
+                                        .padding(horizontal = if (isCompactTopBar) 8.dp else 9.dp, vertical = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.PlaylistPlay,
+                                        contentDescription = epFullDesc,
+                                        tint = hudAccentColor,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    if (epVisibleLabel != null) {
+                                        Text(
+                                            text = epVisibleLabel,
+                                            style = MaterialTheme.typography.labelMedium,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = Color.White,
+                                            maxLines = 1,
+                                            softWrap = false
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        // Grouped compact top-right frosted-glass utility buttons (matched to bottom panel)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(if (isCompactTopBar) 4.dp else if (settings.compactUiMode) 5.dp else 6.dp)
+                        ) {
                         Surface(
                             color = if (isOrientationLocked) hudActiveLockedBg else hudPillBg,
                             shape = hudButtonShape,
@@ -1370,6 +1428,7 @@ fun PlayerScreen(
                         }
                     }
                 }
+                }
 
                 // CENTER TRANSPORT (styled by settings.playerControlsTheme)
                 val stepSec = settings.seekStepSeconds.coerceAtLeast(3)
@@ -1408,6 +1467,7 @@ fun PlayerScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .align(Alignment.BottomCenter)
+                        .windowInsetsPadding(WindowInsets.displayCutout)
                         .padding(horizontal = 12.dp, vertical = 8.dp)
                 ) {
                     // Isolated Timeline Composable: collects positionMsFlow independently so 4Hz playback
@@ -1470,6 +1530,7 @@ fun PlayerScreen(
                         scaleMode = scaleMode,
                         orientationMode = orientationMode,
                         isOrientationLocked = isOrientationLocked,
+                        isInfoOverlayVisible = showLiveInfoHud,
                         pipSupported = pipSupported,
                         onTriggerAction = { action ->
                             interactionTick++
@@ -1523,7 +1584,9 @@ fun PlayerScreen(
                                     if (pipSupported) onEnterPip()
                                 }
                                 PlayerQuickAction.TOOLS -> activeSheet = ActivePlayerSheet.TOOLS
-                                PlayerQuickAction.FILE_INFO -> activeSheet = ActivePlayerSheet.FILE_INFO
+                                PlayerQuickAction.FILE_INFO -> {
+                                    showLiveInfoHud = !showLiveInfoHud
+                                }
                             }
                         },
                         onLongPressAction = {
@@ -1764,15 +1827,29 @@ fun PlayerScreen(
                         ?: playbackState.playlist.getOrNull(playbackState.currentEpisodeIndex)
                     if (currentEp != null) {
                         val ctx = LocalContext.current
-                        val mediaInfo = remember(currentEp.uri) {
-                            com.example.data.VideoStreamInfoExtractor.extractEpisodeInfo(ctx, currentEp)
+                        val mediaInfo by androidx.compose.runtime.produceState<com.example.data.DetailedMediaFileInfo?>(
+                            initialValue = null,
+                            key1 = currentEp.uri,
+                            key2 = playbackState.videoWidth,
+                            key3 = playbackState.activeVideoCodecName
+                        ) {
+                            value = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                                com.example.data.VideoStreamInfoExtractor.extractEpisodeInfo(
+                                    context = ctx,
+                                    episode = currentEp,
+                                    playbackState = playbackState
+                                )
+                            }
                         }
-                        MediaFileInfoModalSheet(
-                            info = mediaInfo,
-                            onRenameRequest = null,
-                            usePlayerFrostedGlass = true,
-                            onDismiss = { activeSheet = ActivePlayerSheet.NONE }
-                        )
+                        val resolvedInfo = mediaInfo
+                        if (resolvedInfo != null) {
+                            MediaFileInfoModalSheet(
+                                info = resolvedInfo,
+                                onRenameRequest = null,
+                                usePlayerFrostedGlass = true,
+                                onDismiss = { activeSheet = ActivePlayerSheet.NONE }
+                            )
+                        }
                     } else {
                         activeSheet = ActivePlayerSheet.NONE
                     }
@@ -1996,7 +2073,9 @@ private fun PlayerTimelineSection(
                             text = tr("+${skipIntroSeconds}с Опенинг", "+${skipIntroSeconds}s Intro"),
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.SemiBold,
-                            color = Color.White
+                            color = Color.White,
+                            maxLines = 1,
+                            softWrap = false
                         )
                     }
                 }
@@ -2036,3 +2115,184 @@ private fun PlayerTimelineSection(
         )
     }
 }
+
+@Composable
+private fun PlayerLiveStatsOverlayCard(
+    playbackState: PlaybackRuntimeState,
+    settings: PlayerSettings,
+    refreshPlan: RefreshRatePlan,
+    onOpenFullDetails: () -> Unit,
+    onClose: () -> Unit
+) {
+    val isEnglish = LocalIsEnglish.current
+    val glassBg = PlayerFrostedGlassBaseColor
+    val accent = MaterialTheme.colorScheme.primary.ensureReadableOn(glassBg, minContrast = 5.4f)
+    val ep = playbackState.currentEpisode
+    val isNetwork = remember(ep?.uri) {
+        ep?.uri?.let { com.example.data.VideoStreamInfoExtractor.isStreamingNetworkUri(it) } == true
+    }
+
+    val resBadge = remember(playbackState.videoWidth, playbackState.videoHeight) {
+        com.example.model.VideoResolutionFormatter.badgeFromDimensions(
+            playbackState.videoWidth,
+            playbackState.videoHeight
+        ) ?: "HD"
+    }
+    val srcFps = if (playbackState.sourceFrameRate > 0f) {
+        String.format(Locale.US, "%.2f", playbackState.sourceFrameRate).trimEnd('0').trimEnd('.')
+    } else {
+        "23.976"
+    }
+    val targetHz = String.format(Locale.US, "%.0f", refreshPlan.targetDisplayHz)
+    val activeAudio = playbackState.audioTrackOptions.firstOrNull { it.isSelected }
+        ?: playbackState.audioTrackOptions.firstOrNull()
+    val videoBitrateStr = if (playbackState.videoBitrateBps > 0L) {
+        String.format(Locale.US, "%.1f Mbps", playbackState.videoBitrateBps / 1_000_000f)
+    } else if (ep != null && ep.sizeBytes > 0L && playbackState.durationMs > 0L) {
+        val bps = (ep.sizeBytes * 8L * 1000L) / playbackState.durationMs
+        String.format(Locale.US, "~%.1f Mbps", bps / 1_000_000f)
+    } else {
+        "VBR"
+    }
+    val audioBitrateStr = when {
+        playbackState.activeAudioBitrateKbps > 0 -> "${playbackState.activeAudioBitrateKbps} kbps"
+        activeAudio != null && activeAudio.bitrateKbps > 0 -> "${activeAudio.bitrateKbps} kbps"
+        else -> "VBR"
+    }
+    val shadersActive = buildList {
+        if (settings.effectiveFrameInterpolationMode.isEnabled) {
+            add(settings.effectiveFrameInterpolationMode.badgeLabel)
+        }
+        if (settings.effectiveAnime4KPreset != Anime4KPreset.OFF) {
+            add("Anime4K ${settings.effectiveAnime4KPreset.badgeLabel}")
+        }
+    }.joinToString(" + ").ifBlank { if (isEnglish) "Direct OES (RAW)" else "Прямой OES (RAW)" }
+
+    Surface(
+        color = glassBg,
+        shape = RoundedCornerShape(16.dp),
+        border = playerPopupBorderStroke(),
+        shadowElevation = 14.dp,
+        modifier = Modifier
+            .widthIn(min = 250.dp, max = 350.dp)
+            .testTag("player_live_stats_overlay")
+    ) {
+        Column(
+            modifier = Modifier
+                .background(playerFrostedGlassBrush(accentAlpha = 0.12f))
+                .padding(horizontal = 12.dp, vertical = 9.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Surface(
+                        color = accent.copy(alpha = 0.22f),
+                        shape = RoundedCornerShape(6.dp),
+                        border = BorderStroke(0.65.dp, accent.copy(alpha = 0.55f))
+                    ) {
+                        Text(
+                            text = "${playbackState.activeDecoderMode.shortBadge} • $resBadge",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = accent,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                        )
+                    }
+                    Text(
+                        text = if (isNetwork) {
+                            tr("Поток (Live)", "Network Stream")
+                        } else {
+                            tr("Монитор потока", "Stream HUD")
+                        },
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color.White,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Surface(
+                        color = lerp(Color(0xD9142138), accent, 0.28f),
+                        shape = RoundedCornerShape(8.dp),
+                        border = BorderStroke(0.7.dp, accent.copy(alpha = 0.55f)),
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .clickable(onClick = onOpenFullDetails)
+                            .testTag("player_live_stats_details_button")
+                    ) {
+                        Text(
+                            text = tr("Подробнее", "Details"),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.White,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                        )
+                    }
+                    IconButton(
+                        onClick = onClose,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .testTag("player_live_stats_close_button")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = tr("Закрыть инфо-оверлей", "Close info overlay"),
+                            tint = Color.White.copy(alpha = 0.80f),
+                            modifier = Modifier.size(14.dp)
+                        )
+                    }
+                }
+            }
+
+            Text(
+                text = tr(
+                    "Видео: ${playbackState.videoWidth}×${playbackState.videoHeight} • ${playbackState.activeVideoCodecName} • $videoBitrateStr",
+                    "Video: ${playbackState.videoWidth}×${playbackState.videoHeight} • ${playbackState.activeVideoCodecName} • $videoBitrateStr"
+                ),
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.White.copy(alpha = 0.92f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = tr(
+                    "Частота: $srcFps к/с → Экран ${targetHz} Гц • ${settings.graphicsBackend.badge}: $shadersActive",
+                    "Cadence: $srcFps fps → Display ${targetHz} Hz • ${settings.graphicsBackend.badge}: $shadersActive"
+                ),
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.White.copy(alpha = 0.86f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            val dspBadge = if (playbackState.isAudioDeArtifactActive && playbackState.audioDeArtifactMode != AudioDeArtifactMode.OFF) {
+                "DSP ${playbackState.audioDeArtifactMode.localizedTitle(isEnglish)}"
+            } else {
+                "DSP OFF"
+            }
+            Text(
+                text = tr(
+                    "Аудио: ${activeAudio?.badge ?: "Auto"} ($audioBitrateStr) • $dspBadge",
+                    "Audio: ${activeAudio?.badge ?: "Auto"} ($audioBitrateStr) • $dspBadge"
+                ),
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.White.copy(alpha = 0.80f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+

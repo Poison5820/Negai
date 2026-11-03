@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import com.example.ui.components.ScaleToFitWidthBox
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -305,47 +307,57 @@ fun PlayerToolsModalSheet(
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
                     text = tr("Инструменты просмотра", "Playback Tools"),
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    modifier = Modifier.weight(1f, fill = false)
                 )
-                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    if (onOpenFileTechnicalInfo != null) {
+                ScaleToFitWidthBox(
+                    modifier = Modifier.weight(1f, fill = false),
+                    contentAlignment = Alignment.CenterEnd
+                ) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        if (onOpenFileTechnicalInfo != null) {
+                            FilledTonalButton(
+                                onClick = {
+                                    onDismiss()
+                                    onOpenFileTechnicalInfo()
+                                },
+                                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
+                                modifier = Modifier.testTag("sheet_open_file_info_button")
+                            ) {
+                                Icon(Icons.Outlined.Info, contentDescription = null, modifier = Modifier.size(15.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(tr("Инфо", "Info"), maxLines = 1, softWrap = false)
+                            }
+                        }
                         FilledTonalButton(
                             onClick = {
                                 onDismiss()
-                                onOpenFileTechnicalInfo()
+                                onOpenQuickActionsCustomizer()
                             },
-                            modifier = Modifier.testTag("sheet_open_file_info_button")
+                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
+                            modifier = Modifier.testTag("sheet_open_quick_actions_customizer")
                         ) {
-                            Icon(Icons.Outlined.Info, contentDescription = null, modifier = Modifier.size(15.dp))
+                            Icon(Icons.Default.Tune, contentDescription = null, modifier = Modifier.size(15.dp))
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text(tr("Инфо", "Info"))
+                            Text(tr("Кнопки", "Buttons"), maxLines = 1, softWrap = false)
                         }
-                    }
-                    FilledTonalButton(
-                        onClick = {
-                            onDismiss()
-                            onOpenQuickActionsCustomizer()
-                        },
-                        modifier = Modifier.testTag("sheet_open_quick_actions_customizer")
-                    ) {
-                        Icon(Icons.Default.Tune, contentDescription = null, modifier = Modifier.size(15.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(tr("Кнопки", "Buttons"))
-                    }
-                    FilledTonalButton(
-                        onClick = {
-                            onLockControls()
-                            onDismiss()
-                        },
-                        modifier = Modifier.testTag("sheet_lock_controls_button")
-                    ) {
-                        Icon(Icons.Default.LockOpen, contentDescription = null, modifier = Modifier.size(15.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(tr("Блок", "Lock"))
+                        FilledTonalButton(
+                            onClick = {
+                                onLockControls()
+                                onDismiss()
+                            },
+                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
+                            modifier = Modifier.testTag("sheet_lock_controls_button")
+                        ) {
+                            Icon(Icons.Default.LockOpen, contentDescription = null, modifier = Modifier.size(15.dp))
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(tr("Блок", "Lock"), maxLines = 1, softWrap = false)
+                        }
                     }
                 }
             }
@@ -572,32 +584,42 @@ fun PlayerToolsModalSheet(
                 ) {
                     FilledTonalButton(
                         onClick = onMarkAbPointA,
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp),
                         modifier = Modifier
                             .weight(1f)
                             .testTag("ab_mark_a_button")
                     ) {
-                        Text(
-                            if (abLoopPointAMs != null) {
-                                "A: ${formatTimeMs(abLoopPointAMs)}"
-                            } else {
-                                tr("Точка A", "Point A")
-                            }
-                        )
+                        ScaleToFitWidthBox {
+                            Text(
+                                text = if (abLoopPointAMs != null) {
+                                    "A: ${formatTimeMs(abLoopPointAMs)}"
+                                } else {
+                                    tr("Точка A", "Point A")
+                                },
+                                maxLines = 1,
+                                softWrap = false
+                            )
+                        }
                     }
                     FilledTonalButton(
                         onClick = onMarkAbPointB,
                         enabled = abLoopPointAMs != null,
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 6.dp),
                         modifier = Modifier
                             .weight(1f)
                             .testTag("ab_mark_b_button")
                     ) {
-                        Text(
-                            if (abLoopPointBMs != null) {
-                                "B: ${formatTimeMs(abLoopPointBMs)}"
-                            } else {
-                                tr("Точка B", "Point B")
-                            }
-                        )
+                        ScaleToFitWidthBox {
+                            Text(
+                                text = if (abLoopPointBMs != null) {
+                                    "B: ${formatTimeMs(abLoopPointBMs)}"
+                                } else {
+                                    tr("Точка B", "Point B")
+                                },
+                                maxLines = 1,
+                                softWrap = false
+                            )
+                        }
                     }
                     if (abLoopPointAMs != null || abLoopPointBMs != null) {
                         OutlinedButton(

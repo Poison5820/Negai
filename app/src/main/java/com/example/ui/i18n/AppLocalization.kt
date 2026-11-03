@@ -166,18 +166,18 @@ fun DecoderMode.localizedDescription(isEnglish: Boolean): String = if (!isEnglis
 
 fun Anime4KPreset.localizedTitle(isEnglish: Boolean): String = if (!isEnglish) title else when (this) {
     Anime4KPreset.OFF -> "Off (Original)"
-    Anime4KPreset.ANIME4K_FAST -> "Anime4K_Fast (Balanced)"
-    Anime4KPreset.ANIME4K_UPSCALE_CNN -> "Anime4K_Upscale_CNN"
-    Anime4KPreset.ANIME4K_UPSCALE_CNNX -> "Anime4K_Upscale_CNNX"
+    Anime4KPreset.ANIME4K_FAST -> "Anime4K Mode C • Fast (Denoise + Upscale)"
+    Anime4KPreset.ANIME4K_UPSCALE_CNN -> "Anime4K Mode B • Restore + Upscale CNN"
+    Anime4KPreset.ANIME4K_UPSCALE_CNNX -> "Anime4K Mode A • HQ Restore + Upscale CNNX"
 }
 
 fun Anime4KPreset.localizedSubtitle(isEnglish: Boolean): String = localizedDescription(isEnglish)
 
 fun Anime4KPreset.localizedDescription(isEnglish: Boolean): String = if (!isEnglish) description else when (this) {
     Anime4KPreset.OFF -> "Direct hardware decoder output without GPU post-processing."
-    Anime4KPreset.ANIME4K_FAST -> "Balanced contour restoration & gentle deblur without thinning lines; minimal GPU load."
-    Anime4KPreset.ANIME4K_UPSCALE_CNN -> "Balanced neural GLSL upscaling: CReLU line reconstruction and halo suppression."
-    Anime4KPreset.ANIME4K_UPSCALE_CNNX -> "Maximum clarity: deep Sobel gradient reconstruction, dense CNNX convolution, and subpixel anti-aliasing."
+    Anime4KPreset.ANIME4K_FAST -> "Mode C (bloc97/Anime4K): Clamp_Highlights + fast halo clean and contour sharpening with minimal mobile GPU load."
+    Anime4KPreset.ANIME4K_UPSCALE_CNN -> "Mode B (bloc97/Anime4K): Clamp_Highlights + soft neural CReLU line reconstruction (Restore_CNN_Soft) and ring-free upscaling."
+    Anime4KPreset.ANIME4K_UPSCALE_CNNX -> "Mode A (bloc97/Anime4K): Clamp_Highlights + deep Sobel gradient reconstruction, dense CNNX convolution, and subpixel anti-aliasing."
 }
 
 fun FrameInterpolationMode.localizedTitle(isEnglish: Boolean): String = if (!isEnglish) title else when (this) {
@@ -554,7 +554,7 @@ fun PlayerQuickAction.localizedDescription(isEnglish: Boolean): String = if (!is
     PlayerQuickAction.ORIENTATION -> "Cycle Auto-Video, Landscape, Portrait, or System Sensor"
     PlayerQuickAction.PIP -> "Minimize video into a floating Picture-in-Picture window"
     PlayerQuickAction.LOCK -> "Lock all player controls against accidental touches"
-    PlayerQuickAction.FILE_INFO -> "Detailed technical information on codecs, resolution, audio tracks and subtitles"
+    PlayerQuickAction.FILE_INFO -> "Compact live technical HUD overlay on video & detailed stream info"
     PlayerQuickAction.TOOLS -> "Open the complete player tools & end-of-episode settings sheet"
 }
 

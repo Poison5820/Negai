@@ -173,6 +173,7 @@ internal fun PlayerQuickActionsBar(
     scaleMode: VideoScaleMode,
     orientationMode: PlayerOrientationMode,
     isOrientationLocked: Boolean = false,
+    isInfoOverlayVisible: Boolean = false,
     pipSupported: Boolean,
     onTriggerAction: (PlayerQuickAction) -> Unit,
     onLongPressAction: (PlayerQuickAction) -> Unit = {},
@@ -325,6 +326,7 @@ internal fun PlayerQuickActionsBar(
                         scaleMode = scaleMode,
                         orientationMode = orientationMode,
                         isOrientationLocked = isOrientationLocked,
+                        isInfoOverlayVisible = isInfoOverlayVisible,
                         buttonShape = buttonShape,
                         textOnLeft = false,
                         isHoldMenuOpen = activeHoldAction == action,
@@ -364,6 +366,7 @@ internal fun PlayerQuickActionsBar(
                     scaleMode = scaleMode,
                     orientationMode = orientationMode,
                     isOrientationLocked = isOrientationLocked,
+                    isInfoOverlayVisible = isInfoOverlayVisible,
                     buttonShape = buttonShape,
                     textOnLeft = true,
                     isHoldMenuOpen = activeHoldAction == PlayerQuickAction.FRAME_INTERPOLATION,
@@ -430,6 +433,7 @@ internal fun PlayerQuickActionsBar(
                     scaleMode = scaleMode,
                     orientationMode = orientationMode,
                     isOrientationLocked = isOrientationLocked,
+                    isInfoOverlayVisible = isInfoOverlayVisible,
                     buttonShape = buttonShape,
                     textOnLeft = false,
                     isHoldMenuOpen = activeHoldAction == PlayerQuickAction.ANIME4K,
@@ -476,6 +480,7 @@ internal fun PlayerQuickActionsBar(
                         scaleMode = scaleMode,
                         orientationMode = orientationMode,
                         isOrientationLocked = isOrientationLocked,
+                        isInfoOverlayVisible = isInfoOverlayVisible,
                         buttonShape = buttonShape,
                         textOnLeft = false,
                         isHoldMenuOpen = activeHoldAction == action,
@@ -527,17 +532,30 @@ internal fun PlayerQuickActionsBar(
                         .semantics { contentDescription = customizeDesc }
                         .testTag("player_customize_quick_actions_button")
                 ) {
-                    Box(
-                        modifier = Modifier.padding(horizontal = 9.dp, vertical = 8.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = customizeDesc,
-                            tint = if (accentFree) Color.White.copy(alpha = 0.90f) else readableAccent,
-                            modifier = Modifier.size(17.dp)
+                Box(
+                    modifier = Modifier
+                        .background(
+                            if (frameless) {
+                                Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent))
+                            } else {
+                                Brush.verticalGradient(
+                                    colors = listOf(
+                                        Color.White.copy(alpha = 0.10f),
+                                        Color.Transparent
+                                    )
+                                )
+                            }
                         )
-                    }
+                        .padding(horizontal = 9.dp, vertical = 8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = customizeDesc,
+                        tint = if (accentFree) Color.White.copy(alpha = 0.90f) else readableAccent,
+                        modifier = Modifier.size(17.dp)
+                    )
+                }
                 }
             }
         }
@@ -553,6 +571,7 @@ private fun QuickActionHoldButton(
     scaleMode: VideoScaleMode,
     orientationMode: PlayerOrientationMode,
     isOrientationLocked: Boolean,
+    isInfoOverlayVisible: Boolean = false,
     buttonShape: RoundedCornerShape,
     textOnLeft: Boolean = false,
     isHoldMenuOpen: Boolean,
@@ -575,7 +594,8 @@ private fun QuickActionHoldButton(
         settings = settings,
         scaleMode = scaleMode,
         orientationMode = orientationMode,
-        isOrientationLocked = isOrientationLocked
+        isOrientationLocked = isOrientationLocked,
+        isInfoOverlayVisible = isInfoOverlayVisible
     )
 
     val currentBuildMenuItems by rememberUpdatedState(buildMenuItems)
@@ -731,12 +751,10 @@ private fun QuickActionHoldButton(
                             if (!change.pressed) {
                                 change.consume()
                                 val finalItems = currentBuildMenuItems()
-                                if (localHoveredIdx in finalItems.indices &&
-                                    (maxMovePx >= dragThresholdPx || localHoveredIdx != activeSelectedIdx)
-                                ) {
+                                if (localHoveredIdx in finalItems.indices) {
                                     finalItems[localHoveredIdx].onSelect()
-                                    currentOnDismissHoldMenu()
                                 }
+                                currentOnDismissHoldMenu()
                                 break
                             }
 
@@ -1213,11 +1231,11 @@ private fun buildHoldMenuItemsForAction(
                     onSelect = { onSelectScaleMode(mode) }
                 )
             } + QuickHoldMenuItem(
-                id = "OFF",
-                label = offText,
+                id = "ACTUAL_FIT",
+                label = if (isEnglish) "Actual Mode" else "Фактический режим",
                 badge = VideoScaleMode.FIT.localizedShortLabel(isEnglish),
                 isSelected = scaleMode == VideoScaleMode.FIT,
-                isOffOption = true,
+                isOffOption = false,
                 onSelect = { onSelectScaleMode(VideoScaleMode.FIT) }
             )
         }
@@ -1331,6 +1349,9 @@ private fun buildHoldMenuItemsForAction(
             )
         }
 
+        PlayerQuickAction.TOOLS,
+        PlayerQuickAction.FILE_INFO -> emptyList()
+
         else -> {
             listOf(
                 QuickHoldMenuItem(
@@ -1367,7 +1388,8 @@ private fun resolveQuickChipVisuals(
     settings: PlayerSettings,
     scaleMode: VideoScaleMode,
     orientationMode: PlayerOrientationMode,
-    isOrientationLocked: Boolean = false
+    isOrientationLocked: Boolean = false,
+    isInfoOverlayVisible: Boolean = false
 ): QuickChipVisualState {
     val isEnglish = LocalIsEnglish.current
     val accentFree = settings.playerControlsTheme.isAccentFree
@@ -1609,10 +1631,10 @@ private fun resolveQuickChipVisuals(
 
         PlayerQuickAction.FILE_INFO -> {
             QuickChipVisualState(
-                accessibilityLabel = if (isEnglish) "File Info" else "Сведения о файле",
-                iconTint = primary,
-                containerColor = neutralBg,
-                border = neutralBorder,
+                accessibilityLabel = if (isEnglish) "Stream Info HUD" else "Инфо о потоке (HUD)",
+                iconTint = if (isInfoOverlayVisible) primary else Color.White,
+                containerColor = if (isInfoOverlayVisible) activePrimaryBg else neutralBg,
+                border = if (isInfoOverlayVisible) activeBorder else neutralBorder,
                 testTag = "player_quick_chip_FILE_INFO"
             )
         }

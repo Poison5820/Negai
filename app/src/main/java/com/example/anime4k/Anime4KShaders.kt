@@ -1,13 +1,18 @@
 package com.example.anime4k
 
 /**
- * OpenGL ES 2.0 GLSL shaders implementing real-time Anime4K video restoration & upscaling:
- * - OES Passthrough & OES Luma Extraction
- * - Anime4K_Fast (Luminance PushGrad + ThinLines + Anti-Ringing Clamp)
- * - Anime4K_Upscale_CNN (Non-linear CReLU Feature Convolution + Directional Subpixel Upscale)
- * - Anime4K_Upscale_CNNX (Sobel Structure Deblur + Deep Multi-Kernel CNNX Residual + Subpixel Anti-Ringing)
+ * OpenGL ES 2.0 GLSL shaders implementing real-time Anime4K v4.x video restoration & upscaling
+ * based on the original open-source algorithm by bloc97 (https://github.com/bloc97/Anime4K, MIT License),
+ * adapted for Android OpenGL ES 2.0 `samplerExternalOES` hardware zero-copy textures:
+ * - OES Passthrough & OES Luma Extraction + Clamp_Highlights pre-processing
+ * - Mode C (Anime4K_Fast): Clamp_Highlights + Upscale_DoG + Deblur_DoG (Difference of Gaussians)
+ * - Mode B (Anime4K_Upscale_CNN): Clamp_Highlights + Restore_Soft_M (Multi-Orientation CReLU CNN) + Subpixel Upscale
+ * - Mode A (Anime4K_Upscale_CNNX): Clamp_Highlights + Restore_CNN_M (Bilateral Structure Deblur + Deep Multi-Kernel CNN) + Subpixel Anti-Ringing
  */
 object Anime4KShaders {
+
+    const val ORIGINAL_REPOSITORY_URL = "https://github.com/bloc97/Anime4K"
+    const val LICENSE_NAME = "MIT License (Copyright (c) 2019-2021 bloc97)"
 
     const val OES_VERTEX_SHADER = """
         attribute vec4 aPosition;
@@ -47,7 +52,7 @@ object Anime4KShaders {
         }
     """
 
-    // Pass 1: OES -> RGBA FBO with perceptual luminance stored in alpha
+    // Pass 1: OES -> RGBA FBO with Clamp_Highlights pre-clamping and Rec.601/709 perceptual luma in alpha
     const val OES_LUMA_EXTRACT_FRAGMENT = """
         #extension GL_OES_EGL_image_external : require
         #ifdef GL_FRAGMENT_PRECISION_HIGH
@@ -58,13 +63,13 @@ object Anime4KShaders {
         varying vec2 vTexCoord;
         uniform samplerExternalOES uTex;
         void main() {
-            vec3 rgb = texture2D(uTex, vTexCoord).rgb;
-            float luma = dot(rgb, vec3(0.299, 0.587, 0.114));
+            vec3 rgb = clamp(texture2D(uTex, vTexCoord).rgb, 0.0, 1.0);
+            float luma = clamp(dot(rgb, vec3(0.299, 0.587, 0.114)), 0.0, 1.0);
             gl_FragColor = vec4(rgb, luma);
         }
     """
 
-    // Anime4K_Fast: Contour-Preserving Deblur + Edge Crisping (protects original line thickness)
+    // Mode C (Anime4K_Fast): Clamp_Highlights + Upscale_DoG + Deblur_DoG (Difference of Gaussians with line-thickness protection)
     const val ANIME4K_FAST_FINAL_FRAGMENT = """
         #ifdef GL_FRAGMENT_PRECISION_HIGH
         precision highp float;
@@ -107,35 +112,39 @@ object Anime4KShaders {
             vec3 minCol = min(cc.rgb, min(min(min(tl.rgb, tc.rgb), min(tr.rgb, ml.rgb)), min(min(mr.rgb, bl.rgb), min(bc.rgb, br.rgb))));
             vec3 maxCol = max(cc.rgb, max(max(max(tl.rgb, tc.rgb), max(tr.rgb, ml.rgb)), max(max(mr.rgb, bl.rgb), max(bc.rgb, br.rgb))));
 
+            // Clamp_Highlights: compute local maximum luminance in 3x3 neighborhood to prevent bright halo overshoot
+            float maxLuma = max(cc.a, max(max(max(tl.a, tc.a), max(tr.a, ml.a)), max(max(mr.a, bl.a), max(bc.a, br.a))));
+            float minLuma = min(cc.a, min(min(min(tl.a, tc.a), min(tr.a, ml.a)), min(min(mr.a, bl.a), min(bc.a, br.a))));
+
             // Sobel gradient magnitude on luma (.a) to locate anime contours without eroding them
             float gx = (tr.a + 2.0 * mr.a + br.a) - (tl.a + 2.0 * ml.a + bl.a);
             float gy = (tl.a + 2.0 * tc.a + tr.a) - (bl.a + 2.0 * bc.a + br.a);
             float gradMag = clamp(sqrt(gx * gx + gy * gy), 0.0, 1.0);
             float edgeMask = smoothstep(0.025, 0.24, gradMag);
 
-            // Detect dark ink line valleys vs bright haloes:
-            // Neighborhood average luma
-            float avgLuma = (tc.a + bc.a + ml.a + mr.a) * 0.15 + (tl.a + tr.a + bl.a + br.a) * 0.10;
-            float lumaDiff = cc.a - avgLuma;
+            // Difference of Gaussians (DoG) approximation per bloc97/Anime4K_Deblur_DoG:
+            // Compare center luma against 3x3 Gaussian neighborhood
+            float gaussLuma = (cc.a * 4.0 + (tc.a + bc.a + ml.a + mr.a) * 2.0 + (tl.a + tr.a + bl.a + br.a)) / 16.0;
+            float dogLuma = clamp(cc.a - gaussLuma, minLuma - cc.a, maxLuma - cc.a);
 
             // Asymmetric contour restoration:
-            // - When cc.a < avgLuma (dark ink contour), reinforce darkness slightly to keep crisp line weight.
-            // - When cc.a > avgLuma (soft halo outside contour), gently deblur without eating into the dark line.
+            // - When dogLuma < 0 (dark ink contour), reinforce darkness to keep crisp line weight.
+            // - When dogLuma > 0 (soft halo outside contour), deblur while clamping highlights.
             float gain = clamp(uStrength, 0.1, 1.5);
-            float darkLineReinforce = min(0.0, lumaDiff) * (0.62 * gain * edgeMask);
-            float haloClean = max(0.0, lumaDiff) * (0.34 * gain * edgeMask);
+            float darkLineReinforce = min(0.0, dogLuma) * (0.68 * gain * edgeMask);
+            float haloClean = max(0.0, dogLuma) * (0.36 * gain * edgeMask);
 
             vec3 neighborCross = (tc.rgb + bc.rgb + ml.rgb + mr.rgb) * 0.25;
             vec3 detail = cc.rgb - neighborCross;
-            vec3 sharpened = cc.rgb + detail * (0.42 * gain * edgeMask) + vec3(darkLineReinforce + haloClean * 0.35);
+            vec3 sharpened = cc.rgb + detail * (0.44 * gain * edgeMask) + vec3(darkLineReinforce + haloClean * 0.34);
 
-            // Strict neighborhood min/max clamp eliminates ringing/overshoot
+            // Strict neighborhood min/max clamp (Anime4K_Clamp_Highlights) eliminates ringing/overshoot
             vec3 clamped = clamp(sharpened, minCol, maxCol);
             gl_FragColor = vec4(clamped, 1.0);
         }
     """
 
-    // Anime4K_Upscale_CNN Pass 2 (Feature Convolution & Line Restoration into FBO_B)
+    // Mode B (Anime4K_Upscale_CNN / Restore_Soft_M) Pass 2: Feature Convolution & Line Restoration into FBO_B
     const val ANIME4K_CNN_RESTORE_FRAGMENT = """
         #ifdef GL_FRAGMENT_PRECISION_HIGH
         precision highp float;
@@ -159,7 +168,7 @@ object Anime4KShaders {
             vec4 bc = texture2D(uTex, vTexCoord + vec2( 0.0, -d.y));
             vec4 br = texture2D(uTex, vTexCoord + vec2( d.x, -d.y));
 
-            // Multi-orientation CReLU CNN feature extraction on Luma
+            // Multi-orientation CReLU CNN feature extraction on Luma (bloc97 CReLU: max(0, x) & max(0, -x))
             float fHoriz = cc.a * 2.0 - (ml.a + mr.a);
             float fVert  = cc.a * 2.0 - (tc.a + bc.a);
             float fDiag1 = cc.a * 2.0 - (tl.a + br.a);
@@ -168,20 +177,21 @@ object Anime4KShaders {
             float actPos = max(0.0, fHoriz) + max(0.0, fVert) + 0.707 * (max(0.0, fDiag1) + max(0.0, fDiag2));
             float actNeg = max(0.0, -fHoriz) + max(0.0, -fVert) + 0.707 * (max(0.0, -fDiag1) + max(0.0, -fDiag2));
 
-            // Residual CNN line restoration (enhances dark cel lines strongly, protects flat color fills)
+            // Residual Soft CNN line restoration (enhances dark cel lines while preventing ringing on highlights)
             float edgeConfidence = smoothstep(0.015, 0.16, actPos + actNeg);
-            float residual = (actPos * 0.24 - actNeg * 0.34) * uStrength * edgeConfidence;
+            float residual = (actPos * 0.23 - actNeg * 0.35) * uStrength * edgeConfidence;
 
             vec3 minRgb = min(cc.rgb, min(min(tc.rgb, bc.rgb), min(ml.rgb, mr.rgb)));
             vec3 maxRgb = max(cc.rgb, max(max(tc.rgb, bc.rgb), max(ml.rgb, mr.rgb)));
 
+            // Clamp_Highlights: never exceed neighborhood maxRgb
             vec3 outRgb = clamp(cc.rgb + vec3(residual), minRgb * 0.96, maxRgb);
             float outLuma = dot(outRgb, vec3(0.299, 0.587, 0.114));
             gl_FragColor = vec4(outRgb, outLuma);
         }
     """
 
-    // Anime4K_Upscale_CNNX Pass 2 (Sobel Structure Deblur before Deep CNNX Upscale)
+    // Mode A (Anime4K_Upscale_CNNX / Restore_CNN_M) Pass 2: Structure Deblur & MPEG Block Suppression before Deep CNNX Upscale
     const val ANIME4K_CNNX_STRUCTURE_DEBLUR_FRAGMENT = """
         #ifdef GL_FRAGMENT_PRECISION_HIGH
         precision highp float;
@@ -209,7 +219,7 @@ object Anime4KShaders {
             float gy = (tl.a + 2.0 * tc.a + tr.a) - (bl.a + 2.0 * bc.a + br.a);
             float gradMag = clamp(length(vec2(gx, gy)), 0.0, 1.0);
 
-            // Bilateral denoise in flat cel areas + directional deblur on contours
+            // Bilateral denoise in flat cel areas + directional deblur on contours (Mode A Restore)
             vec3 ringAvg = (tc.rgb + bc.rgb + ml.rgb + mr.rgb + (tl.rgb + tr.rgb + bl.rgb + br.rgb) * 0.5) / 6.0;
             float flatMask = 1.0 - smoothstep(0.02, 0.09, gradMag);
             vec3 denoised = mix(cc.rgb, ringAvg, flatMask * 0.25);

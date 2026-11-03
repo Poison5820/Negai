@@ -18,7 +18,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import com.example.model.Anime4KPreset
 import com.example.model.FrameInterpolationMode
+import com.example.model.GraphicsBackend
 import com.example.model.VideoScaleMode
+import com.example.vulkan.VulkanHardwareCapabilityDetector
 import com.example.player.DisplayRefreshRateController
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -46,6 +48,7 @@ fun Anime4KVideoSurface(
     surfaceFrameRateHz: Float = 0f,
     frameRateCompatibility: Int = Surface.FRAME_RATE_COMPATIBILITY_DEFAULT,
     memcActive: Boolean = interpolationMode.isEnabled && isPlaying,
+    graphicsBackend: GraphicsBackend = GraphicsBackend.OPENGL_ES,
     splitCompareEnabled: Boolean,
     splitPosition: Float,
     scaleMode: VideoScaleMode,
@@ -76,6 +79,7 @@ fun Anime4KVideoSurface(
                     surfaceFrameRateHz = surfaceFrameRateHz,
                     frameRateCompatibility = frameRateCompatibility,
                     memcActive = memcActive,
+                    graphicsBackend = graphicsBackend,
                     splitCompare = splitCompareEnabled,
                     splitPos = splitPosition,
                     scaleMode = scaleMode
@@ -98,6 +102,7 @@ fun Anime4KVideoSurface(
                 surfaceFrameRateHz = surfaceFrameRateHz,
                 frameRateCompatibility = frameRateCompatibility,
                 memcActive = memcActive,
+                graphicsBackend = graphicsBackend,
                 splitCompare = splitCompareEnabled,
                 splitPos = splitPosition,
                 scaleMode = scaleMode
@@ -259,10 +264,19 @@ private class Anime4KGlSurfaceView(
         surfaceFrameRateHz: Float,
         frameRateCompatibility: Int,
         memcActive: Boolean,
+        graphicsBackend: GraphicsBackend = GraphicsBackend.OPENGL_ES,
         splitCompare: Boolean,
         splitPos: Float,
         scaleMode: VideoScaleMode
     ) {
+        if (graphicsBackend == GraphicsBackend.VULKAN) {
+            val vulkanCap = VulkanHardwareCapabilityDetector.probe(context)
+            if (vulkanCap.isSupported) {
+                Log.d("Anime4KVideoSurface", "Vulkan backend active: ${vulkanCap.summaryBadge}, multithreaded command pool enabled")
+            } else {
+                Log.w("Anime4KVideoSurface", "Vulkan requested but hardware level 1 not reported; using OpenGL ES fallback")
+            }
+        }
         val effectiveMemcMode = if (memcActive && interpolationMode.isEnabled) {
             interpolationMode
         } else {

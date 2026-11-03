@@ -21,6 +21,7 @@ import com.example.model.EpisodeItem
 import com.example.model.EpisodeSortOption
 import com.example.model.FolderSortOption
 import com.example.model.FrameInterpolationMode
+import com.example.model.GraphicsBackend
 import com.example.model.PlaybackEndMode
 import com.example.model.PlayerControlsTheme
 import com.example.model.PlayerOrientationMode
@@ -346,6 +347,33 @@ class NegaiViewModel(application: Application) : AndroidViewModel(application) {
         playEpisodeList(folder.episodes, episodeIndex)
     }
 
+    fun handleIncomingIntent(intent: android.content.Intent) {
+        val collectedUris = LinkedHashSet<Uri>()
+        intent.data?.let { collectedUris.add(it) }
+        val clip = intent.clipData
+        if (clip != null) {
+            for (i in 0 until clip.itemCount) {
+                clip.getItemAt(i)?.uri?.let { collectedUris.add(it) }
+            }
+        }
+        if (collectedUris.isEmpty()) return
+        if (collectedUris.size == 1) {
+            handleIncomingViewIntent(collectedUris.first(), intent.type)
+            return
+        }
+        val app = getApplication<Application>()
+        val episodes = collectedUris.map { uri ->
+            runCatching {
+                app.contentResolver.takePersistableUriPermission(
+                    uri,
+                    android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            }
+            repository.resolveStandaloneVideo(uri)
+        }
+        playEpisodeList(episodes, 0)
+    }
+
     fun handleIncomingViewIntent(uri: Uri, mimeType: String? = null) {
         val scheme = uri.scheme?.lowercase().orEmpty()
         if (scheme == "magnet") {
@@ -362,6 +390,10 @@ class NegaiViewModel(application: Application) : AndroidViewModel(application) {
             torrentsController.openLocalTorrentUriForPlayback(uri)
             return
         }
+        if (isM3uPlaylistUri(uri, mimeType)) {
+            openM3uPlaylistUri(uri)
+            return
+        }
         playStandaloneUri(uri)
     }
 
@@ -374,9 +406,88 @@ class NegaiViewModel(application: Application) : AndroidViewModel(application) {
             handleIncomingViewIntent(uri, "application/x-bittorrent")
             return
         }
+        if (isM3uPlaylistUri(uri, null)) {
+            openM3uPlaylistUri(uri)
+            return
+        }
         val ep = repository.resolveStandaloneVideo(uri)
         preparePlayerLaunchState()
         playerEngine.startPlaylist(listOf(ep), 0, autoResume = true)
+    }
+
+    private fun isM3uPlaylistUri(uri: Uri, mimeType: String?): Boolean {
+        val mimeLower = mimeType?.lowercase().orEmpty()
+        if (mimeLower.contains("mpegurl")) return true
+        val pathLower = uri.path?.lowercase().orEmpty()
+        if (pathLower.endsWith(".m3u") || pathLower.endsWith(".m3u8")) return true
+        val app = getApplication<Application>()
+        val resolvedType = runCatching { app.contentResolver.getType(uri) }.getOrNull()?.lowercase().orEmpty()
+        if (resolvedType.contains("mpegurl")) return true
+        return false
+    }
+
+    private fun openM3uPlaylistUri(uri: Uri) {
+        val scheme = uri.scheme?.lowercase().orEmpty()
+        if ((scheme == "http" || scheme == "https") && uri.path?.lowercase()?.endsWith(".m3u8") == true) {
+            playStreamUrl(uri.toString())
+            return
+        }
+        viewModelScope.launch {
+            val parsedEpisodes = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                parseM3uEpisodes(uri)
+            }
+            if (parsedEpisodes.isNotEmpty()) {
+                playEpisodeList(parsedEpisodes, 0)
+            } else {
+                val ep = repository.resolveStandaloneVideo(uri)
+                preparePlayerLaunchState()
+                playerEngine.startPlaylist(listOf(ep), 0, autoResume = true)
+            }
+        }
+    }
+
+    private fun parseM3uEpisodes(uri: Uri): List<EpisodeItem> {
+        return runCatching {
+            val app = getApplication<Application>()
+            val rawText = when (uri.scheme?.lowercase()) {
+                "file" -> uri.path?.let { java.io.File(it).takeIf { f -> f.exists() && f.length() <= 2_000_000L }?.readText() }
+                "content" -> app.contentResolver.openInputStream(uri)?.bufferedReader()?.use { it.readText() }
+                else -> null
+            } ?: return emptyList()
+
+            if (rawText.contains("#EXT-X-TARGETDURATION", ignoreCase = true) ||
+                rawText.contains("#EXT-X-STREAM-INF", ignoreCase = true)
+            ) {
+                return emptyList()
+            }
+
+            val result = mutableListOf<EpisodeItem>()
+            var pendingTitle: String? = null
+            var index = 1
+            for (rawLine in rawText.lineSequence()) {
+                val line = rawLine.trim()
+                if (line.isEmpty()) continue
+                if (line.startsWith("#EXTINF:", ignoreCase = true)) {
+                    pendingTitle = line.substringAfter(',', "").trim().takeIf { it.isNotEmpty() }
+                } else if (!line.startsWith("#")) {
+                    val title = pendingTitle ?: line.substringAfterLast('/').substringBefore('?').ifBlank { "Эпизод $index" }
+                    result.add(
+                        EpisodeItem(
+                            uri = line,
+                            fileName = title,
+                            cleanTitle = title,
+                            episodeNumber = index,
+                            seasonNumber = 1,
+                            folderId = "m3u_playlist",
+                            folderName = "Плейлист M3U"
+                        )
+                    )
+                    pendingTitle = null
+                    index++
+                }
+            }
+            result
+        }.getOrDefault(emptyList())
     }
 
     private fun isTorrentFileUri(uri: Uri): Boolean {
@@ -891,6 +1002,12 @@ class NegaiViewModel(application: Application) : AndroidViewModel(application) {
     fun setRememberPerEpisodeSettings(remember: Boolean) {
         viewModelScope.launch {
             repository.preferencesRepository.updateRememberPerEpisodeSettings(remember)
+        }
+    }
+
+    fun setGraphicsBackend(backend: GraphicsBackend) {
+        viewModelScope.launch {
+            repository.preferencesRepository.updateGraphicsBackend(backend)
         }
     }
 

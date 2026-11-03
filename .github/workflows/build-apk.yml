@@ -88,11 +88,11 @@ jobs:
           set -euo pipefail
           BASE_VERSION=$(grep -E 'versionName\s*=\s*"[^"]+"' app/build.gradle.kts | head -n 1 | sed -E 's/.*"([^"]+)".*/\1/')
           if [ -z "$BASE_VERSION" ]; then
-            BASE_VERSION="3.2"
+            BASE_VERSION="3.4.2-pre"
           fi
           BASE_CODE=$(grep -E 'versionCode\s*=\s*[0-9]+' app/build.gradle.kts | head -n 1 | sed -E 's/[^0-9]*([0-9]+).*/\1/')
           if [ -z "$BASE_CODE" ]; then
-            BASE_CODE="10"
+            BASE_CODE="12"
           fi
 
           FINAL_VERSION="$BASE_VERSION"
@@ -133,29 +133,43 @@ jobs:
             exit 1
           fi
 
-          TAG="${RESOLVED_RELEASE_TAG:-v3.2}"
+          TAG="${RESOLVED_RELEASE_TAG:-v3.4.2-pre}"
           SHORT_SHA="${GITHUB_SHA::7}"
           APK_SIZE=$(du -h negai.apk | cut -f1)
           TITLE="negai ${TAG} — Cinema & Anime 4K Player (RU / EN)"
 
-          NOTES=$(printf "### negai %s — Cinema & Anime 4K Player (RU / EN)\n\n[![Get it on Obtainium](https://raw.githubusercontent.com/ImranR98/Obtainium/main/assets/graphics/badge_obtainium.png)](https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/%s)\n\n#### 🇷🇺 Изменения в релизе %s\n- **Умный сброс завершённых серий (≥95%%)**: если серия просмотрена до финала или титров (прогресс ≥95%% или остаток ≤15 с), повторный запуск открывает видео с 00:00 и предотвращает мгновенный переход на следующий эпизод.\n- **Плавность интерфейса 120 Гц**: устранение микрозадержек и лагов при скролле списков серий, папок, торрентов и настроек за счёт асинхронной загрузки превью, стабильных ключей LazyColumn и мемоизации компонентов.\n- **Верхние правые кнопки плеера в стиле Frosted Glass**: кнопки фиксации поворота экрана, замка от случайных нажатий и PiP получили единый стиль матового стекла с градиентным обрамлением, микробликом и объёмной тенью, как у нижней панели таймлайна.\n- **Актуализация пасхальной планетарной модели**: обновлены орбиты и характеристики технологий плеера (Игровой режим Bluetooth, авто-баланс Anime4K+MEMC, детектор озвучек торрентов).\n- **Очистка репозитория**: удалена ошибочная запись из .gitignore и синхронизированы описания функций во всех разделах.\n\n#### 🇬🇧 What's New in Release %s\n- **Smart Restart of Completed Videos (≥95%%)**: episodes watched to ≥95%% (or ending in ≤15s) automatically start at 00:00 when reopened, preventing accidental auto-skipping to the next video.\n- **120Hz Scrolling Smoothness**: eliminated stutter in episode cards, folders, torrents, and settings by switching thumbnail lookups to background IO threads, stabilizing LazyColumn keys, and memoizing gradient brushes.\n- **Frosted Glass Top HUD Buttons**: rotation lock, screen lock, and PiP utility buttons now match the bottom timeline panel with frosted glass tint, gradient borders, and depth elevation.\n- **Updated Planetary Easter Egg**: refreshed orbital specifications with Bluetooth Gaming Mode, Anime4K+MEMC auto-balance, and torrent voiceover parsing.\n- **Repository Polish**: removed invalid gitignore typo and synchronized English/Russian function descriptions across all screens.\n\n---\n- **APK:** \`negai.apk\` (%s)\n- **Build / Commit:** \`#%s\` / \`%s\` (branch \`%s\`)\n- **Direct Download:** [negai.apk](https://github.com/%s/releases/download/%s/negai.apk)" "$TAG" "$GITHUB_REPOSITORY" "$TAG" "$TAG" "$APK_SIZE" "$GITHUB_RUN_NUMBER" "$SHORT_SHA" "$GITHUB_REF_NAME" "$GITHUB_REPOSITORY" "$TAG")
+          IS_PRERELEASE="false"
+          if [[ "$TAG" == *"-pre"* ]] || [[ "$TAG" == *"-rc"* ]] || [[ "$TAG" == *"-beta"* ]]; then
+            IS_PRERELEASE="true"
+          fi
+
+          NOTES=$(printf "### negai %s — Cinema & Anime 4K Player (RU / EN)\n\n[![Get it on Obtainium](https://raw.githubusercontent.com/ImranR98/Obtainium/main/assets/graphics/badge_obtainium.png)](https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/%s)\n\n#### 🇷🇺 Изменения в сборке %s\n- **Поддержка выреза камеры и строки состояния в ландшафте**: плеер теперь занимает всю площадь экрана (\`LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES\`).\n- **Геометрическое центрирование элементов**: индикатор буферизации, пилюли перемотки и центральные кнопки управления теперь идеально выровнены по физическому центру без сдвига от выреза.\n- **Исправление сброса прогресса на 0**: полоса прокрутки больше не перескакивает в начало при остановке воспроизведения или завершении серии.\n- **Графический конвейер Vulkan API**: добавлена архитектура вычислений на Vulkan (SPIR-V #version 450 core для шейдеров Anime4K и MEMC) с переключателем в «Прочих» настройках и автоматическим откатом на OpenGL ES.\n- **Сброс настроек плеера в меню «Прочее» с подтверждением**: кнопка сброса перемещена в «Прочее» и защищена диалогом подтверждения.\n- **Обновлённые темы OLED и Тёмная**: тема OLED переведена в абсолютный чёрный (#000000 True Black) со сниженными акцентами фонов, а стиль предыдущей OLED-темы перенесён в Тёмную тему.\n\n#### 🇬🇧 What's New in Build %s\n- **Display Cutout & Status Bar Landscape Expansion**: the player now renders edge-to-edge behind the camera cutout and notification bar (\`LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES\`).\n- **Precise Center Alignment**: fixed horizontal offset for the buffering spinner, seek pills, and transport controls caused by asymmetric display cutouts.\n- **Timeline 0-Reset Bugfix**: stopped progress scrub bar from snapping to 00:00 when stopping playback or reaching episode completion.\n- **Vulkan Graphics Pipeline Architecture**: added compute shader pipelines (SPIR-V #version 450 core for Anime4K and MEMC) with user switch in Miscellaneous settings and graceful fallback to OpenGL ES.\n- **Reset Player Settings in Miscellaneous with Confirmation Dialog**: moved reset all settings to Miscellaneous, protected with a mandatory confirmation prompt.\n- **OLED & Dark Themes Redesign**: OLED theme is now true pure black (#000000 True Black) with minimal tint, while Dark theme adopts the previous obsidian slate aesthetics.\n\n---\n- **APK:** \`negai.apk\` (%s)\n- **Build / Commit:** \`#%s\` / \`%s\` (branch \`%s\`)\n- **Direct Download:** [negai.apk](https://github.com/%s/releases/download/%s/negai.apk)" "$TAG" "$GITHUB_REPOSITORY" "$TAG" "$TAG" "$APK_SIZE" "$GITHUB_RUN_NUMBER" "$SHORT_SHA" "$GITHUB_REF_NAME" "$GITHUB_REPOSITORY" "$TAG")
 
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            echo "Release $TAG already exists on GitHub. Updating to official full Release (removing pre-release flag)..."
+            echo "Release $TAG already exists on GitHub. Updating release (prerelease=${IS_PRERELEASE})..."
             gh release edit "$TAG" \
               --repo "$GITHUB_REPOSITORY" \
               --title "$TITLE" \
               --notes "$NOTES" \
-              --prerelease=false \
+              --prerelease="$IS_PRERELEASE" \
               --draft=false
             gh release upload "$TAG" negai.apk --repo "$GITHUB_REPOSITORY" --clobber
           else
-            echo "Creating official full GitHub Release $TAG..."
-            gh release create "$TAG" negai.apk \
-              --repo "$GITHUB_REPOSITORY" \
-              --target "$GITHUB_SHA" \
-              --title "$TITLE" \
-              --notes "$NOTES"
+            echo "Creating GitHub Release $TAG (prerelease=${IS_PRERELEASE})..."
+            if [ "$IS_PRERELEASE" = "true" ]; then
+              gh release create "$TAG" negai.apk \
+                --repo "$GITHUB_REPOSITORY" \
+                --target "$GITHUB_SHA" \
+                --title "$TITLE" \
+                --notes "$NOTES" \
+                --prerelease
+            else
+              gh release create "$TAG" negai.apk \
+                --repo "$GITHUB_REPOSITORY" \
+                --target "$GITHUB_SHA" \
+                --title "$TITLE" \
+                --notes "$NOTES"
+            fi
           fi
 
           REL_URL=$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json url -q .url)

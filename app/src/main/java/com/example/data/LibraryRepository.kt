@@ -45,6 +45,8 @@ class LibraryRepository private constructor(
     private val scanMutex = Mutex()
     @Volatile
     private var initialAutoScanTriggered = false
+    @Volatile
+    private var lastAvailabilityCleanRealtimeMs: Long = 0L
 
     private val _isScanning = MutableStateFlow(false)
     val isScanning: StateFlow<Boolean> = _isScanning.asStateFlow()
@@ -194,26 +196,37 @@ class LibraryRepository private constructor(
             dao.deleteProgress(candidate.videoUri)
         }
 
-        progressList.take(30).forEach { entry ->
-            if (entry.videoUri != candidate?.videoUri &&
-                PlaybackResumeHelper.isLocalFileUri(entry.videoUri) &&
-                !PlaybackResumeHelper.isMediaFileExists(appContext, entry.videoUri)
-            ) {
-                dao.deleteProgress(entry.videoUri)
+        val nowRealtime = android.os.SystemClock.elapsedRealtime()
+        if (nowRealtime - lastAvailabilityCleanRealtimeMs >= 15_000L) {
+            lastAvailabilityCleanRealtimeMs = nowRealtime
+            progressList.take(30).forEach { entry ->
+                if (entry.videoUri != candidate?.videoUri &&
+                    PlaybackResumeHelper.isLocalFileUri(entry.videoUri) &&
+                    !PlaybackResumeHelper.isMediaFileExists(appContext, entry.videoUri)
+                ) {
+                    dao.deleteProgress(entry.videoUri)
+                }
             }
         }
     }
 
-    suspend fun checkAndGetValidLastPlayed(): PlaybackProgressEntity? = withContext(Dispatchers.IO) {
+    suspend fun checkAndGetValidLastPlayed(force: Boolean = false): PlaybackProgressEntity? = withContext(Dispatchers.IO) {
+        if (force) {
+            lastAvailabilityCleanRealtimeMs = 0L
+        }
         val progressList = dao.getAllProgressSnapshot()
         val storedLastUri = preferencesRepository.lastPlayedVideoUriFlow.first()
         evaluateAndCleanAvailability(progressList, storedLastUri)
         _lastPlayedFile.value
     }
 
-    fun refreshMediaAvailabilityAsync() {
+    fun refreshMediaAvailabilityAsync(force: Boolean = false) {
+        val nowRealtime = android.os.SystemClock.elapsedRealtime()
+        if (!force && _lastPlayedFile.value != null && nowRealtime - lastAvailabilityCleanRealtimeMs < 12_000L) {
+            return
+        }
         repoScope.launch {
-            checkAndGetValidLastPlayed()
+            checkAndGetValidLastPlayed(force = force)
         }
     }
 
@@ -725,6 +738,35 @@ class LibraryRepository private constructor(
                 PlaybackResumeHelper.extractCanonicalDocumentKey(appContext, entry.videoUri) == targetDocKey
             }
         }
+
+    suspend fun getSavedProgressMapForEpisodes(
+        episodes: List<EpisodeItem>
+    ): Map<String, PlaybackProgressEntity> = withContext(Dispatchers.IO) {
+        if (episodes.isEmpty()) return@withContext emptyMap()
+        val snapshot = dao.getAllProgressSnapshot()
+        if (snapshot.isEmpty()) return@withContext emptyMap()
+        val byUri = snapshot.associateBy { it.videoUri }
+        val byDocKey by lazy(LazyThreadSafetyMode.NONE) {
+            snapshot.mapNotNull { entry ->
+                PlaybackResumeHelper.extractCanonicalDocumentKey(appContext, entry.videoUri)?.let { key ->
+                    key to entry
+                }
+            }.toMap()
+        }
+        buildMap(episodes.size) {
+            for (ep in episodes) {
+                val direct = byUri[ep.uri]
+                if (direct != null) {
+                    put(ep.uri, direct)
+                } else {
+                    val docKey = PlaybackResumeHelper.extractCanonicalDocumentKey(appContext, ep.uri)
+                    if (docKey != null) {
+                        byDocKey[docKey]?.let { put(ep.uri, it) }
+                    }
+                }
+            }
+        }
+    }
 
     fun resolveStandaloneVideo(uri: Uri): EpisodeItem {
         runCatching {

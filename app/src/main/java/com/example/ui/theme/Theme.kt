@@ -202,33 +202,34 @@ fun buildNegaiColorScheme(
             outlineVariant = lerp(Color(0xFFCBD5E1), rawPrimary, 0.15f)
         }
         isPureOled -> {
+            // OLED: Pure pitch-black (#000000) with true black surfaces and minimal color tint on backgrounds
             background = Color.Black
             surface = Color.Black
-            surfaceVariant = lerp(Color(0xFF0D121C), rawPrimary, 0.08f)
+            surfaceVariant = Color(0xFF101010)
             surfaceContainerLowest = Color.Black
-            surfaceContainerLow = lerp(Color(0xFF06090F), rawPrimary, 0.04f)
-            surfaceContainer = lerp(Color(0xFF0B101A), rawPrimary, 0.06f)
-            surfaceContainerHigh = lerp(Color(0xFF121926), rawPrimary, 0.08f)
-            surfaceContainerHighest = lerp(Color(0xFF1B2436), rawPrimary, 0.10f)
+            surfaceContainerLow = Color(0xFF060606)
+            surfaceContainer = Color(0xFF0C0C0C)
+            surfaceContainerHigh = Color(0xFF141414)
+            surfaceContainerHighest = Color(0xFF1C1C1C)
+            rawOnBg = Color(0xFFFAFAFA)
+            rawOnSurfaceVariant = Color(0xFFC8C8C8)
+            outline = Color(0xFF2E2E2E)
+            outlineVariant = Color(0xFF1A1A1A)
+        }
+        else -> {
+            // DARK (Non-OLED): Rich obsidian-slate surfaces transferred from previous OLED theme
+            background = Color(0xFF080C14)
+            surface = Color(0xFF0E1422)
+            surfaceVariant = lerp(Color(0xFF141C2E), rawPrimary, 0.08f)
+            surfaceContainerLowest = Color(0xFF05080F)
+            surfaceContainerLow = lerp(Color(0xFF0B101B), rawPrimary, 0.04f)
+            surfaceContainer = lerp(Color(0xFF121828), rawPrimary, 0.06f)
+            surfaceContainerHigh = lerp(Color(0xFF1A2236), rawPrimary, 0.08f)
+            surfaceContainerHighest = lerp(Color(0xFF242E46), rawPrimary, 0.10f)
             rawOnBg = Color(0xFFF8FAFC)
             rawOnSurfaceVariant = Color(0xFFCBD5E1)
             outline = lerp(Color(0xFF334155), rawPrimary, 0.22f)
             outlineVariant = Color(0xFF1E293B)
-        }
-        else -> {
-            // DARK (Non-OLED): Soft slate-obsidian background (#0C111B) clearly distinct from #000000 OLED
-            background = Color(0xFF0C111B)
-            surface = Color(0xFF111827)
-            surfaceVariant = lerp(Color(0xFF1E293B), rawPrimary, 0.08f)
-            surfaceContainerLowest = Color(0xFF070A11)
-            surfaceContainerLow = lerp(Color(0xFF0E1523), rawPrimary, 0.04f)
-            surfaceContainer = lerp(Color(0xFF151F32), rawPrimary, 0.06f)
-            surfaceContainerHigh = lerp(Color(0xFF1D2A42), rawPrimary, 0.08f)
-            surfaceContainerHighest = lerp(Color(0xFF263652), rawPrimary, 0.10f)
-            rawOnBg = Color(0xFFF3F6FC)
-            rawOnSurfaceVariant = Color(0xFFCBD5E1)
-            outline = lerp(Color(0xFF3B4A66), rawPrimary, 0.22f)
-            outlineVariant = Color(0xFF253147)
         }
     }
 
@@ -261,13 +262,31 @@ fun buildNegaiColorScheme(
             .ensureReadableOn(surface, 5.2f)
     }
 
-    // Compute balanced containers from the surface + accent
+    // Compute balanced containers: OLED keeps neutral/dark element backgrounds with minimal tint
     val primaryContainer = monetScheme?.primaryContainer
-        ?: if (isDark) lerp(surfaceContainerHigh, primary, 0.28f) else lerp(Color.White, rawPrimary, 0.15f)
+        ?: if (isPureOled) {
+            lerp(surfaceContainerHigh, primary, 0.08f)
+        } else if (isDark) {
+            lerp(surfaceContainerHigh, primary, 0.28f)
+        } else {
+            lerp(Color.White, rawPrimary, 0.15f)
+        }
     val secondaryContainer = monetScheme?.secondaryContainer
-        ?: if (isDark) lerp(surfaceContainerHigh, secondary, 0.25f) else lerp(Color.White, rawSecondary, 0.14f)
+        ?: if (isPureOled) {
+            lerp(surfaceContainerHigh, secondary, 0.08f)
+        } else if (isDark) {
+            lerp(surfaceContainerHigh, secondary, 0.25f)
+        } else {
+            lerp(Color.White, rawSecondary, 0.14f)
+        }
     val tertiaryContainer = monetScheme?.tertiaryContainer
-        ?: if (isDark) lerp(surfaceContainerHigh, tertiary, 0.24f) else lerp(Color.White, rawTertiary, 0.14f)
+        ?: if (isPureOled) {
+            lerp(surfaceContainerHigh, tertiary, 0.08f)
+        } else if (isDark) {
+            lerp(surfaceContainerHigh, tertiary, 0.24f)
+        } else {
+            lerp(Color.White, rawTertiary, 0.14f)
+        }
 
     // Algorithmic auto-contrast for every "on*" role
     val onPrimary = primary.autoContrastTextColor(minContrast = 5.0f)

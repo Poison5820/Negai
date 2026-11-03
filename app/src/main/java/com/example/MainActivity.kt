@@ -6,6 +6,7 @@ import android.content.res.Configuration
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -49,6 +50,10 @@ class MainActivity : ComponentActivity() {
         val bootSettings = PlayerPreferencesRepository.readBootSettingsSnapshot(this)
         window.setBackgroundDrawable(ColorDrawable(bootSettings.themeMode.previewBgArgb.toInt()))
         super.onCreate(savedInstanceState)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            window.attributes.layoutInDisplayCutoutMode =
+                WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+        }
         enableEdgeToEdge()
         window.setBackgroundDrawable(ColorDrawable(bootSettings.themeMode.previewBgArgb.toInt()))
         DisplayRefreshRateController.applyWindowRefreshRate(this, bootSettings.highRefreshRateEnabled)
@@ -171,9 +176,13 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun handleIncomingVideoIntent(intent: Intent?) {
-        if (intent?.action == Intent.ACTION_VIEW) {
-            val dataUri = intent.data ?: return
-            viewModel.handleIncomingViewIntent(dataUri, intent.type)
+        if (intent == null) return
+        when (intent.action) {
+            Intent.ACTION_VIEW,
+            Intent.ACTION_SEND,
+            Intent.ACTION_SEND_MULTIPLE -> {
+                viewModel.handleIncomingIntent(intent)
+            }
         }
     }
 
@@ -585,7 +594,8 @@ fun NegaiAppRoot(
                 onUpdateExcludeCameraAndScreenshots = { viewModel.setExcludeCameraAndScreenshots(it) },
                 onUpdateMinVideoSizeMb = { viewModel.setMinVideoSizeMb(it) },
                 onUpdateSkipDeleteConfirmation = { viewModel.setSkipDeleteConfirmation(it) },
-                onUpdateRememberPerEpisodeSettings = { viewModel.setRememberPerEpisodeSettings(it) }
+                onUpdateRememberPerEpisodeSettings = { viewModel.setRememberPerEpisodeSettings(it) },
+                onUpdateGraphicsBackend = { viewModel.setGraphicsBackend(it) }
             )
 
             val torrentsActions = TorrentsActions(

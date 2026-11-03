@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-3.2-00E5FF?style=flat-square" alt="Version 3.2" />
+  <img src="https://img.shields.io/badge/version-3.4.2--pre-00E5FF?style=flat-square" alt="Version 3.4.2-pre" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/Kotlin-2.x_%7C_Jetpack_Compose-7F52FF?style=flat-square&logo=kotlin" alt="Kotlin & Compose" />
@@ -33,8 +33,8 @@
 
 ### 1. Video Pipeline & OpenGL ES Shaders
 - **Decoding Engine**: Media3 / ExoPlayer pipeline with selectable **HW+**, **HW**, and **SW** decoder modes supporting H.264, 10-bit HEVC (HDR10 / HLG / Dolby Vision profiles), VP9, and AV1, plus a built-in **Hardware & MediaCodec Inspector** in Settings.
-- **Anime4K Real-Time Upscaling**: Custom GLSL shader stages (`Anime4K_Fast`, `Anime4K_Upscale_CNN`, `Anime4K_Upscale_CNNX`) with Sobel gradient line reconstruction, dark-contour preservation, live split-screen comparison, and automatic `Anime4K_Fast` load-balancing when paired with MEMC.
-- **Frame Interpolation (MEMC)**: Phase-consistent bidirectional motion estimation and frame synthesis (`ANIME 2x`, `BALANCED`, `MAX_FPS`) with perceptual luminance preservation for simultaneous operation alongside Anime4K without frame flickering.
+- **Anime4K Real-Time Upscaling (`bloc97/Anime4K` MIT)**: OpenGL ES 2.0 GLSL shader stages aligned with the official [bloc97/Anime4K](https://github.com/bloc97/Anime4K) architecture (**Mode C — Fast**, **Mode B — Soft CNN**, **Mode A — Restore CNN**) with `Clamp_Highlights` highlight pre-clamping, Difference of Gaussians (`DoG`), multi-orientation `CReLU` feature convolution, and live split-screen comparison.
+- **Custom In-House Frame Interpolation (MEMC)**: Proprietary Negai OpenGL ES 2.0 shader implementation featuring 5-candidate diamond motion search (`MEMC_MOTION_ESTIMATE_FRAGMENT`), scene-cut suppression, and phase-consistent bidirectional frame warping (`ANIME`, `SMOOTH_60`, `MAX_FPS`, `CINEMA`) with perceptual luminance preservation in `.a` for simultaneous operation alongside Anime4K.
 - **LTPO & High Refresh Rate Cadence**: Automatic display refresh rate matching (`24Hz`, `48Hz`, `60Hz`, `90Hz`, `120Hz`, `144Hz`, `165Hz`) with harmonic cadence locking.
 - **Aspect-Aware Orientation**: Automatic landscape/portrait switching per video aspect ratio, manual 1-tap orientation lock preserved across episode transitions, and buffered video-size transitions that prevent premature screen rotation before an episode ends.
 
@@ -61,13 +61,19 @@
 
 ---
 
-## Release 3.2 Summary
+## Pre-Release 3.4.2-pre Summary
 
-- **Smart Restart of Completed Episodes (95% Threshold)**: Fixed an issue where completed or near-completed episodes (`>= 95%` watched or `<= 15s` left) could retain an end-of-file timestamp and immediately skip to the next episode upon reopening. Completed episodes now reset to `00:00` on finish and reopen cleanly from the start while keeping their watched badge in the folder list.
-- **120Hz List Scrolling Optimization**: Removed synchronous UI-thread file checks during thumbnail request building, unified `RecentTabScreen` and `FolderDetailScreen` onto the shared disk-backed `VideoThumbnailCache`, added stable keys in `TorrentsTabScreen`, lazily composed context menus, and memoized card shapes/borders/brushes across all screens.
-- **Frosted Glass Top-Right Player HUD**: Redesigned the top-right player buttons (Episodes/Chapters, Orientation Lock, Screen Touch Lock, and Picture-in-Picture) with the same translucent Frosted Glass surface (`#88101828`), subtle border, and top inner highlight sheen as the bottom `PlayerQuickActionsBar`.
-- **Updated Planetary Easter Egg & Synchronized Translations**: Updated the interactive planetary model (`VersionPlanetaryModalSheet`) with current v3.2 orbital specifications (`Auto-Fast with MEMC`, `165Hz`, Bluetooth Gaming presets, voiceover parser) and unified RU/EN terminology across Settings, Player sheets, and dialogs.
-- **Hardware Inspector & Torrent Voiceover Separation**: Added device display/HDR/MediaCodec hardware inspection in Settings and dedicated voiceover vs. subtitle parsing on torrent release cards.
+- **Display Cutout & Notch Handling in Landscape Mode**: Video canvas now fully occupies the notification bar and camera cutout areas (`LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES`), delivering true uninterrupted edge-to-edge playback in landscape.
+- **Perfect Geometric Centering of Overlays**: Fixed asymmetric display-cutout padding that previously shifted the video buffering spinner (`CircularProgressIndicator`), seek notification pills (double-tap ±10s and horizontal swipe), and center transport controls off-center.
+- **Fixed Scrub Bar Reset to 0 on Playback Stop/End**: Video playback state listeners now properly retain the last known valid position when entering `STATE_IDLE` or when playback ends (`STATE_ENDED`), showing full completion on the timeline rather than abruptly resetting to 00:00.
+- **Vulkan Graphics Pipeline & Shader Architecture**:
+  - Added Vulkan rendering pipeline abstraction (`VulkanPipelineEngine`, SPIR-V / Vulkan GLSL #version 450 core shaders for Anime4K and MEMC motion estimation).
+  - Multi-threaded command pool recording (`VkCommandPool`, async compute queue family) and GPU video acceleration architecture with automatic fallback to OpenGL ES on devices lacking Vulkan Level 1.
+  - Added Graphics Pipeline toggle in **Miscellaneous** (`Прочие`) settings with live device Vulkan capability detection.
+- **Player Settings Reset with Confirmation**: Moved the reset action to **Miscellaneous** (`Прочие`) settings and wrapped it with an explicit confirmation `AlertDialog` to prevent accidental resets.
+- **OLED & Dark Themes Overhaul**:
+  - **OLED Theme**: Enhanced with pure `#000000` True Black surfaces and reduced container background tinting for maximum AMOLED power efficiency and crisp contrast.
+  - **Dark Theme**: Transitioned to the rich deep obsidian-slate surface styling previously featured in the OLED theme.
 
 ---
 
@@ -116,5 +122,6 @@ gradle :app:testDebugUnitTest
 ## Repository & Obtainium Updates
 
 - **Package ID**: `app.negai.player`
-- **Version**: `3.2` (`versionCode = 10`)
+- **Version**: `3.4.2-pre` (`versionCode = 12`)
+- **Anime4K Upstream Attribution**: [https://github.com/bloc97/Anime4K](https://github.com/bloc97/Anime4K) (MIT License, Copyright © 2019–2021 bloc97)
 - **GitHub Repository**: [https://github.com/Poison5820/Negai](https://github.com/Poison5820/Negai)

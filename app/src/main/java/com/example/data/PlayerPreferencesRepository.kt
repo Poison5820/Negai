@@ -19,6 +19,7 @@ import com.example.model.DecoderMode
 import com.example.model.EpisodeSortOption
 import com.example.model.FolderSortOption
 import com.example.model.FrameInterpolationMode
+import com.example.model.GraphicsBackend
 import com.example.model.PlaybackEndMode
 import com.example.model.PlayerControlsTheme
 import com.example.model.PlayerOrientationMode
@@ -122,6 +123,7 @@ class PlayerPreferencesRepository(private val context: Context) {
         val MIN_VIDEO_SIZE_MB = intPreferencesKey("min_video_size_mb")
         val SKIP_DELETE_CONFIRMATION = booleanPreferencesKey("skip_delete_confirmation")
         val REMEMBER_PER_EPISODE_SETTINGS = booleanPreferencesKey("remember_per_episode_settings")
+        val GRAPHICS_BACKEND = stringPreferencesKey("graphics_backend")
     }
 
     val settingsFlow: Flow<PlayerSettings> = context.playerDataStore.data.map { prefs ->
@@ -350,7 +352,11 @@ class PlayerPreferencesRepository(private val context: Context) {
             skipDeleteConfirmation = prefs[Keys.SKIP_DELETE_CONFIRMATION]
                 ?: (if (hasBoot && sp.contains("skip_delete_confirm")) sp.getBoolean("skip_delete_confirm", false) else false),
             rememberPerEpisodeSettings = prefs[Keys.REMEMBER_PER_EPISODE_SETTINGS]
-                ?: (if (hasBoot && sp.contains("remember_per_ep")) sp.getBoolean("remember_per_ep", true) else true)
+                ?: (if (hasBoot && sp.contains("remember_per_ep")) sp.getBoolean("remember_per_ep", true) else true),
+            graphicsBackend = GraphicsBackend.fromId(
+                prefs[Keys.GRAPHICS_BACKEND]
+                    ?: (if (hasBoot) sp.getString("graphics_backend", null) else null)
+            )
         ).also { snapshot ->
             writeBootSettingsSnapshot(context, snapshot)
         }
@@ -754,6 +760,11 @@ class PlayerPreferencesRepository(private val context: Context) {
         context.playerDataStore.edit { it[Keys.REMEMBER_PER_EPISODE_SETTINGS] = remember }
     }
 
+    suspend fun updateGraphicsBackend(backend: GraphicsBackend) {
+        bootPrefs(context).edit().putString("graphics_backend", backend.id).apply()
+        context.playerDataStore.edit { it[Keys.GRAPHICS_BACKEND] = backend.id }
+    }
+
     suspend fun updateTorrServerUrl(url: String) {
         val cleaned = url.trim().ifBlank { "http://127.0.0.1:8090" }
         bootPrefs(context).edit().putString("torr_url", cleaned).apply()
@@ -928,7 +939,8 @@ class PlayerPreferencesRepository(private val context: Context) {
                 ignoreNomediaFolders = sp.getBoolean("ignore_nomedia", true),
                 excludeCameraAndScreenshots = sp.getBoolean("exclude_camera", false),
                 minVideoSizeMb = sp.getInt("min_video_mb", 0).coerceIn(0, 500),
-                skipDeleteConfirmation = sp.getBoolean("skip_delete_confirm", false)
+                skipDeleteConfirmation = sp.getBoolean("skip_delete_confirm", false),
+                graphicsBackend = GraphicsBackend.fromId(sp.getString("graphics_backend", null))
             )
         }
 
@@ -1001,6 +1013,7 @@ class PlayerPreferencesRepository(private val context: Context) {
                 .putBoolean("exclude_camera", s.excludeCameraAndScreenshots)
                 .putInt("min_video_mb", s.minVideoSizeMb)
                 .putBoolean("skip_delete_confirm", s.skipDeleteConfirmation)
+                .putString("graphics_backend", s.graphicsBackend.id)
                 .apply()
         }
     }

@@ -60,6 +60,11 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import com.example.ui.components.InstantSlider
+import com.example.ui.components.ScaleToFitWidthBox
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import com.example.model.GraphicsBackend
+import com.example.vulkan.VulkanHardwareCapabilityDetector
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -726,47 +731,55 @@ internal fun PlaybackSettingsPage(
             ) {
                 OutlinedButton(
                     onClick = { actions.onUpdateSkipIntroSeconds((settings.skipIntroSeconds - 5).coerceIn(5, 600)) },
-                    contentPadding = PaddingValues(horizontal = 6.dp, vertical = 6.dp),
+                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
                     shape = RoundedCornerShape(10.dp),
                     modifier = Modifier
                         .weight(1f)
                         .height(36.dp)
                         .testTag("settings_skip_intro_minus_5")
                 ) {
-                    Text(tr("-5 с", "-5s"), style = MaterialTheme.typography.labelMedium, maxLines = 1)
+                    ScaleToFitWidthBox {
+                        Text(tr("-5 с", "-5s"), style = MaterialTheme.typography.labelMedium, maxLines = 1, softWrap = false)
+                    }
                 }
                 OutlinedButton(
                     onClick = { actions.onUpdateSkipIntroSeconds((settings.skipIntroSeconds - 1).coerceIn(5, 600)) },
-                    contentPadding = PaddingValues(horizontal = 6.dp, vertical = 6.dp),
+                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
                     shape = RoundedCornerShape(10.dp),
                     modifier = Modifier
                         .weight(1f)
                         .height(36.dp)
                         .testTag("settings_skip_intro_minus_1")
                 ) {
-                    Text(tr("-1 с", "-1s"), style = MaterialTheme.typography.labelMedium, maxLines = 1)
+                    ScaleToFitWidthBox {
+                        Text(tr("-1 с", "-1s"), style = MaterialTheme.typography.labelMedium, maxLines = 1, softWrap = false)
+                    }
                 }
                 OutlinedButton(
                     onClick = { actions.onUpdateSkipIntroSeconds((settings.skipIntroSeconds + 1).coerceIn(5, 600)) },
-                    contentPadding = PaddingValues(horizontal = 6.dp, vertical = 6.dp),
+                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
                     shape = RoundedCornerShape(10.dp),
                     modifier = Modifier
                         .weight(1f)
                         .height(36.dp)
                         .testTag("settings_skip_intro_plus_1")
                 ) {
-                    Text(tr("+1 с", "+1s"), style = MaterialTheme.typography.labelMedium, maxLines = 1)
+                    ScaleToFitWidthBox {
+                        Text(tr("+1 с", "+1s"), style = MaterialTheme.typography.labelMedium, maxLines = 1, softWrap = false)
+                    }
                 }
                 OutlinedButton(
                     onClick = { actions.onUpdateSkipIntroSeconds((settings.skipIntroSeconds + 5).coerceIn(5, 600)) },
-                    contentPadding = PaddingValues(horizontal = 6.dp, vertical = 6.dp),
+                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
                     shape = RoundedCornerShape(10.dp),
                     modifier = Modifier
                         .weight(1f)
                         .height(36.dp)
                         .testTag("settings_skip_intro_plus_5")
                 ) {
-                    Text(tr("+5 с", "+5s"), style = MaterialTheme.typography.labelMedium, maxLines = 1)
+                    ScaleToFitWidthBox {
+                        Text(tr("+5 с", "+5s"), style = MaterialTheme.typography.labelMedium, maxLines = 1, softWrap = false)
+                    }
                 }
             }
         }
@@ -1276,58 +1289,68 @@ internal fun AudioSettingsPage(
         ) {
             OutlinedButton(
                 onClick = { actions.onUpdateBluetoothAudioOffsetMs((fineTuneOffsetMs - 50L).coerceIn(-300L, 300L)) },
-                contentPadding = PaddingValues(horizontal = 6.dp, vertical = 6.dp),
+                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
                 shape = RoundedCornerShape(10.dp),
                 modifier = Modifier
                     .weight(1f)
                     .height(36.dp)
                     .testTag("bt_offset_minus_50")
             ) {
-                Text(tr("-50 мс", "-50ms"), style = MaterialTheme.typography.labelMedium, maxLines = 1)
+                ScaleToFitWidthBox {
+                    Text(tr("-50 мс", "-50ms"), style = MaterialTheme.typography.labelMedium, maxLines = 1, softWrap = false)
+                }
             }
             OutlinedButton(
                 onClick = { actions.onUpdateBluetoothAudioOffsetMs((fineTuneOffsetMs - 10L).coerceIn(-300L, 300L)) },
-                contentPadding = PaddingValues(horizontal = 6.dp, vertical = 6.dp),
+                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
                 shape = RoundedCornerShape(10.dp),
                 modifier = Modifier
                     .weight(1f)
                     .height(36.dp)
                     .testTag("bt_offset_minus_10")
             ) {
-                Text(tr("-10 мс", "-10ms"), style = MaterialTheme.typography.labelMedium, maxLines = 1)
+                ScaleToFitWidthBox {
+                    Text(tr("-10 мс", "-10ms"), style = MaterialTheme.typography.labelMedium, maxLines = 1, softWrap = false)
+                }
             }
             FilledTonalButton(
                 onClick = { actions.onUpdateBluetoothAudioOffsetMs(0L) },
-                contentPadding = PaddingValues(horizontal = 6.dp, vertical = 6.dp),
+                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
                 shape = RoundedCornerShape(10.dp),
                 modifier = Modifier
                     .weight(1f)
                     .height(36.dp)
                     .testTag("bt_offset_reset")
             ) {
-                Text(tr("0 мс", "0ms"), style = MaterialTheme.typography.labelMedium, maxLines = 1)
+                ScaleToFitWidthBox {
+                    Text(tr("0 мс", "0ms"), style = MaterialTheme.typography.labelMedium, maxLines = 1, softWrap = false)
+                }
             }
             OutlinedButton(
                 onClick = { actions.onUpdateBluetoothAudioOffsetMs((fineTuneOffsetMs + 10L).coerceIn(-300L, 300L)) },
-                contentPadding = PaddingValues(horizontal = 6.dp, vertical = 6.dp),
+                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
                 shape = RoundedCornerShape(10.dp),
                 modifier = Modifier
                     .weight(1f)
                     .height(36.dp)
                     .testTag("bt_offset_plus_10")
             ) {
-                Text(tr("+10 мс", "+10ms"), style = MaterialTheme.typography.labelMedium, maxLines = 1)
+                ScaleToFitWidthBox {
+                    Text(tr("+10 мс", "+10ms"), style = MaterialTheme.typography.labelMedium, maxLines = 1, softWrap = false)
+                }
             }
             OutlinedButton(
                 onClick = { actions.onUpdateBluetoothAudioOffsetMs((fineTuneOffsetMs + 50L).coerceIn(-300L, 300L)) },
-                contentPadding = PaddingValues(horizontal = 6.dp, vertical = 6.dp),
+                contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
                 shape = RoundedCornerShape(10.dp),
                 modifier = Modifier
                     .weight(1f)
                     .height(36.dp)
                     .testTag("bt_offset_plus_50")
             ) {
-                Text(tr("+50 мс", "+50ms"), style = MaterialTheme.typography.labelMedium, maxLines = 1)
+                ScaleToFitWidthBox {
+                    Text(tr("+50 мс", "+50ms"), style = MaterialTheme.typography.labelMedium, maxLines = 1, softWrap = false)
+                }
             }
         }
     }
@@ -1733,33 +1756,15 @@ internal fun StorageSettingsPage(
             testTag = "confirm_before_delete_switch"
         )
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        OutlinedButton(
+            onClick = actions.onClearPlaybackHistory,
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("clear_history_button")
         ) {
-            OutlinedButton(
-                onClick = actions.onClearPlaybackHistory,
-                modifier = Modifier
-                    .weight(1f)
-                    .testTag("clear_history_button")
-            ) {
-                Icon(Icons.Default.DeleteOutline, contentDescription = null, modifier = Modifier.size(18.dp))
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(tr("Очистить историю", "Clear History"))
-            }
-            OutlinedButton(
-                onClick = actions.onResetAllSettings,
-                colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = MaterialTheme.colorScheme.error
-                ),
-                modifier = Modifier
-                    .weight(1f)
-                    .testTag("reset_settings_button")
-            ) {
-                Icon(Icons.Default.RestartAlt, contentDescription = null, modifier = Modifier.size(18.dp))
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(tr("Сбросить всё", "Reset All"))
-            }
+            Icon(Icons.Default.DeleteOutline, contentDescription = null, modifier = Modifier.size(18.dp))
+            Spacer(modifier = Modifier.width(6.dp))
+            Text(tr("Очистить историю воспроизведения", "Clear Playback History"))
         }
     }
 }
@@ -1800,7 +1805,8 @@ private data class SettingsSectionCardProps(
     val containerColor: Color,
     val border: BorderStroke,
     val elevation: androidx.compose.ui.unit.Dp,
-    val isDark: Boolean
+    val isDark: Boolean,
+    val isPureOled: Boolean
 )
 
 @Composable
@@ -1818,15 +1824,21 @@ internal fun SettingsSectionCard(
         val isPureOled = bg.red < 0.01f && bg.green < 0.01f && bg.blue < 0.01f
         val containerColor = when {
             !isDark -> Color(0xFFFFFFFF).copy(alpha = 0.95f)
-            isPureOled -> Color(0xFF0A101B).copy(alpha = 0.94f)
-            else -> Color(0xFF060A12).copy(alpha = 0.94f)
+            isPureOled -> Color(0xFF050505).copy(alpha = 0.96f)
+            else -> Color(0xFF0A101B).copy(alpha = 0.94f)
         }
-        val border = BorderStroke(0.75.dp, primary.copy(alpha = if (isDark) 0.62f else 0.52f))
+        val borderAlpha = when {
+            !isDark -> 0.52f
+            isPureOled -> 0.22f
+            else -> 0.58f
+        }
+        val border = BorderStroke(0.75.dp, primary.copy(alpha = borderAlpha))
         val elevation = if (isDark) 0.dp else 1.5.dp
-        SettingsSectionCardProps(containerColor, border, elevation, isDark)
+        SettingsSectionCardProps(containerColor, border, elevation, isDark, isPureOled)
     }
     val cardShape = remember { RoundedCornerShape(16.dp) }
     val isDark = sectionCardProps.isDark
+    val isPureOled = sectionCardProps.isPureOled
 
     Card(
         shape = cardShape,
@@ -1853,13 +1865,19 @@ internal fun SettingsSectionCard(
                     modifier = Modifier
                         .size(28.dp)
                         .clip(RoundedCornerShape(8.dp))
-                        .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = if (isDark) 0.65f else 0.85f)),
+                        .background(
+                            if (isPureOled) {
+                                MaterialTheme.colorScheme.surfaceContainerHigh
+                            } else {
+                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = if (isDark) 0.65f else 0.85f)
+                            }
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                        tint = if (isPureOled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onPrimaryContainer,
                         modifier = Modifier.size(16.dp)
                     )
                 }
@@ -2360,6 +2378,12 @@ internal fun MiscellaneousSettingsPage(
     settings: PlayerSettings,
     actions: SettingsActions
 ) {
+    val context = LocalContext.current
+    val isEnglish = LocalIsEnglish.current
+    val vulkanCapability = remember(context) { VulkanHardwareCapabilityDetector.probe(context) }
+    var showResetConfirmDialog by remember { mutableStateOf(false) }
+
+    // 1. Память параметров серий
     SettingsSectionCard(
         title = tr("Память серий", "Per-Episode Memory"),
         icon = Icons.Default.Memory
@@ -2372,6 +2396,193 @@ internal fun MiscellaneousSettingsPage(
             checked = settings.rememberPerEpisodeSettings,
             onCheckedChange = actions.onUpdateRememberPerEpisodeSettings,
             testTag = "remember_per_episode_switch"
+        )
+    }
+
+    // 2. Графический конвейер (OpenGL ES / Vulkan API)
+    SettingsSectionCard(
+        title = tr("Графический конвейер (API)", "Graphics Pipeline (API)"),
+        icon = Icons.Default.HighQuality
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = tr("Бэкенд рендеринга", "Rendering Backend"),
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Medium),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = vulkanCapability.localizedDescription(isEnglish),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Surface(
+                color = if (vulkanCapability.isSupported) {
+                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.85f)
+                } else {
+                    MaterialTheme.colorScheme.surfaceContainerHigh
+                },
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text(
+                    text = vulkanCapability.summaryBadge,
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                    color = if (vulkanCapability.isSupported) {
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        GraphicsBackend.entries.forEach { backend ->
+            val isSelected = settings.graphicsBackend == backend
+            val cardBg = if (isSelected) {
+                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.40f)
+            } else {
+                MaterialTheme.colorScheme.surfaceContainerLow
+            }
+            val borderStroke = if (isSelected) {
+                BorderStroke(1.2.dp, MaterialTheme.colorScheme.primary)
+            } else {
+                BorderStroke(0.6.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+            }
+
+            Surface(
+                color = cardBg,
+                shape = RoundedCornerShape(12.dp),
+                border = borderStroke,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { actions.onUpdateGraphicsBackend(backend) }
+                    .testTag("graphics_backend_${backend.id.lowercase()}")
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 14.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    RadioButton(
+                        selected = isSelected,
+                        onClick = { actions.onUpdateGraphicsBackend(backend) }
+                    )
+                    Column(modifier = Modifier.weight(1f)) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                text = backend.localizedTitle(isEnglish),
+                                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Surface(
+                                color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.6f),
+                                shape = RoundedCornerShape(6.dp)
+                            ) {
+                                Text(
+                                    text = backend.badge,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = backend.localizedSubtitle(isEnglish),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(6.dp))
+        }
+    }
+
+    // 3. Сброс всех настроек плеера (с обязательным подтверждением)
+    SettingsSectionCard(
+        title = tr("Сброс параметров", "Reset Parameters"),
+        icon = Icons.Default.RestartAlt
+    ) {
+        Text(
+            text = tr(
+                "Восстановление стандартных настроек интерфейса, тем оформления, декодера, конвейеров улучшений и жестов управления. История просмотров и закладки сохраняются.",
+                "Restore default settings for interface, themes, decoder, enhancement pipelines and gestures. Playback history and bookmarks will be kept."
+            ),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(modifier = Modifier.height(10.dp))
+        OutlinedButton(
+            onClick = { showResetConfirmDialog = true },
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = MaterialTheme.colorScheme.error
+            ),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.65f)),
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("reset_player_settings_button")
+        ) {
+            Icon(Icons.Default.RestartAlt, contentDescription = null, modifier = Modifier.size(18.dp))
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(tr("Сбросить все настройки плеера", "Reset All Player Settings"))
+        }
+    }
+
+    // Диалог подтверждения сброса настроек
+    if (showResetConfirmDialog) {
+        AlertDialog(
+            onDismissRequest = { showResetConfirmDialog = false },
+            title = {
+                Text(
+                    text = tr("Сброс настроек плеера?", "Reset Player Settings?"),
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+                )
+            },
+            text = {
+                Text(
+                    text = tr(
+                        "Все параметры плеера (оформление, декодер, Anime4K, жесты, звук и субтитры) вернутся к заводским значениям. История воспроизведения не будет затронута. Вы уверены?",
+                        "All player parameters (theme, decoder, Anime4K, gestures, audio and subtitles) will return to default values. Playback history will not be affected. Are you sure?"
+                    ),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showResetConfirmDialog = false
+                        actions.onResetAllSettings()
+                    },
+                    modifier = Modifier.testTag("confirm_reset_settings_dialog_button")
+                ) {
+                    Text(
+                        text = tr("Сбросить", "Reset"),
+                        color = MaterialTheme.colorScheme.error,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showResetConfirmDialog = false }
+                ) {
+                    Text(tr("Отмена", "Cancel"))
+                }
+            }
         )
     }
 }

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import com.example.ui.components.ScaleToFitWidthBox
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -604,38 +606,63 @@ fun AudioTracksModalSheet(
             ) {
                 OutlinedButton(
                     onClick = { onAdjustAudioDelayMs(-250L) },
+                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
                     modifier = Modifier
                         .weight(1f)
                         .testTag("audio_delay_minus_250")
-                ) { Text("-250мс", style = MaterialTheme.typography.labelSmall) }
+                ) {
+                    ScaleToFitWidthBox {
+                        Text(tr("-250мс", "-250ms"), style = MaterialTheme.typography.labelSmall, maxLines = 1, softWrap = false)
+                    }
+                }
 
                 OutlinedButton(
                     onClick = { onAdjustAudioDelayMs(-50L) },
+                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
                     modifier = Modifier
                         .weight(1f)
                         .testTag("audio_delay_minus_50")
-                ) { Text("-50мс", style = MaterialTheme.typography.labelSmall) }
+                ) {
+                    ScaleToFitWidthBox {
+                        Text(tr("-50мс", "-50ms"), style = MaterialTheme.typography.labelSmall, maxLines = 1, softWrap = false)
+                    }
+                }
 
                 FilledTonalButton(
                     onClick = { onSetAudioDelayMs(0L) },
+                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
                     modifier = Modifier
                         .weight(1f)
                         .testTag("audio_delay_reset")
-                ) { Text("0 мс", style = MaterialTheme.typography.labelSmall) }
+                ) {
+                    ScaleToFitWidthBox {
+                        Text(tr("0 мс", "0ms"), style = MaterialTheme.typography.labelSmall, maxLines = 1, softWrap = false)
+                    }
+                }
 
                 OutlinedButton(
                     onClick = { onAdjustAudioDelayMs(50L) },
+                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
                     modifier = Modifier
                         .weight(1f)
                         .testTag("audio_delay_plus_50")
-                ) { Text("+50мс", style = MaterialTheme.typography.labelSmall) }
+                ) {
+                    ScaleToFitWidthBox {
+                        Text(tr("+50мс", "+50ms"), style = MaterialTheme.typography.labelSmall, maxLines = 1, softWrap = false)
+                    }
+                }
 
                 OutlinedButton(
                     onClick = { onAdjustAudioDelayMs(250L) },
+                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
                     modifier = Modifier
                         .weight(1f)
                         .testTag("audio_delay_plus_250")
-                ) { Text("+250мс", style = MaterialTheme.typography.labelSmall) }
+                ) {
+                    ScaleToFitWidthBox {
+                        Text(tr("+250мс", "+250ms"), style = MaterialTheme.typography.labelSmall, maxLines = 1, softWrap = false)
+                    }
+                }
             }
 
             InstantSlider(
@@ -818,38 +845,63 @@ fun SubtitleControlModalSheet(
             ) {
                 OutlinedButton(
                     onClick = { onAdjustDelayMs(-500L) },
+                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
                     modifier = Modifier
                         .weight(1f)
                         .testTag("subtitle_delay_minus_500")
-                ) { Text(tr("-0.5с", "-0.5s"), style = MaterialTheme.typography.labelSmall) }
+                ) {
+                    ScaleToFitWidthBox {
+                        Text(tr("-0.5с", "-0.5s"), style = MaterialTheme.typography.labelSmall, maxLines = 1, softWrap = false)
+                    }
+                }
 
                 OutlinedButton(
                     onClick = { onAdjustDelayMs(-100L) },
+                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
                     modifier = Modifier
                         .weight(1f)
                         .testTag("subtitle_delay_minus_100")
-                ) { Text(tr("-0.1с", "-0.1s"), style = MaterialTheme.typography.labelSmall) }
+                ) {
+                    ScaleToFitWidthBox {
+                        Text(tr("-0.1с", "-0.1s"), style = MaterialTheme.typography.labelSmall, maxLines = 1, softWrap = false)
+                    }
+                }
 
                 FilledTonalButton(
                     onClick = { onSetDelayMs(0L) },
+                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
                     modifier = Modifier
                         .weight(1f)
                         .testTag("subtitle_delay_reset")
-                ) { Text(tr("0.0с", "0.0s"), style = MaterialTheme.typography.labelSmall) }
+                ) {
+                    ScaleToFitWidthBox {
+                        Text(tr("0.0с", "0.0s"), style = MaterialTheme.typography.labelSmall, maxLines = 1, softWrap = false)
+                    }
+                }
 
                 OutlinedButton(
                     onClick = { onAdjustDelayMs(100L) },
+                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
                     modifier = Modifier
                         .weight(1f)
                         .testTag("subtitle_delay_plus_100")
-                ) { Text(tr("+0.1с", "+0.1s"), style = MaterialTheme.typography.labelSmall) }
+                ) {
+                    ScaleToFitWidthBox {
+                        Text(tr("+0.1с", "+0.1s"), style = MaterialTheme.typography.labelSmall, maxLines = 1, softWrap = false)
+                    }
+                }
 
                 OutlinedButton(
                     onClick = { onAdjustDelayMs(500L) },
+                    contentPadding = PaddingValues(horizontal = 4.dp, vertical = 6.dp),
                     modifier = Modifier
                         .weight(1f)
                         .testTag("subtitle_delay_plus_500")
-                ) { Text(tr("+0.5с", "+0.5s"), style = MaterialTheme.typography.labelSmall) }
+                ) {
+                    ScaleToFitWidthBox {
+                        Text(tr("+0.5с", "+0.5s"), style = MaterialTheme.typography.labelSmall, maxLines = 1, softWrap = false)
+                    }
+                }
             }
 
             InstantSlider(
@@ -1012,8 +1064,8 @@ fun Anime4KControlModalSheet(
                         Text(tr("Активировать Anime4K", "Enable Anime4K"), style = MaterialTheme.typography.bodyMedium)
                         Text(
                             tr(
-                                "OpenGL ES шейдер реконструкции линий",
-                                "OpenGL ES line reconstruction shader"
+                                "${settings.graphicsBackend.badge} шейдер реконструкции линий",
+                                "${settings.graphicsBackend.badge} line reconstruction shader"
                             ),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant

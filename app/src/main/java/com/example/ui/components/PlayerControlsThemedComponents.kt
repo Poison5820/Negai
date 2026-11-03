@@ -219,10 +219,13 @@ fun ThemedPlayerCenterTransport(
         )
     )
 
+    ScaleToFitWidthBox(
+        modifier = modifier.padding(horizontal = 8.dp),
+        contentAlignment = Alignment.Center
+    ) {
     when (controlsTheme) {
         PlayerControlsTheme.CLASSIC_OLED -> {
             Row(
-                modifier = modifier,
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
@@ -372,14 +375,13 @@ fun ThemedPlayerCenterTransport(
                 )
             )
             Row(
-                modifier = modifier,
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 TransportButtonBox(
                     onClick = onPreviousEpisode,
                     enabled = hasPlaylist,
-                    contentDescription = "Предыдущая серия",
+                    contentDescription = prevDesc,
                     testTag = "player_prev_episode_button",
                     shape = RoundedCornerShape(16.dp),
                     modifier = Modifier.size(48.dp)
@@ -470,7 +472,7 @@ fun ThemedPlayerCenterTransport(
                 TransportButtonBox(
                     onClick = onNextEpisode,
                     enabled = hasNextEpisode,
-                    contentDescription = "Следующая серия",
+                    contentDescription = nextDesc,
                     testTag = "player_next_episode_button",
                     shape = RoundedCornerShape(16.dp),
                     modifier = Modifier.size(48.dp)
@@ -503,14 +505,13 @@ fun ThemedPlayerCenterTransport(
             val sideShape = RoundedCornerShape(14.dp)
             val mainShape = RoundedCornerShape(18.dp)
             Row(
-                modifier = modifier,
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 TransportButtonBox(
                     onClick = onPreviousEpisode,
                     enabled = hasPlaylist,
-                    contentDescription = "Предыдущая серия",
+                    contentDescription = prevDesc,
                     testTag = "player_prev_episode_button",
                     shape = sideShape,
                     modifier = Modifier.size(48.dp)
@@ -628,7 +629,7 @@ fun ThemedPlayerCenterTransport(
                 TransportButtonBox(
                     onClick = onNextEpisode,
                     enabled = hasNextEpisode,
-                    contentDescription = "Следующая серия",
+                    contentDescription = nextDesc,
                     testTag = "player_next_episode_button",
                     shape = sideShape,
                     modifier = Modifier.size(48.dp)
@@ -658,14 +659,13 @@ fun ThemedPlayerCenterTransport(
         PlayerControlsTheme.MINIMAL_RING -> {
             val ringGlassBg = Color.White.copy(alpha = 0.14f)
             Row(
-                modifier = modifier,
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 TransportButtonBox(
                     onClick = onPreviousEpisode,
                     enabled = hasPlaylist,
-                    contentDescription = "Предыдущая серия",
+                    contentDescription = prevDesc,
                     testTag = "player_prev_episode_button",
                     modifier = Modifier.size(48.dp)
                 ) {
@@ -752,7 +752,7 @@ fun ThemedPlayerCenterTransport(
                 TransportButtonBox(
                     onClick = onNextEpisode,
                     enabled = hasNextEpisode,
-                    contentDescription = "Следующая серия",
+                    contentDescription = nextDesc,
                     testTag = "player_next_episode_button",
                     modifier = Modifier.size(48.dp)
                 ) {
@@ -778,8 +778,7 @@ fun ThemedPlayerCenterTransport(
             Surface(
                 color = Color.White.copy(alpha = 0.12f),
                 shape = RoundedCornerShape(22.dp),
-                border = BorderStroke(1.dp, primary.copy(alpha = 0.38f)),
-                modifier = modifier
+                border = BorderStroke(1.dp, primary.copy(alpha = 0.38f))
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp),
@@ -789,7 +788,7 @@ fun ThemedPlayerCenterTransport(
                     TransportButtonBox(
                         onClick = onPreviousEpisode,
                         enabled = hasPlaylist,
-                        contentDescription = "Предыдущая серия",
+                        contentDescription = prevDesc,
                         testTag = "player_prev_episode_button",
                         shape = RoundedCornerShape(14.dp),
                         modifier = Modifier
@@ -862,7 +861,7 @@ fun ThemedPlayerCenterTransport(
                     TransportButtonBox(
                         onClick = onNextEpisode,
                         enabled = hasNextEpisode,
-                        contentDescription = "Следующая серия",
+                        contentDescription = nextDesc,
                         testTag = "player_next_episode_button",
                         shape = RoundedCornerShape(14.dp),
                         modifier = Modifier
@@ -885,7 +884,6 @@ fun ThemedPlayerCenterTransport(
                 colors = listOf(Color.Black.copy(alpha = 0.28f), Color.Transparent)
             )
             Row(
-                modifier = modifier,
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(14.dp)
             ) {
@@ -1005,7 +1003,6 @@ fun ThemedPlayerCenterTransport(
             val monoSideBg = Color(0x6612151C)
             val monoMainBg = Color(0x801A1E28)
             Row(
-                modifier = modifier,
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
@@ -1131,7 +1128,6 @@ fun ThemedPlayerCenterTransport(
 
         PlayerControlsTheme.GHOST_OUTLINE -> {
             Row(
-                modifier = modifier,
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
@@ -1247,6 +1243,65 @@ fun ThemedPlayerCenterTransport(
                         )
                     }
                 }
+            }
+        }
+    }
+    }
+}
+
+/**
+ * Proportionally scales its single child down if the child's natural width exceeds the available
+ * container width (`constraints.maxWidth`), preventing any clipping, wrapping, or partial squishing
+ * on compact viewports or high UI scale factors (e.g., 125%–140%).
+ */
+@Composable
+fun ScaleToFitWidthBox(
+    modifier: Modifier = Modifier,
+    minScale: Float = 0.52f,
+    contentAlignment: Alignment = Alignment.Center,
+    content: @Composable () -> Unit
+) {
+    androidx.compose.ui.layout.Layout(
+        content = content,
+        modifier = modifier
+    ) { measurables, constraints ->
+        if (measurables.isEmpty()) {
+            return@Layout layout(constraints.minWidth, constraints.minHeight) {}
+        }
+        val childConstraints = constraints.copy(
+            minWidth = 0,
+            maxWidth = androidx.compose.ui.unit.Constraints.Infinity,
+            minHeight = 0
+        )
+        val placeable = measurables.first().measure(childConstraints)
+        val maxW = constraints.maxWidth
+        val scale = if (maxW != androidx.compose.ui.unit.Constraints.Infinity && maxW > 0 && placeable.width > maxW) {
+            (maxW.toFloat() / placeable.width.toFloat()).coerceIn(minScale, 1f)
+        } else {
+            1f
+        }
+        val scaledW = (placeable.width * scale).toInt()
+        val scaledH = (placeable.height * scale).toInt()
+        val layoutWidth = if (scale < 1f) {
+            maxW
+        } else {
+            placeable.width.coerceIn(constraints.minWidth, maxW)
+        }
+        val layoutHeight = scaledH.coerceIn(constraints.minHeight, constraints.maxHeight)
+        layout(layoutWidth, layoutHeight) {
+            val alignedOffset = contentAlignment.align(
+                androidx.compose.ui.unit.IntSize(scaledW, scaledH),
+                androidx.compose.ui.unit.IntSize(layoutWidth, layoutHeight),
+                layoutDirection
+            )
+            if (scale < 1f) {
+                placeable.placeWithLayer(alignedOffset.x, alignedOffset.y) {
+                    transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0f, 0f)
+                    scaleX = scale
+                    scaleY = scale
+                }
+            } else {
+                placeable.placeRelative(alignedOffset.x, alignedOffset.y)
             }
         }
     }
@@ -2098,21 +2153,37 @@ fun InstantSlider(
     colors: SliderColors = SliderDefaults.colors(),
     enabled: Boolean = true
 ) {
-    var draggingValue by remember(value) { mutableFloatStateOf(value) }
+    var draggingValue by remember { mutableFloatStateOf(value) }
     var isDragging by remember { mutableStateOf(false) }
+    var lastDispatchTimeMs by remember { androidx.compose.runtime.mutableLongStateOf(0L) }
+    val currentOnValueChange by androidx.compose.runtime.rememberUpdatedState(onValueChange)
+    val currentOnValueChangeFinished by androidx.compose.runtime.rememberUpdatedState(onValueChangeFinished)
+
+    androidx.compose.runtime.LaunchedEffect(value, isDragging) {
+        if (!isDragging) {
+            draggingValue = value
+        }
+    }
 
     val currentDisplayValue = if (isDragging) draggingValue else value
 
     Slider(
         value = currentDisplayValue.coerceIn(valueRange.start, valueRange.endInclusive),
         onValueChange = { newVal ->
+            val clamped = newVal.coerceIn(valueRange.start, valueRange.endInclusive)
             isDragging = true
-            draggingValue = newVal
-            onValueChange(newVal)
+            draggingValue = clamped
+            val now = android.os.SystemClock.uptimeMillis()
+            if (steps > 0 || now - lastDispatchTimeMs >= 42L) {
+                lastDispatchTimeMs = now
+                currentOnValueChange(clamped)
+            }
         },
         onValueChangeFinished = {
+            val finalVal = draggingValue.coerceIn(valueRange.start, valueRange.endInclusive)
             isDragging = false
-            onValueChangeFinished?.invoke()
+            currentOnValueChange(finalVal)
+            currentOnValueChangeFinished?.invoke()
         },
         valueRange = valueRange,
         steps = steps,

@@ -24,10 +24,11 @@ class NegaiV2FeaturesTest {
 
     @Test
     fun version3BuildConfig_and_frameInterpolationUserFacingLabels() {
-        assertEquals(10, BuildConfig.VERSION_CODE)
-        assertEquals("3.2", BuildConfig.VERSION_NAME)
+        assertEquals(12, BuildConfig.VERSION_CODE)
+        assertEquals("3.4.2-pre", BuildConfig.VERSION_NAME)
         assertEquals("app.negai.player", BuildConfig.APPLICATION_ID)
-        assertEquals("v3.2", com.example.model.AppVersionInfo.BADGE_TEXT)
+        assertEquals("v3.4.2-pre", com.example.model.AppVersionInfo.BADGE_TEXT)
+        assertEquals("https://github.com/bloc97/Anime4K", com.example.model.AppVersionInfo.ANIME4K_ORIGINAL_REPO_URL)
 
         assertEquals(com.example.model.AppLanguage.SYSTEM, com.example.model.AppLanguage.fromId("system"))
         assertEquals(com.example.model.AppLanguage.RU, com.example.model.AppLanguage.fromId("ru"))
@@ -640,8 +641,70 @@ class NegaiV2FeaturesTest {
             tempRoot.deleteRecursively()
         }
     }
+
+    @Test
+    fun v34_pre1_anime4kPresets_mitAttribution_and_streamingNetworkDetection() {
+        assertEquals(
+            "https://github.com/bloc97/Anime4K",
+            com.example.anime4k.Anime4KShaders.ORIGINAL_REPOSITORY_URL
+        )
+        assertTrue(com.example.anime4k.Anime4KShaders.LICENSE_NAME.contains("MIT"))
+        assertTrue(com.example.anime4k.Anime4KShaders.ANIME4K_FAST_FINAL_FRAGMENT.contains("dogLuma"))
+        assertTrue(com.example.anime4k.Anime4KShaders.OES_LUMA_EXTRACT_FRAGMENT.contains("clamp("))
+
+        assertEquals(
+            com.example.model.Anime4KPreset.ANIME4K_FAST,
+            com.example.model.Anime4KPreset.fromId("Mode_C")
+        )
+        assertEquals(
+            com.example.model.Anime4KPreset.ANIME4K_UPSCALE_CNN,
+            com.example.model.Anime4KPreset.fromId("Mode_B")
+        )
+        assertEquals(
+            com.example.model.Anime4KPreset.ANIME4K_UPSCALE_CNNX,
+            com.example.model.Anime4KPreset.fromId("Mode_A")
+        )
+        assertTrue(com.example.model.Anime4KPreset.ANIME4K_FAST.title.contains("Mode C"))
+        assertTrue(com.example.model.Anime4KPreset.ANIME4K_UPSCALE_CNN.title.contains("Mode B"))
+        assertTrue(com.example.model.Anime4KPreset.ANIME4K_UPSCALE_CNNX.title.contains("Mode A"))
+
+        assertTrue(
+            com.example.data.VideoStreamInfoExtractor.isStreamingNetworkUri(
+                "http://127.0.0.1:8090/stream/fname.mkv?link=abc&index=1&play"
+            )
+        )
+        assertTrue(
+            com.example.data.VideoStreamInfoExtractor.isStreamingNetworkUri(
+                "https://example.com/anime/ep01.m3u8"
+            )
+        )
+        assertFalse(
+            com.example.data.VideoStreamInfoExtractor.isStreamingNetworkUri(
+                "file:///storage/emulated/0/Movies/ep01.mkv"
+            )
+        )
+    }
+
+    @Test
+    fun v342_pre_vulkan_graphicsBackend_and_oledTheme() {
+        // 1. Graphics backend default
+        val defaultSettings = PlayerSettings()
+        assertEquals(com.example.model.GraphicsBackend.OPENGL_ES, defaultSettings.graphicsBackend)
+        assertEquals(com.example.model.GraphicsBackend.OPENGL_ES, com.example.model.GraphicsBackend.fromId("opengl_es"))
+        assertEquals(com.example.model.GraphicsBackend.VULKAN, com.example.model.GraphicsBackend.fromId("vulkan"))
+        assertEquals(com.example.model.GraphicsBackend.OPENGL_ES, com.example.model.GraphicsBackend.fromId("unknown"))
+
+        // 2. Vulkan SPIR-V compute and vertex shader pipelines
+        assertTrue(com.example.vulkan.VulkanShaderPipelines.VULKAN_QUAD_VERTEX_SHADER.contains("#version 450 core"))
+        assertTrue(com.example.vulkan.VulkanShaderPipelines.VULKAN_ANIME4K_COMPUTE_SHADER.contains("local_size_x = 16, local_size_y = 16"))
+        assertTrue(com.example.vulkan.VulkanShaderPipelines.VULKAN_ANIME4K_COMPUTE_SHADER.contains("imageStore(outImage"))
+        assertTrue(com.example.vulkan.VulkanShaderPipelines.VULKAN_MEMC_MOTION_COMPUTE_SHADER.contains("imageStore(motionVectors"))
+        assertTrue(com.example.vulkan.VulkanShaderPipelines.VULKAN_COMPOSITE_FRAGMENT_SHADER.contains("#version 450 core"))
+
+        // 3. Version info
+        assertEquals("3.4.2-pre", com.example.model.AppVersionInfo.VERSION_NAME)
+        assertEquals(12, com.example.model.AppVersionInfo.VERSION_CODE)
+        assertEquals("v3.4.2-pre", com.example.model.AppVersionInfo.BADGE_TEXT)
+        assertEquals("v3.4.2-pre", com.example.model.AppVersionInfo.RELEASE_TAG)
+    }
 }
-
-
-
-

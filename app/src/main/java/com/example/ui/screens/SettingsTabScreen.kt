@@ -62,6 +62,7 @@ import com.example.model.AppThemeMode
 import com.example.model.AudioDeArtifactMode
 import com.example.model.DecoderMode
 import com.example.model.FrameInterpolationMode
+import com.example.model.GraphicsBackend
 import com.example.model.PlaybackEndMode
 import com.example.model.PlayerControlsTheme
 import com.example.model.PlayerOrientationMode
@@ -147,7 +148,8 @@ data class SettingsActions(
     val onUpdateExcludeCameraAndScreenshots: (Boolean) -> Unit,
     val onUpdateMinVideoSizeMb: (Int) -> Unit,
     val onUpdateSkipDeleteConfirmation: (Boolean) -> Unit = {},
-    val onUpdateRememberPerEpisodeSettings: (Boolean) -> Unit = {}
+    val onUpdateRememberPerEpisodeSettings: (Boolean) -> Unit = {},
+    val onUpdateGraphicsBackend: (GraphicsBackend) -> Unit = {}
 )
 
 @Composable
@@ -318,10 +320,14 @@ private fun SettingsCategoryHub(
         MaterialTheme.colorScheme.background.blue < 0.01f
     val hubCardBg = when {
         !isDark -> androidx.compose.ui.graphics.Color(0xFFFFFFFF).copy(alpha = 0.94f)
-        isPureOled -> androidx.compose.ui.graphics.Color(0xFF0A101B).copy(alpha = 0.92f)
-        else -> androidx.compose.ui.graphics.Color(0xFF070B13).copy(alpha = 0.92f)
+        isPureOled -> androidx.compose.ui.graphics.Color(0xFF050505).copy(alpha = 0.96f)
+        else -> androidx.compose.ui.graphics.Color(0xFF0A101B).copy(alpha = 0.92f)
     }
-    val hubBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = if (isDark) 0.58f else 0.48f)
+    val hubBorderColor = when {
+        !isDark -> MaterialTheme.colorScheme.primary.copy(alpha = 0.48f)
+        isPureOled -> MaterialTheme.colorScheme.primary.copy(alpha = 0.22f)
+        else -> MaterialTheme.colorScheme.primary.copy(alpha = 0.58f)
+    }
     val hubBorder = remember(hubBorderColor) { BorderStroke(0.75.dp, hubBorderColor) }
     val hubCardShape = remember(settings.compactUiMode) {
         RoundedCornerShape(if (settings.compactUiMode) 15.dp else 18.dp)
@@ -379,13 +385,23 @@ private fun SettingsCategoryHub(
                         modifier = Modifier
                             .size(44.dp)
                             .clip(hubIconShape)
-                            .background(MaterialTheme.colorScheme.primaryContainer),
+                            .background(
+                                if (isPureOled) {
+                                    MaterialTheme.colorScheme.surfaceContainerHigh
+                                } else {
+                                    MaterialTheme.colorScheme.primaryContainer
+                                }
+                            ),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = category.icon(),
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                            tint = if (isPureOled) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.onPrimaryContainer
+                            },
                             modifier = Modifier.size(22.dp)
                         )
                     }
@@ -521,10 +537,11 @@ private fun categorySummary(
         }
     }
     SettingsCategory.MISCELLANEOUS -> {
-        if (isEnglish) {
+        val memStatus = if (isEnglish) {
             if (settings.rememberPerEpisodeSettings) "Per-episode memory ON" else "Per-episode memory OFF"
         } else {
             if (settings.rememberPerEpisodeSettings) "Память серий вкл" else "Память серий выкл"
         }
+        "${settings.graphicsBackend.badge} • $memStatus"
     }
 }

@@ -76,8 +76,26 @@ data class DetailedMediaFileInfo(
 
 object VideoStreamInfoExtractor {
 
-    fun extractEpisodeInfo(context: Context, episode: EpisodeItem): DetailedMediaFileInfo {
-        val localFile = StorageAccessHelper.resolveLocalFileFromUri(context, episode.uri)
+    fun isStreamingNetworkUri(uriString: String): Boolean {
+        val trimmed = uriString.trim()
+        val colonIdx = trimmed.indexOf(':')
+        if (colonIdx <= 0) return false
+        val scheme = trimmed.substring(0, colonIdx).lowercase(Locale.ROOT)
+        return scheme == "http" || scheme == "https" || scheme == "rtsp" || scheme == "rtmp" ||
+            scheme == "magnet" || scheme == "mms" || scheme == "udp" || scheme == "rtp"
+    }
+
+    fun extractEpisodeInfo(
+        context: Context,
+        episode: EpisodeItem,
+        playbackState: com.example.player.PlaybackRuntimeState? = null
+    ): DetailedMediaFileInfo {
+        val isNetworkStream = isStreamingNetworkUri(episode.uri)
+        val localFile = if (isNetworkStream) {
+            null
+        } else {
+            StorageAccessHelper.resolveLocalFileFromUri(context, episode.uri)
+        }
         val actualFileName = localFile?.name?.takeIf { it.isNotBlank() } ?: episode.fileName
         val fullPath = localFile?.absolutePath ?: Uri.decode(episode.uri)
         val sizeBytes = when {
@@ -90,17 +108,25 @@ object VideoStreamInfoExtractor {
         }
 
         val ext = actualFileName.substringAfterLast('.', "").lowercase(Locale.ROOT)
-        val containerFormat = resolveContainerFormatLabel(ext)
+        val containerFormat = if (isNetworkStream && (ext.isBlank() || ext.length > 5)) {
+            when {
+                episode.uri.contains(".m3u8", ignoreCase = true) -> "HLS Stream (M3U8)"
+                episode.uri.contains("/stream", ignoreCase = true) || episode.uri.contains("torr", ignoreCase = true) -> "HTTP Stream (TorrServer / P2P)"
+                else -> "HTTP / Network Stream"
+            }
+        } else {
+            resolveContainerFormatLabel(ext)
+        }
 
-        var durationMs = episode.durationMs
-        var width = episode.videoWidth
-        var height = episode.videoHeight
+        var durationMs = (playbackState?.durationMs?.takeIf { it > 0L }) ?: episode.durationMs
+        var width = (playbackState?.videoWidth?.takeIf { it > 0 }) ?: episode.videoWidth
+        var height = (playbackState?.videoHeight?.takeIf { it > 0 }) ?: episode.videoHeight
         var overallBitrateBps = 0L
-        var videoFps = 0f
-        var videoMime = ""
-        var videoCodec = ""
+        var videoFps = playbackState?.sourceFrameRate?.takeIf { it > 0f } ?: 0f
+        var videoMime = playbackState?.videoMimeType.orEmpty()
+        var videoCodec = if (videoMime.isNotBlank()) friendlyVideoCodecName(videoMime, actualFileName) else ""
         var videoProfileLevel = ""
-        var videoBitrateBps = 0L
+        var videoBitrateBps = playbackState?.videoBitrateBps?.takeIf { it > 0L } ?: 0L
         var colorStandard = 0
         var colorTransfer = 0
         var hdrStaticInfoPresent = false
@@ -108,113 +134,155 @@ object VideoStreamInfoExtractor {
         val embeddedAudio = mutableListOf<AudioStreamTechnicalInfo>()
         val embeddedSubtitles = mutableListOf<SubtitleStreamTechnicalInfo>()
 
-        // 1. Query MediaMetadataRetriever for container duration, dimensions, bitrate
-        runCatching {
-            val retriever = MediaMetadataRetriever()
-            try {
-                setRetrieverDataSource(context, retriever, episode.uri, localFile)
-                val durStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
-                durStr?.toLongOrNull()?.takeIf { it > 0L }?.let { durationMs = it }
+        if (!isNetworkStream) {
+            // 1. Query MediaMetadataRetriever for local container duration, dimensions, bitrate
+            runCatching {
+                val retriever = MediaMetadataRetriever()
+                try {
+                    setRetrieverDataSource(context, retriever, episode.uri, localFile)
+                    val durStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+                    durStr?.toLongOrNull()?.takeIf { it > 0L }?.let { durationMs = it }
 
-                val wStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)
-                val hStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)
-                wStr?.toIntOrNull()?.takeIf { it > 0 }?.let { width = it }
-                hStr?.toIntOrNull()?.takeIf { it > 0 }?.let { height = it }
+                    val wStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)
+                    val hStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)
+                    wStr?.toIntOrNull()?.takeIf { it > 0 }?.let { width = it }
+                    hStr?.toIntOrNull()?.takeIf { it > 0 }?.let { height = it }
 
-                val brStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE)
-                brStr?.toLongOrNull()?.takeIf { it > 0L }?.let { overallBitrateBps = it }
+                    val brStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_BITRATE)
+                    brStr?.toLongOrNull()?.takeIf { it > 0L }?.let { overallBitrateBps = it }
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    val fpsStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_CAPTURE_FRAMERATE)
-                    fpsStr?.toFloatOrNull()?.takeIf { it > 0f }?.let { videoFps = it }
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        val fpsStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_CAPTURE_FRAMERATE)
+                        fpsStr?.toFloatOrNull()?.takeIf { it > 0f }?.let { videoFps = it }
+                    }
+                } finally {
+                    runCatching { retriever.release() }
                 }
-            } finally {
-                runCatching { retriever.release() }
             }
-        }
 
-        // 2. Query MediaExtractor for individual video, audio, and subtitle elementary streams
-        runCatching {
-            val extractor = MediaExtractor()
-            try {
-                setExtractorDataSource(context, extractor, episode.uri, localFile)
-                val trackCount = extractor.trackCount
-                var audioIdx = 1
-                var subIdx = 1
+            // 2. Query MediaExtractor for individual local video, audio, and subtitle elementary streams
+            runCatching {
+                val extractor = MediaExtractor()
+                try {
+                    setExtractorDataSource(context, extractor, episode.uri, localFile)
+                    val trackCount = extractor.trackCount
+                    var audioIdx = 1
+                    var subIdx = 1
 
-                for (i in 0 until trackCount) {
-                    val format = extractor.getTrackFormat(i)
-                    val mime = format.getStringOrDefault(MediaFormat.KEY_MIME, "")
-                    when {
-                        mime.startsWith("video/") -> {
-                            if (videoMime.isEmpty()) {
-                                videoMime = mime
-                                videoCodec = friendlyVideoCodecName(mime, actualFileName)
-                                val fw = format.getIntOrDefault(MediaFormat.KEY_WIDTH, width)
-                                val fh = format.getIntOrDefault(MediaFormat.KEY_HEIGHT, height)
-                                if (fw > 0) width = fw
-                                if (fh > 0) height = fh
-                                val fps = format.getFloatOrIntAsFloat(MediaFormat.KEY_FRAME_RATE, videoFps)
-                                if (fps > 0f) videoFps = fps
-                                val vBr = format.getIntOrDefault(MediaFormat.KEY_BIT_RATE, 0)
-                                if (vBr > 0) videoBitrateBps = vBr.toLong()
+                    for (i in 0 until trackCount) {
+                        val format = extractor.getTrackFormat(i)
+                        val mime = format.getStringOrDefault(MediaFormat.KEY_MIME, "")
+                        when {
+                            mime.startsWith("video/") -> {
+                                if (videoMime.isEmpty()) {
+                                    videoMime = mime
+                                    videoCodec = friendlyVideoCodecName(mime, actualFileName)
+                                    val fw = format.getIntOrDefault(MediaFormat.KEY_WIDTH, width)
+                                    val fh = format.getIntOrDefault(MediaFormat.KEY_HEIGHT, height)
+                                    if (fw > 0) width = fw
+                                    if (fh > 0) height = fh
+                                    val fps = format.getFloatOrIntAsFloat(MediaFormat.KEY_FRAME_RATE, videoFps)
+                                    if (fps > 0f) videoFps = fps
+                                    val vBr = format.getIntOrDefault(MediaFormat.KEY_BIT_RATE, 0)
+                                    if (vBr > 0) videoBitrateBps = vBr.toLong()
 
-                                val profile = format.getIntOrDefault("profile", 0)
-                                val level = format.getIntOrDefault("level", 0)
-                                if (profile > 0 || level > 0) {
-                                    videoProfileLevel = "Profile $profile" + if (level > 0) " / Level $level" else ""
-                                }
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                                    colorStandard = format.getIntOrDefault(MediaFormat.KEY_COLOR_STANDARD, 0)
-                                    colorTransfer = format.getIntOrDefault(MediaFormat.KEY_COLOR_TRANSFER, 0)
-                                    hdrStaticInfoPresent = format.containsKey(MediaFormat.KEY_HDR_STATIC_INFO)
+                                    val profile = format.getIntOrDefault("profile", 0)
+                                    val level = format.getIntOrDefault("level", 0)
+                                    if (profile > 0 || level > 0) {
+                                        videoProfileLevel = "Profile $profile" + if (level > 0) " / Level $level" else ""
+                                    }
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                        colorStandard = format.getIntOrDefault(MediaFormat.KEY_COLOR_STANDARD, 0)
+                                        colorTransfer = format.getIntOrDefault(MediaFormat.KEY_COLOR_TRANSFER, 0)
+                                        hdrStaticInfoPresent = format.containsKey(MediaFormat.KEY_HDR_STATIC_INFO)
+                                    }
                                 }
                             }
-                        }
 
-                        mime.startsWith("audio/") -> {
-                            val channels = format.getIntOrDefault(MediaFormat.KEY_CHANNEL_COUNT, 2)
-                            val sampleRate = format.getIntOrDefault(MediaFormat.KEY_SAMPLE_RATE, 48000)
-                            val aBr = format.getIntOrDefault(MediaFormat.KEY_BIT_RATE, 0)
-                            val lang = format.getStringOrDefault(MediaFormat.KEY_LANGUAGE, "und")
-                            val title = format.getStringOrDefault("title", "")
-                            embeddedAudio.add(
-                                AudioStreamTechnicalInfo(
-                                    index = audioIdx++,
-                                    title = title.ifBlank { "Аудиодорожка #${audioIdx - 1}" },
-                                    codecName = friendlyAudioCodecName(mime),
-                                    channelsLabel = formatChannelsLabel(channels),
-                                    sampleRateLabel = String.format(Locale.US, "%.1f кГц", sampleRate / 1000f),
-                                    bitrateLabel = if (aBr > 0) "${aBr / 1000} кбит/с" else "VBR",
-                                    language = normalizeLanguageLabel(lang),
-                                    isExternal = false
+                            mime.startsWith("audio/") -> {
+                                val channels = format.getIntOrDefault(MediaFormat.KEY_CHANNEL_COUNT, 2)
+                                val sampleRate = format.getIntOrDefault(MediaFormat.KEY_SAMPLE_RATE, 48000)
+                                val aBr = format.getIntOrDefault(MediaFormat.KEY_BIT_RATE, 0)
+                                val lang = format.getStringOrDefault(MediaFormat.KEY_LANGUAGE, "und")
+                                val title = format.getStringOrDefault("title", "")
+                                embeddedAudio.add(
+                                    AudioStreamTechnicalInfo(
+                                        index = audioIdx++,
+                                        title = title.ifBlank { "Аудиодорожка #${audioIdx - 1}" },
+                                        codecName = friendlyAudioCodecName(mime),
+                                        channelsLabel = formatChannelsLabel(channels),
+                                        sampleRateLabel = String.format(Locale.US, "%.1f кГц", sampleRate / 1000f),
+                                        bitrateLabel = if (aBr > 0) "${aBr / 1000} кбит/с" else "VBR",
+                                        language = normalizeLanguageLabel(lang),
+                                        isExternal = false
+                                    )
                                 )
-                            )
-                        }
+                            }
 
-                        mime.startsWith("text/") || mime.startsWith("application/") -> {
-                            val lang = format.getStringOrDefault(MediaFormat.KEY_LANGUAGE, "und")
-                            val title = format.getStringOrDefault("title", "")
-                            embeddedSubtitles.add(
-                                SubtitleStreamTechnicalInfo(
-                                    index = subIdx++,
-                                    title = title.ifBlank { "Субтитры #${subIdx - 1}" },
-                                    formatName = friendlySubtitleCodecName(mime),
-                                    language = normalizeLanguageLabel(lang),
-                                    isExternal = false
+                            mime.startsWith("text/") || mime.startsWith("application/") -> {
+                                val lang = format.getStringOrDefault(MediaFormat.KEY_LANGUAGE, "und")
+                                val title = format.getStringOrDefault("title", "")
+                                embeddedSubtitles.add(
+                                    SubtitleStreamTechnicalInfo(
+                                        index = subIdx++,
+                                        title = title.ifBlank { "Субтитры #${subIdx - 1}" },
+                                        formatName = friendlySubtitleCodecName(mime),
+                                        language = normalizeLanguageLabel(lang),
+                                        isExternal = false
+                                    )
                                 )
-                            )
+                            }
                         }
                     }
+                } finally {
+                    runCatching { extractor.release() }
                 }
-            } finally {
-                runCatching { extractor.release() }
+            }
+        } else if (playbackState != null) {
+            // Populate active stream tracks from live ExoPlayer state without opening a second blocking socket!
+            playbackState.audioTrackOptions.filter { !it.isExternal }.forEachIndexed { idx, opt ->
+                val sampleRateHz = playbackState.audioSampleRateHz.takeIf { it > 0 } ?: 48000
+                val channels = playbackState.audioChannelCount.takeIf { it > 0 } ?: 2
+                embeddedAudio.add(
+                    AudioStreamTechnicalInfo(
+                        index = idx + 1,
+                        title = opt.label,
+                        codecName = if (playbackState.audioMimeType.isNotBlank()) {
+                            friendlyAudioCodecName(playbackState.audioMimeType)
+                        } else {
+                            opt.badge.ifBlank { "AAC / Opus" }
+                        },
+                        channelsLabel = formatChannelsLabel(channels),
+                        sampleRateLabel = String.format(Locale.US, "%.1f кГц", sampleRateHz / 1000f),
+                        bitrateLabel = if (opt.bitrateKbps > 0) "${opt.bitrateKbps} кбит/с" else "Live Stream",
+                        language = opt.badge.ifBlank { "Поток" },
+                        isExternal = false
+                    )
+                )
+            }
+            playbackState.subtitleTrackOptions.filter { !it.isExternal && it.id != "off" }.forEachIndexed { idx, opt ->
+                embeddedSubtitles.add(
+                    SubtitleStreamTechnicalInfo(
+                        index = idx + 1,
+                        title = opt.label,
+                        formatName = opt.badge.ifBlank { "Embedded" },
+                        language = opt.badge.ifBlank { "Поток" },
+                        isExternal = false
+                    )
+                )
             }
         }
 
-        // 3. Fallback inference from filename if MediaExtractor didn't run or container is MKV with unindexed tracks
+        // 3. Fallback inference from filename or live decoder if MediaExtractor didn't run
         if (videoCodec.isBlank()) {
-            videoCodec = inferVideoCodecFromFileName(actualFileName, ext)
+            val activeDec = playbackState?.activeVideoCodecName.orEmpty()
+            videoCodec = when {
+                activeDec.contains("hevc", ignoreCase = true) || activeDec.contains("h265", ignoreCase = true) -> "HEVC (H.265)"
+                activeDec.contains("av01", ignoreCase = true) || activeDec.contains("av1", ignoreCase = true) || activeDec.contains("dav1d", ignoreCase = true) -> "AV1"
+                activeDec.contains("vp9", ignoreCase = true) -> "VP9"
+                activeDec.contains("avc", ignoreCase = true) || activeDec.contains("h264", ignoreCase = true) -> "AVC (H.264)"
+                else -> inferVideoCodecFromFileName(actualFileName, ext)
+            }
         }
         if (videoMime.isBlank()) {
             videoMime = inferVideoMimeFromCodec(videoCodec)

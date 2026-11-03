@@ -260,23 +260,23 @@ enum class Anime4KPreset(
     ),
     ANIME4K_FAST(
         id = "Anime4K_Fast",
-        title = "Anime4K_Fast (Deblur + Резкость)",
+        title = "Anime4K Mode C • Fast (Denoise + Upscale)",
         badgeLabel = "A4K FAST",
-        description = "Деликатное повышение чёткости контуров и устранение мыла с сохранением оригинальной толщины рисовки.",
+        description = "Режим C (bloc97/Anime4K): Clamp_Highlights + быстрая очистка ореолов и повышение чёткости контуров с минимальной нагрузкой на мобильный GPU.",
         passCount = 2
     ),
     ANIME4K_UPSCALE_CNN(
         id = "Anime4K_Upscale_CNN",
-        title = "Anime4K_Upscale_CNN",
+        title = "Anime4K Mode B • Restore + Upscale CNN",
         badgeLabel = "CNN x2",
-        description = "Сбалансированный нейросетевой GLSL-апскейлинг: восстановление линий CReLU и подавление ореолов.",
+        description = "Режим B (bloc97/Anime4K): Clamp_Highlights + мягкая нейросетевая реконструкция линий CReLU (Restore_CNN_Soft) и направленный апскейлинг без звона.",
         passCount = 3
     ),
     ANIME4K_UPSCALE_CNNX(
         id = "Anime4K_Upscale_CNNX",
-        title = "Anime4K_Upscale_CNNX",
+        title = "Anime4K Mode A • HQ Restore + Upscale CNNX",
         badgeLabel = "CNNX ULTRA",
-        description = "Максимальная чёткость: глубокая реконструкция градиентов Собеля, плотная свёртка CNNX и субпиксельный антиалиасинг.",
+        description = "Режим A (bloc97/Anime4K): Clamp_Highlights + глубокая реконструкция градиентов Собеля, плотная свёртка CNNX и субпиксельный антиалиасинг.",
         passCount = 4
     );
 
@@ -284,8 +284,18 @@ enum class Anime4KPreset(
         val selectablePresets: List<Anime4KPreset>
             get() = listOf(ANIME4K_FAST, ANIME4K_UPSCALE_CNN, ANIME4K_UPSCALE_CNNX)
 
-        fun fromId(id: String): Anime4KPreset =
-            entries.firstOrNull { it.id.equals(id, ignoreCase = true) } ?: OFF
+        fun fromId(id: String): Anime4KPreset {
+            val clean = id.trim()
+            return when {
+                clean.equals("Mode_C", ignoreCase = true) ||
+                    clean.equals("Anime4K_Mode_C", ignoreCase = true) -> ANIME4K_FAST
+                clean.equals("Mode_B", ignoreCase = true) ||
+                    clean.equals("Anime4K_Mode_B", ignoreCase = true) -> ANIME4K_UPSCALE_CNN
+                clean.equals("Mode_A", ignoreCase = true) ||
+                    clean.equals("Anime4K_Mode_A", ignoreCase = true) -> ANIME4K_UPSCALE_CNNX
+                else -> entries.firstOrNull { it.id.equals(clean, ignoreCase = true) } ?: OFF
+            }
+        }
     }
 }
 
@@ -812,12 +822,47 @@ enum class SleepTimerPreset(
 }
 
 object AppVersionInfo {
-    const val VERSION_NAME = "3.2"
-    const val VERSION_CODE = 10
-    const val BADGE_TEXT = "v3.2"
-    const val RELEASE_TAG = "v3.2"
+    const val VERSION_NAME = "3.4.2-pre"
+    const val VERSION_CODE = 12
+    const val BADGE_TEXT = "v3.4.2-pre"
+    const val RELEASE_TAG = "v3.4.2-pre"
     const val GITHUB_REPO_URL = "https://github.com/Poison5820/Negai"
+    const val ANIME4K_ORIGINAL_REPO_URL = "https://github.com/bloc97/Anime4K"
     const val OBTAINIUM_ADD_URL = "https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/Poison5820/Negai"
+}
+
+enum class GraphicsBackend(
+    val id: String,
+    val titleRu: String,
+    val titleEn: String,
+    val badge: String,
+    val subtitleRu: String,
+    val subtitleEn: String
+) {
+    OPENGL_ES(
+        id = "OPENGL_ES",
+        titleRu = "OpenGL ES (По умолчанию)",
+        titleEn = "OpenGL ES (Default)",
+        badge = "GLES 2.0 / 3.0",
+        subtitleRu = "Стабильный zero-copy конвейер через EGLImage & SurfaceTexture с аппаратным декодером",
+        subtitleEn = "Stable zero-copy EGLImage & SurfaceTexture pipeline with hardware decoder"
+    ),
+    VULKAN(
+        id = "VULKAN",
+        titleRu = "Vulkan API",
+        titleEn = "Vulkan API",
+        badge = "Vulkan 1.1+",
+        subtitleRu = "Многопоточный конвейер VkCommandPool, параллельная запись буферов команд и Vulkan Compute для MEMC/Anime4K",
+        subtitleEn = "Multithreaded VkCommandPool pipeline, parallel command recording & Vulkan Compute for MEMC/Anime4K"
+    );
+
+    fun localizedTitle(isEnglish: Boolean): String = if (isEnglish) titleEn else titleRu
+    fun localizedSubtitle(isEnglish: Boolean): String = if (isEnglish) subtitleEn else subtitleRu
+
+    companion object {
+        fun fromId(id: String?): GraphicsBackend =
+            entries.firstOrNull { it.id.equals(id?.trim(), ignoreCase = true) } ?: OPENGL_ES
+    }
 }
 
 enum class AppLanguage(
@@ -983,7 +1028,8 @@ data class PlayerSettings(
     val skipDeleteConfirmation: Boolean = false,
 
     // Miscellaneous & Per-Episode Memory
-    val rememberPerEpisodeSettings: Boolean = true
+    val rememberPerEpisodeSettings: Boolean = true,
+    val graphicsBackend: GraphicsBackend = GraphicsBackend.OPENGL_ES
 ) {
     val effectiveFrameInterpolationMode: FrameInterpolationMode
         get() = if (frameInterpolationEnabled && frameInterpolationMode != FrameInterpolationMode.OFF) {

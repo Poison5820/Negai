@@ -108,6 +108,8 @@ data class PlaybackRuntimeState(
     val sourceFrameRate: Float = 0f,
     val chapters: List<VideoChapter> = emptyList(),
     val activeVideoCodecName: String = "Ожидание потока…",
+    val videoMimeType: String = "",
+    val videoBitrateBps: Long = 0L,
     val isHardwareAccelerated: Boolean = true,
     val activeDecoderMode: DecoderMode = DecoderMode.HW_PLUS,
     val audioTrackOptions: List<AudioTrackUiOption> = emptyList(),
@@ -120,6 +122,9 @@ data class PlaybackRuntimeState(
     val audioDeArtifactMode: AudioDeArtifactMode = AudioDeArtifactMode.STANDARD,
     val autoDeArtifactLowBitrate: Boolean = true,
     val activeAudioBitrateKbps: Int = 0,
+    val audioMimeType: String = "",
+    val audioSampleRateHz: Int = 0,
+    val audioChannelCount: Int = 0,
     val isAudioDeArtifactActive: Boolean = true,
     val bluetoothAudioRoute: BluetoothAudioRouteState = BluetoothAudioRouteState(),
     val bluetoothAutoSyncEnabled: Boolean = true,
@@ -346,11 +351,17 @@ class PlayerEngine private constructor(
             val buffering = playbackState == Player.STATE_BUFFERING
             val liveDur = player.duration.takeIf { it != C.TIME_UNSET && it > 0L }
             val dur = liveDur ?: _state.value.durationMs
-            var pos = player.currentPosition.coerceAtLeast(0L)
+            val rawPos = player.currentPosition.coerceAtLeast(0L)
+            val previousValidPos = _positionMs.value.coerceAtLeast(_state.value.currentPositionMs)
+            var pos = if (playbackState == Player.STATE_IDLE && rawPos == 0L && previousValidPos > 0L) {
+                previousValidPos
+            } else {
+                rawPos
+            }
             if (liveDur != null) {
                 lastKnownDurationForTrackedEpisodeMs = liveDur
                 verifyAndResetIfResumedAtEnd(player, liveDur)
-                pos = player.currentPosition.coerceAtLeast(0L)
+                pos = player.currentPosition.coerceAtLeast(pos).coerceAtLeast(0L)
             }
             _positionMs.value = pos
             _state.update { prev ->
@@ -392,14 +403,13 @@ class PlayerEngine private constructor(
                         )
                     }
                 }
-                // Reset player timer to 00:00 after finishing so the user can replay without being stuck at EOF
                 player.pause()
-                player.seekTo(0L)
-                _positionMs.value = 0L
+                // Retain scrub bar position at completion (completedDur) so progress does not snap to 0
+                _positionMs.value = completedDur
                 _state.update {
                     it.copy(
                         isPlaying = false,
-                        currentPositionMs = 0L,
+                        currentPositionMs = completedDur,
                         durationMs = completedDur,
                         resumedFromPositionMs = null
                     )
@@ -720,11 +730,14 @@ class PlayerEngine private constructor(
                     } else {
                         state.activeVideoCodecName
                     }
+                    val vBitrate = format.bitrate.takeIf { it > 0 }?.toLong() ?: state.videoBitrateBps
                     state.copy(
                         videoWidth = dispW,
                         videoHeight = dispH,
                         sourceFrameRate = if (fps > 0f) fps else state.sourceFrameRate,
-                        activeVideoCodecName = updatedName
+                        activeVideoCodecName = updatedName,
+                        videoMimeType = format.sampleMimeType ?: state.videoMimeType,
+                        videoBitrateBps = vBitrate
                     )
                 }
             }
@@ -983,7 +996,12 @@ class PlayerEngine private constructor(
         ensurePlaybackServiceStarted()
 
         engineScope.launch {
-            val settings = repository.settingsFlow.first()
+            val (settings, progressByUri) = withContext(Dispatchers.IO) {
+                val s = repository.settingsFlow.first()
+                val map = repository.getSavedProgressMapForEpisodes(episodes)
+                s to map
+            }
+
             bluetoothAutoSyncEnabled = settings.bluetoothAudioAutoSync
             bluetoothConfiguredOffsetMs = settings.bluetoothAudioOffsetMs
             bluetoothSyncController.refreshRouteState()
@@ -1001,7 +1019,7 @@ class PlayerEngine private constructor(
             )
 
             for (ep in episodes) {
-                val saved = repository.getSavedProgressForEpisode(ep)
+                val saved = progressByUri[ep.uri]
                 if (saved?.manualAudioUri != null) {
                     val list = extraAudioByVideo.getOrPut(ep.uri) { mutableListOf() }
                     if (list.none { it.uri == saved.manualAudioUri }) {
@@ -1034,7 +1052,7 @@ class PlayerEngine private constructor(
             }
 
             val startEpisode = episodes[safeIndex]
-            val savedProgress = repository.getSavedProgressForEpisode(startEpisode)
+            val savedProgress = progressByUri[startEpisode.uri]
             val effectiveSavedDuration = (savedProgress?.durationMs ?: 0L).coerceAtLeast(startEpisode.durationMs)
             val effectiveSavedPos = savedProgress?.positionMs ?: startEpisode.resumePositionMs
             val startPos = PlaybackResumeHelper.computeResumePositionMs(
@@ -1059,7 +1077,9 @@ class PlayerEngine private constructor(
             lastFramePtsUs = C.TIME_UNSET
             ptsSampleCount = 0
             autoAppliedDefaultAudioForVideo.clear()
-            val sources = episodes.map { buildMediaSourceForEpisode(it) }
+            val sources = withContext(Dispatchers.IO) {
+                episodes.map { buildMediaSourceForEpisode(it) }
+            }
 
             val defaultSpd = settings.defaultPlaybackSpeed.coerceIn(0.25f, 3.0f)
             val epSavedSpd = savedProgress?.playbackSpeed
@@ -1083,6 +1103,11 @@ class PlayerEngine private constructor(
                     videoHeight = if (detectedVideoHeight > 0) detectedVideoHeight else it.videoHeight,
                     chapters = emptyList(),
                     sourceFrameRate = 0f,
+                    videoMimeType = "",
+                    videoBitrateBps = 0L,
+                    audioMimeType = "",
+                    audioSampleRateHz = 0,
+                    audioChannelCount = 0,
                     playbackSpeed = effectiveSpd,
                     isTempSpeedBoostActive = false,
                     audioBoostPercent = appliedBoost,
@@ -1103,16 +1128,20 @@ class PlayerEngine private constructor(
             activePlayer.prepare()
             activePlayer.playWhenReady = true
 
-            if (PlaybackResumeHelper.isMediaFileExists(appContext, startEpisode.uri) ||
-                !PlaybackResumeHelper.isLocalFileUri(startEpisode.uri)
-            ) {
-                repository.savePlaybackProgress(
-                    episode = startEpisode,
-                    positionMs = startPos,
-                    durationMs = effectiveSavedDuration,
-                    videoWidth = detectedVideoWidth,
-                    videoHeight = detectedVideoHeight
-                )
+            val startWidth = detectedVideoWidth
+            val startHeight = detectedVideoHeight
+            withContext(Dispatchers.IO) {
+                if (PlaybackResumeHelper.isMediaFileExists(appContext, startEpisode.uri) ||
+                    !PlaybackResumeHelper.isLocalFileUri(startEpisode.uri)
+                ) {
+                    repository.savePlaybackProgress(
+                        episode = startEpisode,
+                        positionMs = startPos,
+                        durationMs = effectiveSavedDuration,
+                        videoWidth = startWidth,
+                        videoHeight = startHeight
+                    )
+                }
             }
 
             onEpisodeActivated(startEpisode)
@@ -1913,6 +1942,9 @@ class PlayerEngine private constructor(
         _state.update {
             it.copy(
                 activeAudioBitrateKbps = kbps,
+                audioMimeType = format.sampleMimeType.orEmpty(),
+                audioSampleRateHz = format.sampleRate.coerceAtLeast(0),
+                audioChannelCount = format.channelCount.coerceAtLeast(0),
                 isAudioDeArtifactActive = audioDelayProcessor.isDeArtifactCurrentlyActive
             )
         }
@@ -2199,13 +2231,19 @@ class PlayerEngine private constructor(
         if (currentState.errorMessage != null) return
         val ep = currentState.currentEpisode ?: return
         val rawPos = player.currentPosition.coerceAtLeast(0L)
+        val lastKnownPos = _positionMs.value.coerceAtLeast(currentState.currentPositionMs)
+        val validPos = if (rawPos == 0L && (player.playbackState == Player.STATE_IDLE || player.playbackState == Player.STATE_ENDED) && lastKnownPos > 0L) {
+            lastKnownPos
+        } else {
+            rawPos
+        }
         val dur = (player.duration.takeIf { it != C.TIME_UNSET && it > 0L } ?: currentState.durationMs)
             .coerceAtLeast(lastKnownDurationForTrackedEpisodeMs)
         val isEnded = player.playbackState == Player.STATE_ENDED ||
-            (dur >= 10_000L && (rawPos >= (dur * 95L) / 100L || (dur - rawPos) <= 15_000L))
-        val effectiveDur = if (isEnded) dur.coerceAtLeast(rawPos).coerceAtLeast(10_000L) else dur
-        val posToSave = if (isEnded) effectiveDur else rawPos
-        _positionMs.value = if (player.playbackState == Player.STATE_ENDED) 0L else rawPos
+            (dur >= 10_000L && (validPos >= (dur * 95L) / 100L || (dur - validPos) <= 15_000L))
+        val effectiveDur = if (isEnded) dur.coerceAtLeast(validPos).coerceAtLeast(10_000L) else dur
+        val posToSave = if (isEnded) effectiveDur else validPos
+        _positionMs.value = if (player.playbackState == Player.STATE_ENDED) effectiveDur else validPos
         if (effectiveDur <= 0L && posToSave <= 0L) return
         engineScope.launch {
             if (PlaybackResumeHelper.isLocalFileUri(ep.uri) &&
