@@ -5,6 +5,26 @@
 
 ---
 
+## [v4.0.3] — `versionCode = 25` / `versionName = "4.0.3"`
+
+### 🇷🇺 Русский
+- **Исправление ошибки `FfmpegAudioRenderer error` и отображения `Mono` на DTS-HD Master Audio 7.1 (`.m2ts`):**
+  - В парсере дескриптора `AudioAssetDescriptor` (`ETSI TS 102 114 Table 7-9` в `HdmvDtsHdReader`) поле `nuTotalNumChs` теперь считывается как 8-битное значение (`readBits(8) + 1`) вместо 4-битного, благодаря чему дорожка `DTS-HD Master Audio 7.1` (`8 каналов`, 48 кГц, 24 бит) корректно определяется как **7.1 Surround** (`8ch`), а не `Mono` (`1ch`).
+  - Реализована атомарная буферизация пары `[DTS Core (0x7FFE8001) + Extension Substream (0x64582025)]` и фильтрация неполных/осиротевших фреймов расширения (`0x64582025`) после перемотки или возобновления воспроизведения, предотвращающая сбой `SwrContext` / `AVERROR_INVALIDDATA` в `FfmpegAudioRenderer` (`libdcadec`).
+- **Устранение чёрного экрана со звуком и сбоев синхронизации Blu-ray BDAV (`.m2ts`):**
+  - Исправлено выравнивание 4-байтного `TP_extra_header` на границах 188-байтных пакетов в `BdavStrippingExtractorInput.skipFully` и `resetPeekPosition`, а также увеличен диапазон поиска PCR-таймстампов до `3000` пакетов для точного бинарного поиска H.264 IDR-ключевых кадров.
+  - Исключена отправка аудиосэмплов с фиктивным `PTS = 0` до получения первого PES PTS после перемотки и синхронизирован порядок освобождения `Surface` при переключении декодеров (`existingPlayer.release()` до привязки `Surface` к новому экземпляру плеера).
+
+### 🇬🇧 English
+- **Fixed `FfmpegAudioRenderer error` & `Mono` Channel Detection on DTS-HD Master Audio 7.1 (`.m2ts`):**
+  - Fixed `nuTotalNumChs` in `HdmvDtsHdReader` (`ETSI TS 102 114 Table 7-9`) to read the full 8-bit field (`readBits(8) + 1`) instead of 4 bits, accurately reporting 8 channels (**7.1 Surround**) instead of `Mono` (`1ch`).
+  - Enforced atomic `[DTS Core (0x7FFE8001) + Extension Substream (0x64582025)]` frame coalescing and skipped orphan post-seek extension substreams so `FfmpegAudioDecoder` (`libdcadec`) never receives mismatched or coreless XLL packets.
+- **Fixed Intermittent Black Screen with Audio on Blu-ray BDAV (`.m2ts`):**
+  - Fixed 4-byte `TP_extra_header` boundary alignment in `BdavStrippingExtractorInput.skipFully` and `resetPeekPosition`, and expanded the PCR search window to `3000` TS packets.
+  - Prevented emitting audio samples with a synthetic `0L` PTS prior to the first PES PTS header and ensured synchronous `existingPlayer.release()` before re-binding the video `Surface` during decoder fallback.
+
+---
+
 ## [v4.0.2] — `versionCode = 24` / `versionName = "4.0.2"`
 
 ### 🇷🇺 Русский
