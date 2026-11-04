@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.0.1-00E5FF?style=flat-square" alt="Version 4.0.1" />
+  <img src="https://img.shields.io/badge/version-4.0.2-00E5FF?style=flat-square" alt="Version 4.0.2" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/license-Proprietary_(Closed_Source)-FF4D8D?style=flat-square" alt="Proprietary License" />
@@ -61,13 +61,13 @@
 
 ---
 
-## What's New in Release 4.0.1 (Build 23)
+## What's New in Release 4.0.2 (Build 24)
 
+- **Top-Bar Negai Premium Star Button & Unified Premium Branding**:
+  - Compact golden star button in the top bar right beside the palette icon opening the `Negai Premium` levitating purchase dialog (Google Play Billing); unified rebranding from `PRO` to `Premium`; smaller right-aligned star indicators on paid palettes and dialog styles that automatically disappear once Premium is unlocked.
 - **Blu-ray BDAV (`.m2ts`) Demuxer & DTS-HD Master Audio 7.1 (`0x86`) Playback**:
   - Dedicated 192-byte Blu-ray BDAV packet extractor (`BdavM2tsExtractor`) and ETSI TS 102 114 parser (`HdmvDtsHdReader`) coalescing `[DTS Core + DTS-HD XLL Extension]` into unified 8-channel access units for FFmpeg (`libdcadec`), eliminating `Source Error` on `.m2ts` Blu-ray sound-check streams.
   - Instant `STATE_IDLE` recovery across play/pause, seek, episode switching, and interactive **Retry** / **SW Decoder (FFmpeg)** buttons on the error banner so playback recovers in-place without exiting the player.
-- **Negai PRO Settings Card & Google Play Billing Levitating Modal**:
-  - Top **Negai PRO** card in Settings opening `ProSubscriptionLevitatingDialog` with feature descriptions and a Google Play Billing purchase flow stub; locked **PRO Complementary Palettes & Dialog Styles** block rendered darkened with a top Star icon; Quick Appearance top-bar popup converted to a levitating dialog.
 - **3D IMAX Playback, Right-Pinned Skip Intro & Full-Width Camera Cutout HUD**:
   - Fixed Full-SBS (`3840×1080`) and Full-TAB (`1920×2160`) 3D IMAX aspect ratio calculation and prevented Full-TAB 3D frames from triggering portrait screen rotation.
   - Fixed the Skip Intro (`+85s Intro`) button alignment so it remains strictly pinned to the right edge even when embedded chapter pills are active.
@@ -143,7 +143,7 @@ gradle :app:testDebugUnitTest
 ## Repository & Obtainium Updates
 
 - **Package ID**: `app.negai.player`
-- **Version**: `4.0.1` (`versionCode = 23`)
+- **Version**: `4.0.2` (`versionCode = 24`)
 - **Software License**: Proprietary (Closed-Source, All Rights Reserved)
 - **Anime4K Upstream Attribution**: [https://github.com/bloc97/Anime4K](https://github.com/bloc97/Anime4K) (MIT License, Copyright © 2019–2021 bloc97)
 - **MIT KEMAR HRTF Upstream Attribution**: [https://sound.media.mit.edu/resources/KEMAR.html](https://sound.media.mit.edu/resources/KEMAR.html) (MIT License, Bill Gardner & Keith Martin, MIT Media Lab)
