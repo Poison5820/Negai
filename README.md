@@ -1,7 +1,7 @@
 # Negai — Anime Video Player for Android
 
 <p align="center">
-  <img src="app/src/main/res/drawable/ic_negai_launcher_fg.png" alt="Negai Logo" width="128" height="128" />
+  <img src="assets/ic_negai_launcher_fg.png" alt="Negai Logo" width="128" height="128" />
 </p>
 
 <p align="center">
@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-3.6.1-00E5FF?style=flat-square" alt="Version 3.6.1" />
+  <img src="https://img.shields.io/badge/version-3.6.6-00E5FF?style=flat-square" alt="Version 3.6.6" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/Kotlin-2.x_%7C_Jetpack_Compose-7F52FF?style=flat-square&logo=kotlin" alt="Kotlin & Compose" />
@@ -130,7 +130,7 @@ gradle :app:testDebugUnitTest
 ## Repository & Obtainium Updates
 
 - **Package ID**: `app.negai.player`
-- **Version**: `3.6.1` (`versionCode = 18`)
+- **Version**: `3.6.6` (`versionCode = 21`)
 - **Anime4K Upstream Attribution**: [https://github.com/bloc97/Anime4K](https://github.com/bloc97/Anime4K) (MIT License, Copyright © 2019–2021 bloc97)
 - **FFmpeg Upstream**: [https://ffmpeg.org](https://ffmpeg.org) (LGPL v2.1+)
 - **GitHub Repository**: [https://github.com/Poison5820/Negai](https://github.com/Poison5820/Negai)
