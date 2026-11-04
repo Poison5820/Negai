@@ -9,10 +9,10 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-3.6.6-00E5FF?style=flat-square" alt="Version 3.6.6" />
+  <img src="https://img.shields.io/badge/version-4.0-00E5FF?style=flat-square" alt="Version 4.0" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
-  <img src="https://img.shields.io/badge/Kotlin-2.x_%7C_Jetpack_Compose-7F52FF?style=flat-square&logo=kotlin" alt="Kotlin & Compose" />
+  <img src="https://img.shields.io/badge/license-Proprietary_(Closed_Source)-FF4D8D?style=flat-square" alt="Proprietary License" />
 </p>
 
 <p align="center">
@@ -61,19 +61,27 @@
 
 ---
 
-## Pre-Release 3.4.2-pre Summary
+## What's New in Release 4.0 (Build 22)
 
-- **Display Cutout & Notch Handling in Landscape Mode**: Video canvas now fully occupies the notification bar and camera cutout areas (`LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES`), delivering true uninterrupted edge-to-edge playback in landscape.
-- **Perfect Geometric Centering of Overlays**: Fixed asymmetric display-cutout padding that previously shifted the video buffering spinner (`CircularProgressIndicator`), seek notification pills (double-tap ±10s and horizontal swipe), and center transport controls off-center.
-- **Fixed Scrub Bar Reset to 0 on Playback Stop/End**: Video playback state listeners now properly retain the last known valid position when entering `STATE_IDLE` or when playback ends (`STATE_ENDED`), showing full completion on the timeline rather than abruptly resetting to 00:00.
-- **Vulkan Graphics Pipeline & Shader Architecture**:
-  - Added Vulkan rendering pipeline abstraction (`VulkanPipelineEngine`, SPIR-V / Vulkan GLSL #version 450 core shaders for Anime4K and MEMC motion estimation).
-  - Multi-threaded command pool recording (`VkCommandPool`, async compute queue family) and GPU video acceleration architecture with automatic fallback to OpenGL ES on devices lacking Vulkan Level 1.
-  - Added Graphics Pipeline toggle in **Miscellaneous** (`Прочие`) settings with live device Vulkan capability detection.
-- **Player Settings Reset with Confirmation**: Moved the reset action to **Miscellaneous** (`Прочие`) settings and wrapped it with an explicit confirmation `AlertDialog` to prevent accidental resets.
-- **OLED & Dark Themes Overhaul**:
-  - **OLED Theme**: Enhanced with pure `#000000` True Black surfaces and reduced container background tinting for maximum AMOLED power efficiency and crisp contrast.
-  - **Dark Theme**: Transitioned to the rich deep obsidian-slate surface styling previously featured in the OLED theme.
+- **3D IMAX Playback, Right-Pinned Skip Intro & Full-Width Camera Cutout HUD**:
+  - Fixed Full-SBS (`3840×1080`) and Full-TAB (`1920×2160`) 3D IMAX aspect ratio calculation and prevented Full-TAB 3D frames from triggering portrait screen rotation.
+  - Fixed the Skip Intro (`+85s Intro`) button alignment so it remains strictly pinned to the right edge even when embedded chapter pills are active.
+  - Extended the Player Top Bar and Bottom Controls across the full width of the screen including the camera cutout zone (`LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES`).
+- **DTS-HD MA 7.1 Playback & In-Place Source Error Recovery**:
+  - Enabled `FLAG_ENABLE_HDMV_DTS_AUDIO_STREAMS` with an expanded 1500-packet TS timestamp search window and full 16/24/32-bit/Float 5.1 & 7.1 multichannel PCM downmixing so Blu-ray/M2TS/MKV `DTS-HD Master Audio 7.1` streams play without `Source Error`.
+  - Added automatic `STATE_IDLE` recovery across play/pause, seek, episode switching, and interactive **Retry** / **SW Decoder (FFmpeg)** buttons on the error banner so playback recovers in-place without exiting the player.
+- **Strict External Audio & Subtitle Auto-Matching**:
+  - External audio and subtitle tracks now require strict base-filename stem matching (exact stem or prefix followed by a delimiter `.`, `_`, `-`, `[`, `(`, or space), preventing unrelated music albums (e.g., `.flac` tracks) in the same folder from auto-binding to videos.
+- **Built-in 3D HRTF Binaural Spatial Audio (MIT KEMAR)**:
+  - Real-time 5.1 / 7.1 surround-to-binaural headphone convolution engine (`HrtfBinauralAudioProcessor`) using Interaural Time Difference (ITD) delay lines and minimum-phase KEMAR pinna FIR filters derived from the **MIT Media Lab KEMAR HRTF dataset** (Bill Gardner & Keith Martin, MIT License).
+- **Accurate Hardware / Software Decoder Fallback Indicator**:
+  - When a hardware decoder is unavailable or fails and playback falls back to software (FFmpeg / CPU), the active decoder state automatically updates and highlights the `SW` badge in the Top Bar, Quick Actions Bar, Audio sheet, and Video Decoder sheet.
+- **Levitating Multi-Profile Dialogs Outside the Player**:
+  - Replaced flat `AlertDialog` windows outside the player with `FloatingElevatedDialog` featuring spring-animated elevation and selectable profiles (`Standard Floating`, `Glassmorphic Blur PRO`, `Cyber Neon Glow PRO`).
+- **Live Wallpaper Monet Icon, Dual-Tone Split Swatches & PRO Complementary Palettes**:
+  - The `Monet` palette icon now dynamically displays the actual Primary & Secondary colors extracted from your live Android 12+ wallpaper.
+  - All accent swatches now use a clear **Primary (left) + Secondary (right) split badge** instead of ambiguous concentric circles.
+  - Added 4 high-contrast **Complementary Color Palettes** (`Sunset Horizon`, `Cyber Neon`, `Tokyo Sakura Pro`, `Midnight Amethyst`) in a dedicated **PRO** section.
 
 ---
 
@@ -119,18 +127,23 @@ gradle :app:testDebugUnitTest
 
 ---
 
-## Licensing & Third-Party Components
+## Licensing & Third-Party Open-Source Attributions
 
-- **Anime4K (MIT License)**: Real-time anime video upscaling shaders and line reconstruction algorithms are based on [bloc97/Anime4K](https://github.com/bloc97/Anime4K). Full license text and copyright notice: [`LICENSE_ANIME4K.txt`](LICENSE_ANIME4K.txt).
-- **FFmpeg (GNU LGPL v2.1+)**: Software audio decoding (AC3, E-AC3, DTS, DTS-HD MA, Dolby TrueHD, FLAC, Opus) is provided through the Jellyfin Media3 extension dynamically loading shared `.so` libraries (`libffmpeg.so`, `libffmpegJNI.so`) without GPL extensions (`--enable-gpl` is omitted). Full compliance details and license text: [`LICENSE_FFMPEG.txt`](LICENSE_FFMPEG.txt).
-- **Negai Application Source**: Open-source anime video player for Android.
+- **Negai Player — Proprietary Software (All Rights Reserved)**:
+  - **Negai Player (`app.negai.player`) is proprietary, closed-source software. Copyright © 2026 Negai Player. All Rights Reserved.** This public repository serves exclusively as the official release distribution showcase and third-party license compliance notice.
+- **Anime4K (MIT License)**: Real-time anime video upscaling shaders and line reconstruction algorithms are based on [bloc97/Anime4K](https://github.com/bloc97/Anime4K) (Copyright © 2019–2021 bloc97). Full license text: [`LICENSE_ANIME4K.txt`](LICENSE_ANIME4K.txt).
+- **MIT KEMAR Binaural HRTF Dataset (MIT License)**: 3D HRTF binaural spatial audio convolution filters for 5.1 / 7.1 surround sound are derived from the [MIT Media Lab KEMAR Dummy-Head HRTF Dataset](https://sound.media.mit.edu/resources/KEMAR.html) by **Bill Gardner and Keith Martin** (Copyright © 1994 MIT Media Laboratory). Full license text: [`LICENSE_MIT_KEMAR_HRTF.txt`](LICENSE_MIT_KEMAR_HRTF.txt).
+- **FFmpeg (GNU LGPL v2.1+)**: Software audio decoding (AC3, E-AC3, DTS, DTS-HD MA, Dolby TrueHD, FLAC, Opus) is provided through the Jellyfin Media3 extension dynamically loading shared `.so` libraries (`libffmpeg.so`, `libffmpegJNI.so`) without GPL extensions (`--enable-gpl` is omitted). Upstream project: [https://ffmpeg.org](https://ffmpeg.org). Full compliance details and license text: [`LICENSE_FFMPEG.txt`](LICENSE_FFMPEG.txt).
+- **AndroidX Media3 / ExoPlayer (Apache License 2.0)**: Core media playback pipeline developed by Google LLC ([https://developer.android.com/media/media3](https://developer.android.com/media/media3)), licensed under the [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0).
 
 ---
 
 ## Repository & Obtainium Updates
 
 - **Package ID**: `app.negai.player`
-- **Version**: `3.6.6` (`versionCode = 21`)
+- **Version**: `4.0` (`versionCode = 22`)
+- **Software License**: Proprietary (Closed-Source, All Rights Reserved)
 - **Anime4K Upstream Attribution**: [https://github.com/bloc97/Anime4K](https://github.com/bloc97/Anime4K) (MIT License, Copyright © 2019–2021 bloc97)
-- **FFmpeg Upstream**: [https://ffmpeg.org](https://ffmpeg.org) (LGPL v2.1+)
-- **GitHub Repository**: [https://github.com/Poison5820/Negai](https://github.com/Poison5820/Negai)
+- **MIT KEMAR HRTF Upstream Attribution**: [https://sound.media.mit.edu/resources/KEMAR.html](https://sound.media.mit.edu/resources/KEMAR.html) (MIT License, Bill Gardner & Keith Martin, MIT Media Lab)
+- **FFmpeg Upstream**: [https://ffmpeg.org](https://ffmpeg.org) (GNU LGPL v2.1+)
+- **GitHub Release Showcase**: [https://github.com/Poison5820/Negai](https://github.com/Poison5820/Negai)
