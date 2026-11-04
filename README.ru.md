@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/версия-4.0.1-00E5FF?style=flat-square" alt="Версия 4.0.1" />
+  <img src="https://img.shields.io/badge/версия-4.0.2-00E5FF?style=flat-square" alt="Версия 4.0.2" />
   <img src="https://img.shields.io/badge/пакет-app.negai.player-00B8D4?style=flat-square" alt="Пакет приложения" />
   <img src="https://img.shields.io/badge/платформа-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Платформа" />
   <img src="https://img.shields.io/badge/лицензия-Проприетарная_(Closed_Source)-FF4D8D?style=flat-square" alt="Проприетарная лицензия" />
@@ -61,13 +61,13 @@
 
 ---
 
-## Что нового в релизе 4.0.1 (Сборка 23)
+## Что нового в релизе 4.0.2 (Сборка 24)
 
+- **Кнопка звезды Negai Premium вверху возле палитры и единое обозначение Premium**:
+  - Компактная золотая звезда в верхней панели рядом с иконкой палитры открывает левитирующее окно **Negai Premium** (Google Play Billing); все обозначения `PRO` заменены на `Premium`; уменьшенные звёзды у платных палитр и стилей окон расположены справа и автоматически исчезают после покупки.
 - **Демультиплексор Blu-ray BDAV (`.m2ts`) и воспроизведение DTS-HD Master Audio 7.1 (`0x86`)**:
   - Специализированный экстрактор 192-байтных пакетов Blu-ray BDAV (`BdavM2tsExtractor`) и парсер ETSI TS 102 114 (`HdmvDtsHdReader`), объединяющий `[DTS Core + DTS-HD XLL Extension]` в единый 8-канальный фрейм для декодера **FFmpeg (`libdcadec`)**, устраняющий ошибку `Source Error` на тестовых `.m2ts` файлах.
   - Автоматический выход из `STATE_IDLE` при нажатии Play, перемотке, смене серии или кнопках **«Повторить»** / **«SW Декодер (FFmpeg)»** прямо на баннере ошибки без необходимости выходить из проигрывателя.
-- **Карточка Negai PRO в настройках и левитирующее окно Google Play Billing**:
-  - Вверху главной страницы настроек добавлена кнопка **Negai PRO** с левитирующим окном описания преимуществ и кнопкой активации через **Google Play Billing**; блок премиум-тем без активного PRO затемнён и отмечен звездой вверху; быстрое меню оформления по кнопке вверху переведено на левитирующий диалог.
 - **3D IMAX, фиксация кнопки «+85с Опенинг» справа и интерфейс во всю зону выреза камеры**:
   - Исправлен расчёт пропорций для горизонтальных и вертикальных 3D IMAX стереопар (Full-SBS `3840×1080` и Full-TAB `1920×2160`), устранено ошибочное переключение Full-TAB 3D видео в портретную ориентацию.
   - Исправлено смещение кнопки пропуска опенинга (`+85с Опенинг`) к центру экрана при наличии встроенных глав — теперь кнопка жёстко закреплена у правого края над полосой прокрутки.
@@ -143,7 +143,7 @@ gradle :app:testDebugUnitTest
 ## Репозиторий и обновления через Obtainium
 
 - **Идентификатор пакета**: `app.negai.player`
-- **Версия**: `4.0.1` (`versionCode = 23`)
+- **Версия**: `4.0.2` (`versionCode = 24`)
 - **Лицензия приложения**: Проприетарная (Closed-Source, Все права защищены)
 - **Оригинальный репозиторий Anime4K**: [https://github.com/bloc97/Anime4K](https://github.com/bloc97/Anime4K) (лицензия MIT, Copyright © 2019–2021 bloc97)
 - **Оригинальный источник MIT KEMAR HRTF**: [https://sound.media.mit.edu/resources/KEMAR.html](https://sound.media.mit.edu/resources/KEMAR.html) (лицензия MIT, Bill Gardner & Keith Martin, MIT Media Lab)
