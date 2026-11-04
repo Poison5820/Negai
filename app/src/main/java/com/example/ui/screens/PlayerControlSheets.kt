@@ -437,6 +437,8 @@ fun AudioTracksModalSheet(
     audioOptions: List<AudioTrackUiOption>,
     audioBoostPercent: Int,
     maxAudioBoostPercent: Int = 200,
+    audioDecoderMode: com.example.model.AudioDecoderMode = com.example.model.AudioDecoderMode.AUTO,
+    activeAudioCodecName: String = "",
     audioDeArtifactMode: AudioDeArtifactMode = AudioDeArtifactMode.STANDARD,
     autoDeArtifactLowBitrate: Boolean = true,
     activeAudioBitrateKbps: Int = 0,
@@ -452,6 +454,7 @@ fun AudioTracksModalSheet(
     onSelectAudio: (AudioTrackUiOption) -> Unit,
     onSetAudioBoostPercent: (Int) -> Unit,
     onUpdateMaxAudioBoostPercent: (Int) -> Unit = {},
+    onSelectAudioDecoderMode: (com.example.model.AudioDecoderMode) -> Unit = {},
     onSelectAudioDeArtifactMode: (AudioDeArtifactMode) -> Unit = {},
     onToggleAutoDeArtifactLowBitrate: (Boolean) -> Unit = {},
     onAdjustAudioDelayMs: (Long) -> Unit = {},
@@ -582,6 +585,92 @@ fun AudioTracksModalSheet(
                                     modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp)
                                 )
                             }
+                        }
+                    }
+                }
+            }
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 2.dp))
+
+            // Audio Decoder Mode (Auto HW+SW / Software FFmpeg / Hardware)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = tr("Декодер аудио (AC3 / DTS / Dolby)", "Audio Decoder (AC3 / DTS / Dolby)"),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    val activeDecoderInfo = if (activeAudioCodecName.isNotBlank()) {
+                        tr("Активен: $activeAudioCodecName", "Active: $activeAudioCodecName")
+                    } else {
+                        tr(
+                            "Автопереход на программный FFmpeg, если формат не поддерживается чипом",
+                            "Auto-switches to FFmpeg software if hardware lacks codec support"
+                        )
+                    }
+                    Text(
+                        text = activeDecoderInfo,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                Surface(
+                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.75f),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = audioDecoderMode.localizedBadge(isEnglish),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                }
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                com.example.model.AudioDecoderMode.entries.forEach { mode ->
+                    val selected = audioDecoderMode == mode
+                    Surface(
+                        color = if (selected) {
+                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.65f)
+                        } else {
+                            cardBg
+                        },
+                        shape = RoundedCornerShape(10.dp),
+                        border = BorderStroke(
+                            1.dp,
+                            if (selected) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.14f)
+                        ),
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(10.dp))
+                            .clickable { onSelectAudioDecoderMode(mode) }
+                            .testTag("sheet_audio_decoder_${mode.id}")
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(2.dp)
+                        ) {
+                            Text(
+                                text = mode.localizedBadge(isEnglish),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                                maxLines = 1
+                            )
+                            Text(
+                                text = mode.localizedTitle(isEnglish),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
                         }
                     }
                 }

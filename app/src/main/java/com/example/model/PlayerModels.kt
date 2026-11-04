@@ -552,6 +552,37 @@ enum class AudioDeArtifactMode(
     }
 }
 
+enum class AudioDecoderMode(
+    val id: String,
+    val title: String,
+    val subtitle: String,
+    val shortBadge: String
+) {
+    AUTO(
+        id = "AUTO",
+        title = "Авто (HW + SW)",
+        subtitle = "Аппаратный декодер с автопереходом на программный FFmpeg (AC3/DTS/Dolby)",
+        shortBadge = "АВТО"
+    ),
+    SOFTWARE(
+        id = "SOFTWARE",
+        title = "Программный (SW)",
+        subtitle = "Принудительное программное декодирование всех форматов (FFmpeg)",
+        shortBadge = "SW"
+    ),
+    HARDWARE(
+        id = "HARDWARE",
+        title = "Аппаратный (HW)",
+        subtitle = "Системные кодеки с автопереключением на SW при отсутствии поддержки",
+        shortBadge = "HW"
+    );
+
+    companion object {
+        fun fromId(id: String?): AudioDecoderMode =
+            entries.firstOrNull { it.id.equals(id?.trim(), ignoreCase = true) } ?: AUTO
+    }
+}
+
 enum class VideoScaleMode(
     val id: String,
     val title: String,
@@ -882,10 +913,10 @@ data class ReleaseHistoryEntry(
 )
 
 object AppVersionInfo {
-    const val VERSION_NAME = "3.6"
-    const val VERSION_CODE = 17
-    const val BADGE_TEXT = "v3.6"
-    const val RELEASE_TAG = "v3.6"
+    const val VERSION_NAME = "3.6.1"
+    const val VERSION_CODE = 18
+    const val BADGE_TEXT = "v3.6.1"
+    const val RELEASE_TAG = "v3.6.1"
     const val GITHUB_REPO_URL = "https://github.com/Poison5820/Negai"
     const val ANIME4K_ORIGINAL_REPO_URL = "https://github.com/bloc97/Anime4K"
     const val OBTAINIUM_ADD_URL = "https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/Poison5820/Negai"
@@ -1255,6 +1286,7 @@ data class PlayerSettings(
     val bluetoothAudioOffsetMs: Long = 0L,
     val audioDeArtifactMode: AudioDeArtifactMode = AudioDeArtifactMode.STANDARD,
     val autoDeArtifactLowBitrate: Boolean = true,
+    val audioDecoderMode: AudioDecoderMode = AudioDecoderMode.AUTO,
 
     // Subtitles
     val autoBindExternalSubtitles: Boolean = true,

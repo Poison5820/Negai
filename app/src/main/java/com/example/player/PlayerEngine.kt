@@ -23,6 +23,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.common.audio.ChannelMixingAudioProcessor
+import androidx.media3.common.audio.ChannelMixingMatrix
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
@@ -43,6 +44,7 @@ import com.example.data.LibraryRepository
 import com.example.data.MediaAutoMatcher
 import com.example.data.PlaybackResumeHelper
 import com.example.model.AudioDeArtifactMode
+import com.example.model.AudioDecoderMode
 import com.example.model.DecoderMode
 import com.example.model.EpisodeItem
 import com.example.model.ExternalAudioTrack
@@ -147,6 +149,8 @@ data class PlaybackRuntimeState(
     val audioDelayMs: Long = 0L,
     val audioDeArtifactMode: AudioDeArtifactMode = AudioDeArtifactMode.STANDARD,
     val autoDeArtifactLowBitrate: Boolean = true,
+    val audioDecoderMode: AudioDecoderMode = AudioDecoderMode.AUTO,
+    val activeAudioCodecName: String = "",
     val activeAudioBitrateKbps: Int = 0,
     val audioMimeType: String = "",
     val audioSampleRateHz: Int = 0,
@@ -212,6 +216,7 @@ class PlayerEngine private constructor(
         get() = ensureExoPlayer()
 
     private var configuredDecoderMode: DecoderMode = DecoderMode.HW_PLUS
+    private var configuredAudioDecoderMode: AudioDecoderMode = AudioDecoderMode.AUTO
     private var highRefreshOrInterpActive: Boolean = true
     private var decoderFallbackRetryCount: Int = 0
 
@@ -623,6 +628,7 @@ class PlayerEngine private constructor(
                 pendingNextVideoHeight = 0
                 detectedVideoWidth = nextW
                 detectedVideoHeight = nextH
+                val (nextHdr, nextHdrBadge) = probeLocalVideoHdr(newEp.uri)
 
                 _state.update {
                     it.copy(
@@ -631,6 +637,8 @@ class PlayerEngine private constructor(
                         durationMs = currentDur,
                         videoWidth = nextW,
                         videoHeight = nextH,
+                        isHdr = nextHdr,
+                        hdrBadge = nextHdrBadge,
                         chapters = emptyList(),
                         abLoopStartMs = null,
                         abLoopEndMs = null,
@@ -716,21 +724,37 @@ class PlayerEngine private constructor(
         }
 
         override fun onPlayerError(error: PlaybackException) {
-            val isCodecOrDecoderError = when (error.errorCode) {
+            val cause = error.cause
+            val isAudioError = error.errorCode == PlaybackException.ERROR_CODE_AUDIO_TRACK_INIT_FAILED ||
+                error.errorCode == PlaybackException.ERROR_CODE_AUDIO_TRACK_WRITE_FAILED ||
+                cause is androidx.media3.exoplayer.audio.AudioSink.InitializationException ||
+                cause is androidx.media3.exoplayer.audio.AudioSink.ConfigurationException ||
+                (error.message?.contains("AudioRenderer", ignoreCase = true) == true) ||
+                (error.message?.contains("audio/", ignoreCase = true) == true)
+
+            val isCodecOrDecoderError = isAudioError || when (error.errorCode) {
                 PlaybackException.ERROR_CODE_DECODER_INIT_FAILED,
                 PlaybackException.ERROR_CODE_DECODING_FAILED,
                 PlaybackException.ERROR_CODE_DECODING_FORMAT_EXCEEDS_CAPABILITIES,
-                PlaybackException.ERROR_CODE_DECODING_FORMAT_UNSUPPORTED,
-                PlaybackException.ERROR_CODE_AUDIO_TRACK_INIT_FAILED,
-                PlaybackException.ERROR_CODE_AUDIO_TRACK_WRITE_FAILED -> true
+                PlaybackException.ERROR_CODE_DECODING_FORMAT_UNSUPPORTED -> true
                 else -> {
-                    val cause = error.cause
                     cause is androidx.media3.exoplayer.mediacodec.MediaCodecDecoderException ||
                         cause is androidx.media3.exoplayer.mediacodec.MediaCodecRenderer.DecoderInitializationException ||
-                        cause is androidx.media3.exoplayer.audio.AudioSink.InitializationException ||
-                        cause is androidx.media3.exoplayer.audio.AudioSink.ConfigurationException ||
                         cause is android.media.MediaCodec.CodecException
                 }
+            }
+
+            if (isAudioError && configuredAudioDecoderMode != AudioDecoderMode.SOFTWARE && decoderFallbackRetryCount < 2) {
+                decoderFallbackRetryCount++
+                _state.update {
+                    it.copy(
+                        errorMessage = null,
+                        isBuffering = true,
+                        hudNotice = "Аппаратный декодер аудио не поддерживается: включён программный (SW)"
+                    )
+                }
+                setAudioDecoderMode(AudioDecoderMode.SOFTWARE)
+                return
             }
 
             if (isCodecOrDecoderError && configuredDecoderMode != DecoderMode.SOFTWARE_PREFER && decoderFallbackRetryCount < 2) {
@@ -844,6 +868,31 @@ class PlayerEngine private constructor(
             }
         }
 
+        override fun onAudioDecoderInitialized(
+            eventTime: AnalyticsListener.EventTime,
+            decoderName: String,
+            initializedTimestampMs: Long,
+            initializationDurationMs: Long
+        ) {
+            val activeIdx = _exoPlayer?.currentMediaItemIndex ?: _state.value.currentEpisodeIndex
+            if (eventTime.windowIndex != activeIdx) return
+            val lower = decoderName.lowercase()
+            val isSw = lower.contains("ffmpeg") ||
+                lower.startsWith("c2.android.") ||
+                lower.startsWith("omx.google.")
+            _state.update { prev ->
+                val notice = if (configuredAudioDecoderMode == AudioDecoderMode.HARDWARE && isSw && prev.hudNotice == null) {
+                    "Аудиоформат не поддерживается HW — автоматически включён SW декодер ($decoderName)"
+                } else {
+                    prev.hudNotice
+                }
+                prev.copy(
+                    activeAudioCodecName = decoderName,
+                    hudNotice = notice
+                )
+            }
+        }
+
         override fun onAudioInputFormatChanged(
             eventTime: AnalyticsListener.EventTime,
             format: Format,
@@ -860,6 +909,7 @@ class PlayerEngine private constructor(
         // until ensureExoPlayer() is invoked when actual video playback begins!
         val boot = repository.preferencesRepository.readBootSettingsSnapshot()
         configuredDecoderMode = boot.decoderMode
+        configuredAudioDecoderMode = boot.audioDecoderMode
         highRefreshOrInterpActive = boot.highRefreshRateEnabled || boot.effectiveFrameInterpolationMode.isEnabled
         preferExternalAudioOnStart = boot.preferExternalAudioOnStart
         preferredAudioLanguage = boot.preferredAudioLanguage
@@ -874,6 +924,7 @@ class PlayerEngine private constructor(
         _state.update {
             it.copy(
                 activeDecoderMode = boot.decoderMode,
+                audioDecoderMode = boot.audioDecoderMode,
                 playbackEndMode = boot.playbackEndMode,
                 bluetoothAutoSyncEnabled = boot.bluetoothAudioAutoSync,
                 bluetoothConfiguredOffsetMs = boot.bluetoothAudioOffsetMs,
@@ -900,8 +951,12 @@ class PlayerEngine private constructor(
                 bluetoothConfiguredOffsetMs = s.bluetoothAudioOffsetMs
                 audioDelayProcessor.deArtifactMode = s.audioDeArtifactMode
                 audioDelayProcessor.autoDeArtifactLowBitrate = s.autoDeArtifactLowBitrate
+                if (s.audioDecoderMode != configuredAudioDecoderMode) {
+                    setAudioDecoderMode(s.audioDecoderMode)
+                }
                 _state.update {
                     it.copy(
+                        audioDecoderMode = s.audioDecoderMode,
                         audioDeArtifactMode = s.audioDeArtifactMode,
                         autoDeArtifactLowBitrate = s.autoDeArtifactLowBitrate,
                         isAudioDeArtifactActive = audioDelayProcessor.isDeArtifactCurrentlyActive
@@ -959,7 +1014,112 @@ class PlayerEngine private constructor(
         }
     }
 
+    private fun createChannelMixingProcessor(): ChannelMixingAudioProcessor {
+        return ChannelMixingAudioProcessor().apply {
+            // 1.0 Mono -> 2.0 Stereo
+            putChannelMixingMatrix(ChannelMixingMatrix.create(1, 2))
+            // 2.0 Stereo -> 2.0 Stereo (identity passthrough)
+            putChannelMixingMatrix(ChannelMixingMatrix.create(2, 2))
+            // 3.0 (L, R, C) -> 2.0 Stereo
+            putChannelMixingMatrix(
+                ChannelMixingMatrix(
+                    3, 2,
+                    floatArrayOf(
+                        1.0f, 0.0f,
+                        0.0f, 1.0f,
+                        0.7071f, 0.7071f
+                    )
+                )
+            )
+            // 4.0 Quad (FL, FR, BL, BR) -> 2.0 Stereo
+            putChannelMixingMatrix(
+                ChannelMixingMatrix(
+                    4, 2,
+                    floatArrayOf(
+                        1.0f, 0.0f,
+                        0.0f, 1.0f,
+                        0.7071f, 0.0f,
+                        0.0f, 0.7071f
+                    )
+                )
+            )
+            // 5.0 (FL, FR, C, BL, BR) -> 2.0 Stereo
+            putChannelMixingMatrix(
+                ChannelMixingMatrix(
+                    5, 2,
+                    floatArrayOf(
+                        1.0f, 0.0f,
+                        0.0f, 1.0f,
+                        0.7071f, 0.7071f,
+                        0.7071f, 0.0f,
+                        0.0f, 0.7071f
+                    )
+                )
+            )
+            // 5.1 Surround (FL, FR, C, LFE, BL, BR) -> 2.0 Stereo
+            putChannelMixingMatrix(
+                ChannelMixingMatrix(
+                    6, 2,
+                    floatArrayOf(
+                        1.0f, 0.0f,
+                        0.0f, 1.0f,
+                        0.7071f, 0.7071f,
+                        0.5f, 0.5f,
+                        0.7071f, 0.0f,
+                        0.0f, 0.7071f
+                    )
+                )
+            )
+            // 6.1 Surround -> 2.0 Stereo
+            putChannelMixingMatrix(
+                ChannelMixingMatrix(
+                    7, 2,
+                    floatArrayOf(
+                        1.0f, 0.0f,
+                        0.0f, 1.0f,
+                        0.7071f, 0.7071f,
+                        0.5f, 0.5f,
+                        0.7071f, 0.0f,
+                        0.0f, 0.7071f,
+                        0.5f, 0.5f
+                    )
+                )
+            )
+            // 7.1 Surround (FL, FR, C, LFE, BL, BR, SL, SR) -> 2.0 Stereo
+            putChannelMixingMatrix(
+                ChannelMixingMatrix(
+                    8, 2,
+                    floatArrayOf(
+                        1.0f, 0.0f,
+                        0.0f, 1.0f,
+                        0.7071f, 0.7071f,
+                        0.5f, 0.5f,
+                        0.7071f, 0.0f,
+                        0.0f, 0.7071f,
+                        0.7071f, 0.0f,
+                        0.0f, 0.7071f
+                    )
+                )
+            )
+        }
+    }
+
     private fun createConfiguredExoPlayer(mode: DecoderMode): ExoPlayer {
+        val audioMode = configuredAudioDecoderMode
+        val preferSwAudio = audioMode == AudioDecoderMode.SOFTWARE || mode == DecoderMode.SOFTWARE_PREFER
+        val swFirstSelector = MediaCodecSelector { mimeType, requiresSecureDecoder, requiresTunnelingDecoder ->
+            val defaultList = MediaCodecSelector.DEFAULT.getDecoderInfos(
+                mimeType,
+                requiresSecureDecoder,
+                requiresTunnelingDecoder
+            )
+            defaultList.sortedBy { info ->
+                val n = info.name.lowercase()
+                val isSw = n.startsWith("c2.android.") || n.startsWith("omx.google.") || !info.hardwareAccelerated
+                if (isSw) 0 else 1
+            }
+        }
+
         val renderersFactory = object : DefaultRenderersFactory(appContext) {
             override fun buildAudioSink(
                 context: Context,
@@ -971,7 +1131,7 @@ class PlayerEngine private constructor(
                     .setAudioCapabilities(audioCapabilities)
                     .setEnableFloatOutput(true)
                     .setEnableAudioTrackPlaybackParams(enableAudioTrackPlaybackParams)
-                    .setAudioProcessors(arrayOf(ChannelMixingAudioProcessor(), audioDelayProcessor))
+                    .setAudioProcessors(arrayOf(createChannelMixingProcessor(), audioDelayProcessor))
                     .build()
             }
 
@@ -985,11 +1145,23 @@ class PlayerEngine private constructor(
                 eventListener: androidx.media3.exoplayer.audio.AudioRendererEventListener,
                 out: java.util.ArrayList<androidx.media3.exoplayer.Renderer>
             ) {
+                // Always keep FFmpeg audio extension enabled so AC3/E-AC3/DTS/TrueHD/FLAC
+                // automatically fall back to software when hardware MediaCodec does not support them.
+                val effectiveAudioExtMode = if (preferSwAudio) {
+                    EXTENSION_RENDERER_MODE_PREFER
+                } else {
+                    EXTENSION_RENDERER_MODE_ON
+                }
+                val effectiveAudioSelector = if (preferSwAudio) {
+                    swFirstSelector
+                } else {
+                    MediaCodecSelector.DEFAULT
+                }
                 super.buildAudioRenderers(
                     context,
-                    extensionRendererMode,
-                    mediaCodecSelector,
-                    enableDecoderFallback,
+                    effectiveAudioExtMode,
+                    effectiveAudioSelector,
+                    /* enableDecoderFallback = */ true,
                     audioSink,
                     eventHandler,
                     eventListener,
@@ -1000,8 +1172,8 @@ class PlayerEngine private constructor(
                         out[i] = object : androidx.media3.exoplayer.audio.MediaCodecAudioRenderer(
                             context,
                             codecAdapterFactory,
-                            mediaCodecSelector,
-                            enableDecoderFallback,
+                            effectiveAudioSelector,
+                            /* enableDecoderFallback = */ true,
                             eventHandler,
                             eventListener,
                             audioSink
@@ -1035,18 +1207,7 @@ class PlayerEngine private constructor(
                 DecoderMode.SOFTWARE_PREFER -> {
                     setEnableDecoderFallback(true)
                     setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_PREFER)
-                    setMediaCodecSelector { mimeType, requiresSecureDecoder, requiresTunnelingDecoder ->
-                        val defaultList = MediaCodecSelector.DEFAULT.getDecoderInfos(
-                            mimeType,
-                            requiresSecureDecoder,
-                            requiresTunnelingDecoder
-                        )
-                        defaultList.sortedBy { info ->
-                            val n = info.name.lowercase()
-                            val isSw = n.startsWith("c2.android.") || n.startsWith("omx.google.") || !info.hardwareAccelerated
-                            if (isSw) 0 else 1
-                        }
-                    }
+                    setMediaCodecSelector(swFirstSelector)
                 }
             }
         }
@@ -1105,8 +1266,19 @@ class PlayerEngine private constructor(
     }
 
     fun attachVideoSurface(surface: Surface) {
+        val previousSurface = boundSurface
         boundSurface = surface
-        ensureExoPlayer().setVideoSurface(surface)
+        val player = ensureExoPlayer()
+        player.setVideoSurface(surface)
+        if (_state.value.isHdr && previousSurface != null && previousSurface !== surface && player.playbackState != Player.STATE_IDLE) {
+            val params = player.trackSelectionParameters
+            player.trackSelectionParameters = params.buildUpon()
+                .setTrackTypeDisabled(C.TRACK_TYPE_VIDEO, true)
+                .build()
+            player.trackSelectionParameters = params.buildUpon()
+                .setTrackTypeDisabled(C.TRACK_TYPE_VIDEO, false)
+                .build()
+        }
     }
 
     fun detachVideoSurface(surface: Surface) {
@@ -1229,6 +1401,9 @@ class PlayerEngine private constructor(
             ptsSampleCount = 0
             autoAppliedDefaultAudioForVideo.clear()
             autoAppliedDefaultSubForVideo.clear()
+            val (initialIsHdr, initialHdrBadge) = withContext(Dispatchers.IO) {
+                probeLocalVideoHdr(startEpisode.uri)
+            }
             val sources = withContext(Dispatchers.IO) {
                 episodes.map { buildMediaSourceForEpisode(it) }
             }
@@ -1274,6 +1449,8 @@ class PlayerEngine private constructor(
                     durationMs = effectiveSavedDuration,
                     videoWidth = detectedVideoWidth,
                     videoHeight = detectedVideoHeight,
+                    isHdr = initialIsHdr,
+                    hdrBadge = initialHdrBadge,
                     chapters = emptyList(),
                     sourceFrameRate = 0f,
                     videoMimeType = "",
@@ -2135,6 +2312,44 @@ class PlayerEngine private constructor(
         }
     }
 
+    fun setAudioDecoderMode(newMode: AudioDecoderMode) {
+        if (configuredAudioDecoderMode == newMode && _state.value.audioDecoderMode == newMode) return
+        configuredAudioDecoderMode = newMode
+        _state.update { it.copy(audioDecoderMode = newMode) }
+        engineScope.launch {
+            repository.preferencesRepository.updateAudioDecoderMode(newMode)
+        }
+        val existingPlayer = _exoPlayer ?: return
+        val wasPlaying = existingPlayer.playWhenReady && existingPlayer.playbackState != Player.STATE_IDLE
+        val savedPos = existingPlayer.currentPosition.coerceAtLeast(0L)
+        val savedIndex = existingPlayer.currentMediaItemIndex.coerceAtLeast(0)
+        val playlist = _state.value.playlist
+        val speed = _state.value.playbackSpeed
+
+        existingPlayer.removeListener(playerListener)
+        existingPlayer.removeAnalyticsListener(analyticsListener)
+        existingPlayer.clearVideoFrameMetadataListener(videoFrameMetadataListener)
+        boundSurface?.let { existingPlayer.clearVideoSurface(it) }
+
+        val freshPlayer = createConfiguredExoPlayer(configuredDecoderMode)
+        applyFrameRateStrategy(freshPlayer, highRefreshOrInterpActive)
+        freshPlayer.playbackParameters = PlaybackParameters(speed)
+        boundSurface?.let { freshPlayer.setVideoSurface(it) }
+        _exoPlayer = freshPlayer
+        applyPlaybackEndModeToExo(_state.value.playbackEndMode)
+        audioBoostController.onAudioSessionIdChanged(freshPlayer.audioSessionId)
+
+        playerChangedListeners.forEach { it(freshPlayer) }
+        existingPlayer.release()
+
+        if (playlist.isNotEmpty()) {
+            val sources = playlist.map { buildMediaSourceForEpisode(it) }
+            freshPlayer.setMediaSources(sources, savedIndex.coerceIn(playlist.indices), savedPos)
+            freshPlayer.prepare()
+            freshPlayer.playWhenReady = wasPlaying
+        }
+    }
+
     private fun rebuildCurrentPlaylistPreservingPosition() {
         val player = _exoPlayer ?: return
         val playlist = _state.value.playlist
@@ -2548,6 +2763,62 @@ class PlayerEngine private constructor(
             result
         } catch (_: Throwable) {
             emptyList()
+        } finally {
+            runCatching { extractor.release() }
+        }
+    }
+
+    private fun probeLocalVideoHdr(uriStr: String): Pair<Boolean, String> {
+        if (!PlaybackResumeHelper.isLocalFileUri(uriStr)) return false to ""
+        val extractor = android.media.MediaExtractor()
+        return try {
+            val uri = Uri.parse(uriStr)
+            if (uri.scheme.equals("file", ignoreCase = true)) {
+                val path = uri.path
+                if (!path.isNullOrBlank()) {
+                    extractor.setDataSource(path)
+                } else {
+                    extractor.setDataSource(appContext, uri, null)
+                }
+            } else {
+                extractor.setDataSource(appContext, uri, null)
+            }
+            val count = extractor.trackCount
+            for (i in 0 until count) {
+                val mf = runCatching { extractor.getTrackFormat(i) }.getOrNull() ?: continue
+                val mime = runCatching { mf.getString(android.media.MediaFormat.KEY_MIME) }.getOrNull().orEmpty().lowercase()
+                if (!mime.startsWith("video/")) continue
+                val isDolbyVision = mime.contains("dolby-vision") || mime.contains("dvhe") || mime.contains("dvh1")
+                val colorTransfer = if (mf.containsKey(android.media.MediaFormat.KEY_COLOR_TRANSFER)) {
+                    runCatching { mf.getInteger(android.media.MediaFormat.KEY_COLOR_TRANSFER) }.getOrDefault(0)
+                } else 0
+                val colorStandard = if (mf.containsKey(android.media.MediaFormat.KEY_COLOR_STANDARD)) {
+                    runCatching { mf.getInteger(android.media.MediaFormat.KEY_COLOR_STANDARD) }.getOrDefault(0)
+                } else 0
+                val profile = if (mf.containsKey(android.media.MediaFormat.KEY_PROFILE)) {
+                    runCatching { mf.getInteger(android.media.MediaFormat.KEY_PROFILE) }.getOrDefault(0)
+                } else 0
+                val isHdr10 = colorTransfer == android.media.MediaFormat.COLOR_TRANSFER_ST2084 ||
+                    (mime.contains("hevc") && (profile == android.media.MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10HDR10 ||
+                        profile == android.media.MediaCodecInfo.CodecProfileLevel.HEVCProfileMain10HDR10Plus))
+                val isHlg = colorTransfer == android.media.MediaFormat.COLOR_TRANSFER_HLG
+                val isBt2020Hdr = colorStandard == android.media.MediaFormat.COLOR_STANDARD_BT2020 &&
+                    colorTransfer != android.media.MediaFormat.COLOR_TRANSFER_SDR_VIDEO &&
+                    colorTransfer != android.media.MediaFormat.COLOR_TRANSFER_LINEAR &&
+                    colorTransfer != 0
+                if (isDolbyVision || isHdr10 || isHlg || isBt2020Hdr) {
+                    val badge = when {
+                        isDolbyVision -> "Dolby Vision"
+                        isHdr10 -> "HDR10"
+                        isHlg -> "HLG"
+                        else -> "HDR"
+                    }
+                    return true to badge
+                }
+            }
+            false to ""
+        } catch (_: Throwable) {
+            false to ""
         } finally {
             runCatching { extractor.release() }
         }

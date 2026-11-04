@@ -1265,6 +1265,63 @@ internal fun AudioSettingsPage(
     }
 
     SettingsSectionCard(
+        title = tr("Декодер аудио (AC3, DTS, Dolby, AAC)", "Audio Decoder (AC3, DTS, Dolby, AAC)"),
+        subtitle = tr(
+            "Автоматическое переключение на программный FFmpeg-декодер, если устройство не поддерживает формат аппаратно",
+            "Automatically switches to FFmpeg software decoding if hardware lacks format support"
+        ),
+        icon = Icons.Default.Memory
+    ) {
+        TwoColumnSettingsGrid(items = com.example.model.AudioDecoderMode.entries) { mode ->
+            val selected = settings.audioDecoderMode == mode
+            Surface(
+                color = if (selected) {
+                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f)
+                } else {
+                    MaterialTheme.colorScheme.surfaceContainerLow
+                },
+                shape = RoundedCornerShape(12.dp),
+                border = BorderStroke(
+                    1.dp,
+                    if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .clickable { actions.onUpdateAudioDecoderMode(mode) }
+                    .testTag("settings_audio_decoder_${mode.id}")
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 9.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = mode.localizedTitle(isEnglish),
+                            style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Text(
+                            text = mode.localizedSubtitle(isEnglish),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    RadioButton(
+                        selected = selected,
+                        onClick = { actions.onUpdateAudioDecoderMode(mode) },
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+        }
+    }
+
+    SettingsSectionCard(
         title = tr("Очистка звука (De-Artifact DSP)", "Audio Cleanup (De-Artifact DSP)"),
         icon = Icons.Default.AutoAwesome,
         infoTopic = ModeInfoTopic.AUDIO_CLEANUP

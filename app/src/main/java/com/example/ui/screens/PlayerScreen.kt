@@ -207,6 +207,7 @@ fun PlayerScreen(
     onSelectAudio: (AudioTrackUiOption) -> Unit,
     onPickExternalAudio: () -> Unit,
     onSetAudioBoostPercent: (Int) -> Unit,
+    onSelectAudioDecoderMode: (com.example.model.AudioDecoderMode) -> Unit = {},
     onSelectAudioDeArtifactMode: (AudioDeArtifactMode) -> Unit = {},
     onToggleAutoDeArtifactLowBitrate: (Boolean) -> Unit = {},
     onAdjustAudioDelay: (Long) -> Unit = {},
@@ -280,6 +281,9 @@ fun PlayerScreen(
         if (activity != null) {
             activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
             activity.window?.let { win ->
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    runCatching { win.colorMode = ActivityInfo.COLOR_MODE_DEFAULT }
+                }
                 val lp = win.attributes
                 lp.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
                 win.attributes = lp
@@ -417,12 +421,53 @@ fun PlayerScreen(
         onDispose {}
     }
 
+    // Automatically switch Android Window into hardware HDR display mode + max brightness when playing HDR video
+    DisposableEffect(playbackState.isHdr) {
+        val activity = context.findActivity()
+        val win = activity?.window
+        val previousBrightness = win?.attributes?.screenBrightness ?: WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
+        if (win != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                runCatching {
+                    win.colorMode = if (playbackState.isHdr) {
+                        ActivityInfo.COLOR_MODE_HDR
+                    } else {
+                        ActivityInfo.COLOR_MODE_DEFAULT
+                    }
+                }
+            }
+            if (Build.VERSION.SDK_INT >= 34) {
+                runCatching {
+                    win.setDesiredHdrHeadroom(0f)
+                }
+            }
+            if (playbackState.isHdr) {
+                val lp = win.attributes
+                lp.screenBrightness = 1.0f
+                win.attributes = lp
+            }
+        }
+        onDispose {
+            if (win != null && playbackState.isHdr) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    runCatching { win.colorMode = ActivityInfo.COLOR_MODE_DEFAULT }
+                }
+                val lp = win.attributes
+                lp.screenBrightness = previousBrightness
+                win.attributes = lp
+            }
+        }
+    }
+
     DisposableEffect(Unit) {
         onDispose {
             val activity = context.findActivity()
             if (activity != null) {
                 activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
                 activity.window?.let { win ->
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        runCatching { win.colorMode = ActivityInfo.COLOR_MODE_DEFAULT }
+                    }
                     val lp = win.attributes
                     lp.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
                     win.attributes = lp
@@ -1949,6 +1994,8 @@ fun PlayerScreen(
                     audioOptions = playbackState.audioTrackOptions,
                     audioBoostPercent = playbackState.audioBoostPercent,
                     maxAudioBoostPercent = settings.maxAudioBoostPercent,
+                    audioDecoderMode = playbackState.audioDecoderMode,
+                    activeAudioCodecName = playbackState.activeAudioCodecName,
                     audioDeArtifactMode = playbackState.audioDeArtifactMode,
                     autoDeArtifactLowBitrate = playbackState.autoDeArtifactLowBitrate,
                     activeAudioBitrateKbps = playbackState.activeAudioBitrateKbps,
@@ -1964,6 +2011,7 @@ fun PlayerScreen(
                     onSelectAudio = onSelectAudio,
                     onSetAudioBoostPercent = onSetAudioBoostPercent,
                     onUpdateMaxAudioBoostPercent = onUpdateMaxAudioBoostPercent,
+                    onSelectAudioDecoderMode = onSelectAudioDecoderMode,
                     onSelectAudioDeArtifactMode = onSelectAudioDeArtifactMode,
                     onToggleAutoDeArtifactLowBitrate = onToggleAutoDeArtifactLowBitrate,
                     onAdjustAudioDelayMs = onAdjustAudioDelay,
@@ -2617,9 +2665,9 @@ private fun HdrVideoSurface(
             modifier = viewModifier,
             factory = { context ->
                 SurfaceView(context).apply {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        holder.setFormat(android.graphics.PixelFormat.RGBA_1010102)
-                    }
+                    // Keep default PixelFormat.OPAQUE on SurfaceHolder so MediaCodec outputs native
+                    // 10-bit YUV (P010) + BT.2020 PQ/HLG static/dynamic HDR metadata directly to
+                    // Hardware Composer (HWC) overlay plane, engaging true display HDR mode.
                     holder.addCallback(object : SurfaceHolder.Callback {
                         override fun surfaceCreated(holder: SurfaceHolder) {
                             if (holder.surface.isValid) {
@@ -2639,11 +2687,7 @@ private fun HdrVideoSurface(
                     })
                 }
             },
-            update = { surfaceView ->
-                if (videoWidth > 0 && videoHeight > 0) {
-                    surfaceView.holder.setFixedSize(videoWidth, videoHeight)
-                }
-            }
+            update = { _ -> }
         )
     }
 }

@@ -348,6 +348,7 @@ class NegaiViewModel(application: Application) : AndroidViewModel(application) {
             repository.preferencesRepository.resetAllSettingsToDefaults()
             playerEngine.setPlaybackEndMode(PlaybackEndMode.AUTO_NEXT)
             playerEngine.switchDecoderMode(DecoderMode.HW_PLUS)
+            playerEngine.setAudioDecoderMode(com.example.model.AudioDecoderMode.AUTO)
             _videoScaleMode.value = VideoScaleMode.FIT
         }
     }
@@ -968,6 +969,10 @@ class NegaiViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             repository.preferencesRepository.updateBluetoothAudioOffsetMs(offsetMs)
         }
+    }
+
+    fun setAudioDecoderMode(mode: com.example.model.AudioDecoderMode) {
+        playerEngine.setAudioDecoderMode(mode)
     }
 
     fun setAudioDeArtifactMode(mode: AudioDeArtifactMode) {

@@ -135,6 +135,7 @@ data class SettingsActions(
     val onUpdatePreferredAudioLanguage: (PreferredTrackLanguage) -> Unit = {},
     val onUpdateDefaultAudioBoostPercent: (Int) -> Unit = {},
     val onUpdateMaxAudioBoostPercent: (Int) -> Unit = {},
+    val onUpdateAudioDecoderMode: (com.example.model.AudioDecoderMode) -> Unit = {},
     val onUpdateAudioDeArtifactMode: (AudioDeArtifactMode) -> Unit = {},
     val onUpdateAutoDeArtifactLowBitrate: (Boolean) -> Unit = {},
     val onUpdateBluetoothAudioAutoSync: (Boolean) -> Unit = {},

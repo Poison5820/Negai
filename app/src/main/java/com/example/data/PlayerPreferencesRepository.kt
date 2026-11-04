@@ -15,6 +15,7 @@ import com.example.model.AppAccentColor
 import com.example.model.AppLanguage
 import com.example.model.AppThemeMode
 import com.example.model.AudioDeArtifactMode
+import com.example.model.AudioDecoderMode
 import com.example.model.DecoderMode
 import com.example.model.EpisodeSortOption
 import com.example.model.FolderSortOption
@@ -107,6 +108,7 @@ class PlayerPreferencesRepository(private val context: Context) {
         val BLUETOOTH_AUDIO_OFFSET_MS = longPreferencesKey("bluetooth_audio_fine_offset_ms")
         val AUDIO_DE_ARTIFACT_MODE = stringPreferencesKey("audio_de_artifact_mode")
         val AUTO_DE_ARTIFACT_LOW_BITRATE = booleanPreferencesKey("auto_de_artifact_low_bitrate")
+        val AUDIO_DECODER_MODE = stringPreferencesKey("audio_decoder_mode")
 
         val AUTO_BIND_SUBS = booleanPreferencesKey("auto_bind_external_subtitles")
         val PREFER_EXTERNAL_SUBS_ON_START = booleanPreferencesKey("prefer_external_subtitles_on_start")
@@ -316,6 +318,11 @@ class PlayerPreferencesRepository(private val context: Context) {
             ),
             autoDeArtifactLowBitrate = prefs[Keys.AUTO_DE_ARTIFACT_LOW_BITRATE]
                 ?: (if (hasBoot && sp.contains("auto_de_artifact_low_bitrate")) sp.getBoolean("auto_de_artifact_low_bitrate", true) else true),
+            audioDecoderMode = AudioDecoderMode.fromId(
+                prefs[Keys.AUDIO_DECODER_MODE]
+                    ?: (if (hasBoot) sp.getString("audio_decoder_mode", null) else null)
+                    ?: AudioDecoderMode.AUTO.id
+            ),
 
             autoBindExternalSubtitles = prefs[Keys.AUTO_BIND_SUBS]
                 ?: (if (hasBoot && sp.contains("auto_bind_subs")) sp.getBoolean("auto_bind_subs", true) else true),
@@ -754,6 +761,11 @@ class PlayerPreferencesRepository(private val context: Context) {
         context.playerDataStore.edit { it[Keys.AUTO_DE_ARTIFACT_LOW_BITRATE] = enabled }
     }
 
+    suspend fun updateAudioDecoderMode(mode: AudioDecoderMode) {
+        bootPrefs(context).edit().putString("audio_decoder_mode", mode.id).apply()
+        context.playerDataStore.edit { it[Keys.AUDIO_DECODER_MODE] = mode.id }
+    }
+
     suspend fun updateAutoBindSubtitles(enabled: Boolean) {
         bootPrefs(context).edit().putBoolean("auto_bind_subs", enabled).apply()
         context.playerDataStore.edit { it[Keys.AUTO_BIND_SUBS] = enabled }
@@ -979,6 +991,9 @@ class PlayerPreferencesRepository(private val context: Context) {
                     sp.getString("audio_de_artifact_mode", AudioDeArtifactMode.STANDARD.id)
                 ),
                 autoDeArtifactLowBitrate = sp.getBoolean("auto_de_artifact_low_bitrate", true),
+                audioDecoderMode = AudioDecoderMode.fromId(
+                    sp.getString("audio_decoder_mode", AudioDecoderMode.AUTO.id)
+                ),
 
                 autoBindExternalSubtitles = sp.getBoolean("auto_bind_subs", true),
                 preferExternalSubtitlesOnStart = sp.getBoolean("prefer_ext_subs", true),
@@ -1065,6 +1080,7 @@ class PlayerPreferencesRepository(private val context: Context) {
                 .putLong("bt_fine_offset_ms", 0L)
                 .putString("audio_de_artifact_mode", s.audioDeArtifactMode.id)
                 .putBoolean("auto_de_artifact_low_bitrate", s.autoDeArtifactLowBitrate)
+                .putString("audio_decoder_mode", s.audioDecoderMode.id)
                 .putBoolean("auto_bind_subs", s.autoBindExternalSubtitles)
                 .putBoolean("prefer_ext_subs", s.preferExternalSubtitlesOnStart)
                 .putString("pref_sub_lang", s.preferredSubtitleLanguage.id)

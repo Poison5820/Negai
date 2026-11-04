@@ -20,6 +20,7 @@ import com.example.model.AppAccentColor
 import com.example.model.AppLanguage
 import com.example.model.AppThemeMode
 import com.example.model.AudioDeArtifactMode
+import com.example.model.AudioDecoderMode
 import com.example.model.DecoderMode
 import com.example.model.EpisodeSortOption
 import com.example.model.FolderSortOption
@@ -258,6 +259,30 @@ fun AudioDeArtifactMode.localizedBadge(isEnglish: Boolean): String = when (this)
     AudioDeArtifactMode.SOFT -> if (isEnglish) "Soft" else shortBadge
     AudioDeArtifactMode.STANDARD -> if (isEnglish) "Standard" else shortBadge
     AudioDeArtifactMode.AGGRESSIVE -> if (isEnglish) "Aggr." else shortBadge
+}
+
+fun AudioDecoderMode.localizedTitle(isEnglish: Boolean): String = when (this) {
+    AudioDecoderMode.AUTO -> if (isEnglish) "Auto (HW + SW)" else title
+    AudioDecoderMode.SOFTWARE -> if (isEnglish) "Software (SW)" else title
+    AudioDecoderMode.HARDWARE -> if (isEnglish) "Hardware (HW)" else title
+}
+
+fun AudioDecoderMode.localizedSubtitle(isEnglish: Boolean): String = when (this) {
+    AudioDecoderMode.AUTO -> if (isEnglish) {
+        "Hardware decoder with auto software FFmpeg fallback (AC3/DTS/Dolby)"
+    } else subtitle
+    AudioDecoderMode.SOFTWARE -> if (isEnglish) {
+        "Force software FFmpeg decoding for all audio formats"
+    } else subtitle
+    AudioDecoderMode.HARDWARE -> if (isEnglish) {
+        "System codecs with auto switch to SW when format is unsupported"
+    } else subtitle
+}
+
+fun AudioDecoderMode.localizedBadge(isEnglish: Boolean): String = when (this) {
+    AudioDecoderMode.AUTO -> if (isEnglish) "AUTO" else shortBadge
+    AudioDecoderMode.SOFTWARE -> "SW"
+    AudioDecoderMode.HARDWARE -> "HW"
 }
 
 fun AppThemeMode.localizedBadge(isEnglish: Boolean): String = when (this) {
