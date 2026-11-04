@@ -1,6 +1,31 @@
 # Changelog / История изменений — Negai Player (`app.negai.player`)
 
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
+Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
+
+---
+
+## [v4.0.1] — `versionCode = 23` / `versionName = "4.0.1"`
+
+### 🇷🇺 Русский
+- **Демультиплексор Blu-ray BDAV (`.m2ts`) и исправление `Source Error` на DTS-HD Master Audio 7.1 (`0x86`):**
+  - Реализован специализированный экстрактор **Blu-ray BDAV (`.m2ts`)** (`BdavM2tsExtractor`) с поддержкой 192-байтных пакетов (`4-byte TP_extra_header + 188-byte TS`) и таблицей дескрипторов **HDMV PMT** (`0x86` / `134` DTS-HD Master Audio XLL, `0x85` DTS-HD HRA, `0x82` HDMV DTS, `0x83` TrueHD, `0x84` E-AC-3, `0x80` Blu-ray LPCM).
+  - Реализован парсер **ETSI TS 102 114 (`HdmvDtsHdReader`)**, объединяющий ядро DTS (`0x7FFE8001`) и расширение DTS-HD XLL (`0x64582025`) в единый 8-канальный фрейм для декодера **FFmpeg (`libdcadec`)**, устраняющий ошибку `Source Error` на файлах `dts_hd_ma_7-1_dredd_sound_check.m2ts`.
+- **Карточка Negai PRO в настройках и левитирующее окно Google Play Billing:**
+  - На главной странице настроек вверху добавлена кнопка **Negai PRO** с левитирующим окном (`ProSubscriptionLevitatingDialog`), содержащим описание премиум-функций и кнопку оплаты через **Google Play Billing** (тестовая заглушка активации с блокировкой всех PRO-функций до покупки).
+  - Убран ручной переключатель PRO над темами; блок **«Комплиментарные палитры и стили диалогов (PRO)»** без активного PRO затемнён, отмечен золотой звездой вверху и открывает левитирующее окно покупки PRO при нажатии.
+- **Левитирующее быстрое меню оформления:**
+  - Всплывающее меню оформления по кнопке в верхней панели переведено с нижней шторки на левитирующий диалог (`FloatingElevatedDialog`).
+
+### 🇬🇧 English
+- **Blu-ray BDAV (`.m2ts`) Demuxer & DTS-HD Master Audio 7.1 (`0x86`) `Source Error` Fix:**
+  - Added `BdavM2tsExtractor` supporting 192-byte Blu-ray BDAV packets (`4-byte TP_extra_header + 188-byte TS`) and HDMV PMT descriptors (`0x86` / `134` DTS-HD Master Audio XLL, `0x85` DTS-HD HRA, `0x82` HDMV DTS, `0x83` TrueHD, `0x84` E-AC-3, `0x80` Blu-ray LPCM).
+  - Implemented `HdmvDtsHdReader` (ETSI TS 102 114) to coalesce DTS Core (`0x7FFE8001`) and DTS-HD Extension Substreams (`0x64582025`) into unified 8-channel frames for FFmpeg (`libdcadec`), fixing `Source Error` on `dts_hd_ma_7-1_dredd_sound_check.m2ts`.
+- **Top Settings Negai PRO Banner & Google Play Billing Levitating Dialog:**
+  - Added a top **Negai PRO** card in Settings opening `ProSubscriptionLevitatingDialog` with feature descriptions and a Google Play Billing purchase flow stub that gates PRO features until activated.
+  - Removed the manual PRO preview switch above themes; styled the locked **PRO Complementary Palettes & Dialog Styles** block with a darkened card and top Star icon that opens `ProSubscriptionLevitatingDialog` on tap.
+- **Levitating Quick Appearance Menu:**
+  - Converted the top bar Quick Appearance popup from a bottom sheet to a levitating dialog (`FloatingElevatedDialog`).
 
 ---
 
@@ -10,9 +35,8 @@
 - **Бинауральное пространственное аудио HRTF (MIT KEMAR):**
   - Реализован процессор многоканального звука **5.1 / 7.1 / 6.1** (`HrtfBinauralAudioProcessor`) для наушников на базе открытого акустического датасета **MIT Media Lab KEMAR HRTF** (*Bill Gardner & Keith Martin, MIT License*).
   - Применяется межушная задержка по времени (**ITD**) и импульсная фильтрация ушной раковины (**Pinna FIR**) по азимутам всех окружающих каналов (`FL`, `FR`, `FC`, `LFE`, `BL`, `BR`, `SL`, `SR`) с переключателем в шторке аудиодорожек плеера и в разделе настроек «Аудио».
-- **Воспроизведение DTS-HD Master Audio 7.1 (24-бит) и защита от зависания при сбое:**
-  - Включена поддержка дескрипторов **HDMV DTS-HD MA 7.1** (`FLAG_ENABLE_HDMV_DTS_AUDIO_STREAMS`) для Blu-ray контейнеров (`.m2ts` / `.ts`), а также обработка **16 / 24 / 32-бит и Float PCM** в аудиоконвейере.
-  - Реализовано мгновенное восстановление проигрывателя из `STATE_IDLE` после `Source Error` (автоматический перезапуск сессии декодера и повторный `prepare()` при выборе другого файла, дорожки или режима декодирования) без необходимости выходить из плеера.
+- **Поддержка потоков DTS-HD Master Audio 7.1 (24-бит) и защита от зависания при сбое:**
+  - Включена поддержка дескрипторов **HDMV DTS-HD MA 7.1** (`FLAG_ENABLE_HDMV_DTS_AUDIO_STREAMS`), обработка **16 / 24 / 32-бит и Float PCM** в аудиоконвейере и мгновенное восстановление проигрывателя из `STATE_IDLE` после `Source Error` без необходимости выходить из плеера.
 - **Точная индикация режима декодирования (HW / SW):**
   - При автоматическом переключении с неподдерживаемого аппаратного кодека на программный декодер (**FFmpeg / CPU**) кнопки **SW** в меню аудио/видео и индикатор в верхнем HUD мгновенно подсвечиваются активным состоянием (`effectiveVideoDecoderMode` / `effectiveAudioDecoderMode`).
 - **Строгая автопривязка внешних дорожек и субтитров:**
@@ -22,10 +46,8 @@
   - Кнопка **«+85с Опенинг»** жёстко закреплена у правого края над таймлайном во всех режимах масштабирования.
   - Верхняя и нижняя панели HUD в ландшафтном режиме используют всю ширину экрана включая зону выреза камеры (`DisplayCutout`).
 - **Левитирующие диалоги, живая иконка Monet и комплиментарные Pro-темы:**
-  - Все всплывающие диалоги вне плеера переведены на левитирующие карточки (`LevitatingDialogBox`) с мягкой тенью и скруглёнными углами `28dp`.
-  - Иконка **Monet** в выборе акцентов теперь отображает реальные динамические цвета системных обоев Android 12+ (`dynamicDarkColorScheme` / `dynamicLightColorScheme`).
-  - Иконки остальных цветовых тем разделены на **основной цвет** (внешнее кольцо) и **дополнительный акцент** (внутреннее ядро).
-  - Добавлен отдельный блок **«Комплиментарные палитры (PRO)»** из 6 контрастных двухтоновых схем, подготовленный для будущего платного доступа.
+  - Все всплывающие диалоги вне плеера переведены на левитирующие карточки (`FloatingElevatedDialog`).
+  - Иконка **Monet** отображает реальные динамические цвета системных обоев Android 12+, значки остальных тем разделены на **основной цвет** и **дополнительный акцент**, добавлен блок **«Комплиментарные палитры (PRO)»**.
 - **Подготовка к Google Play и лицензионная чистота:**
   - Оформлен закрытый проприетарный статус **Negai Player** (*Copyright © Negai, All Rights Reserved*) и полная атрибуция используемых открытых компонентов (**Anime4K** — MIT, **MIT KEMAR HRTF** — MIT, **FFmpeg** — LGPL v2.1+, **AndroidX Media3** — Apache 2.0).
 
@@ -33,7 +55,7 @@
 - **Binaural HRTF Spatial Audio (MIT KEMAR):**
   - Implemented real-time **5.1 / 7.1 / 6.1** headphone spatialization (`HrtfBinauralAudioProcessor`) powered by the **MIT Media Lab KEMAR HRTF** dataset (*Bill Gardner & Keith Martin, MIT License*) with Interaural Time Difference (**ITD**) delay lines and pinna FIR filtering, toggleable from the player audio sheet and Audio settings.
 - **DTS-HD Master Audio 7.1 (24-bit) & Instant Error Recovery:**
-  - Enabled **HDMV DTS-HD MA 7.1** stream descriptors (`FLAG_ENABLE_HDMV_DTS_AUDIO_STREAMS`) in Blu-ray (`.m2ts` / `.ts`) containers, added **16 / 24 / 32-bit & Float PCM** processing, and added automatic `STATE_IDLE` recovery after `Source Error` without exiting the player.
+  - Enabled **HDMV DTS-HD MA 7.1** stream descriptors (`FLAG_ENABLE_HDMV_DTS_AUDIO_STREAMS`), **16 / 24 / 32-bit & Float PCM** processing, and automatic `STATE_IDLE` recovery after `Source Error` without exiting the player.
 - **Accurate HW / SW Decoder Fallback Indicator:**
   - When an unsupported hardware codec automatically falls back to software decoding (**FFmpeg / CPU**), the **SW** selector buttons and top HUD badge immediately reflect the active software state (`effectiveVideoDecoderMode` / `effectiveAudioDecoderMode`).
 - **Strict External Audio & Subtitle Auto-Matching:**
@@ -41,7 +63,7 @@
 - **3D IMAX & Full-Width Camera Cutout HUD:**
   - Fixed Full-SBS / Full-TAB aspect ratio calculation in **3D IMAX** mode, pinned the **+85s Skip Intro** button to the right edge of the timeline, and extended the player HUD across the camera cutout area.
 - **Levitating Dialogs, Live Wallpaper Monet Badge & Pro Complementary Palettes:**
-  - Replaced standard dialogs outside the player with levitating cards (`LevitatingDialogBox`), updated the **Monet** icon to display live Android 12+ wallpaper colors, redesigned color badges into Primary outer ring + Secondary inner core, and added a **Complementary Palettes (PRO)** section.
+  - Replaced standard dialogs outside the player with levitating cards (`FloatingElevatedDialog`), updated the **Monet** icon to display live Android 12+ wallpaper colors, redesigned color badges into Primary outer ring + Secondary inner core, and added a **Complementary Palettes (PRO)** section.
 - **Google Play Readiness & Legal Attribution:**
   - Clarified **Negai Player** proprietary closed-source license (*All Rights Reserved*) alongside complete open-source notices for **Anime4K** (MIT), **MIT KEMAR HRTF** (MIT), **FFmpeg** (LGPL v2.1+), and **AndroidX Media3** (Apache 2.0).
 
