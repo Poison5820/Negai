@@ -5,6 +5,24 @@
 
 ---
 
+## [v4.0.2] — `versionCode = 24` / `versionName = "4.0.2"`
+
+### 🇷🇺 Русский
+- **Кнопка звезды Negai Premium в верхней панели рядом с палитрой:**
+  - Кнопка открытия окна покупки перенесена из списка категорий настроек в верхнюю панель (`TopAppBar`) в виде компактной золотой звезды рядом с иконкой палитры (`top_bar_premium_button`).
+- **Ребрендинг PRO → Premium и аккуратные звёзды справа у платных элементов:**
+  - Во всех диалогах, заголовках и бейджах обозначение `PRO` заменено на `Premium` (`Negai Premium`).
+  - Иконки звёзд у платных палитр, стилей левитирующих окон и премиум-блоков уменьшены и перенесены на правую сторону; после покупки (`isProUnlocked = true`) звёзды автоматически исчезают.
+
+### 🇬🇧 English
+- **Top-Bar Negai Premium Star Button Next to Palette:**
+  - Relocated the purchase trigger from the settings category list into a compact golden star button in the top bar right beside the palette icon (`top_bar_premium_button`).
+- **PRO → Premium Rebranding & Compact Right-Aligned Stars:**
+  - Replaced `PRO` with `Premium` (`Negai Premium`) across all user-facing dialogs, headers, and badges.
+  - Positioned smaller gold star icons on the right side of paid palettes, dialog style rows, and locked blocks; the stars automatically disappear once Premium is unlocked.
+
+---
+
 ## [v4.0.1] — `versionCode = 23` / `versionName = "4.0.1"`
 
 ### 🇷🇺 Русский
