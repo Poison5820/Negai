@@ -5,6 +5,36 @@
 
 ---
 
+## [v4.0.5] — `versionCode = 27` / `versionName = "4.0.5"`
+
+### 🇷🇺 Русский
+- **Исправление падения яркости экрана при запуске приложения (с включённой системной автояркостью):**
+  - Из `AndroidManifest.xml` у `MainActivity` удалён статический атрибут `android:colorMode="hdr"`, из-за которого Android при запуске приложения переводил всё окно в режим HDR-композиции и принудительно занижал яркость SDR-интерфейса («SDR paper-white dimming») для резервирования запаса пиковой яркости HDR.
+  - Теперь окно приложения запускается и работает в стандартном цветовом режиме `COLOR_MODE_DEFAULT` с системной автояркостью (`BRIGHTNESS_OVERRIDE_NONE`), а аппаратный `COLOR_MODE_HDR` и повышенная яркость включаются динамически в `PlayerScreen` исключительно во время воспроизведения реального HDR-видео (HDR10 / HLG / Dolby Vision) и сбрасываются обратно при выходе из него.
+
+### 🇬🇧 English
+- **Fixed Screen Brightness Dropping to Minimum on App Launch (with System Auto-Brightness Enabled):**
+  - Removed the static `android:colorMode="hdr"` attribute from `MainActivity` in `AndroidManifest.xml`, which caused the Android display compositor to enter HDR mode immediately on app startup and dim the entire SDR UI ("SDR paper-white dimming") to reserve HDR peak headroom.
+  - The app window now launches and operates in standard `COLOR_MODE_DEFAULT` with system auto-brightness (`BRIGHTNESS_OVERRIDE_NONE`), dynamically switching to `COLOR_MODE_HDR` in `PlayerScreen` strictly when playing actual HDR video (HDR10 / HLG / Dolby Vision).
+
+---
+
+## [v4.0.4] — `versionCode = 26` / `versionName = "4.0.4"`
+
+### 🇷🇺 Русский
+- **Сбалансированные отступы и системная безопасность (Safe Drawing) для всех левитирующих меню:**
+  - Унифицированы внутренние и внешние отступы для всех левитирующих диалогов (`FloatingElevatedDialog`, `QuickThemeBottomSheet`, `ProSubscriptionLevitatingDialog`, `ModeInfoModalDialog`, `VersionPlanetaryModalSheet`, `QuickActionsCustomizerSheet`).
+  - Добавлена обработка `WindowInsets.safeDrawing` и внешние отступы `24.dp` по вертикали, предотвращающие прилипание и наложение модальных окон на системную навигационную полосу и жесты Android.
+  - Увеличены нижние отступы скроллируемого контента (до `16.dp` в меню быстрого оформления и `14.dp` в окне Premium) и закреплена комфортная высота кнопок действий (`48.dp`), устраняющая ощущение отсутствия отступа внизу.
+
+### 🇬🇧 English
+- **Harmonized Paddings and Safe Drawing Insets for all Levitating Menus:**
+  - Unified internal and external margins across all levitating dialogs (`FloatingElevatedDialog`, `QuickThemeBottomSheet`, `ProSubscriptionLevitatingDialog`, `ModeInfoModalDialog`, `VersionPlanetaryModalSheet`, `QuickActionsCustomizerSheet`).
+  - Added `WindowInsets.safeDrawing` and vertical `24.dp` outer margins, preventing floating cards from overlapping or sticking to the system navigation bar and Android gesture pill.
+  - Increased bottom scroll content padding (up to `16.dp` in Quick Appearance and `14.dp` in Premium dialog) and ensured accessible action button height (`48.dp`), eliminating the missing bottom spacing issue.
+
+---
+
 ## [v4.0.3] — `versionCode = 25` / `versionName = "4.0.3"`
 
 ### 🇷🇺 Русский
