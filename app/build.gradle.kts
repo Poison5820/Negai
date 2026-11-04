@@ -16,8 +16,8 @@ android {
     applicationId = "app.negai.player"
     minSdk = 24
     targetSdk = 36
-    versionCode = 17
-    versionName = "3.6"
+    versionCode = 18
+    versionName = "3.6.1"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
