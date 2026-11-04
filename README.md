@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-3.4.2--pre-00E5FF?style=flat-square" alt="Version 3.4.2-pre" />
+  <img src="https://img.shields.io/badge/version-3.6.1-00E5FF?style=flat-square" alt="Version 3.6.1" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/Kotlin-2.x_%7C_Jetpack_Compose-7F52FF?style=flat-square&logo=kotlin" alt="Kotlin & Compose" />
@@ -119,9 +119,18 @@ gradle :app:testDebugUnitTest
 
 ---
 
+## Licensing & Third-Party Components
+
+- **Anime4K (MIT License)**: Real-time anime video upscaling shaders and line reconstruction algorithms are based on [bloc97/Anime4K](https://github.com/bloc97/Anime4K). Full license text and copyright notice: [`LICENSE_ANIME4K.txt`](LICENSE_ANIME4K.txt).
+- **FFmpeg (GNU LGPL v2.1+)**: Software audio decoding (AC3, E-AC3, DTS, DTS-HD MA, Dolby TrueHD, FLAC, Opus) is provided through the Jellyfin Media3 extension dynamically loading shared `.so` libraries (`libffmpeg.so`, `libffmpegJNI.so`) without GPL extensions (`--enable-gpl` is omitted). Full compliance details and license text: [`LICENSE_FFMPEG.txt`](LICENSE_FFMPEG.txt).
+- **Negai Application Source**: Open-source anime video player for Android.
+
+---
+
 ## Repository & Obtainium Updates
 
 - **Package ID**: `app.negai.player`
-- **Version**: `3.4.2-pre` (`versionCode = 12`)
+- **Version**: `3.6.1` (`versionCode = 18`)
 - **Anime4K Upstream Attribution**: [https://github.com/bloc97/Anime4K](https://github.com/bloc97/Anime4K) (MIT License, Copyright © 2019–2021 bloc97)
+- **FFmpeg Upstream**: [https://ffmpeg.org](https://ffmpeg.org) (LGPL v2.1+)
 - **GitHub Repository**: [https://github.com/Poison5820/Negai](https://github.com/Poison5820/Negai)

@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/версия-3.4.2--pre-00E5FF?style=flat-square" alt="Версия 3.4.2-pre" />
+  <img src="https://img.shields.io/badge/версия-3.6.1-00E5FF?style=flat-square" alt="Версия 3.6.1" />
   <img src="https://img.shields.io/badge/пакет-app.negai.player-00B8D4?style=flat-square" alt="Пакет приложения" />
   <img src="https://img.shields.io/badge/платформа-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Платформа" />
   <img src="https://img.shields.io/badge/Kotlin-2.x_%7C_Jetpack_Compose-7F52FF?style=flat-square&logo=kotlin" alt="Kotlin и Compose" />
@@ -119,9 +119,18 @@ gradle :app:testDebugUnitTest
 
 ---
 
+## Лицензии и сторонние компоненты (Third-Party Licenses)
+
+- **Anime4K (лицензия MIT)**: Шейдеры масштабирования рисовки и алгоритмы реконструкции контуров базируются на [bloc97/Anime4K](https://github.com/bloc97/Anime4K). Полный текст лицензии и уведомление об авторских правах: [`LICENSE_ANIME4K.txt`](LICENSE_ANIME4K.txt).
+- **FFmpeg (лицензия GNU LGPL v2.1+)**: Программное декодирование аудиоформатов (AC3, E-AC3, DTS, DTS-HD MA, Dolby TrueHD, FLAC, Opus) выполняется через расширение Jellyfin Media3 с динамической загрузкой разделяемых библиотек `.so` (`libffmpeg.so`, `libffmpegJNI.so`) без использования GPL-модулей (`--enable-gpl` отключён). Полные юридические условия и текст лицензии: [`LICENSE_FFMPEG.txt`](LICENSE_FFMPEG.txt).
+- **Исходный код приложения Negai**: Открытый видеоплеер для Android.
+
+---
+
 ## Репозиторий и обновления через Obtainium
 
 - **Идентификатор пакета**: `app.negai.player`
-- **Версия**: `3.4.2-pre` (`versionCode = 12`)
+- **Версия**: `3.6.1` (`versionCode = 18`)
 - **Оригинальный репозиторий Anime4K**: [https://github.com/bloc97/Anime4K](https://github.com/bloc97/Anime4K) (лицензия MIT, Copyright © 2019–2021 bloc97)
+- **Проект FFmpeg**: [https://ffmpeg.org](https://ffmpeg.org) (лицензия LGPL v2.1+)
 - **Официальный репозиторий GitHub**: [https://github.com/Poison5820/Negai](https://github.com/Poison5820/Negai)
