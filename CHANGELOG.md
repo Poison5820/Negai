@@ -5,6 +5,24 @@
 
 ---
 
+## [v4.0.6] — `versionCode = 28` / `versionName = "4.0.6"`
+
+### 🇷🇺 Русский
+- **Единые максимальные внешние отступы для всех левитирующих окон:**
+  - В `FloatingElevatedDialog`, `VersionPlanetaryModalSheet`, `ModeInfoModalDialog` и `QuickActionsCustomizerSheet` заданы общие константы внешних отступов (`20.dp` по горизонтали, `24.dp` по вертикали с `WindowInsets.safeDrawing`), единая максимальная ширина (`280.dp..520.dp`) и адаптивная максимальная высота (`rememberFloatingDialogMaxHeight()`, до `640.dp` с гарантированным запасом от краёв экрана).
+  - Убрано переполнение высоты контейнера диалога (`fillMaxSize` внутри `Dialog`) и отсутствие верхнего предела `heightIn` у `FloatingElevatedDialog`, из-за которых высокие окна (такие как `Negai Premium` и `Быстрое оформление`) смещались вниз и прижимались вплотную к краю экрана.
+- **Гарантированная автонумерация версий в CI (`release.yml`):**
+  - В GitHub Actions workflow добавлена автоматическая проверка существующих релизов и тегов: если текущая версия `x.x.y` уже опубликована в репозитории, CI автоматически увеличивает патч-версию `y` и `versionCode` перед сборкой APK, чтобы никогда не перезаписывать предыдущий релиз.
+
+### 🇬🇧 English
+- **Unified Maximum Outer Margins Across All Levitating Windows:**
+  - Standardized outer padding (`20.dp` horizontal, `24.dp` vertical with `WindowInsets.safeDrawing`), width bounds (`280.dp..520.dp`), and adaptive maximum height (`rememberFloatingDialogMaxHeight()`, up to `640.dp` with guaranteed screen-edge clearance) across `FloatingElevatedDialog`, `VersionPlanetaryModalSheet`, `ModeInfoModalDialog`, and `QuickActionsCustomizerSheet`.
+  - Fixed dialog container height overflow (`fillMaxSize` inside `Dialog`) and missing `heightIn` cap on `FloatingElevatedDialog` that previously pushed tall dialogs (`Negai Premium`, `Quick Appearance`) right up against the bottom edge of the screen.
+- **Guaranteed Automatic Version Increment in CI (`release.yml`):**
+  - Added automatic release tag collision detection in GitHub Actions so that if `vX.Y.Z` already exists, the workflow automatically increments the patch version `Z` and `versionCode` prior to building the APK instead of overwriting the previous release.
+
+---
+
 ## [v4.0.5] — `versionCode = 27` / `versionName = "4.0.5"`
 
 ### 🇷🇺 Русский
