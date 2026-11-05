@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.0.2-00E5FF?style=flat-square" alt="Version 4.0.2" />
+  <img src="https://img.shields.io/badge/version-4.0.6-00E5FF?style=flat-square" alt="Version 4.0.6" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/license-Proprietary_(Closed_Source)-FF4D8D?style=flat-square" alt="Proprietary License" />
@@ -61,8 +61,12 @@
 
 ---
 
-## What's New in Release 4.0.2 (Build 24)
+## What's New in Release 4.0.6 (Build 28)
 
+- **Unified Outer Margins & Max Height for Levitating Windows**:
+  - Standardized outer screen margins (`20.dp` horizontal, `24.dp` vertical), width bounds (`280.dp..520.dp`), and dynamic maximum height (`min(640.dp, screenHeight - 48.dp)`) across all levitating modal windows (`FloatingElevatedDialog`, `Negai Premium`, `QuickThemeBottomSheet`, `VersionPlanetaryModalSheet`, `ModeInfoModalDialog`, `QuickActionsCustomizerSheet`) so no dialog ever touches the top or bottom screen edges.
+- **Native System Auto-Brightness Preservation on HDR10 / Dolby Vision Videos**:
+  - Removed forced `screenBrightness = 1.0f` and `COLOR_MODE_HDR` overrides so launching HDR10 / HLG / Dolby Vision videos keeps the user's system auto-brightness untouched until the brightness gesture is explicitly used.
 - **Top-Bar Negai Premium Star Button & Unified Premium Branding**:
   - Compact golden star button in the top bar right beside the palette icon opening the `Negai Premium` levitating purchase dialog (Google Play Billing); unified rebranding from `PRO` to `Premium`; smaller right-aligned star indicators on paid palettes and dialog styles that automatically disappear once Premium is unlocked.
 - **Blu-ray BDAV (`.m2ts`) Demuxer & DTS-HD Master Audio 7.1 (`0x86`) Playback**:
@@ -143,7 +147,7 @@ gradle :app:testDebugUnitTest
 ## Repository & Obtainium Updates
 
 - **Package ID**: `app.negai.player`
-- **Version**: `4.0.2` (`versionCode = 24`)
+- **Version**: `4.0.6` (`versionCode = 28`)
 - **Software License**: Proprietary (Closed-Source, All Rights Reserved)
 - **Anime4K Upstream Attribution**: [https://github.com/bloc97/Anime4K](https://github.com/bloc97/Anime4K) (MIT License, Copyright © 2019–2021 bloc97)
 - **MIT KEMAR HRTF Upstream Attribution**: [https://sound.media.mit.edu/resources/KEMAR.html](https://sound.media.mit.edu/resources/KEMAR.html) (MIT License, Bill Gardner & Keith Martin, MIT Media Lab)
