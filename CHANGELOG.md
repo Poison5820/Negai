@@ -5,6 +5,30 @@
 
 ---
 
+## [v4.0.11] — `versionCode = 33` / `versionName = "4.0.11"`
+
+### 🇷🇺 Русский
+- **Исправление `Unexpected runtime error` на Blu-ray `.m2ts` с Dolby TrueHD + Atmos (`0x83`) и E-AC-3 JOC 7.1 (`0x84`):**
+  - **Демультиплексирование субпотоков Blu-ray `stream_id = 0xFD` (`0x71`, `0x72`, `0x76`):** В `BdavM2tsExtractor` и `HdmvExtendedPesReader` реализовано чтение 7-битного поля `stream_id_extension` из PES-заголовка: для гибридных дорожек Dolby TrueHD + Atmos (`0x83`) субпотоки `0x76` (ядро AC-3) и `0x72` (MLP FBA 16-ch) разделяются без повреждения синхрослова `0x0B77`, а для Blu-ray E-AC-3 JOC 7.1 (`0x84`) базовый кадр `0x71` и зависимый субпоток расширения `0x72` атомарно склеиваются в единый фрейм (`HdmvEac3Reader`) для декодера FFmpeg 7.1.
+  - **Баланс буфера `SampleQueue` при перемотке и старте с сохранённой позиции:** В `NormalizingTrackOutput` добавлен сброс `resetOnSeek()` и точный учёт `safeOffset` при отбрасывании неключевых слайсов до первого `IDR`, что полностью устраняет исключение `IllegalArgumentException` / `Unexpected runtime error` в `SampleQueue.sampleMetadata`.
+- **Устранение тормозов на видео 250+ Мбит/с (Snapdragon 7+ Gen 3):**
+  - **Прямой zero-copy вывод через `SurfaceView` без шейдеров:** Когда `Anime4K` и `MEMC` выключены (`!hasVisualProcessing`), видео с 0-го кадра выводится напрямую через аппаратный оверлей `SurfaceView` (`HdrVideoSurface`) в обход `GLSurfaceView` и `SurfaceTexture`.
+  - **Разгрузка аппаратного декодера и защита от ложных сбросов к ключевому кадру:** Включена асинхронная очередь `MediaCodec` (`forceEnableMediaCodecAsynchronousQueueing()`), аппаратный пропуск неопорных B-кадров (`vendor.qti-ext-dec-picture-order.enable`), скорректирован порог аварийного сброса к IDR до `-650 мс` (вместо `-180 мс`) и добавлен замер реального времени `eglSwapBuffers()` в `GLThread` с защитой `renderInFlight`.
+- **Настоящее переключение цветового пространства экрана в HDR (`BT.2020 PQ / HLG / Display P3`):**
+  - **Снятие ограничения SDR-запаса яркости и явная передача метаданных `BT.2020`:** Убран вызов `setDesiredHdrHeadroom(1.0f)` на Android 14+ (блокировавший HDR-диапазон на уровне `1.0x` SDR), в `MediaCodecVideoRenderer.getMediaFormat()` добавлена явная передача `COLOR_STANDARD_BT2020`, `COLOR_TRANSFER_ST2084` / `COLOR_TRANSFER_HLG` и `KEY_HDR_STATIC_INFO` в `SurfaceView`, а для шейдерного режима `Anime4KGlSurfaceView` добавлен 10-битный `RGBA1010102` `EGLConfig` и `EGL_GL_COLORSPACE_BT2020_PQ_EXT` / `HLG_EXT` / `DISPLAY_P3`.
+
+### 🇬🇧 English
+- **Fixed `Unexpected runtime error` on Blu-ray `.m2ts` with Dolby TrueHD + Atmos (`0x83`) & E-AC-3 JOC 7.1 (`0x84`):**
+  - **Blu-ray `stream_id = 0xFD` Substream Demuxing (`0x71`, `0x72`, `0x76`):** Added 7-bit PES `stream_id_extension` parsing in `BdavM2tsExtractor` and `HdmvExtendedPesReader`, separating interleaved AC-3 core (`0x76`) and TrueHD MLP (`0x72`) substreams on `0x83` tracks (`HdmvTrueHdReader`) and atomically coalescing `[AC-3 Core + E-AC-3 Dependent Substream]` frames on `0x84` tracks (`HdmvEac3Reader`) for FFmpeg 7.1 decoding.
+  - **`SampleQueue` Offset Balance on Seek & Resume:** Added `resetOnSeek()` and strict `safeOffset` accounting in `NormalizingTrackOutput` when dropping pre-IDR slices, eliminating `SampleQueue.sampleMetadata` `Unexpected runtime error` crashes on seek/resume.
+- **Eliminated 250+ Mbps Video Lag on Snapdragon 7+ Gen 3:**
+  - **Direct Zero-Copy `SurfaceView` Output When Shaders Are Off:** Routed all video directly to `SurfaceView` (`HdrVideoSurface`) from frame 0 whenever `Anime4K` and `MEMC` are `OFF`, bypassing `GLSurfaceView` / `SurfaceTexture` GPU copies.
+  - **Hardware Decoder Offload & Anti-Stall Tuning:** Enabled `forceEnableMediaCodecAsynchronousQueueing()`, Qualcomm low-latency picture-order / B-frame hints, relaxed `shouldDropBuffersToKeyframe` to `-650 ms` (preventing premature `codec.flush()` freezes), and measured true post-`eglSwapBuffers()` GPU frame duration with a `renderInFlight` guard.
+- **True Hardware Display Color Space Switching for HDR (`BT.2020 PQ / HLG / Display P3`):**
+  - **Unlocked HDR Headroom & Explicit `BT.2020` Format Keys:** Replaced `setDesiredHdrHeadroom(1.0f)` with `0f` on Android 14+, explicitly populated `COLOR_STANDARD_BT2020`, `COLOR_TRANSFER_ST2084` / `COLOR_TRANSFER_HLG`, and `KEY_HDR_STATIC_INFO` on `MediaCodec`, and added 10-bit `RGBA1010102` + `EGL_GL_COLORSPACE_BT2020_PQ_EXT` / `HLG_EXT` / `DISPLAY_P3` support to `Anime4KGlSurfaceView`.
+
+---
+
 ## [v4.0.10] — `versionCode = 32` / `versionName = "4.0.10"`
 
 ### 🇷🇺 Русский
