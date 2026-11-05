@@ -5,6 +5,30 @@
 
 ---
 
+## [v4.0.8] — `versionCode = 30` / `versionName = "4.0.8"`
+
+### 🇷🇺 Русский
+- **Исправление воспроизведения и перемотки Blu-ray `.m2ts` (`BDAV 192 байта`, `DTS-HD Master Audio 7.1`, 4-слайсовый `H.264 High@L4.1`):**
+  - **Предчтение длительности и пакетно-выровненный `SeekMap`:** В `BdavM2tsExtractor` добавлено предварительное сканирование меток `PTS` в начале и конце `.m2ts` файла до запуска `TsExtractor`, что исключает внутренний прыжок `TsDurationReader` в конец файла без сброса буферов элементарных потоков, а также пакетно-выровненный `BdavPacketAlignedSeekMap` с запасом на ключевой кадр.
+  - **Нормализация шкалы времени к `00:00`:** Добавлен `BdavTimestampCoordinator`, автоматически вычитающий стартовое смещение `PTS` Blu-ray диска (например, `08:11` / `491 с`) и сглаживающий разрывы `PTS` для всех дорожек, благодаря чему таймлайн всегда начинается с `00:00` и точно соответствует длительности ролика (`01:28`).
+  - **Устранение зелёных вспышек и залипания программного декодера (`SW`):** Отключён флаг `FLAG_ALLOW_NON_IDR_KEYFRAMES` и добавлен строгий фильтр `IDR` ключевых кадров в `NormalizingTrackOutput` при старте и после перемотки (предотвращающий декодирование зависимых слайсов 4-slice Blu-ray H.264 по пустым буферам `Y=0, U=0, V=0`); автоматический аварийный фоллбэк больше не перезаписывает пользовательскую настройку декодера в `DataStore` (`HW+` остаётся по умолчанию).
+- **Переработка тем «Матовое стекло» (`Frosted Glass`) и «Жидкое стекло» (`Liquid Glass`):**
+  - **Устранён прямоугольный артефакт позади полупрозрачных элементов и окон:** Отключена аппаратная тень Skia (`shadowElevation = 0.dp`, `tonalElevation = 0.dp`) на всех полупрозрачных стеклянных поверхностях, которая ранее рисовала прямоугольник внутренней умбры (`inner umbra`) сквозь прозрачный фон.
+  - **Жидкое стекло (`Liquid Glass`):** Повышена оптическая прозрачность (`alpha = 0.20..0.24` для элементов, `0.42` для модальных окон) и добавлен 4-слойный шейдер краевого линзового преломления (`Modifier.negaiGlassSurfaceOverlay` — внешний мениск преломления, тёмная линзовая фаска глубины, противоположная внутренняя каустика и острый влажный блик по контуру).
+  - **Матовое стекло (`Frosted Glass`):** Добавлен процедурный шейдер мелкозернистого матового шума (`FrostedNoiseTileBrush` 96×96 с наложением `BlendMode.Overlay`), сатиновая диффузия контура и системное размытие фона позади левитирующих окон (`FLAG_BLUR_BEHIND` на Android 12+).
+
+### 🇬🇧 English
+- **Fixed Blu-ray `.m2ts` Playback & Seeking (`BDAV 192-byte`, `DTS-HD Master Audio 7.1`, 4-slice `H.264 High@L4.1`):**
+  - **Pre-Read Duration Scanner & Packet-Aligned `SeekMap`:** Added pre-read head/tail PES `PTS` scanning in `BdavM2tsExtractor` before `TsExtractor` runs (preventing mid-stream `TsDurationReader` EOF seeks without elementary reader resets) and `BdavPacketAlignedSeekMap` with keyframe lead-in.
+  - **Zero-Based Timeline Normalization (`00:00`):** Added `BdavTimestampCoordinator` to normalize non-zero Blu-ray disc `PTS` base offsets (fixing the `08:11 / 01:28` timeline bug) and smooth mid-stream `PTS` discontinuities across all tracks.
+  - **Eliminated Green Screen Flashes & Sticky `SW` Decoder Fallback:** Removed `FLAG_ALLOW_NON_IDR_KEYFRAMES` and enforced strict `IDR` keyframe gating in `NormalizingTrackOutput` on startup and post-seek (preventing 4-slice Blu-ray H.264 streams from decoding dependent slices against uninitialized `Y=0, U=0, V=0` buffers); transient error recovery no longer overwrites the user's saved `HW+` preference in `DataStore`.
+- **Reworked "Frosted Glass" & "Liquid Glass" Interface Themes:**
+  - **Removed Rectangular Artifact Behind Translucent Elements:** Zeroed Skia hardware shadow elevation (`shadowElevation = 0.dp`, `tonalElevation = 0.dp`) on all translucent surfaces so the solid inner umbra polygon is never visible through the glass.
+  - **Liquid Glass:** Increased optical transparency (`alpha = 0.20..0.24` for elements, `0.42` for modals) and implemented a 4-band curved lens edge refraction overlay (`Modifier.negaiGlassSurfaceOverlay` — outer refractive meniscus, concave depth trough, opposing inner caustic highlight, and crisp wet specular rim).
+  - **Frosted Glass:** Added a procedural 96×96 fine matte noise grain shader (`FrostedNoiseTileBrush` with `BlendMode.Overlay`), satin inner frost rim, and Android 12+ window background blur (`FLAG_BLUR_BEHIND`) on levitating dialogs.
+
+---
+
 ## [v4.0.7] — `versionCode = 29` / `versionName = "4.0.7"`
 
 ### 🇷🇺 Русский
