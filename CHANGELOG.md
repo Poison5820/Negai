@@ -5,6 +5,28 @@
 
 ---
 
+## [v4.0.10] — `versionCode = 32` / `versionName = "4.0.10"`
+
+### 🇷🇺 Русский
+- **Адаптивный пропуск кадров декодера и оптимизация буфера на видео 250+ Мбит/с (`AdaptiveFrameDropPolicy`):**
+  - **Ранний сброс опоздавших кадров с защитой от замирания картинки:** В `MediaCodecVideoRenderer` внедрён порог сброса `-12 мс` для сверхтяжёлых потоков (`>= 80 Мбит/с`) и серийных задержек (вместо стандартных `-30 мс`), при этом гарантируется принудительная отрисовка опорного кадра не реже каждых `220 мс`, чтобы экран никогда не замирал.
+  - **Быстрый перескок к ключевому кадру (`IDR`) при перегрузке декодера:** При отставании декодирования более чем на `180 мс` на 250 Мбит/с потоках очередь декодера автоматически сбрасывается до следующего ключевого кадра (`shouldDropBuffersToKeyframe`), мгновенно восстанавливая синхронизацию с аудио.
+  - **Приоритет реального времени и лимит памяти предбуфера `96 МБ`:** Для `MediaCodec` активирован `KEY_PRIORITY = 0` (реальное время), `KEY_OPERATING_RATE` и пропуск дублирующихся буферов релиза; в `DefaultLoadControl` установлен потолок `targetBufferBytes = 96 МБ` (`prioritizeTimeOverSizeThresholds = false`), предотвращающий выделение 1.5–2.5 ГБ ОЗУ и фризы сборщика мусора на 250 Мбит/с файлах.
+- **Интерполяция кадров (`MEMC`) на всех сложных форматах (HDR, 10-бит, Blu-ray `.m2ts`, 4K 250 Мбит/с) с авто-пропуском субкадров:**
+  - **Активация MEMC и Anime4K на HDR / 10-бит потоках:** В `PlayerScreen` конвейер `Anime4KVideoSurface` теперь автоматически используется для всех форматов (включая HDR10 / HLG / 10-бит BT.2020) при включённой интерполяции кадров (`MEMC`) или `Anime4K`, а также ускорен захват исходного FPS по дельтам `PTS` (4 кадра вместо 8) и оценка битрейта по размеру файла.
+  - **Автоматический пропуск субкадров MEMC и масштабирование буферов движения при нагрузке:** В `Anime4KRenderer` добавлен мониторинг времени рендера GPU и VSync (`evaluateMemcTick`): при нехватке времени кадра пропускается синтез промежуточного субкадра (`DROP_SUBFRAME_TO_REFERENCE`), при скачке `PTS` после пропуска кадра декодером пропускается проход оптического потока (`SKIP_OPTICAL_FLOW_CATCHUP`), а внутренние FBO оценки движения ограничиваются до `1920px` (`1440px` под высокой нагрузкой).
+
+### 🇬🇧 English
+- **Adaptive Decoder Frame Dropping & Buffer Optimization for 250+ Mbps Video (`AdaptiveFrameDropPolicy`):**
+  - **Early Late-Frame Dropping with Anti-Freeze Guarantee:** Custom `MediaCodecVideoRenderer` policy drops late output buffers at `-12 ms` on ultra-high-bitrate streams (`>= 80 Mbps`) instead of waiting `-30 ms`, while enforcing a maximum `220 ms` interval between rendered frames so video never freezes completely.
+  - **Fast Keyframe (`IDR`) Catch-Up Under Decoder Overload:** Flushes queued packets to the next keyframe when lag exceeds `180 ms` on ultra-high-bitrate streams (`260 ms` standard), immediately restoring A/V sync.
+  - **Realtime Codec Priority & `96 MB` Buffer Memory Cap:** Configured `MediaCodec` with `KEY_PRIORITY = 0` (realtime), `KEY_OPERATING_RATE`, and identical release time skipping; capped `DefaultLoadControl` `targetBufferBytes` to `96 MB` (`prioritizeTimeOverSizeThresholds = false`) to prevent 1.5–2.5 GB RAM allocation and GC stalls on 250 Mbps files.
+- **Frame Interpolation (`MEMC`) Across All Complex Formats (HDR, 10-bit, Blu-ray `.m2ts`, 4K 250 Mbps) with Auto Sub-Frame Skipping:**
+  - **Enabled MEMC & Anime4K on HDR / 10-bit Streams:** Updated `PlayerScreen` so `Anime4KVideoSurface` runs on HDR10 / HLG / 10-bit BT.2020 streams whenever MEMC or Anime4K is active, alongside faster 4-sample `PTS` FPS detection and file-size bitrate estimation.
+  - **Automatic MEMC Sub-Frame Skipping & Internal FBO Scaling Under Load:** Integrated `evaluateMemcTick` into `Anime4KRenderer` to automatically skip intermediate sub-frame synthesis (`DROP_SUBFRAME_TO_REFERENCE`) when GPU/VSync budget is exceeded, skip optical-flow estimation across decoder frame-drop jumps (`SKIP_OPTICAL_FLOW_CATCHUP`), and bound internal MEMC FBOs to `1920px` (`1440px` under load).
+
+---
+
 ## [v4.0.9] — `versionCode = 31` / `versionName = "4.0.9"`
 
 ### 🇷🇺 Русский
