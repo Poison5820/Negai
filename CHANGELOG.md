@@ -5,6 +5,30 @@
 
 ---
 
+## [v4.0.7] — `versionCode = 29` / `versionName = "4.0.7"`
+
+### 🇷🇺 Русский
+- **Единая дизайн-система (`UnifiedDesignSystem`) и 3 глобальные темы интерфейса:**
+  - Все однотипные UI-элементы приложения (карточки папок и настроек, строки выбора и переключатели, левитирующие окна и листы, бейджи, иконки-кнопки и ползунки) переведены на единые шаблоны (`UnifiedSurfaceCard`, `UnifiedModalSurface`, `UnifiedSelectionRow`, `UnifiedBadgeChip`, `UnifiedIconButton`, `unifiedSliderColors`) и токены `LocalNegaiUiStyleTokens`.
+  - Добавлены **3 глобальные темы интерфейса** (`UiThemeStyle`), применяемые одновременно ко всему приложению, левитирующим окнам и HUD видеоплеера:
+    - **Плоский (Material 3 Expressive)** — бесплатный базовый стиль без теней с чёткими контурами и тональными контейнерами M3.
+    - **Матовое стекло (Frosted Glass ★, Negai Premium)** — полупрозрачные матовые подложки под элементы и фоны окон с мягким рассеянным свечением контура.
+    - **Жидкое стекло (Liquid Glass ★, Negai Premium)** — многослойное оптическое преломление, двойные блики граней и глубокий объём.
+- **Переключатель акцентной тонировки элементов (`accentTintEnabled`):**
+  - В настройки оформления и окно «Быстрое оформление» добавлен независимый переключатель тонировки подложек, рамок, кнопок и окон под активный акцентный цвет либо в нейтральном ахроматическом стиле без цветовой окраски.
+
+### 🇬🇧 English
+- **Unified Design System (`UnifiedDesignSystem`) & 3 Global Interface Themes:**
+  - Standardized all identical UI element types across the app (folder & settings cards, selection/toggle rows, levitating dialogs & bottom sheets, badges, icon buttons, and sliders) onto shared composable templates (`UnifiedSurfaceCard`, `UnifiedModalSurface`, `UnifiedSelectionRow`, `UnifiedBadgeChip`, `UnifiedIconButton`, `unifiedSliderColors`) driven by `LocalNegaiUiStyleTokens`.
+  - Introduced **3 global interface themes** (`UiThemeStyle`) applied uniformly across the app, levitating windows, and video player HUD:
+    - **Flat (Material 3 Expressive)** — free base style with minimal shadows, crisp outlines, and M3 tonal containers.
+    - **Frosted Glass (★ Negai Premium)** — translucent matte surface pills and window backings with a diffused frost rim.
+    - **Liquid Glass (★ Negai Premium)** — multi-layer optical refraction sheen, dual specular edge highlights, and deep lens elevation.
+- **Independent Element Accent Tint Toggle (`accentTintEnabled`):**
+  - Added a dedicated toggle in Appearance Settings and the Quick Appearance dialog to switch element surfaces, borders, buttons, and windows between active accent tinting and neutral achromatic styling.
+
+---
+
 ## [v4.0.6] — `versionCode = 28` / `versionName = "4.0.6"`
 
 ### 🇷🇺 Русский
