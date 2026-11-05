@@ -5,6 +5,26 @@
 
 ---
 
+## [v4.0.9] — `versionCode = 31` / `versionName = "4.0.9"`
+
+### 🇷🇺 Русский
+- **Переработка физики стекла и света в теме «Жидкое стекло» (`Liquid Glass` / Fluid Glassmorphism):**
+  - **Скошенная стеклянная грань (`Bevel / Chamfer`) вместо плоских неоновых рамок:** Полностью убраны равномерные неоновые обводки `1px solid var(--accent)`. Вместо них реализована скошенная грань с падением света сверху вниз: верхняя кромка имеет мягкий светлый блик (`rgba(255, 255, 255, 0.35)` с деликатным 14% оттенком акцента), плавно затухающий к нижней кромке (`rgba(255, 255, 255, 0.08)`).
+  - **Объём и толщина выпуклой линзы (`Specular Highlights & Inner Shadow`):** Добавлены внутренние блики и тени толстой полированной линзы (`inset 0 1px 1px rgba(255, 255, 255, 0.40)` сверху и `inset 0 -2px 4px rgba(0, 0, 0, 0.30)` снизу), а также мягкая внешняя тень модальных окон (`0 20px 40px rgba(0, 0, 0, 0.45)` через `Modifier.negaiModalExteriorDropShadow` с отсечением `ClipOp.Difference` строго снаружи стекла).
+  - **Глубокое оптическое размытие фона (`Backdrop Blur`):** Для модальных окон («Быстрое оформление», «Negai Premium» и др.) и выпадающих листов увеличена глубина оптического размытия (`blurBehindRadius = 64` + насыщенная световая диффузия `saturate(180%)`), чтобы фоновый текст превращался в мягкую абстрактную световую текстуру и не мешал чтению.
+  - **Тело стекла `135°` и деликатная тонировка (`5–12%`):** Фон стеклянных панелей выполнен диагональным градиентом под углом `135°` от `rgba(255, 255, 255, 0.12)` к `rgba(255, 255, 255, 0.03)`. При включённой акцентной тонировке оттенок акцента подмешивается в тело стекла с минимальной непрозрачностью (`5–12%`), не заливая рамки.
+  - **Объёмные гелевые переключатели и радио-кнопки (`UnifiedGlassSwitch` и `UnifiedGlassRadioButton`):** В стеклянных темах переключатели и радио-кнопки выполнены в виде выпуклых капель смолы/геля с внутренним градиентным свечением и плавным смещением светового блика при наведении и нажатии (в теме «Плоский» сохранены стандартные элементы Material 3).
+
+### 🇬🇧 English
+- **Rebuilt Glass & Light Physics for the "Liquid Glass" (Fluid Glassmorphism) Theme:**
+  - **Top-Down Beveled Glass Edge (`Bevel / Chamfer`) Replacing Flat Neon Borders:** Eliminated uniform bright `1px solid var(--accent)` outlines and replaced them with a top-down chamfered glass edge: a soft top specular highlight (`rgba(255, 255, 255, 0.35)` with a subtle 14% accent hint) tapering down to a nearly invisible bottom edge (`rgba(255, 255, 255, 0.08)`).
+  - **Convex Lens Volume & Thickness (`Specular Highlights & Inner Shadow`):** Added thick lens inner highlights and shadows (`inset 0 1px 1px rgba(255, 255, 255, 0.40)` at the top, `inset 0 -2px 4px rgba(0, 0, 0, 0.30)` at the bottom) and an exterior-only modal drop shadow (`0 20px 40px rgba(0, 0, 0, 0.45)` via `Modifier.negaiModalExteriorDropShadow` with `ClipOp.Difference`).
+  - **Deep Optical Backdrop Blur (`Backdrop Blur`):** Increased modal and menu backdrop blur (`blurBehindRadius = 64` + `saturate(180%)` radial light diffusion) so background text dissolves into a soft abstract light texture rather than bleeding through.
+  - **`135°` Glass Body Gradient & Subtle `5–12%` Tinting:** Replaced flat fills with a `135°` diagonal glass gradient from `rgba(255, 255, 255, 0.12)` to `rgba(255, 255, 255, 0.03)`, mixing the accent color into the glass body at `5–12%` opacity when element tinting is enabled.
+  - **3D Resin / Gel Interactive Controls (`UnifiedGlassSwitch` & `UnifiedGlassRadioButton`):** Styled active items, switches, and radio buttons in glass themes as 3D resin/gel droplets with inner gradient luminescence and interactive specular shift on hover/press (keeping standard Material 3 controls in the Flat theme).
+
+---
+
 ## [v4.0.8] — `versionCode = 30` / `versionName = "4.0.8"`
 
 ### 🇷🇺 Русский
