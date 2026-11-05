@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/версия-4.0.2-00E5FF?style=flat-square" alt="Версия 4.0.2" />
+  <img src="https://img.shields.io/badge/версия-4.0.6-00E5FF?style=flat-square" alt="Версия 4.0.6" />
   <img src="https://img.shields.io/badge/пакет-app.negai.player-00B8D4?style=flat-square" alt="Пакет приложения" />
   <img src="https://img.shields.io/badge/платформа-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Платформа" />
   <img src="https://img.shields.io/badge/лицензия-Проприетарная_(Closed_Source)-FF4D8D?style=flat-square" alt="Проприетарная лицензия" />
@@ -61,8 +61,12 @@
 
 ---
 
-## Что нового в релизе 4.0.2 (Сборка 24)
+## Что нового в релизе 4.0.6 (Сборка 28)
 
+- **Единые максимальные внешние отступы и высота для всех левитирующих окон**:
+  - Унифицированы внешние отступы от краёв экрана (`20.dp` по горизонтали, `24.dp` по вертикали), ограничения ширины (`280.dp..520.dp`) и адаптивная максимальная высота (`min(640.dp, screenHeight - 48.dp)`) для всех левитирующих окон (`FloatingElevatedDialog`, `Negai Premium`, `QuickThemeBottomSheet`, `VersionPlanetaryModalSheet`, `ModeInfoModalDialog`, `QuickActionsCustomizerSheet`), чтобы ни одно окно не упиралось в края экрана.
+- **Сохранение системной автояркости на HDR10 / Dolby Vision видео**:
+  - Убрано принудительное выставление `screenBrightness = 1.0f` и `COLOR_MODE_HDR` при открытии HDR-видео — экран сохраняет системную автояркость до тех пор, пока пользователь сам не изменит яркость свайпом.
 - **Кнопка звезды Negai Premium вверху возле палитры и единое обозначение Premium**:
   - Компактная золотая звезда в верхней панели рядом с иконкой палитры открывает левитирующее окно **Negai Premium** (Google Play Billing); все обозначения `PRO` заменены на `Premium`; уменьшенные звёзды у платных палитр и стилей окон расположены справа и автоматически исчезают после покупки.
 - **Демультиплексор Blu-ray BDAV (`.m2ts`) и воспроизведение DTS-HD Master Audio 7.1 (`0x86`)**:
@@ -143,7 +147,7 @@ gradle :app:testDebugUnitTest
 ## Репозиторий и обновления через Obtainium
 
 - **Идентификатор пакета**: `app.negai.player`
-- **Версия**: `4.0.2` (`versionCode = 24`)
+- **Версия**: `4.0.6` (`versionCode = 28`)
 - **Лицензия приложения**: Проприетарная (Closed-Source, Все права защищены)
 - **Оригинальный репозиторий Anime4K**: [https://github.com/bloc97/Anime4K](https://github.com/bloc97/Anime4K) (лицензия MIT, Copyright © 2019–2021 bloc97)
 - **Оригинальный источник MIT KEMAR HRTF**: [https://sound.media.mit.edu/resources/KEMAR.html](https://sound.media.mit.edu/resources/KEMAR.html) (лицензия MIT, Bill Gardner & Keith Martin, MIT Media Lab)
