@@ -5,6 +5,67 @@
 
 ---
 
+## [v4.0.15] — `versionCode = 37` / `versionName = "4.0.15"`
+
+### 🇬🇧 English
+- **Floating Navigation Dock on Main Screen:**
+  - Modern floating rounded pill dock suspended above the bottom screen edge.
+  - Automatically adapts to **Liquid Glass**, **Frosted Glass**, and **Flat (Material 3)** theme styles.
+  - Integrated gesture-safe navigation bar insets (`WindowInsets.navigationBars`) preventing overlay clipping.
+- **Optical Liquid Glass & Frosted Glass Overhaul (`liquid-glass.ybouane.com`):**
+  - Simulated physical light refraction, specular top gleams, and deep crystal transparency.
+  - Subtle chromatic prism border accents on curved surfaces.
+  - Glass themes are part of Negai Premium (Flat Material 3 is free).
+- **Synchronized Player HUD Interface:**
+  - Video controls, top bars, and dialogs now directly mirror the app's selected theme style and accent palette.
+- **Clean Complementary Palettes:**
+  - Secondary colors apply strictly to secondary chips, badges, and subtle borders, eliminating muddy color combinations on primary controls.
+- **Star Indicators (★) Replacing Text Badges:**
+  - Removed bulky textual `Premium` and `PRO` badges across all dialogs, sheets, and cards in favor of clean gold star icons.
+- **Simplified Theme Settings:**
+  - Removed duplicate theme style controls from the complementary colors section.
+- **Streamlined Packaging & Documentation:**
+  - Single public release artifact `negai.apk` (removed duplicate `app-github-release.apk`).
+  - Restructured documentation to be English-first and user-centric, with technical specifications moved to the bottom.
+
+### 🇷🇺 Русский
+- **Плавающий док навигации на главном экране:**
+  - Современный скругленный парящий док внизу экрана с поддержкой стилей **Жидкое стекло**, **Матовое стекло** и **Flat (Material 3)**.
+  - Корректная обработка системных отступов навигационной панели (`WindowInsets.navigationBars`).
+- **Обновление физики стекла (Liquid Glass):**
+  - Оптическое преломление света, зеркальные блики и кристальная прозрачность.
+  - Тонкая хроматическая кайма по контуру элементов.
+  - Стеклянные темы входят в Negai Premium (стиль Flat бесплатен).
+- **Единый стиль интерфейса плеера:**
+  - Элементы управления проигрывателя теперь оформлены в едином стиле с основным приложением.
+- **Чистые комплементарные палитры:**
+  - Дополнительный цвет применяется строго к бейджам и тонким акцентам, исключая грязные сочетания.
+- **Лаконичные звезды (★) вместо бейджей:**
+  - Текстовые плашки `Premium` и `PRO` заменены на элегантные золотые звезды.
+- **Удаление дублирующихся настроек оформления:**
+  - Убран повторный селектор темы из блока комплементарных цветов.
+- **Оптимизация релиза и документации:**
+  - Единый файл `negai.apk` для открытого репозитория; документация ориентирована на пользователей с английским языком по умолчанию.
+
+---
+
+## [v4.0.14] — `versionCode = 36` / `versionName = "4.0.14"`
+
+### 🇬🇧 English
+- **Natural YouTube-Style Hardware HDR Output:**
+  - Direct `SurfaceView` (`PixelFormat.RGBA_8888`) routing to hardware decoder bypassing SDR shaders.
+  - Natural dynamic HDR brightness scaling (`COLOR_MODE_HDR`, `SurfaceControl.Transaction.setExtendedRangeBrightness`, and `setDesiredHdrHeadroom`) without artificial window brightness overrides.
+  - Dynamic HDR10+ metadata forwarding (`KEY_HDR10_PLUS_INFO` from ITU-T T.35 SEI) and Dolby Vision profile initialization (Profile 5, Profile 7, Profile 8 with CSD passthrough).
+- **Expanded Premium Gating in Market Build:**
+  - Neural Anime4K Mode B CNN and Mode A CNNX alongside MEMC 60fps & Max Screen Hz gated in the Play Store edition (Anime4K Fast, MEMC 2x, and Anime 2D remain free; all features unlocked in the GitHub edition).
+
+### 🇷🇺 Русский
+- **Аппаратный HDR-вывод без завышения системной яркости:**
+  - Прямой вывод через `SurfaceView` в декодер с обходом SDR-шейдеров, поддержка динамических метаданных HDR10+ и профилей Dolby Vision.
+  - Разграничение премиум-функций в сборке для Google Play.
+
+---
+
 ## [v4.0.13] — `versionCode = 35` / `versionName = "4.0.13"`
 
 ### 🇷🇺 Русский
