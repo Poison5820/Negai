@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/версия-4.0.7-00E5FF?style=flat-square" alt="Версия 4.0.7" />
+  <img src="https://img.shields.io/badge/версия-4.0.12-00E5FF?style=flat-square" alt="Версия 4.0.12" />
   <img src="https://img.shields.io/badge/пакет-app.negai.player-00B8D4?style=flat-square" alt="Пакет приложения" />
   <img src="https://img.shields.io/badge/платформа-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Платформа" />
   <img src="https://img.shields.io/badge/лицензия-Проприетарная_(Closed_Source)-FF4D8D?style=flat-square" alt="Проприетарная лицензия" />
@@ -147,7 +147,7 @@ gradle :app:testDebugUnitTest
 ## Репозиторий и обновления через Obtainium
 
 - **Идентификатор пакета**: `app.negai.player`
-- **Версия**: `4.0.7` (`versionCode = 29`)
+- **Версия**: `4.0.12` (`versionCode = 34`)
 - **Лицензия приложения**: Проприетарная (Closed-Source, Все права защищены)
 - **Оригинальный репозиторий Anime4K**: [https://github.com/bloc97/Anime4K](https://github.com/bloc97/Anime4K) (лицензия MIT, Copyright © 2019–2021 bloc97)
 - **Оригинальный источник MIT KEMAR HRTF**: [https://sound.media.mit.edu/resources/KEMAR.html](https://sound.media.mit.edu/resources/KEMAR.html) (лицензия MIT, Bill Gardner & Keith Martin, MIT Media Lab)
