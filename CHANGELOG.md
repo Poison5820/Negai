@@ -5,6 +5,28 @@
 
 ---
 
+## [v4.0.13] — `versionCode = 35` / `versionName = "4.0.13"`
+
+### 🇷🇺 Русский
+- **Двухвариантная архитектура дистрибуции (`flavorDimensions = "distribution"`: `github` и `market`):**
+  - **Вариант `github` (`applicationId = "app.negai.player"`, `FEATURE_UNLOCKED = true`):** Все комплементарные цветовые палитры и глобальные темы «Матовое стекло» и «Жидкое стекло» разблокированы по умолчанию. В исходном наборе `src/github` реализован провайдер поддержки сообщества (`GithubCommunityPaymentProvider`) с плейсхолдерами донатов (Boosty, Patreon, GitHub Sponsors, крипто-кошелёк TON/USDT) без подключения библиотеки Google Play Billing SDK.
+  - **Вариант `market` (`applicationId = "com.negai.player"`, `FEATURE_UNLOCKED = false`):** Коммерческая сборка для Google Play Store с разовой пожизненной покупкой через Google Play Billing (`BillingClient.ProductType.INAPP`, SKU `negai_premium_lifetime`) в изолированном исходном наборе `src/market` (`PlayBillingPaymentProvider`) и полным отсутствием сторонних ссылок донатов на уровне байткода.
+- **Обновлённый CI/CD пайплайн релиза (`.github/workflows/release.yml`):**
+  - Автоматическая сборка и подпись `assembleGithubRelease` (`app-github-release.apk`) и `bundleMarketRelease assembleMarketRelease` (`app-market-release.aab`, `app-market-release.apk`).
+  - Автоматическая выгрузка `app-market-release.aab` в дорожку `internal` (`status: draft`) Google Play Console при наличии секрета `PLAY_STORE_JSON_KEY`.
+  - Раздельная публикация релизов: коммерческие артефакты `market` сохраняются во внутреннем релизе приватного репозитория, а в публичную витрину `Poison5820/Negai` отправляются только `app-github-release.apk`, лицензии, `CHANGELOG.md` и документация.
+
+### 🇬🇧 English
+- **Dual-Flavor Distribution Architecture (`flavorDimensions = "distribution"`: `github` & `market`):**
+  - **`github` Flavor (`applicationId = "app.negai.player"`, `FEATURE_UNLOCKED = true`):** All complementary dual-tone color palettes and 'Frosted Glass' & 'Liquid Glass' UI themes are unlocked out of the box. Isolated `src/github` source set (`GithubCommunityPaymentProvider`) provides community tip-jar placeholders (Boosty, Patreon, GitHub Sponsors, TON/USDT crypto wallet) with zero Google Play Billing SDK dependencies.
+  - **`market` Flavor (`applicationId = "com.negai.player"`, `FEATURE_UNLOCKED = false`):** Commercial Google Play Store build gated behind a one-time lifetime purchase via Google Play Billing (`BillingClient.ProductType.INAPP`, SKU `negai_premium_lifetime`) in `src/market` (`PlayBillingPaymentProvider`), completely stripping all non-Google donation mechanisms at compile time.
+- **Dual-Repository CI/CD Release Pipeline (`.github/workflows/release.yml`):**
+  - Builds and signs both `assembleGithubRelease` (`app-github-release.apk`) and `bundleMarketRelease assembleMarketRelease` (`app-market-release.aab`, `app-market-release.apk`).
+  - Deploys `app-market-release.aab` to the Google Play Console `internal` track as a `draft` release using `PLAY_STORE_JSON_KEY`.
+  - Publishes `market` artifacts exclusively to the private repository release and dispatches only the signed `github` APK, third-party licenses, `CHANGELOG.md`, and READMEs to the public showcase repository.
+
+---
+
 ## [v4.0.11] — `versionCode = 33` / `versionName = "4.0.11"`
 
 ### 🇷🇺 Русский
