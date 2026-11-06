@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.0.12-00E5FF?style=flat-square" alt="Version 4.0.12" />
+  <img src="https://img.shields.io/badge/version-4.0.13-00E5FF?style=flat-square" alt="Version 4.0.13" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/license-Proprietary_(Closed_Source)-FF4D8D?style=flat-square" alt="Proprietary License" />
@@ -147,7 +147,7 @@ gradle :app:testDebugUnitTest
 ## Repository & Obtainium Updates
 
 - **Package ID**: `app.negai.player`
-- **Version**: `4.0.12` (`versionCode = 34`)
+- **Version**: `4.0.13` (`versionCode = 35`)
 - **Software License**: Proprietary (Closed-Source, All Rights Reserved)
 - **Anime4K Upstream Attribution**: [https://github.com/bloc97/Anime4K](https://github.com/bloc97/Anime4K) (MIT License, Copyright © 2019–2021 bloc97)
 - **MIT KEMAR HRTF Upstream Attribution**: [https://sound.media.mit.edu/resources/KEMAR.html](https://sound.media.mit.edu/resources/KEMAR.html) (MIT License, Bill Gardner & Keith Martin, MIT Media Lab)
