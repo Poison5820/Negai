@@ -5,6 +5,80 @@
 
 ---
 
+## [v4.1.1] — `versionCode = 39` / `versionName = "4.1.1"`
+
+### 🇬🇧 English
+- **Decoder Lifecycle & Audio Artifact Fixes:**
+  - Fixed audio crackling/glitches and video freeze on single frame after opening and closing the player multiple times by ensuring immediate surface detachment (`clearVideoSurface()`) and synchronous audio DSP buffer flushes on player exit.
+- **Dynamic Refresh Rate Energy Saving (Non-MEMC):**
+  - Optimized non-MEMC playback refresh rate matching: display dynamically matches video FPS (24/25/30/48/50/60 Hz) and falls back to standard 60 Hz instead of maintaining 120/144 Hz, reducing battery drain on standard videos.
+- **Title Cleaning & Prefix Preservation:**
+  - Preserved title prefixes starting with `hdr10_` and technical metadata tags in video names; fixed file size strings (e.g. `250 mb`) being misidentified as episode numbers.
+- **Episode Number Removal:**
+  - Completely removed episode badges from video cards, player titles, and lists to eliminate incorrect episode numbers derived from file names.
+- **Landscape Levitating Windows & Smooth Edge Dissolve:**
+  - Redesigned levitating dialogs for landscape mode with responsive header scaling and added a smooth optical fading edge (`dialogFadingEdge`) and rounded clipping (`RoundedCornerShape(16.dp)`), eliminating square cutoffs.
+- **Google Play Market Rating:**
+  - Replaced GitHub repository links in the Google Play Market build flavor with a direct "Rate App on Google Play" action.
+
+### 🇷🇺 Русский
+- **Устранение артефактов звука и зависания видео:**
+  - Исправлены хрипы звука и зависание видео на одном кадре при повторных открытиях и закрытиях плеера благодаря немедленной отвязке видео-поверхности (`clearVideoSurface()`) и синхронной очистке аудиопроцессоров при выходе.
+- **Энергосбережение экрана без MEMC:**
+  - Оптимизирована частота обновления экрана при выключенном MEMC: экран подстраивается под FPS видео (24/25/30/48/50/60 Гц) с возвратом к 60 Гц вместо удержания 120/144 Гц, что экономит заряд батареи.
+- **Сохранение названий `hdr10_` и чистота заголовков:**
+  - Исправлено вырезание префиксов названий (например, `hdr10_sample.mp4`); устранены ошибки, когда размер файла (`250 mb`) воспринимался как номер серии.
+- **Полное удаление бейджей эпизодов:**
+  - Полностью удалены бейджи номеров серий из карточек файлов, заголовков плеера и списков, исключив неверные номера.
+- **Левитирующие окна в альбомном режиме и сглаживание краев:**
+  - Адаптирована верстка левитирующих окон для ландшафтной ориентации с компактными заголовками; добавлено скругление `RoundedCornerShape(16.dp)` и градиентная маска затухания краев (`dialogFadingEdge`) вместо прямоугольного среза.
+- **Оценка в Google Play в маркет-сборке:**
+  - Заменены ссылки на GitHub в сборке для Google Play на действие «Оценить приложение в Google Play».
+
+---
+
+## [v4.1] — `versionCode = 38` / `versionName = "4.1"`
+
+### 🇬🇧 English
+- **Automated Maximum Screen Brightness for Real HDR Output:**
+  - Automated window brightness boost to 100% (`screenBrightness = 1.0f`) whenever playing HDR10, HLG, or Dolby Vision content to unleash the display hardware's full dynamic range and peak nits.
+  - Automatically restores user system brightness when pausing, exiting the player, or playing SDR content.
+- **Heavy Video Format Startup & Hardware Decoder Stall Protection:**
+  - Integrated a 2.6-second warmup watchdog (`decoderWarmupWatchdog`): if a device's hardware decoder hangs or stalls on heavy profiles (HEVC Main 10, AV1, 4K Blu-ray streams), the player seamlessly falls back to software decoding (`DecoderMode.SOFTWARE_PREFER`).
+  - Added continuous buffering spinner feedback during warmup before the first frame is rendered, preventing long black-screen or frozen static frame pauses.
+  - Codec errors (`isCodecOrDecoderError`) automatically switch to software decoding without displaying disruptive error banners.
+- **Fixed Stale Floating Media File Info:**
+  - `MediaFileInfoModalSheet` and metadata extraction now refresh dynamically on episode switching, resolution updates, or codec changes (`isEpisodeMatchingPlayback` guard prevents stale data from the previous file).
+- **Timeline Scrubber Clamping on Network Streams:**
+  - Resolved timeline jump bug where streaming feeds with unknown/zero duration (`durationMs <= 0`) pegged the scrubber to 100% (the end); it now remains cleanly at 00:00 until stream metrics arrive.
+- **Glass HUD Themes Monetization:**
+  - Glass controls themes (`GLASS_CAPSULE`, `CYBER_NEON`, `CINEMA_TACTILE`) and surface styles (`FROSTED_GLASS`) are now part of Negai Premium (marked with gold stars `★` and gated behind the Pro modal).
+- **P2P Trackers Segregation:**
+  - Isolated `p2p_trackers.json` exclusively into the GitHub community build flavor (`src/github/assets`), fully excluding it from Google Play Market builds.
+- **Normalized Versioning:**
+  - Version updated to `4.1` with patch version `y` cleanly reset to `0`, and workflow parsing updated to support two-part `x.x` version numbers.
+
+### 🇷🇺 Русский
+- **Автоматическая максимальная яркость экрана для настоящего HDR:**
+  - Автоматическое переключение яркости окна на 100% (`screenBrightness = 1.0f`) при воспроизведении HDR10, HLG и Dolby Vision для раскрытия пиковой аппаратной яркости дисплея.
+  - Автоматическое восстановление исходной системной яркости при выходе из плеера или воспроизведении SDR.
+- **Устранение зависаний тяжелых форматов и защита от сбоев кодеков:**
+  - Внедрен сторожевой таймер разгона декодера (`decoderWarmupWatchdog`, 2.6 с): если аппаратный чип зависает на первом кадре тяжелых видео (HEVC 10-бит, AV1, BDAV), плеер бесшовно переключается на программный декодер (`DecoderMode.SOFTWARE_PREFER`).
+  - Во время ожидания первого кадра теперь отображается индикатор загрузки, устраняя эффект замирания на черном экране или статичном кадре.
+  - Ошибки кодеков не показывают пользователю тревожный баннер, если видео может быть воспроизведено программно.
+- **Исправление плавающей информации о файле:**
+  - Окно «Информация о файле» (`MediaFileInfoModalSheet`) теперь гарантированно обновляется при смене видео, смене разрешения потока или кодека, исключая утечку данных от предыдущего файла.
+- **Исправление полосы перемотки (Timeline / Seek Bar):**
+  - Устранена ошибка, из-за которой на сетевых потоках с не определенной длительностью полоса прокрутки стартовала с самого конца (100%). Теперь прогресс остается на 00:00 до загрузки потока.
+- **Платные стеклянные темы оформления:**
+  - Стеклянные стили элементов управления («Стеклянная капсула», «Кибер-Неон», «Студийный пульт») и подложек HUD («Матовое стекло») включены в Negai Premium (отмечены звездочками `★` с открытием окна Pro-подписки).
+- **Изоляция трекеров только для GitHub-версии:**
+  - Файл `p2p_trackers.json` перенесен исключительно в GitHub-сборку (`src/github/assets`) и полностью вырезан из Google Play Market версии.
+- **Нормализация версионирования 4.1:**
+  - Версия обновлена до `4.1` со сбросом номера патча `y` в `0`.
+
+---
+
 ## [v4.0.15] — `versionCode = 37` / `versionName = "4.0.15"`
 
 ### 🇬🇧 English
