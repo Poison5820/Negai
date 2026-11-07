@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "description": "Стандартный список открытых P2P-узлов (GitHub Open Repository)",
+  "jacred_mirrors": [
+    "https://jacred.xyz",
+    "https://jacred.pro",
+    "http://jacred.viewbox.dev",
+    "https://jac.red",
+    "https://jacred.stream",
+    "https://jacred.torrserver.com"
+  ],
+  "rutor_mirrors": [
+    "https://rutor.info",
+    "https://rutor.is",
+    "http://new-rutor.org",
+    "http://rutor.lib",
+    "https://6tor.org"
+  ],
+  "rutracker_mirrors": [
+    "https://rutracker.org",
+    "https://rutracker.net",
+    "https://rutracker.nl",
+    "http://bt.t-ru.org/ann",
+    "http://bt2.t-ru.org/ann",
+    "http://bt3.t-ru.org/ann",
+    "http://bt4.t-ru.org/ann"
+  ],
+  "nyaa_mirrors": [
+    "https://nyaa.si",
+    "https://nyaa.land",
+    "https://nyaa.iss.ink",
+    "https://nyaa.iss.one"
+  ],
+  "anilibria_mirrors": [
+    "https://api.anilibria.tv",
+    "https://anilibria.top",
+    "https://anilibria.wtf"
+  ],
+  "apibay_mirrors": [
+    "https://apibay.org",
+    "https://piratebay.party/apibay"
+  ]
+}
