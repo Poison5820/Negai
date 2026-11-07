@@ -3,7 +3,7 @@
 **Effective Date:** November 7, 2026  
 **Last Updated:** November 7, 2026  
 **Application Name:** Negai Media Player (`negai`)  
-**Public Privacy Policy URL:** [https://poison5820.github.io/Negai/PRIVACY](https://poison5820.github.io/Negai/PRIVACY)  
+**Public Privacy Policy URL:** [https://github.com/Poison5820/Negai/blob/main/PRIVACY.md](https://github.com/Poison5820/Negai/blob/main/PRIVACY.md)  
 **Source & Issue Tracker:** [https://github.com/Poison5820/Negai/issues](https://github.com/Poison5820/Negai/issues)
 
 ---
@@ -79,7 +79,7 @@ Negai Media Player is a general-audience local media player tool and does not kn
 
 ## 7. Changes to This Privacy Policy
 
-If we update this Privacy Policy to reflect new features or regulatory requirements, we will publish the revised document at `https://poison5820.github.io/Negai/PRIVACY` and in the root `PRIVACY.md` file of our public repository (`https://github.com/Poison5820/Negai/blob/main/PRIVACY.md`), updating the "Last Updated" date at the top.
+If we update this Privacy Policy to reflect new features or regulatory requirements, we will publish the revised document in the root `PRIVACY.md` file of our public repository (`https://github.com/Poison5820/Negai/blob/main/PRIVACY.md`), updating the "Last Updated" date at the top.
 
 ---
 
@@ -97,7 +97,7 @@ If you have any questions, concerns, or requests regarding this Privacy Policy o
 
 **Дата вступления в силу:** 7 ноября 2026 г.  
 **Приложение:** Negai Media Player (`negai`)  
-**Постоянная ссылка:** [https://poison5820.github.io/Negai/PRIVACY](https://poison5820.github.io/Negai/PRIVACY)  
+**Постоянная ссылка:** [https://github.com/Poison5820/Negai/blob/main/PRIVACY.md](https://github.com/Poison5820/Negai/blob/main/PRIVACY.md)  
 **Обратная связь (GitHub Issues):** [https://github.com/Poison5820/Negai/issues](https://github.com/Poison5820/Negai/issues)
 
 ## 1. Отсутствие сбора персональных данных
