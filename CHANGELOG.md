@@ -5,6 +5,134 @@
 
 ---
 
+## [v4.2.11] — `versionCode = 58` / `versionName = "4.2.11"`
+
+### 🇬🇧 English
+- **RenderThread Crash Guard & Circular Backdrop Recursion Elimination (SIGSEGV Fix):**
+  - Resolved native HWUI stack overflow crash (`SEGV_ACCERR` in `RenderNode::prepareTreeImpl`) caused by nested list elements and action buttons attempting to sample their own actively recorded ancestor backdrop.
+  - Implemented an architectural `LocalActiveRecordingBackdrop` composition local barrier in `Modifier.negaiSurface` and `resolveSafeLayerBackdrop` that completely blocks elements inside an active recording container from sampling the parent's backdrop.
+  - Isolated tab contents in `LibraryScreen` and episode lists in `FolderDetailScreen` so only top header capsules, floating navigation docks, and floating dialog windows sample the underlying scene.
+  - Reset `sampleBackdrop = false` across all action pills, buttons, and sort headers inside list content to prevent circular drawing trees.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.2.11)</b></summary>
+
+<br>
+
+- **Защита от RenderThread-крашей (SIGSEGV) и устранение циклической рекурсии бэкдропа:**
+  - Устранён нативный сбой переполнения стека HWUI (`SEGV_ACCERR` в `RenderNode::prepareTreeImpl`), возникавший из-за попытки вложенных элементов списка и кнопок сэмплировать свой собственный родительский слой преломления.
+  - Внедрён системный барьер `LocalActiveRecordingBackdrop` в `Modifier.negaiSurface` и `resolveSafeLayerBackdrop`, блокирующий сэмплирование бэкдропа для любых элементов, находящихся внутри записываемого контейнера.
+  - Изолировано содержимое вкладок в `LibraryScreen` и списка серий в `FolderDetailScreen`: живое преломление фона активно исключительно для парящих верхних шапок, нижнего навигационного дока и модальных окон.
+  - Сброшен флаг `sampleBackdrop = false` для всех плашек, кнопок и чипов внутри списков, исключая образование циклических графов в дереве отрисовки Android 15.
+
+</details>
+
+---
+
+## [v4.2.10] — `versionCode = 57` / `versionName = "4.2.10"`
+
+### 🇬🇧 English
+- **Reference Material 3 Expressive Flat Theme:**
+  - Completely eliminated glass stroke borders, bevels, inner groove shadows, and 3D glares from cards, modal sheets, floating navigation dock, top headers, filter chips, and selection rows (`BorderStroke(0.dp, Color.Transparent)` or `border = null`).
+  - Enforced pure Material 3 Surface Container tonal elevations (`surfaceContainerLow` / `surfaceContainer` for first-level cards, `surfaceContainerHigh` for floating capsules and modal dialogs, `surfaceContainerHighest` for nested unselected chips and rows, and `secondaryContainer` / `primaryContainer` for selected chips and active buttons).
+  - 1.dp hairline border (`outlineVariant`) in Flat mode remains strictly on outlined action buttons and text input fields.
+  - Restored clean 2D Material 3 rendering for switches, radio indicators, seekbar controls, and vertical scrollbars, while disabling cylindrical lens bending and chromatic dispersion in Flat scroll-edge optics.
+- **Satin Matte Contrast & 100% Text Legibility in Liquid Glass:**
+  - Boosted satin backing density for nested elements (inside modals, action chips, and nested list rows) to `0.48f` (selected Dark) / `0.32f` (unselected Dark) and `0.80f` (selected Light) / `0.64f` (unselected Light) with a soft milky-quartz inner fill and 135° beveled rim.
+  - Enhanced modal dialog backdrop blur to `16dp` and surface opacity to `0.62f` (Dark/OLED) / `0.76f` (Light) while maintaining crystal lens refraction (`28dp` height, `56dp` amount).
+  - Floating navigation capsules now feature calibrated `6.5dp` pre-lens blur and `0.36f` (Dark) / `0.62f` (Light) surface opacity with full lens refraction.
+  - Added anti-glare typography micro-shadowing (`0.50f` dark shadow in dark themes, `0.65f` white glow in light themes) in content providers for all glass themes to prevent optical reflections from degrading text legibility.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.2.10)</b></summary>
+
+<br>
+
+- **Эталонная плоская тема Material 3 Expressive (Flat):**
+  - Полностью удалены стеклянные обводки, оптические фаски, внутренние тени и 3D-блики с карточек, модальных окон, плавающего навигационного дока, верхних шапок, чипов фильтрации и строк выбора (`BorderStroke(0.dp, Color.Transparent)` или `border = null`).
+  - Реализована чистая тональная иерархия Material 3 Surface Container (`surfaceContainerLow` / `surfaceContainer` для карточек первого уровня, `surfaceContainerHigh` для модальных окон и плавающих панелей, `surfaceContainerHighest` для вложенных невыбранных чипов и строк, `secondaryContainer` / `primaryContainer` для активных элементов).
+  - Обводка 1.dp (`outlineVariant`) в теме Flat сохранена исключительно для контурных кнопок и полей ввода текста.
+  - Переключатели, радиокнопки, полоса перемотки и скроллбар приведены к строгому 2D-виду Material 3 без 3D-бликов и фасок, а краевая оптика скролла переведена на чистый вертикальный градиент без линзового расширения и хроматических аберраций.
+- **Сатиновый контраст вложенных элементов и 100% читаемость текста в Liquid Glass:**
+  - Увеличена плотность сатиновой подложки для вложенных элементов (внутри модальных окон, чипов и вложенных строк списка) до `0.48f` (выбрано, тёмная) / `0.32f` (не выбрано, тёмная) и `0.80f` (выбрано, светлая) / `0.64f` (не выбрано, светлая) с мягким молочно-кварцевым градиентом и фаской 135°.
+  - Размытие модальных окон в теме «Жидкое стекло» увеличено до `16dp`, а плотность подложки — до `0.62f` (тёмная) / `0.76f` (светлая) при сохранении линзового преломления (`28dp` высота, `56dp` сила).
+  - Плавающие навигационные капсулы откалиброваны на размытие `6.5dp` и прозрачность `0.36f` (тёмная) / `0.62f` (светлая) с сохранением живого преломления линзы.
+  - Добавлена микротень текста (`0.50f` тёмная в тёмных темах, `0.65f` светлая в светлых темах) во все текстовые стили поверх стекла, гарантирующая идеальную читаемость текста даже поверх ярких оптических бликов и видео.
+
+</details>
+
+---
+
+## [v4.2.9] — `versionCode = 56` / `versionName = "4.2.9"`
+
+### 🇬🇧 English
+- **Dynamic Scroll-Edge Lens Optics & Chromatic Dispersion:**
+  - Top and bottom scroll-edge optical deformation on lists and floating modal sheets now activates strictly dynamically based on real scroll offset. Stationary cards (such as the storage access card on an empty library) remain 100% sharp with zero false top or bottom fading.
+  - Preserved full brightness across the first 70% of the scroll-edge optical zone in **Liquid Glass** so the cylindrical outward lens bend (`10–14%` lateral expansion) and `R / G / B` chromatic dispersion are clearly visible before smoothly dissolving at the very edge.
+- **3D Optical Glass Switches & Radio Buttons:**
+  - Replaced flat standard toggle switches and radio indicators with custom 3D optical glass controls featuring recessed glass capsules, `135°` specular bevels, and a convex quartz droplet thumb with a specular highlight, inner shadow, and spring morphing on interaction.
+- **100% Glass Micro-Component Unification:**
+  - Unified all filter chips, quick action pills (`Access`, `File`, `URL`, `Folder`), folder sort controls, search and stream URL input fields, and context dropdown menus (`⋮`) with the active UI theme (`Flat`, `Frosted Glass`, and `Liquid Glass`).
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.2.9)</b></summary>
+
+<br>
+
+- **Динамическая линзовая оптика границ скролла и хроматическая дисперсия:**
+  - Верхняя и нижняя оптическая деформация на границах списков и модальных окон теперь включается строго динамически при фактической прокрутке контента. Карточки в состоянии покоя (например, карточка доступа к памяти) отображаются идеально чётко без ложного размытия или затухания краёв.
+  - В теме «Жидкое стекло» сохранена полная яркость пикселей на первых 70% оптической зоны края, благодаря чему отчётливо видны цилиндрический линзовый изгиб карточек (`10–14%` бокового расширения) и спектральная `R / G / B` дисперсия перед мягким растворением у самой кромки.
+- **Объёмные 3D-стеклянные переключатели и радиокнопки:**
+  - Стандартные плоские тумблеры и радиокнопки заменены на кастомные объёмные стеклянные элементы с углублённой капсулой, оптической фаской `135°` и выпуклой кварцевой каплей-бегунком с верхним бликом, внутренней тенью и пружинной деформацией при переключении.
+- **100% унификация микро-элементов интерфейса:**
+  - Все чипы фильтрации, кнопки быстрых действий («Доступ», «Файл», «URL», «Папка»), переключатели сортировки, поля поиска и ввода потоковых ссылок, а также контекстные выпадающие меню (`⋮`) полностью переведены на оптический конвейер выбранной темы оформления (`Flat`, «Матовое стекло», «Жидкое стекло»).
+
+</details>
+
+---
+
+## [v4.2.8] — `versionCode = 55` / `versionName = "4.2.8"`
+
+### 🇬🇧 English
+- **Unified Floating Glass Capsules & Refraction Flow:**
+  - Standardized all top app bars, section headers, and the bottom floating navigation dock into floating glass capsules with real-time scroll refraction physics across all tabs and settings pages.
+- **Crystal-Clear Liquid Glass Optics:**
+  - Calibrated Liquid Glass optics with reduced pre-lens blur (2–2.5dp on cards/bars, 7dp on modals) and amplified lens refraction (28dp height, 58dp strength) with translucent crystal transparency, creating a sharp water-droplet distortion effect that cleanly contrasts with velvet Frosted Glass (36dp blur).
+- **Optical Glass Seekbar & Convex Droplet Thumb (Zero Neon Glow):**
+  - Completely eliminated outer neon halo blur from the player seekbar; redesigned the timeline track as a recessed 3D optical glass groove with a 135° specular bevel and a convex glass droplet thumb that refracts the underlying video or scene.
+- **AGSL Optical Scroll-Edge Deformation:**
+  - Replaced static colored borders and lines at scroll boundaries with a shader engine (Android 13+) that smoothly bends, disperses, and dissolves the actual scrolling content pixels at top and bottom list boundaries while remaining completely transparent over empty background areas.
+- **Live Modal Backdrop Sync & Zero Coordinate Shift:**
+  - Eliminated vertical coordinate offset on floating modal windows and synchronized live background updates so switching themes, styles, or color palettes immediately updates the refracted scene behind open dialogs.
+- **Discrete 5.1 & 7.1 Spatial Audio DSP & Android Spatializer:**
+  - Real-time 5.1 and 7.1 channel binaural HRTF headphone convolution (MIT KEMAR), Center Dialogue Anchor, 55–110 Hz LFE Bass Harmonizer, 7.8 kHz Pinna Rear Notch filter, and native integration with the Android 12L+ Spatializer API.
+- **WCAG 2.1 AAA Contrast Engine & 85/15 Complementary Palette Balance:**
+  - Guaranteed text legibility (≥ 7.0:1 primary, ≥ 4.5:1 secondary contrast) across all 90 theme, style, and accent palette combinations, and enforced the 85% primary / 15% secondary complementary color rule across switches, radio buttons, and seekbars.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.2.8)</b></summary>
+
+<br>
+
+- **Единый стандарт парящих стеклянных капсул:**
+  - Все верхние шапки и нижняя навигационная док-панель переведены на единый конвейер с живым преломлением скролла во всех вкладках и разделах настроек.
+- **Кристальная оптика «Жидкого стекла»:**
+  - Снижено матовое размытие (2–2.5dp на карточках и панелях, 7dp на окнах) и усилено преломление линзы (28dp / 58dp) в теме «Жидкое стекло» для эффекта прозрачной капли воды в отличие от бархатного «Матового стекла» (36dp).
+- **Оптическая стеклянная полоса перемотки без неона:**
+  - Полностью убрано неоновое свечение полосы перемотки плеера — трек и каплевидный ползунок выполнены из объёмного оптического стекла со скошенной фаской 135° и преломлением фона.
+- **Шейдерная оптика границ скролла:**
+  - Статичные цветные полосы и линии сверху и снизу списков заменены на шейдер оптической деформации самих карточек контента при входе под края прокрутки.
+- **Живой фон и точные координаты всплывающих окон:**
+  - Устранено смещение фона во всплывающих модальных окнах и исправлена заморозка подложки при переключении темы, стиля или палитры на лету.
+- **Дискретный пространственный звук 5.1 / 7.1 и Android Spatializer:**
+  - Бинауральная свертка многоканального звука 5.1 и 7.1 для наушников (MIT KEMAR HRTF), фокус центрального канала диалогов, сабвуферный гармонизатор 55–110 Гц, тыловой пинна-фильтр 7.8 кГц и поддержка системного Android 12L+ Spatializer API.
+- **Движок композитного контраста WCAG 2.1 AAA и баланс 85/15:**
+  - Гарантированная читаемость текста (≥ 7.0:1) на всех 90 комбинациях тем, стилей и палитр с единым стилем переключателей и радиокнопках.
+
+</details>
+
+---
+
 ## [v4.1.1] — `versionCode = 39` / `versionName = "4.1.1"`
 
 ### 🇬🇧 English
