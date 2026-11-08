@@ -5,6 +5,42 @@
 
 ---
 
+## [v4.2.13] — `versionCode = 60` / `versionName = "4.2.13"`
+
+### 🇬🇧 English
+- **10-Component Atomic Design System Consolidation:**
+  - Standardized the entire application interface onto 10 canonical building blocks: `UnifiedSurfaceCard`, `UnifiedSelectionRow`, `UnifiedFloatingBar`, `UnifiedModalHeader` & `UnifiedModalFooter`, `UnifiedActionButton`, `UnifiedIconButton`, `UnifiedFilterChip`, `UnifiedBadgeChip`, `UnifiedInputBar`, and `UnifiedDropdownMenu`.
+  - Replaced all legacy local cards, custom chips, ad-hoc badges, standalone text inputs, and unstyled popup menus across Library, Folders, Episode Details, Recent History, Torrents, Settings, and Player HUD overlays.
+- **90° Corner Bleed Elimination & Contour-Accurate 135° Glass Bevels:**
+  - Eliminated white and gray 90° rectangular halos protruding behind rounded corners of cards, buttons, and chips by enforcing hardware shape clipping prior to backdrop and surface drawing.
+  - Replaced rectangular inner highlight fills with contour-accurate outline rendering so 3D optical glass bevels follow rounded and continuous capsule corners with zero corner bleed.
+  - Removed harsh dark 1dp contrast outlines on nested glass cards, buttons, and chips so every element shares the exact same smooth 135° optical bevel as the floating navigation dock and top capsule bar.
+- **100% Unified Modal Headers & "Done" Footers:**
+  - Standardized every dialog, bottom sheet, and player control sheet onto `UnifiedModalHeader` (tinted icon badge, title, subtitle, and optional glass close button) and `UnifiedModalFooter` (right-aligned pill confirmation button with unified `OUTLINED` / `PRIMARY` styling).
+- **Strict Borderless Flat Theme Compliance:**
+  - Guaranteed zero borders on cards, rows, bars, modals, and filter/badge chips in the Material 3 Expressive `Flat` theme, preserving a clean 1dp `outlineVariant` stroke exclusively on `OUTLINED` action buttons and text input bars.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.2.13)</b></summary>
+
+<br>
+
+- **Единая атомарная дизайн-система из 10 канонических компонентов:**
+  - Весь интерфейс приложения переведён на 10 эталонных компонентов: `UnifiedSurfaceCard`, `UnifiedSelectionRow`, `UnifiedFloatingBar`, `UnifiedModalHeader` и `UnifiedModalFooter`, `UnifiedActionButton`, `UnifiedIconButton`, `UnifiedFilterChip`, `UnifiedBadgeChip`, `UnifiedInputBar` и `UnifiedDropdownMenu`.
+  - Устранены все локальные «особенные» карточки, кастомные чипы, разнородные бейджи, поля ввода и выпадающие меню на экранах библиотеки, папок, серий, истории, торрентов, настроек и оверлеев плеера.
+- **Устранение прямоугольных 90° ореолов за углами и единая 135° фаска стекла:**
+  - Полностью исправлено выступание белых и серых 90° прямоугольников за скруглённые углы карточек, кнопок и чипов благодаря принудительной обрезке по контуру формы до отрисовки слоёв стекла и бликов.
+  - Внутренний блик и 135° фаска переведены с прямоугольной заливки на точную отрисовку по контуру скруглённой фигуры.
+  - Убрана грубая тёмная обводка вложенных карточек и чипов в темах «Матовое стекло» и «Жидкое стекло» — теперь все элементы имеют такую же гладкую 135° оптическую грань, как нижняя док-панель и верхняя капсула.
+- **100% унификация шапок и кнопок «Готово» в модальных окнах:**
+  - Все диалоги, шторки сортировки, инспектор торрентов, кастомайзер быстрых действий и окна плеера переведены на единые `UnifiedModalHeader` и `UnifiedModalFooter`.
+- **Эталонная чистота темы Flat без лишних рамок:**
+  - В плоской теме Material 3 Expressive гарантировано отсутствие рамок у всех карточек, строк, панелей, чипов и модальных окон (тонкий контур `1dp` сохранён строго у контурных кнопок `OUTLINED` и полей ввода).
+
+</details>
+
+---
+
 ## [v4.2.12] — `versionCode = 59` / `versionName = "4.2.12"`
 
 ### 🇬🇧 English
