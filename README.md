@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.1.8-00E5FF?style=flat-square" alt="Version 4.1.8" />
+  <img src="https://img.shields.io/badge/version-4.2.7-00E5FF?style=flat-square" alt="Version 4.2.7" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/license-Proprietary_(Closed_Source)-FF4D8D?style=flat-square" alt="Proprietary License" />
@@ -55,14 +55,12 @@ You can install and update Negai directly through **Obtainium** or grab the univ
 
 ---
 
-## ✨ What's New in Release 4.0.15 (Build 37)
+## ✨ What's New in Release 4.2.7 (Build 54)
 
-- **Floating Navigation Dock**: Modern rounded navigation dock suspended above the bottom screen edge, supporting Liquid Glass, Frosted Glass, and Material 3 styles with gesture insets.
-- **Liquid Glass Physics Overhaul**: Redesigned light physics inspired by modern optical refraction (`liquid-glass.ybouane.com`) featuring diagonal specular highlights, curved lens depth, and subtle chromatic prism edge accents.
-- **Unified Player Interface**: Video controls, top bars, and settings dialogs now directly match the global app theme and accent palette.
-- **Refined Complementary Palettes**: Secondary accent colors are strictly applied to badges, sliders, and subtle borders, keeping primary buttons and cards clean and readable.
-- **Minimalist Star Indicators**: Bulky text badges (`Premium`/`PRO`) replaced with clean gold star icons (★).
-- **Streamlined Packaging**: Single public `negai.apk` package without redundant duplicates.
+- **Continuous Scroll-Synced Glass Refraction & Bottom Dock Alignment**: Positioned the floating navigation dock strictly at the bottom of the screen and synchronized 60/120Hz backdrop invalidation so the top header capsule and bottom dock refract scrolling content without interruption or dropouts.
+- **Optical Scroll Edge Fade & Spectral Chromatic Edge**: Added smooth optical boundary dissolution with a prismatic spectral reflex on folder lists and floating modal sheets so scrolling items never suffer from a hard rectangular cut.
+- **Convex Glass Droplet Scrollbar**: Redesigned the vertical scrollbar thumb in Liquid Glass and Frosted Glass as a translucent 3D glass droplet with a specular left/top highlight and chromatic tip reflexes instead of a solid neon bar.
+- **Strict 85/15 Complementary Palette Balance & Radiant Gold Premium Button**: Unified switches (white quartz thumb + primary track), radio buttons, and player seekbars around the dominant primary accent while reserving the secondary accent for micro-badges (`v4.2.7`, `1080p`, `4K`, episode counters), and gave the Google Play Billing button in Negai Premium a pure radiant gold gradient with high-contrast dark typography.
 
 ---
 
