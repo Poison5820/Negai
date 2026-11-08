@@ -5,6 +5,48 @@
 
 ---
 
+## [v4.2.12] — `versionCode = 59` / `versionName = "4.2.12"`
+
+### 🇬🇧 English
+- **Backdrop Ghosting Elimination (Double Image Fix):**
+  - Swapped modifier hierarchy in `LibraryScreen` and `FolderDetailScreen` so the screen's solid background is recorded directly inside `LayerBackdrop` before rendering child content, preventing unrecorded transparent frames.
+  - Injected an opaque backing canvas (`opaqueCanvasBase`) inside `drawBackdrop` for both `Frosted Glass` and `Liquid Glass` across all floating navigation capsules, top headers, and modal dialogs, fully occluding unblurred underlying layers from bleeding through.
+  - Calibrated floating navigation bar backing density in dark themes to `0.48f` while preserving vivid `vibrancy()` and crystal `lens()` refraction.
+- **Pronounced Cylindrical Scroll-Edge Optics & Menu Lens Bending:**
+  - Redesigned `NEGAI_SCROLL_EDGE_OPTICS_AGSL` in Liquid Glass to eliminate premature edge fading (`rimDissolve = 1.0 - smoothstep(0.84, 1.0, t)` holding 100% brightness across 84% of the edge span).
+  - Sharply enhanced the cylindrical meniscus lens (`scaleX = 1.0 + 0.28 * lensPower * (0.65 + 0.35 * normX * normX) * intensity`), vertical parabolic sag, and expanded chromatic dispersion from `4.6dp` to `6.8dp`.
+  - Expanded optical edge span to `42dp` in Liquid Glass and `38dp` in Frosted Glass, and connected scroll states across modal dialogs and nested lists for instantaneous optical responsiveness.
+- **Complete Elimination of Borders & 3D Artifacts in Flat Theme:**
+  - Removed all 9 remaining glass borders, gradients, and specular bevels when `UiThemeStyle.FLAT` is active: accent palette selection, header version pill, TorrServer status card, search recommendation hero, torrent search result cards, modal header icon badge, floating dialog style selector preview, audio codec card, and player HUD overlay borders (`playerPopupBorderStroke = null`).
+- **WCAG 2.1 Contrast Calibration & Light Bleedthrough Protection:**
+  - Engineered adaptive `activeThumbColor` in `UnifiedGlassSwitch` dynamically computing luminance against `primaryAccent` and guaranteeing >= 4.5:1 contrast against pastel Monet tracks in dark themes.
+  - Reinforced typography contrast against white background cards passing beneath translucent glass with worst-case backdrop compositing floors.
+  - Replaced hardcoded text alphas with design system WCAG tokens across torrent cards, folder metadata, and planetary dialog pills.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.2.12)</b></summary>
+
+<br>
+
+- **Полное устранение «гостинга» (двоения резкого контента под стеклом):**
+  - Изменён порядок модификаторов в `LibraryScreen` и `FolderDetailScreen`: непрозрачный фон экрана теперь гарантированно записывается внутрь текстуры `LayerBackdrop`.
+  - Добавлена непрозрачная подложка `opaqueCanvasBase` в `drawBackdrop` для тем «Жидкое стекло» и «Матовое стекло» под всеми плавающими панелями, шапками и модальными окнами, полностью перекрывающая неразмытый нижний слой.
+  - Плотность тонирующей подложки плавающего дока в тёмной теме увеличена до `0.48f` при сохранении яркого эффекта насыщенности и преломления линзы.
+- **Глубокая оптическая деформация границ скролла и усиленный мениск линзы:**
+  - Переработан шейдер `NEGAI_SCROLL_EDGE_OPTICS_AGSL` в теме «Жидкое стекло»: устранено раннее затухание (100% яркость сохраняется на первых 84% зоны границы скролла).
+  - Резко усилена цилиндрическая линза мениска (`scaleX = 1.0 + 0.28 * lensPower`), параболический изгиб строк и спектральная дисперсия (увеличена с `4.6dp` до `6.8dp`).
+  - Увеличена зона действия оптической кромки до `42dp` в «Жидком стекле» и `38dp` в «Матовом стекле», а также проброшены состояния скролла в модальные окна для мгновенного отклика.
+- **Полное удаление оставшихся рамок и 3D-фасок в теме Flat:**
+  - Отключены все 9 оставшихся обводок и стеклянных фасок при выборе плоской темы: в сетке акцентной палитры, бейдже версии в шапке, статусе TorrServer, стартовой карточке поиска, карточках торрентов, иконке шапки модальных окон, превью стилей и HUD-оверлеях плеера.
+- **Калибровка автоконтраста WCAG 2.1 и защита от белых карточек:**
+  - Разработан динамический подбор цвета бегунка `UnifiedGlassSwitch` с проверкой яркости дорожки `primaryAccent`, обеспечивающий контраст >= 4.5:1 даже на пастельных темах Monet.
+  - Добавлена защита контраста текста на стекле при прохождении белых карточек под прозрачным слоем.
+  - Заменены прямые цвета и альфа-прозрачности текстов на токены дизайн-системы в результатах поиска торрентов, метаданных папок и бейджах модальных окон.
+
+</details>
+
+---
+
 ## [v4.2.11] — `versionCode = 58` / `versionName = "4.2.11"`
 
 ### 🇬🇧 English
