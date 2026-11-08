@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.2.7-00E5FF?style=flat-square" alt="Version 4.2.7" />
+  <img src="https://img.shields.io/badge/version-4.2.11-00E5FF?style=flat-square" alt="Version 4.2.11" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/license-Proprietary_(Closed_Source)-FF4D8D?style=flat-square" alt="Proprietary License" />
@@ -55,12 +55,13 @@ You can install and update Negai directly through **Obtainium** or grab the univ
 
 ---
 
-## ✨ What's New in Release 4.2.7 (Build 54)
+## ✨ What's New in Release 4.2.8 (Build 55)
 
-- **Continuous Scroll-Synced Glass Refraction & Bottom Dock Alignment**: Positioned the floating navigation dock strictly at the bottom of the screen and synchronized 60/120Hz backdrop invalidation so the top header capsule and bottom dock refract scrolling content without interruption or dropouts.
-- **Optical Scroll Edge Fade & Spectral Chromatic Edge**: Added smooth optical boundary dissolution with a prismatic spectral reflex on folder lists and floating modal sheets so scrolling items never suffer from a hard rectangular cut.
-- **Convex Glass Droplet Scrollbar**: Redesigned the vertical scrollbar thumb in Liquid Glass and Frosted Glass as a translucent 3D glass droplet with a specular left/top highlight and chromatic tip reflexes instead of a solid neon bar.
-- **Strict 85/15 Complementary Palette Balance & Radiant Gold Premium Button**: Unified switches (white quartz thumb + primary track), radio buttons, and player seekbars around the dominant primary accent while reserving the secondary accent for micro-badges (`v4.2.7`, `1080p`, `4K`, episode counters), and gave the Google Play Billing button in Negai Premium a pure radiant gold gradient with high-contrast dark typography.
+- **Unified Floating Glass Capsules Across All Screens**: Unified all top headers (`negai v4.2.8`, `← Section Title`, folder detail header) and the bottom navigation dock onto a single floating glass capsule standard with live scroll-synced refraction across every tab and settings screen.
+- **Crystal-Clear Liquid Glass Optics**: Reduced matte blur (`2–2.5dp` on cards/bars, `7dp` on modals) and increased lens refraction height and strength (`28dp` / `58dp`) in Liquid Glass so scrolling cards and text remain crisp and visibly bend along curved capsule edges like a crystal water droplet, clearly distinguished from velvet Frosted Glass (`36dp` blur).
+- **Optical Glass Seekbar & Droplet Thumb (Zero Neon Glow)**: Completely removed outer neon halo glow from the player seekbar; redesigned the timeline track as a recessed 3D optical glass groove with a `135°` specular bevel and a convex glass droplet thumb that refracts the underlying scene.
+- **True Shader Scroll-Edge Deformation**: Replaced static colored bars and lines at scroll boundaries with an AGSL optical shader that smoothly bends and dissolves the actual scrolling content pixels at top and bottom list boundaries, staying 100% invisible over empty background areas.
+- **Live Modal Backdrop Sync & Zero Coordinate Shift**: Eliminated cross-window coordinate offset (`24–48dp`) on floating modal windows and synchronized live background updates so switching themes, styles, or palettes immediately updates the refracted scene behind open dialogs.
 
 ---
 
