@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.2.12-00E5FF?style=flat-square" alt="Version 4.2.12" />
+  <img src="https://img.shields.io/badge/version-4.2.13-00E5FF?style=flat-square" alt="Version 4.2.13" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/license-Proprietary_(Closed_Source)-FF4D8D?style=flat-square" alt="Proprietary License" />
@@ -55,13 +55,12 @@ You can install and update Negai directly through **Obtainium** or grab the univ
 
 ---
 
-## ✨ What's New in Release 4.2.8 (Build 55)
+## ✨ What's New in Release 4.2.13 (Build 60)
 
-- **Unified Floating Glass Capsules Across All Screens**: Unified all top headers (`negai v4.2.8`, `← Section Title`, folder detail header) and the bottom navigation dock onto a single floating glass capsule standard with live scroll-synced refraction across every tab and settings screen.
-- **Crystal-Clear Liquid Glass Optics**: Reduced matte blur (`2–2.5dp` on cards/bars, `7dp` on modals) and increased lens refraction height and strength (`28dp` / `58dp`) in Liquid Glass so scrolling cards and text remain crisp and visibly bend along curved capsule edges like a crystal water droplet, clearly distinguished from velvet Frosted Glass (`36dp` blur).
-- **Optical Glass Seekbar & Droplet Thumb (Zero Neon Glow)**: Completely removed outer neon halo glow from the player seekbar; redesigned the timeline track as a recessed 3D optical glass groove with a `135°` specular bevel and a convex glass droplet thumb that refracts the underlying scene.
-- **True Shader Scroll-Edge Deformation**: Replaced static colored bars and lines at scroll boundaries with an AGSL optical shader that smoothly bends and dissolves the actual scrolling content pixels at top and bottom list boundaries, staying 100% invisible over empty background areas.
-- **Live Modal Backdrop Sync & Zero Coordinate Shift**: Eliminated cross-window coordinate offset (`24–48dp`) on floating modal windows and synchronized live background updates so switching themes, styles, or palettes immediately updates the refracted scene behind open dialogs.
+- **10-Component Atomic Design System**: Consolidated the entire UI across Library, Folders, Episodes, Recent, Torrents, Settings, and Player sheets onto 10 canonical components (`UnifiedSurfaceCard`, `UnifiedSelectionRow`, `UnifiedFloatingBar`, `UnifiedModalHeader/Footer`, `UnifiedActionButton`, `UnifiedIconButton`, `UnifiedFilterChip`, `UnifiedBadgeChip`, `UnifiedInputBar`, `UnifiedDropdownMenu`).
+- **Zero 90° Corner Bleed & Smooth 135° Glass Bevels**: Eliminated white and gray rectangular halos protruding behind rounded card and chip corners via hardware shape clipping and contour-accurate outline rendering; unified all glass cards, buttons, and chips with the exact same smooth 135° specular bevel as the floating navigation dock.
+- **Unified Modal Headers & "Done" Footers**: Standardized all dialogs, bottom sheets, and player control sheets onto `UnifiedModalHeader` and `UnifiedModalFooter` for consistent typography, icon badges, and confirmation buttons.
+- **Pure Borderless M3 Flat Theme**: Guaranteed 0% borders on cards, bars, modals, rows, and chips in the Flat theme, keeping a 1dp `outlineVariant` stroke exclusively on `OUTLINED` buttons and text input bars.
 
 ---
 
