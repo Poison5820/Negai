@@ -5,6 +5,130 @@
 
 ---
 
+## [v4.2.17] — `versionCode = 64` / `versionName = "4.2.17"`
+
+### 🇬🇧 English
+- **Live Optical Blur & Refraction Restored (`Frosted Glass` & `Liquid Glass`):**
+  - Restored immediate frame-1 live background capture for the top floating bar, bottom navigation dock, and modal dialogs across both glass themes.
+  - Added a two-phase optical rim for Light theme (`Frosted Glass` & `Liquid Glass`), pairing a delicate graphite-accent outer micro-rim with an inner `135°` specular highlight for crisp edge definition over bright surfaces.
+- **100% Seamless & Borderless `Flat (Material 3 Expressive)` Theme:**
+  - Eliminated all remaining border strokes, action bar dividers, and nested double-clip anti-aliasing seams across `System (Auto) / Light / Dark` cards, palette selectors, `Access / File / URL / 👁` pills, and dialog rows in `Flat` mode.
+- **Pure `#000000` OLED Video Player Canvas & Optional Ambient Video Glow:**
+  - Set the video player letterbox/pillarbox canvas to pure `#000000` black by default and added an optional **Ambient Video Glow** toggle in **Appearance** and **Video & Shaders** settings.
+- **Zero-Crackle Audio Resume, Instant Video Frame Start & Gesture HUD Polish:**
+  - Eliminated `SurfaceSyncGroup` window timeouts and delayed video frame start when resuming from non-zero timestamps by deferring display refresh rate switching until after first frame render and bypassing redundant initial seek re-triggers on local media.
+  - Eliminated initial audio crackling/popping on Dolby and DTS tracks via first-sample envelope seeding and a 65 ms post-flush warmup ramp across all DSP processors.
+  - Added an `850 ms` post-release visibility hold and orientation-aware system bar dead zones for the vertical brightness/volume swipe HUD, and rendered player modal sheets in-window to prevent system status bar flashes.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.2.17)</b></summary>
+
+<br>
+
+- **Восстановление живого размытия `blur()` и преломления `lens()` (`Матовое стекло` и `Жидкое стекло`):**
+  - Восстановлен мгновенный захват оптического фона с первого кадра для верхней парящей панели, нижнего дока навигации и модальных окон.
+  - Для светлой темы в режимах стекла добавлена двухфазная оптическая грань (тонкий графитово-акцентный внешний микро-ободок + внутренний зеркальный блик `135°`), обеспечивающая чёткую читаемость краёв на светлом фоне.
+- **Абсолютно бесшовная тема `Flat (Material 3 Expressive)` без рамок:**
+  - Полностью убраны остаточные обводки, разделители и двойные контуры сглаживания на кнопках выбора темы (`System / Light / Dark`), палитрах акцентов, пилюлях `Доступ / Файл / Ссылка / 👁`, кнопке исключений папок и карточках диалогов.
+- **Чисто-чёрный (`#000000`) фон видеоплеера и опциональная фоновая подсветка:**
+  - Поля вокруг видео по умолчанию сделаны строго чёрными (`#000000` OLED), а в разделы **Внешний вид** и **Видео и шейдеры** добавлен переключатель **«Фоновая подсветка под видео»** (`Ambient Video Glow`).
+- **Чистый старт звука Dolby/DTS без треска, мгновенный старт видео и полировка жестов:**
+  - Устранены таймауты `SurfaceSyncGroup` и задержка появления видеокадра при продолжении просмотра за счёт переноса переключения герцовки экрана на момент после отрисовки первого кадра и отказа от повторного `seekTo` для локальных файлов.
+  - Устранён стартовый треск и щелчки звука на дорожках Dolby / DTS при возобновлении воспроизведения благодаря инициализации огибающей по первому сэмплу и 65 мс плавному прогреву после `flush()`.
+  - Индикатор вертикальных свайпов яркости и громкости теперь удерживается на экране `850 мс` после отпускания пальца и защищён от ложных срабатываний у системных краёв экрана, а шторки плеера открываются внутри полноэкранного контейнера без мигания системного статус-бара.
+
+</details>
+
+---
+
+## [v4.2.16] — `versionCode = 63` / `versionName = "4.2.16"`
+
+### 🇬🇧 English
+- **Instant Initial Window Sync (`wmsSync-VRI`) & Zero-BlurMaskFilter Hardware Shadow Pipeline:**
+  - Eliminated offscreen software `BlurMaskFilter` allocations (`ShadowNode`, `InnerShadowNode`, `HighlightNode`) across cards and nested controls that caused `SurfaceSyncGroup(wmsSync-VRI[MainActivity]#2)` 1000ms timeouts during initial launch.
+  - Added a single-pass hardware `RenderNode` fast path (`physicalShadowMod` + contour-clipped 3D volume gradient + `135°` optical bevel) for all nested controls (`isNestedControl = true`), non-sampling surfaces, and initial window-sync frames.
+  - Deferred live `LayerBackdrop` optical capture (`isFirstFrameReady`) and display refresh rate querying by 64–80ms until initial `WindowManager` traversal synchronization completes.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.2.16)</b></summary>
+
+<br>
+
+- **Мгновенная синхронизация стартового окна (`wmsSync-VRI`) и однопроходный аппаратный конвейер теней:**
+  - Устранены программные offscreen-буферы `BlurMaskFilter` (`ShadowNode`, `InnerShadowNode`, `HighlightNode`) на карточках и вложенных кнопках, вызывавшие предупреждение `SurfaceSyncGroup(wmsSync-VRI[MainActivity]#2)` (таймаут 1000 мс) при старте приложения.
+  - Для всех вложенных кнопок, бейджей, чипов и первых кадров синхронизации окна внедрён однопроходный аппаратный рендеринг `RenderNode` с контурной тенью, внутренним 3D-градиентом и 135° фаской без создания промежуточных текстур.
+  - Захват живого оптического фона `LayerBackdrop` и фоновый опрос режимов герцовки экрана отложены на 64–80 мс до полного завершения стартовой синхронизации `WindowManager`.
+
+</details>
+
+---
+
+## [v4.2.15] — `versionCode = 62` / `versionName = "4.2.15"`
+
+### 🇬🇧 English
+- **Native `AndroidLiquidGlass` Pipeline (`Shadow`, `InnerShadow`, `Highlight`):**
+  - Migrated all surfaces across `Liquid Glass` and `Frosted Glass` to the native `drawBackdrop` rendering pipeline (`io.github.kyant0:backdrop:1.0.4`), utilizing built-in outer `Shadow`, 3D `InnerShadow` volume, and contour-accurate `Highlight` bevels (`HighlightStyle.Default` / `HighlightStyle.Ambient`).
+  - Removed pre-surface `.clip(shape)` wrappers prior to `drawBackdrop` so native outer shadows render cleanly outside rounded contours in both Light and Dark themes while inner fills and content remain strictly clipped inside `onDrawSurface`.
+- **Authentic 4-Tier Google Material 3 Expressive (`Flat`) Theme:**
+  - Upgraded the `Flat` theme to a strict 4-tier tonal containment hierarchy (`Background` -> `Cards` -> `Nested Controls / Rows` -> `Modals & Floating Bars`) with 100% opaque surfaces and zero borders or glass bevels across both Light and Dark/OLED modes.
+- **Full Modernization of Video Player Modals & HUD Across All 3 Themes:**
+  - Synchronized all video player control sheets, quick action pills, timeline badges, and HUD popup banners (`Speed Boost`, `Volume / Brightness`, `Seek HUD`, `Resumed Banner`) with the active player surface theme (`Flat`, `Frosted Glass`, `Liquid Glass`).
+  - Wired live scroll-state-driven edge optics (`scrollState` / `lazyListState`) across all player modal sheets and lazy backdrop capture of the ambient player HUD strictly when a modal sheet is open.
+- **Elimination of `SurfaceSyncGroup` 1000ms Timeouts:**
+  - Replaced per-card temporary `RenderNode` allocations with a single shared `LocalFallbackCanvasBackdrop` and bypassed offscreen effect passes on non-sampling nested controls, permanently eliminating `SurfaceSyncGroup` transaction stalls during scrolling and tab transitions.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.2.15)</b></summary>
+
+<br>
+
+- **Нативный конвейер стекла `AndroidLiquidGlass` (`Shadow`, `InnerShadow`, `Highlight`):**
+  - Все карточки, плавающие панели, модальные окна и кнопки в темах «Жидкое стекло» и «Матовое стекло» переведены на нативный рендеринг `drawBackdrop` (`io.github.kyant0:backdrop:1.0.4`) с использованием встроенных внешних теней `Shadow`, внутреннего объёма `InnerShadow` и контурной фаски `Highlight`.
+  - Убрано предварительное обрезание `.clip(shape)` перед вызовом `drawBackdrop`, благодаря чему нативная внешняя тень свободно отрисовывается снаружи скруглённой формы как в Светлой, так и в Тёмной теме, а внутренняя заливка строго ограничена контуром.
+- **Эталонная 4-уровневая тональная иерархия Material 3 Expressive в теме `Flat`:**
+  - Плоская тема `Flat` приведена к 4-уровневой тональной системе Google Material 3 Expressive (`Фон` -> `Карточки` -> `Вложенные строки и кнопки` -> `Модальные окна и парящие панели`) со 100% непрозрачными поверхностями без рамок и стеклянных бликов.
+- **Полная модернизация шторок и HUD видеоплеера под все 3 темы оформления:**
+  - Все шторки управления видеоплеером, кнопки быстрых действий, капсулы таймлайна и всплывающие HUD-индикаторы (`Ускорение 2x`, `Громкость / Яркость`, `Перемотка`, `Продолжено с...`) синхронизированы с выбранным стилем плеера (`Flat`, `Матовое стекло`, `Жидкое стекло`).
+  - Во все модальные окна плеера подключена динамическая оптика границ скролла (`scrollState` / `lazyListState`) и ленивый захват оптического фона HUD строго в момент открытия модального окна.
+- **Устранение задержек `SurfaceSyncGroup` (1000ms timeout):**
+  - Внедрён единый разделяемый `LocalFallbackCanvasBackdrop` и отключены холостые проходы шейдеров для вложенных кнопок без преломления фона, что полностью устраняет предупреждения `SurfaceSyncGroup` при прокрутке списков и переключении вкладок.
+
+</details>
+
+---
+
+## [v4.2.14] — `versionCode = 61` / `versionName = "4.2.14"`
+
+### 🇬🇧 English
+- **Permanent Fix for 90° Rectangular Halos Behind Rounded Corners:**
+  - Eliminated the 90° rectangular fallback (`0.dp`) on rounded cards, selection rows, and modals by preserving the original component shape across hardware layer clipping, surface background fills, and optical bevel outlines, while using a `ContinuousRoundedRectangle(22.dp)` fallback for backdrop shader sampling.
+  - Replaced legacy Material 3 `Card` wrapper inside `UnifiedSurfaceCard` with a zero-elevation `Surface` and dual pre/post-surface shape clipping so no rectangular bounds ever bleed in Light or Dark themes.
+- **Single-Pass 135° Optical Glass Bevel & Satin Matte Nested Controls:**
+  - Removed duplicate outer `.border(...)` strokes that stacked on top of the 135° optical bevel in `Frosted Glass` and `Liquid Glass`, ensuring every card, row, modal, and bar shares the exact same clean 135° specular rim as the floating navigation dock and top bar.
+  - Introduced **Satin Matte** nested control rendering (`isNestedControl = true` with a soft `0.75dp` bevel and zero backdrop sampling) for all nested icon buttons, action buttons, filter chips, badge chips, and input bars.
+- **100% Borderless Material 3 Expressive (`Flat`) Theme & Canonical Dialogs:**
+  - Removed all remaining borders in the `Flat` theme from search and text input bars (`UnifiedInputBar`), resolution badges (`360p` / `1080p`), theme/controls selector rows, and torrent action pills.
+  - Migrated the **Open Magnet or .torrent**, **TorrServer Configuration**, and **Release Details** dialogs onto canonical `UnifiedModalHeader`, `UnifiedInputBar`, `UnifiedSurfaceCard`, and `UnifiedBadgeChip`.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.2.14)</b></summary>
+
+<br>
+
+- **Полное устранение 90° прямоугольных ореолов позади скруглённых углов:**
+  - Устранён сброс скруглённой формы на прямоугольник `0.dp` (90°), из-за которого позади карточек категорий настроек и строк выбора в светлой и тёмной теме проступал прямоугольный фон.
+  - Компонент `UnifiedSurfaceCard` переведён на чистый `Surface` с двойной контурной обрезкой `.clip(resolvedShape)` и сохранением исходной скруглённой фигуры во всех слоях `graphicsLayer`, `background` и `drawNegai3DBevel`.
+- **Единая 135° оптическая фаска без двойной обводки и режим Satin Matte для вложенных кнопок:**
+  - Из `Frosted Glass` и `Liquid Glass` удалена дублирующая внешняя обводка `.border(...)`, накладывавшаяся поверх 135° оптического блика — теперь все карточки и панели имеют точно такую же чистую 135° грань, как нижний док и верхняя капсула.
+  - Все вложенные кнопки, иконки (`←`, `×`, `🔍`), чипы, бейджи и поля ввода переведены в спокойный матовый режим **Satin Matte** (`isNestedControl = true` с мягкой фаской `0.75dp` без рекурсивного преломления фона).
+- **100% безрамочная плоская тема `Flat` и каноничные диалоги торрентов:**
+  - В теме `Flat` полностью убраны контуры у полей поиска и ввода (`UnifiedInputBar`), бейджа разрешения (`360p` / `1080p`), строк выбора стиля и торрент-кнопок.
+  - Диалоги **«Открыть Magnet или .torrent»**, **«Настройка TorrServer»** и инспектор раздачи переведены на эталонные `UnifiedModalHeader`, `UnifiedInputBar`, `UnifiedSurfaceCard` и `UnifiedBadgeChip`.
+
+</details>
+
+---
+
 ## [v4.2.13] — `versionCode = 60` / `versionName = "4.2.13"`
 
 ### 🇬🇧 English
