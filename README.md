@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.3.0-00E5FF?style=flat-square" alt="Version 4.3.0" />
+  <img src="https://img.shields.io/badge/version-4.3.2-00E5FF?style=flat-square" alt="Version 4.3.2" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/license-Proprietary_(Closed_Source)-FF4D8D?style=flat-square" alt="Proprietary License" />
@@ -55,11 +55,11 @@ You can install and update Negai directly through **Obtainium** or grab the univ
 
 ---
 
-## ✨ What's New in Release 4.3.0 (Build 68)
+## ✨ What's New in Release 4.3.2 (Build 70)
 
-- **Instant "Ambient Video Glow" Button in Player HUD**: Moved the Ambient Video Glow toggle out of Settings and placed a dedicated one-tap button directly in the video player's top HUD bar right next to **Quality** and **Screen Orientation** for instant switching between pure `#000000` OLED black and ambient frame glow during playback.
-- **Cylindrical Scroll-Edge Meniscus Lens (`Liquid Glass`) & Matte Diffusion (`Frosted Glass`)**: Replaced simple scroll-edge alpha fade across lists and floating modals (`44 dp` optical zone) with lateral barrel meniscus refraction, vertical wave compression, and 5-tap RGB chromatic dispersion (`9.5 dp`) in `Liquid Glass`, plus 9-tap matte blur diffusion in `Frosted Glass` without premature transparency loss.
-- **100% Borderless "About Device" Screen in `Flat` Mode**: Migrated all hardware/software codec rows, `HW Accelerated` badges, and legal buttons on the **About Device** page to borderless M3 Expressive tonal components.
+- **Calibrated Scroll-Edge Meniscus Lens (`Liquid Glass`) & Matte Blur (`Frosted Glass`)**: Refined chromatic dispersion (`1.6 dp`), inward meniscus refraction (`+dirY` without top-edge coordinate clamping), and 5-tap smoothing (`r = 3.5 px`) for crystal-clear scroll edges without acid RGB splitting.
+- **Live Glass Background Blur Around Floating Windows Without Black Screen**: Replaced parent `RenderEffect` layer blur with direct `safeBackdrop` blur (`18 dp`) on the modal scrim in `Frosted Glass` and `Liquid Glass`, eliminating the black-screen backdrop reset when opening dialogs.
+- **True Hardware HDR (BT.2020 PQ/HLG), Instant Portrait Video Orientation & Smart 60 fps MEMC Auto-Bypass**: Restored direct 10-bit `SurfaceView` HWC HDR presentation (`SurfaceControl` `DATASPACE_BT2020_PQ` / `HLG` + `setExtendedRangeBrightness` + smooth `520 ms` YouTube-style warm D65 UI transition), eliminated landscape orientation jerk on portrait videos (`1080×1920`), and added smart GL shader bypass on 60 fps videos in `Smooth 60 fps` MEMC mode with an expanded 4-line **Stream HUD**.
 
 ---
 
