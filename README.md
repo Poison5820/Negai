@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.3.8-00E5FF?style=flat-square" alt="Version 4.3.8" />
+  <img src="https://img.shields.io/badge/version-4.3.9-00E5FF?style=flat-square" alt="Version 4.3.9" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/license-Proprietary_(Closed_Source)-FF4D8D?style=flat-square" alt="Proprietary License" />
@@ -55,9 +55,13 @@ You can install and update Negai directly through **Obtainium** or grab the univ
 
 ---
 
-## ✨ What's New in Release 4.3.8 (Build 76)
+## ✨ What's New in Release 4.3.9 (Build 77)
 
-- **Unified Theme Badges & Status Indicators Across All Modal Windows**: Every slider value badge (`0ms`, `1.0x`, `+85s`, `100%`, `20 sp`), codec pill (`AAC • 192k`, `DTS`, `SRT`), decoder status chip (`Auto`, `HW`, `SW`), and compact `28 dp` `[i]` reference button across all player and app sheets now uses the canonical `Liquid Glass`, `Frosted Glass`, and `Flat` theme components with guaranteed WCAG text contrast.
+- **Streamlined Hold Mini-Menus**: Disabled hold popups on Decoder and Scale buttons, kept only available audio tracks in the Audio hold menu, and removed the duplicate All Tools entry from the Tools hold menu.
+- **Persistent Auto Decoder Selection**: Selecting `AUTO (HW + SW)` in Audio Decoder stays highlighted during software fallback with real-time status in the header badge (`AUTO (SW)` / `AUTO (HW)`).
+- **100% Free & Default 3D Spatial Audio and Free 'Soft' Audio Cleanup**: 3D Spatial Audio (HRTF + XTC) is now enabled by default and free for everyone, and the 'Soft' profile in De-Artifact DSP is free and default.
+- **Compact 3-Button Row & [ⓘ] Technical Guide**: Modern horizontal 3-button selector (`Auto`, `HRTF 3D`, `XTC 3D`) and interactive `[ⓘ]` modal dialog for 3D surround sound.
+- **Cleaned Up Legal Navigation**: Removed duplicate Privacy Policy buttons from Settings and Device Info, consolidating all attributions into the planetary version sheet.
 - **Unified Interactive Step & Preset Filter Chips**: Standardized audio/subtitle sync step pills (`-250ms..+250ms`, `-0.5s..+0.5s`), skip-intro step buttons, UI scale reset (`↻ 100%`), and the full playback speed grid (`0.5x..3.0x`) under a consistent, non-clipped filter chip design.
 - **Accurate Direct Stereo (`2.0`) Audio Status Copy**: Stereo tracks now display `2.0 Stereo (Native)` when 3D spatial audio is off, `Bypass 2.0 (5.1/7.1 only)` when enabled, and `Direct Stereo Output (2.0)` in the audio output route status line.
 
