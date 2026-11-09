@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.3.2-00E5FF?style=flat-square" alt="Version 4.3.2" />
+  <img src="https://img.shields.io/badge/version-4.3.3-00E5FF?style=flat-square" alt="Version 4.3.3" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/license-Proprietary_(Closed_Source)-FF4D8D?style=flat-square" alt="Proprietary License" />
@@ -55,11 +55,11 @@ You can install and update Negai directly through **Obtainium** or grab the univ
 
 ---
 
-## ✨ What's New in Release 4.3.2 (Build 70)
+## ✨ What's New in Release 4.3.3 (Build 71)
 
-- **Calibrated Scroll-Edge Meniscus Lens (`Liquid Glass`) & Matte Blur (`Frosted Glass`)**: Refined chromatic dispersion (`1.6 dp`), inward meniscus refraction (`+dirY` without top-edge coordinate clamping), and 5-tap smoothing (`r = 3.5 px`) for crystal-clear scroll edges without acid RGB splitting.
-- **Live Glass Background Blur Around Floating Windows Without Black Screen**: Replaced parent `RenderEffect` layer blur with direct `safeBackdrop` blur (`18 dp`) on the modal scrim in `Frosted Glass` and `Liquid Glass`, eliminating the black-screen backdrop reset when opening dialogs.
-- **True Hardware HDR (BT.2020 PQ/HLG), Instant Portrait Video Orientation & Smart 60 fps MEMC Auto-Bypass**: Restored direct 10-bit `SurfaceView` HWC HDR presentation (`SurfaceControl` `DATASPACE_BT2020_PQ` / `HLG` + `setExtendedRangeBrightness` + smooth `520 ms` YouTube-style warm D65 UI transition), eliminated landscape orientation jerk on portrait videos (`1080×1920`), and added smart GL shader bypass on 60 fps videos in `Smooth 60 fps` MEMC mode with an expanded 4-line **Stream HUD**.
+- **Overhauled HLS (`:hls:manifest.m3u8`), DASH, RTSP & Network Playlist Streaming**: Explicit MIME detection (`APPLICATION_M3U8` / `APPLICATION_MPD` / `APPLICATION_SS` / `APPLICATION_RTSP`), case-insensitive scheme normalization (`Https://` -> `https://`), modern browser `User-Agent`, pipe-header (`|Referer=...&User-Agent=...`) and remote `.m3u` (`#EXTINF` / `#EXTVLCOPT`) support, and protection against false `HW+` -> `SW` decoder downgrades on stream errors.
+- **Unified 100% UI & Font Scale in Video Player & Sheets**: Removed hidden `0.90x`/`0.88x` modal sheet downscaling and DPI shrinking at `100%` scale, and matched top HUD `1080p`/`4K` and `HDR` pills (`SemiBold`, `36 dp`) with adjacent HUD buttons.
+- **100% Transparent "Frameless" HUD Mode & Distinct "Frosted Glass" vs "Liquid Glass" in Player**: Pure zero-fill, zero-border floating icons in `Frameless` mode, contrasted against `76%` velvet-matte graphite in `Frosted Glass` and `24%` crystal optical lens with a `1.45 dp` `135°` diamond rim in `Liquid Glass`.
 
 ---
 
