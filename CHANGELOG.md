@@ -3,6 +3,70 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.3.8] — `versionCode = 76` / `versionName = "4.3.8"`
+
+### 🇬🇧 English
+- **Unified Theme Badges & Status Indicators Across All Player & App Modal Windows:**
+  - Replaced all legacy local badge boxes and custom color/corner overrides inside `Audio Tracks & Sync`, `Playback Tools`, `Playback Speed`, `Subtitles`, `Hardware Decoder & Video`, `Anime4K`, `Frame Interpolation`, `Video Quality`, `Playlist`, `Video Chapters`, `Skip Intro`, `Sleep Timer`, and `Media File Info` sheets with the canonical theme badge component (`Liquid Glass`, `Frosted Glass`, and `Flat`).
+  - Slider value badges (`0ms`, `1.0x`, `+85s`, `100%`, `20 sp`), audio/subtitle codec badges (`AAC • 192k`, `DTS`, `SRT`, `ASS`), decoder status pills (`Auto`, `HW`, `SW`), and volume boost indicators now automatically adapt to the active theme engine with guaranteed WCAG >= 4.5:1 text contrast—eliminating pale, unreadable rectangular badges.
+  - Refined the `[i]` mode reference icon button across `Audio Cleanup`, `Anime4K`, `Frame Interpolation`, and `Hardware Decoder` headers into a crisp, compact `28 dp` circular glass/tonal control.
+- **Unified Interactive Step & Preset Filter Chips:**
+  - Standardized audio sync step pills (`-250ms`, `-50ms`, `0ms`, `+50ms`, `+250ms`), subtitle delay step pills (`-0.5s`, `-0.1s`, `0.0s`, `+0.1s`, `+0.5s`), skip-intro step pills (`-5s`, `-1s`, `+1s`, `+5s`), the UI scale reset pill (`↻ 100%`), and the full playback speed grid (`0.5x` through `3.0x`) under the canonical filter chip design without container clipping.
+- **Accurate Direct Stereo (`2.0`) Status Copy in Audio & Spatial Settings:**
+  - When playing 2-channel stereo (`2.0`) or mono (`1.0`) tracks, the `3D Spatial Audio` card now displays `2.0 Stereo (Native)` when spatial audio is off (reserving `ITU Downmix` strictly for multichannel `5.1/7.1` tracks) and `Bypass 2.0 (5.1/7.1 only)` when enabled, while the output route line accurately reports `Direct Stereo Output (2.0)`.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.3.8)</b></summary>
+
+<br>
+
+- **Полная унификация всех мелких бейджей и индикаторов в модальных окнах плеера и приложения:**
+  - Все локальные прямоугольные плашки и кастомные переопределения цветов/скруглений в окнах `Аудиодорожки и синхронизация`, `Инструменты плеера`, `Скорость воспроизведения`, `Субтитры`, `Аппаратный декодер и видео`, `Anime4K`, `Интерполяция кадров`, `Качество видео`, `Плейлист`, `Главы видео`, `Пропуск опенинга`, `Таймер сна` и `Сведения о файле` переведены на единый канонический компонент бейджа с полной поддержкой тем `Жидкое стекло`, `Матовое стекло` и `Flat`.
+  - Индикаторы значений слайдеров (`0 мс`, `1.0x`, `+85 с`, `100%`, `20 sp`), бейджи кодеков дорожек (`AAC • 192k`, `DTS`, `SRT`, `ASS`), статусы декодера (`Авто`, `HW`, `SW`) и лимита усиления громкости теперь автоматически наследуют оптику выбранной темы и гарантируют высокий WCAG-контраст текста без выцветших нечитаемых заливок.
+  - Кнопка справки `[i]` в заголовках `Очистка звука`, `Anime4K`, `Интерполяция кадров` и `Декодер` приведена к аккуратным компактным габаритам `28 dp`.
+- **Единый стиль интерактивных чипов шага синхронизации, сброса масштаба и сетки скоростей:**
+  - Кнопки шага сдвига звука (`-250 мс`, `-50 мс`, `0 мс`, `+50 мс`, `+250 мс`), задержки субтитров (`-0.5 с`, `-0.1 с`, `0.0 с`, `+0.1 с`, `+0.5 с`), шага пропуска опенинга (`-5 с`, `-1 с`, `+1 с`, `+5 с`), кнопка сброса масштаба интерфейса (`↻ 100%`) и вся сетка пресетов скорости (`0.5x .. 3.0x`) переведены на единый канонический стиль чипов без обрезания по краям контейнера.
+- **Точная индикация прямого стереовыхода (`2.0`) в настройках звука и 3D-аудио:**
+  - На обычных двухканальных стереодорожках (`2.0`) карточка `Пространственный звук 3D` теперь отображает бейдж `2.0 Стерео (Нативно)` при выключенном тумблере (оставляя `ITU Downmix` только для многоканальных `5.1/7.1` дорожек) и `Байпас 2.0 (Только 5.1/7.1)` при включённом, а строка маршрута вывода корректно показывает `Прямой стереовыход (2.0)`.
+
+</details>
+
+---
+
+## [v4.3.7] — `versionCode = 75` / `versionName = "4.3.7"`
+
+### 🇬🇧 English
+- **True Zero-Copy Audio Passthrough & Zero-Allocation DSP Pipeline:**
+  - Stereo (`2.0`) and Mono (`1.0`) audio tracks now return `AudioFormat.NOT_SET` during audio sink configuration in both the 3D HRTF binaural and XTC speaker processors, completely excluding them from the active audio processing graph (`0% CPU` overhead, `0` buffer copies, and full preservation of native 24-bit/32-bit/Float bit depth).
+  - Eliminated per-buffer `FloatArray` heap allocations on the real-time audio thread and replaced `Double`-precision `tanh` calls with a fast Pade `[3/2]` `Float` soft-clipping approximation (`fastTanh`), cutting mathematical DSP overhead by up to 5x on multichannel `5.1/7.1` tracks.
+  - Added direct zero-overhead `ByteBuffer` block transfer when audio sync delay is `0 ms` and low-bitrate de-artifact filtering is inactive, bypassing per-sample `Float` conversion loops.
+- **Zero-Allocation HDR10+ / Dolby Vision Parsing & Smart Hardware Audio Decoding:**
+  - Added an immediate SDR early exit before NAL unit scanning, replaced per-frame byte array allocations on Dolby Vision Profile 7 streams with a reusable scratch buffer, and deduplicated `KEY_HDR10_PLUS_INFO` `MediaCodec.setParameters` IPC calls when dynamic metadata payloads are unchanged.
+  - Enabled dedicated hardware `MediaCodec` decoders for Dolby Digital (`AC3`) and Dolby Digital Plus (`E-AC3`) in `Auto` audio mode when 3D spatial audio is turned off or the stream is stereo, and cached system `MediaCodecList` queries in lazy lookup tables.
+- **Eliminated Parasitic UI Recompositions & Optimized Ambient Video Glow Sampling:**
+  - Throttled buffered position state updates (`bufferedPositionMs`) to `>= 1000 ms` deltas with adaptive `100 ms / 250 ms` playback ticker intervals, preventing unnecessary whole-screen Compose recompositions while keeping the seekbar at 60/120 fps via its isolated `positionMsFlow`.
+  - Optimized Ambient Video Glow hardware `PixelCopy` sampling to run strictly after the first video frame is rendered using a reusable `16x16` bitmap and pixel array at `350 ms` intervals.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.3.7)</b></summary>
+
+<br>
+
+- **Истинный Zero-Copy Passthrough и отказ от аллокаций памяти в аудиопроцессорах:**
+  - Для всех стерео (`2.0`) и моно (`1.0`) дорожек процессоры бинаурального звука 3D HRTF и акустической сцены динамиков XTC теперь возвращают `AudioFormat.NOT_SET` на этапе конфигурации, полностью исключая себя из активного графа аудиосинка (`0%` нагрузки на CPU, `0` копирований буферов и полное сохранение нативной разрядности `24-bit / 32-bit / Float`).
+  - Устранены аллокации массивов `FloatArray` в куче на каждый буфер в реальном времени, а тяжелые вызовы `tanh(Double)` заменены на быструю `Float`-аппроксимацию Паде `[3/2]` (`fastTanh`), что ускоряет нелинейное лимитирование и басовый гармонайзер на многоканальных `5.1/7.1` дорожках до 5 раз.
+  - В процессоре синхронизации звука при нулевой задержке (`0 мс`) и выключенной очистке низкого битрейта реализована прямая блочная пересылка памяти `ByteBuffer` без по-сэмпльной конвертации в `Float`.
+- **Оптимизация парсера HDR10+ / Dolby Vision без нагрузки на GC и умный выбор аппаратных декодеров AC3/E-AC3:**
+  - Добавлен мгновенный ранний выход для обычных SDR-видео без сканирования NAL-единиц, устранены покадровые аллокации `ByteArray` при очистке базового слоя Dolby Vision Profile 7 за счёт переиспользуемого буфера, а синхронные IPC-вызовы `MediaCodec.setParameters` для `KEY_HDR10_PLUS_INFO` выполняются только при фактическом изменении метаданных сцены.
+  - В режиме аудиодекодера «Авто» разрешено использование энергоэффективных аппаратных чипов `MediaCodec` для дорожек `AC3` и `E-AC3`, когда пространственный 3D-звук выключен (или дорожка стереофоническая), а системный список кодеков `MediaCodecList` кэшируется один раз за сессию.
+- **Устранение паразитных перерисовок UI во время воспроизведения и оптимизация Ambient Video Glow:**
+  - Обновления буферизованной позиции (`bufferedPositionMs`) в общем состоянии плеера теперь срабатывают только при сдвиге буфера на `>= 1000 мс` с адаптивным шагом тикера `100 мс / 250 мс`, что полностью избавляет `PlayerScreen` от холостых перерисовок при сохранении идеальной плавности ползунка через изолированный поток `positionMsFlow`.
+  - Сэмплер фоновой подсветки `Ambient Video Glow` переведён на переиспользуемый буфер `16x16` пикселей с запуском строго после отрисовки первого видеокадра и интервалом `350 мс`.
+
+</details>
+
+---
+
 ## [v4.3.6] — `versionCode = 74` / `versionName = "4.3.6"`
 
 ### 🇬🇧 English
