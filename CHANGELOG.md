@@ -5,6 +5,78 @@
 
 ---
 
+## [v4.3.2] — `versionCode = 70` / `versionName = "4.3.2"`
+
+### 🇬🇧 English
+- **Calibrated AGSL Scroll-Edge Meniscus Lens (`Liquid Glass`) & Matte Diffusion (`Frosted Glass`):**
+  - Reduced chromatic dispersion from an extreme `11 dp` (`38 dp` effective RGB split) to a refined **`1.6 dp`** prismatic edge (`36 dp` meniscus zone in `Liquid Glass`, `32 dp` in `Frosted Glass`) and reversed vertical sampling inward (`+dirY`) so top-edge coordinates never clamp at `0.0` ("vertical fence" distortion).
+  - Scrolling text in `Liquid Glass` now bends smoothly through a polished glass bevel with 5-tap smoothing (`r = 3.5 px`) and dissolves cleanly (`1.0 - smoothstep(0.18, 1.0, t)`), while `Frosted Glass` applies a compact 9-tap Gaussian diffusion (`r <= 7.5 px`) without double-vision ghosting.
+- **Live Glass Background Blur Around Floating Windows Without Black Screen:**
+  - Replaced parent-container `RenderEffect` blur (which caused Android's hardware `GraphicsLayer` to blank out the recorded `LayerBackdrop` into a solid black screen when opening modals) with direct live `safeBackdrop` blur (`18 dp`) rendered on the full-screen modal scrim in `Frosted Glass` and `Liquid Glass`.
+- **True Hardware HDR Presentation (10-bit BT.2020 PQ / HLG) & Smooth YouTube-Style Warm UI Adaptation:**
+  - Routed HDR playback (`HDR10`, `HDR10+`, `HLG`, `Dolby Vision`) directly to the hardware composer (`SurfaceView` 10-bit HWC path, bypassing 8-bit SDR shader FBOs) and restored `SurfaceControl.Transaction` (`DATASPACE_BT2020_PQ` / `DATASPACE_BT2020_HLG` + API 34+ `setExtendedRangeBrightness` & window `COLOR_MODE_HDR` headroom).
+  - Added a smooth `520 ms` color-temperature transition (`warmthProgress`) on the SDR overlay layer so player controls and subtitles shift gently to a comfortable D65 paper-white (`#F3EFE6`) during HDR playback just like YouTube.
+- **Instant Portrait Orientation on Vertical Videos & Smart MEMC 60 fps Auto-Bypass + Detailed Stream HUD:**
+  - Probed local video dimensions and rotation metadata (`90°`/`270°` swap) prior to the first frame and deferred `By Video` (`VIDEO_ASPECT`) orientation locking until valid dimensions are known, eliminating the brief landscape rotation jerk when opening portrait videos (`1080×1920`).
+  - Accelerated PTS-delta frame-rate detection for streams without container FPS tags, bypassed the GL shader surface when `Smooth 60 fps` MEMC auto-bypasses on `>= 58.5 fps` videos, and upgraded **Stream HUD** with 4 detailed telemetry lines (Video & Color Space, Cadence & MEMC Auto-Bypass status, Active Renderer / Shader passes, and Audio codec/channels/bitrate/decoder + 3D Spatial + De-Artifact DSP status).
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.3.2)</b></summary>
+
+<br>
+
+- **Оптическая калибровка краевой линзы скролла без кислотного RGB-разрыва и сжатия текста (`Жидкое стекло` и `Матовое стекло`):**
+  - Базовая хроматическая дисперсия уменьшена с экстремальных `11 dp` (дававших разлёт каналов до `38 dp`) до благородных **`1.6 dp`** (высота зоны `36 dp` в `Жидком стекле` и `32 dp` в `Матовом стекле`), а вектор смещения направлен внутрь контента (`+dirY`), что полностью устранило зажатие верхних пикселей в «вертикальный забор».
+  - В теме `Жидкое стекло` текст на краях прокрутки мягко преломляется сквозь полированную грань с 5-точечным сглаживанием (`r = 3.5 px`) и плавным растворением (`1.0 - smoothstep(0.18, 1.0, t)`), а в `Матовом стекле` — мягко рассеивается компактным 9-точечным ядром (`r <= 7.5 px`) без двоения букв.
+- **Живое размытие фона вокруг плавающих окон без ухода экрана в черноту:**
+  - Убрано наложение `RenderEffect` на родительский контейнер записи `LayerBackdrop` (из-за которого аппаратный `GraphicsLayer` сбрасывал буфер фона в чёрный экран при открытии диалогов). Теперь размытие фона (`18 dp`) вокруг всех плавающих окон рисуется напрямую через живой `safeBackdrop` на подложке окна в темах `Матовое стекло` и `Жидкое стекло`.
+- **Настоящий аппаратный HDR (10-бит BT.2020 PQ / HLG) и плавная тёплая адаптация интерфейса как в YouTube:**
+  - При воспроизведении HDR (`HDR10`, `HDR10+`, `HLG`, `Dolby Vision`) видео направляется напрямую в аппаратный композитор `SurfaceView` (10-бит HWC в обход 8-битных SDR FBO шейдеров) с передачей `DATASPACE_BT2020_PQ` / `DATASPACE_BT2020_HLG`, `setExtendedRangeBrightness` (Android 14+) и `COLOR_MODE_HDR`.
+  - Слой интерфейса плеера и субтитров при старте HDR плавно (за `520 мс`) переходит из холодного белого в мягкий тёплый оттенок `D65` (`#F3EFE6`), предотвращая ослепление глаз в темноте точно как в YouTube.
+- **Мгновенная портретная ориентация вертикальных видео и умный авто-байпас MEMC 60 к/с + подробный «Монитор потока»:**
+  - Разрешение и метаданные поворота (`90°`/`270°`) считываются до первого кадра, а режим ориентации «По формату видео» не переключает экран в ландшафт при `0×0`, благодаря чему вертикальные ролики (`1080×1920`) сразу открываются в портретном режиме без рывка.
+  - Ускорен расчёт реального FPS по дельтам PTS для файлов без тега частоты в контейнере, добавлен полный обход GL-рендера при авто-байпасе `MEMC 60 к/с` на видео `>= 58.5 к/с`, а плашка **«Монитор потока» (`Stream HUD`)** теперь выводит 4 подробные строки (Видео и цветовое пространство `BT.2020 HWC` / `SDR BT.709`, Частота и статус `MEMC` / `Авто-Байпас`, Активный рендер и шейдеры, Аудио кодек/каналы/битрейт/декодер + `3D Spatial` + `De-Artifact DSP`).
+
+</details>
+
+---
+
+## [v4.3.1] — `versionCode = 69` / `versionName = "4.3.1"`
+
+### 🇬🇧 English
+- **Fixed AGSL Scroll-Edge Meniscus Lens & Matte Diffusion Shader Compilation:**
+  - Resolved an Android AGSL/SkSL runtime shader compilation issue caused by `h`-suffixed float literals (`0.72h`, `0.28h`, etc.) that previously forced scroll boundaries to fall back to a plain alpha fade.
+  - Scrolling lists and floating windows now execute the full hardware AGSL shader on Android 13+: `Liquid Glass` renders a true cylindrical meniscus lens with 100% hold opacity across 90% of the zone, lateral barrel expansion (`0.36x`), vertical wave compression (`0.48x`), and `11 dp` 5-tap RGB chromatic dispersion, while `Frosted Glass` applies a 9-point matte blur kernel (`r = 13 px`).
+- **20 dp Background Blur Around All Floating Windows (`Frosted Glass` & `Liquid Glass`) & Stronger `Flat` Scrim:**
+  - Opening any floating modal window in `Frosted Glass` or `Liquid Glass` now blurs the entire underlying screen (`20 dp` hardware `RenderEffect` blur + `52 px` window blur radius) with a balanced dark/light scrim (`44%` / `26%`).
+  - In `Flat (Material 3 Expressive)` mode, floating windows keep a crisp unblurred background with stronger contrast dimming (`64%` in Dark mode, `48%` in Light mode).
+- **Vivid Dual-Source "Ambient Video Glow" Around the Video Frame:**
+  - Upgraded the in-player **Ambient Video Glow** from a subtle center-only gradient hidden behind the video surface to a wide dual-source atmospheric halo (`0.92x` screen span) with soft peripheral screen-blended illumination across letterbox and pillarbox bars while preserving pure `#000000` OLED black when turned off.
+- **Unified Top Bar & Player HUD Button Sizes + Landscape Floating Navigation Dock:**
+  - Standardized all top bar action buttons (`Star`, `Palette`, `Refresh`) to `38×38 dp` with `20 dp` icons, unified the video player's top HUD **Resolution** (`1080p` / `4K`) and **HDR** pills to the exact `36 dp` capsule height of adjacent HUD buttons, and migrated list resolution badges to theme-aware canonical badges.
+  - Replaced the landscape side navigation rail with the unified bottom centered floating capsule dock across both portrait and landscape orientations.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.3.1)</b></summary>
+
+<br>
+
+- **Исправление компиляции AGSL-шейдера краевой линзы скролла (`Жидкое стекло` и `Матовое стекло`):**
+  - Устранена ошибка компиляции Android AGSL/SkSL из-за суффиксов `h` у дробных литералов (`0.72h`, `0.28h` и др.), из-за которой шейдер падал в `catch` и переключался на обычное линейное затухание прозрачности.
+  - Теперь на Android 13+ списки и плавающие окна рендерят полноценный аппаратный шейдер: в теме `Жидкое стекло` работает цилиндрическая линза мениска со 100% плотностью текста на 90% высоты зоны, бочкообразным преломлением к краям (`0.36x`), вертикальным сжатием волны (`0.48x`) и 5-точечной RGB-дисперсией (`11 dp`), а в `Матовом стекле` — 9-точечное матовое размытие (`r = 13 px`).
+- **Аппаратное размытие фона (20 dp) вокруг плавающих окон в стеклянных темах и усиленное затемнение в `Flat`:**
+  - При открытии любого плавающего окна в темах `Матовое стекло` и `Жидкое стекло` весь фон приложения или видеоплеера вокруг окна мягко размывается (`20 dp` `RenderEffect` + радиус `52 px` для системных диалогов) со сбалансированной вуалью (`44%` / `26%`).
+  - В теме `Flat (Material 3 Expressive)` фон под диалогами остаётся чётким без размытия, но получил более глубокое контрастное затемнение (`64%` в тёмной теме и `48%` в светлой).
+- **Яркая двунаправленная фоновая подсветка «Ambient Video Glow» вокруг кадра в видеоплеере:**
+  - Фоновая подсветка в видеоплеере переработана из слабой центральной точки позади `SurfaceView` в широкое двухзонное атмосферное свечение (`0.92x` размера экрана) с мягким периферийным ореолом на чёрных полосах сверху/снизу и по бокам кадра (при выключенной кнопке сохраняется эталонный `#000000` OLED).
+- **Выравнивание размеров кнопок верхней панели и HUD плеера + единый нижний парящий док в горизонтальном режиме:**
+  - Все кнопки верхней панели (`Звезда`, `Палитра`, `Обновить`) приведены к единому квадрату `38×38 dp` с иконками `20 dp`, кнопки **Качества** (`1080p` / `4K`) и **HDR** в верхней панели видеоплеера выровнены в единые `36 dp` стеклянные капсулы вровень с соседними кнопками HUD, а бейджи разрешения в списках переведены на каноничный тематический компонент.
+  - Боковая панель `NavigationRail` в горизонтальной ориентации убрана — теперь и в портретном, и в ландшафтном режиме используется единый центрированный нижний парящий док-капсула.
+
+</details>
+
+---
+
 ## [v4.3.0] — `versionCode = 68` / `versionName = "4.3.0"`
 
 ### 🇬🇧 English
