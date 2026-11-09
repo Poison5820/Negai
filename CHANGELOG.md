@@ -3,6 +3,68 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.3.6] — `versionCode = 74` / `versionName = "4.3.6"`
+
+### 🇬🇧 English
+- **Legacy CI/CD Release Tail Removed (`.github/workflows/release.yml`):**
+  - Completely purged hardcoded legacy blocks (`Technical Specifications & Architecture` and `Licenses & Attribution`) from GitHub Actions `release.yml` workflow after `cat "$CHANGELOG_SECTION"`. Releases now contain clean, dynamic, version-specific release notes without outdated boilerplate.
+- **Reliable Hardware Screen Blur Around Floating Windows in Glass Modes (`LibraryScreen.kt`, `PlayerScreen.kt`, `UnifiedModalsAndSelectors.kt`):**
+  - Re-enabled 16-dp hardware screen blur (`RenderEffect.createBlurEffect(16.dp, 16.dp, Shader.TileMode.CLAMP)`) behind floating modal windows in `FROSTED_GLASS` and `LIQUID_GLASS` themes on Android 12+ (API 31+).
+  - Fully eliminated Android Skia RenderNode recursion conflicts and backdrop blackouts by skipping `.recordGlassBackdrop(mainScreenBackdrop)` on the content `Row` and feeding `topBarBackdrop = null` into headers and navigation docks when `hasOpenModal == true`.
+  - In `UnifiedModalSurface`, switched to `fallbackMeshBackdrop` directly when glass themes are active, preventing duplicate backdrop reads from blurred root nodes.
+  - In `PlayerScreen.kt`, applied 16-dp hardware blur to the player HUD layer behind open modal sheets when glass themes are active without competing backdrop recording.
+  - In `BaseFloatingWindow`, calibrated translucent scrim tinting: gentle `0.24f` dark / `0.14f` light veil in glass themes and clean `0.45f` dark / `0.30f` light dimming in `FLAT` theme.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.3.6)</b></summary>
+
+<br>
+
+- **Удаление устаревшего хвоста из CI/CD релиза GitHub Actions (`.github/workflows/release.yml`):**
+  - Полностью удалён захардкоженный устаревший блок со спецификациями и лицензиями (`Technical Specifications & Architecture` и `Licenses & Attribution`) из шага публикации релиза в `.github/workflows/release.yml`. Теперь описания релизов GitHub формируются динамически строго из актуального чейнджлога без лишнего текста.
+- **Возврат 16-dp аппаратного размытия экрана вокруг плавающих окон в темах стекла без ухода в черноту (`LibraryScreen.kt`, `PlayerScreen.kt`, `UnifiedModalsAndSelectors.kt`):**
+  - Восстановлено аппаратное размытие экрана на 16 dp (`RenderEffect.createBlurEffect`) позади всех плавающих окон в темах «Матовое стекло» и «Жидкое стекло» на Android 12+ (API 31+).
+  - Полностью устранён конфликт RenderNode в Skia: когда открыто плавающее окно (`hasOpenModal == true`), на главном экране отключается запись `recordGlassBackdrop(mainScreenBackdrop)`, а в шапку и нижний док передаётся `topBarBackdrop = null`, благодаря чему весь фоновый интерфейс размывается с кристальной чистотой без единого чёрного пикселя.
+  - В `UnifiedModalSurface` для стеклянных тем используется `fallbackMeshBackdrop`, исключающий чтение размытого узла дерева отрисовки.
+  - В `PlayerScreen.kt` при открытых шторках и выбранной стеклянной теме интерфейс HUD позади окна размывается на 16 dp без паразитной записи бэкдропа.
+  - В `BaseFloatingWindow` настроена аккуратная полупрозрачная вуаль затемнения: лёгкая вуаль `24%` (тёмная) / `14%` (светлая) в темах стекла поверх размытого фона и аккуратное затемнение `45%` (тёмная) / `30%` (светлая) в теме Flat.
+
+</details>
+
+---
+
+## [v4.3.5] — `versionCode = 73` / `versionName = "4.3.5"`
+
+### 🇬🇧 English
+- **Truly Dynamic 4-Zone Ambient Video Glow Strictly Outside Video Bounds:**
+  - Implemented real-time 4-zone frame color sampling (`VideoAmbientPaletteState`) capturing average top, bottom, left, and right edge colors every 260ms via hardware-accelerated `PixelCopy` on Android 7.0+ (API 24+), enhancing optical glass saturation (`boostOpticalGlassSaturation(..., 1.25f)`) and smoothly interpolating transitions over 420ms with linear easing.
+  - Completely removed any overlay canvas layer drawn with `BlendMode.Screen` over the video rectangle, keeping the video frame 100% pristine and free of hazy purple tints.
+  - In `Anime4KVideoSurface`, applied `Modifier.aspectRatio(effectiveAspect)` inside a centered `Box` container when `scaleMode == VideoScaleMode.FIT`, exposing letterbox and pillarbox margins for 4 soft radial-elliptical glow halos that bloom from the video frame perimeter outwards.
+  - Synchronized `LocalVideoAmbientTintColor` with the animated dominant scene color so floating player HUD controls and glass sheets breathe naturally with the film palette.
+- **ITU-R BS.775 Multichannel Mixing & Precise 3D Spatial Audio Localization:**
+  - Corrected `ChannelMixingAudioProcessor` matrices in 5.1, 6.1, and 7.1 audio: routed `ch3` (LFE) symmetrically to both Left and Right channels (`0.22f, 0.22f`), mapped `ch4` (BL/SL) strictly to the left channel (`0.34f, 0.0f`), and mapped `ch5` (BR/SR) strictly to the right channel (`0.0f, 0.34f`).
+  - Fixed 7.1 channel layout ordering in `HrtfBinauralAudioProcessor` and `XtcSpeakerAudioProcessor`: mapped `ch4` and `ch5` as Back Left/Right (`BL/BR`, `±145°`) and `ch6` and `ch7` as Side Left/Right (`SL/SR`, `±95°`).
+  - Added acoustic Head-Shadow low-pass filtering (2600 Hz cutoff) on contralateral front channels (`FL/FR`) for crisp, forward-projected screen-plane staging without cross-bleeding.
+  - Equipped rear channels (`BL/BR`) with a 1st-order Pinna Rear Shadow filter (3100 Hz cutoff, combining 62% warm low-pass + 38% notched signal), rear propagation delay, and coherent rear reflection routing without anti-phase phase cancellation.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.3.5)</b></summary>
+
+<br>
+
+- **Настоящая динамическая 4-зонная подсветка Ambient Video Glow строго за пределами кадра:**
+  - Реализован аппаратный 4-зонный сэмплер реального видеокадра (`VideoAmbientPaletteState`), извлекающий средние цвета верхней, нижней, левой и правой четвертей изображения каждые 260 мс через `PixelCopy` (на Android 7.0+ API 24+) с усилением насыщенности (`boostOpticalGlassSaturation(..., 1.25f)`), сохранением физической яркости сцены и плавной 420-мс интерполяцией.
+  - Полностью удалён любой слой подсветки с `BlendMode.Screen`, рисовавшийся поверх видеокадра: само видео теперь отображается со 100% кристальной чистотой без мутной цветной пелены.
+  - В `Anime4KVideoSurface` при режиме `scaleMode == VideoScaleMode.FIT` добавлен модификатор `aspectRatio` с центровкой в `Box`, благодаря чему чёрные полосы (`letterbox` / `pillarbox`) остаются открытыми для 4 мягких радиально-эллиптических ореолов, расходящихся от границ кадра.
+  - Значение `LocalVideoAmbientTintColor` синхронизировано с доминирующим цветом сцены, благодаря чему стеклянные панели HUD деликатно дышат в тон видеоряду.
+- **Матрицы микширования ITU-R BS.775 и точное разделение 3D-звука в 5.1 и 7.1:**
+  - Исправлены матрицы `ChannelMixingProcessor` в 5.1, 6.1 и 7.1: сабвуфер `ch3` (LFE) теперь подаётся строго по центру в оба уха (`0.22f, 0.22f`), задний левый `ch4` (BL/SL) — строго в левый канал (`0.34f, 0.0f`), а задний правый `ch5` (BR/SR) — строго в правый канал (`0.0f, 0.34f`).
+  - В 7.1 потоках процессоров `HRTF` и `XTC` исправлен порядок каналов: `ch4, ch5` назначены тыловыми (`BL/BR`, `±145°`), а `ch6, ch7` — боковыми (`SL/SR`, `±95°`).
+  - Для передних каналов (`FL/FR`) добавлен ФНЧ тени головы на 2600 Гц для противоположного уха с чистым верхом для ипсилатерального канала, что даёт чёткую широкую фронтальную сцену перед экраном.
+  - Для тыловых каналов (`BL/BR`) добавлена физическая фильтрация Pinna Rear Shadow (ФНЧ 3100 Гц + режекторный фильтр 6200 Гц), тыловая задержка прихода волны и когерентное тыловое отражение без противофазного размытия.
+
+</details>
+
 ---
 
 ## [v4.3.4] — `versionCode = 72` / `versionName = "4.3.4"`
