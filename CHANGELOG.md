@@ -3,6 +3,50 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.3.9] — `versionCode = 77` / `versionName = "4.3.9"`
+
+### 🇬🇧 English
+- **Streamlined Bottom Quick Action Hold Mini-Menus:**
+  - Disabled hold popups on the `Decoder` and `Scale` buttons—now operating strictly via regular tap for immediate mode cycling without unexpected hold menus.
+  - Simplified the `Audio` hold popup to display exclusively available audio tracks for rapid soundtrack selection, removing DSP cleanup modes and the redundant disable action.
+  - Cleaned up the `Tools` hold popup by removing the top "All Tools & Settings" entry (already opened directly on click), keeping quick surface theme presets (`Flat`, `Frosted Glass`, `Liquid Glass`, and `Frameless`).
+- **Preserved `AUTO (HW + SW)` Selection Across Decoders:**
+  - Preserved the active `Auto (HW + SW)` selection when software decoding or automatic fallback initializes, displaying the real-time active engine in the header badge (`AUTO (SW)` or `AUTO (HW)`) rather than overwriting the user's highlighted choice.
+  - Video decoder similarly maintains highlighted `HW+` user preference while indicating actual hardware/software acceleration status in the codec metrics card.
+- **100% Free & Default 3D Spatial Audio (HRTF + XTC) and Free 'Soft' Audio Cleanup:**
+  - `3D Spatial Audio` (HRTF binaural processing for headphones and XTC crosstalk cancellation for stereo speakers) is now enabled by default and 100% free for all users, with all Premium locks and gold stars removed.
+  - Added the 'Soft' profile in `Audio Cleanup (De-Artifact DSP)` as a free tier enabled by default alongside 'Off', offering gentle de-essing and warm high-frequency harmonic restoration without requiring a subscription.
+- **Compact 3-Button 3D Spatial Audio Row & Interactive [ⓘ] Technical Guide:**
+  - Replaced tall vertical radio rows in the Audio sheet with a compact horizontal 3-button row (`Auto`, `HRTF 3D`, `XTC 3D`) matching the Audio Decoder style.
+  - Added an interactive `[ⓘ]` reference dialog explaining binaural MIT KEMAR HRTF, speaker transaural XTC, and 2.0 Stereo Auto-Bypass architecture.
+- **Removed Duplicate Privacy Policy Buttons:**
+  - Consolidated Privacy Policy and open-source attributions into a single canonical location inside the version planetary modal sheet, removing duplicate entries from Settings and Device Info.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.3.9)</b></summary>
+
+<br>
+
+- **Ревизия и очистка мини-меню удержания в нижней панели быстрого доступа:**
+  - Отключены мини-меню удержания для кнопок `Декодер` и `Масштаб` — теперь они работают только по обычному нажатию без лишних всплывающих окон.
+  - В меню удержания кнопки `Звук` оставлен исключительно список доступных аудиодорожек для мгновенного переключения дорожки без кнопки отключения и пунктов DSP.
+  - В меню удержания кнопки `Инструменты` убран верхний пункт открытия настроек, оставлены только 4 стиля поверхности (`Flat`, `Матовое стекло`, `Жидкое стекло`, `Без рамок`).
+- **Сохранение выбора «Авто (HW + SW)» и «HW+» в декодерах:**
+  - При программном декодировании или автоматическом фолбэке выбор пользователя `АВТО (HW + SW)` больше не сбрасывается на `SW`, а фактический движок наглядно отображается в заголовке бейджа (`АВТО (SW)` или `АВТО (HW)`).
+  - В видеодекодере кнопка `HW+` остаётся активной, а статус ускорения отображается в блоке параметров кодека.
+- **100% бесплатный и включённый по умолчанию Пространственный звук 3D (HRTF + XTC) и бесплатный режим «Мягкий» в Очистке звука:**
+  - `Пространственный звук 3D` (HRTF для наушников и XTC для стереодинамиков) теперь включён по умолчанию и полностью бесплатен для всех пользователей без Pro-ограничений и звёздочек.
+  - В модуль `Очистка звука (De-Artifact DSP)` добавлен бесплатный профиль «Мягкий» (установлен по умолчанию наряду с «Откл.») для деликатного де-эссинга и устранения артефактов без подписки.
+- **Компактный ряд из 3 кнопок для 3D-звука и подробное справочное окно [ⓘ]:**
+  - Вместо трёх громоздких вертикальных строк с радиокнопками в шторке звука сделан компактный горизонтальный ряд из 3 кнопок в стиле декодеров (`Авто`, `HRTF 3D`, `XTC 3D`).
+  - Добавлена кнопка справки `[ⓘ]`, открывающая окно с подробным описанием алгоритмов MIT KEMAR HRTF, трансаурального XTC и авто-обхода для дорожек 2.0 стерео.
+- **Удаление дублирующихся кнопок Политики конфиденциальности:**
+  - Ссылка на Политику конфиденциальности и лицензии открытого ПО консолидирована в едином каноническом месте — в планетарном окне версии приложения.
+
+</details>
+
+---
+
 ## [v4.3.8] — `versionCode = 76` / `versionName = "4.3.8"`
 
 ### 🇬🇧 English
