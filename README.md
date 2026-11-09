@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.2.20-00E5FF?style=flat-square" alt="Version 4.2.20" />
+  <img src="https://img.shields.io/badge/version-4.3.0-00E5FF?style=flat-square" alt="Version 4.3.0" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/license-Proprietary_(Closed_Source)-FF4D8D?style=flat-square" alt="Proprietary License" />
@@ -55,11 +55,11 @@ You can install and update Negai directly through **Obtainium** or grab the univ
 
 ---
 
-## ✨ What's New in Release 4.2.17 (Build 64)
+## ✨ What's New in Release 4.3.0 (Build 68)
 
-- **Live Optical Glass Blur & Refraction (`Frosted Glass` & `Liquid Glass`)**: Restored frame-1 live `blur()` and `lens()` refraction for the top floating bar, bottom dock, and modals, plus a two-phase optical rim for crisp edge definition in Light theme.
-- **100% Seamless & Borderless `Flat (Material 3 Expressive)` Theme**: Eliminated all remaining border strokes, dividers, and double-clip anti-aliasing halos across theme selectors, palette grids, folder action pills, and dialogs.
-- **Pure `#000000` OLED Video Canvas, Zero-Crackle Dolby/DTS Resume & In-Window Player Modals**: Made the video player background pure `#000000` black by default with an optional **Ambient Video Glow** toggle, added 65 ms post-flush audio envelope seeding for crackle-free Dolby/DTS resume, held brightness/volume swipe HUDs for 850 ms, and rendered player sheets in-window to prevent status bar flashes.
+- **Instant "Ambient Video Glow" Button in Player HUD**: Moved the Ambient Video Glow toggle out of Settings and placed a dedicated one-tap button directly in the video player's top HUD bar right next to **Quality** and **Screen Orientation** for instant switching between pure `#000000` OLED black and ambient frame glow during playback.
+- **Cylindrical Scroll-Edge Meniscus Lens (`Liquid Glass`) & Matte Diffusion (`Frosted Glass`)**: Replaced simple scroll-edge alpha fade across lists and floating modals (`44 dp` optical zone) with lateral barrel meniscus refraction, vertical wave compression, and 5-tap RGB chromatic dispersion (`9.5 dp`) in `Liquid Glass`, plus 9-tap matte blur diffusion in `Frosted Glass` without premature transparency loss.
+- **100% Borderless "About Device" Screen in `Flat` Mode**: Migrated all hardware/software codec rows, `HW Accelerated` badges, and legal buttons on the **About Device** page to borderless M3 Expressive tonal components.
 
 ---
 
