@@ -5,6 +5,38 @@
 
 ---
 
+## [v4.3.3] — `versionCode = 71` / `versionName = "4.3.3"`
+
+### 🇬🇧 English
+- **Overhauled HLS (`/720.mp4:hls:manifest.m3u8`), DASH, RTSP, P2P TorrServer & Network Playlist Streaming:**
+  - Added explicit stream MIME resolution (`APPLICATION_M3U8` for `:hls:`, `/hls/`, `manifest.m3u8`, `master.m3u8`, `index.m3u8`, `format=m3u8`; `APPLICATION_MPD` for `:dash:`, `/dash/`, `manifest.mpd`; `APPLICATION_SS` for `.ism/manifest`; `APPLICATION_RTSP` for `rtsp://`) and case-insensitive scheme normalization (`Https://` -> `https://`, `Http://` -> `http://`, `Rtsp://` -> `rtsp://`) so CDN URLs containing `.mp4:hls:manifest.m3u8` open directly in the HLS engine instead of failing as progressive MP4 files.
+  - Upgraded the HTTP streaming transport with a modern mobile browser `User-Agent` (preventing CDN balancing blocks on `solodcdn` and similar hosts), cross-protocol `http <-> https` redirect following, `|User-Agent=...&Referer=...&Origin=...&Cookie=...` pipe-header parsing, remote HTTP/HTTPS `.m3u` playlist loading (`#EXTINF` + `#EXTVLCOPT`), and 5-attempt segment retry policy.
+  - Prevented network stream source/container errors from falsely downgrading the hardware video decoder (`HW+` -> `SW`) and added automatic HLS fallback retry when an extensionless HTTP stream returns an HLS manifest.
+- **Unified 100% UI & Font Scale Across Video Player HUD and Floating Sheets:**
+  - Removed the hidden `0.90x` density and `0.88x` font-scale downscaling on player modal windows as well as DPI-based auto-shrinking at `100%` scale, ensuring all player buttons, `1080p`/`4K` & `HDR` badges (`SemiBold`), and floating sheets match the main interface proportions at `100%`.
+- **100% Transparent "Frameless" HUD Mode & Distinct "Frosted Glass" vs "Liquid Glass" in Video Player:**
+  - Removed residual glass overlays and dark outer shadow rings in **Frameless** (`Без фона`) mode so top HUD buttons, timeline pills (`Skip Intro`, `A-B Loop`, `Chapter`), center transport buttons, and bottom quick actions become 100% transparent floating icons (`0 dp` border, `0%` background fill).
+  - Established a bold visual distinction in the video player between **Frosted Glass** (`76%` velvet-matte graphite fill with soft satin sheen and `0.9 dp` matte rim) and **Liquid Glass** (`24%` crystal-clear optical lens fill with bright dome specular highlight and a sharp `1.45 dp` `135°` diamond gradient rim).
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.3.3)</b></summary>
+
+<br>
+
+- **Ревизия потокового воспроизведения HLS (`/720.mp4:hls:manifest.m3u8`), DASH, RTSP, P2P TorrServer и сетевых плейлистов:**
+  - Добавлено явное определение MIME-типа потока (`APPLICATION_M3U8` для `:hls:`, `/hls/`, `manifest.m3u8`, `master.m3u8`, `index.m3u8`, `format=m3u8`; `APPLICATION_MPD` для `:dash:`, `/dash/`, `manifest.mpd`; `APPLICATION_SS` для `.ism/manifest`; `APPLICATION_RTSP` для `rtsp://`) и нормализация регистра протокола (`Https://` -> `https://`, `Http://` -> `http://`, `Rtsp://` -> `rtsp://`), благодаря чему CDN-ссылки вида `.mp4:hls:manifest.m3u8` сразу открываются как HLS-поток без ошибки чтения контейнера.
+  - Обновлён сетевой HTTP-транспорт плеера: современный браузерный `User-Agent` (без блокировок со стороны CDN вроде `solodcdn`), поддержка кросс-протокольных редиректов `http <-> https`, разбор кастомных заголовков через `|User-Agent=...&Referer=...&Origin=...&Cookie=...`, загрузка удалённых `.m3u` плейлистов по `http/https` (`#EXTINF` и `#EXTVLCOPT`) и 5 попыток переподключения при сбое сегмента.
+  - Исключено ложное переключение видеодекодера с `HW+` на `SW` при сетевых ошибках источника и добавлен автоматический перезапуск в режиме HLS, если сервер отдаёт манифест по ссылке без расширения `.m3u8`.
+- **Единый 100% масштаб интерфейса и шрифта в видеоплеере и плавающих окнах:**
+  - Убрано принудительное уменьшение плотности (`0.90x`) и шрифта (`0.88x`) у модальных шторок плеера, а также авто-сжатие на широких экранах при масштабе `100%` — теперь кнопки HUD, пилюли разрешения `1080p`/`4K` и `HDR` (`SemiBold`) и все шторки плеера имеют единый эталонный размер наравне с главным меню.
+- **100% прозрачный режим «Без фона» и яркое визуальное различие «Матового стекла» и «Жидкого стекла» в плеере:**
+  - В режиме **«Без фона» (`Frameless`)** полностью отключены остаточные стеклянные подложки и тёмные контурные кольца у всех верхних кнопок, капсул над таймлайном («Пропустить опенинг», `A-B`, «Глава»), центральных кнопок управления и нижнего бара — остаются только чистые парящие иконки и текст с тенью (`0%` фона, `0 dp` рамок).
+  - Кардинально разведены стили **«Матовое стекло»** (плотная бархатно-матовая графитовая тонировка `76%` с мягкой сатиновой вуалью и деликатной гранью `0.9 dp`) и **«Жидкое стекло»** (кристально прозрачная оптическая линза `24%` с ярким купольным бликом и острой алмазной фаской `1.45 dp` под углом `135°`).
+
+</details>
+
+---
+
 ## [v4.3.2] — `versionCode = 70` / `versionName = "4.3.2"`
 
 ### 🇬🇧 English
