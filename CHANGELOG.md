@@ -5,6 +5,38 @@
 
 ---
 
+## [v4.2.18] — `versionCode = 65` / `versionName = "4.2.18"`
+
+### 🇬🇧 English
+- **Tonal Satin Nested Controls & Instant Glass Theme Switching (`Frosted Glass` & `Liquid Glass`):**
+  - Replaced nested glass-in-a-frame borders with contrasting **Tonal Satin Pills** for all inner buttons, selection rows, chips, and inputs inside cards and floating windows: unselected nested controls now have zero perimeter bevels, while active selections display a delicate accent highlight.
+  - Kept the live optical background capture layer attached across theme switches so switching from `Flat` to `Frosted Glass` or `Liquid Glass` activates `blur()` and `lens()` refraction immediately without reopening the screen.
+- **Unified Floating Window Scroll Optics & Pinned Modal Headers:**
+  - Eliminated false top/bottom scroll-edge fading on non-scrolling dialogs (`Open Magnet / .torrent`, `TorrServer Configuration`, `Mode Info`) so short windows remain 100% crisp from top to bottom.
+  - Pinned modal headers and `Done` footers outside the scrollable viewport across all floating dialogs and video player sheets, and tuned the `44 dp` AGSL meniscus zone to act as a clear refracting glass lens with chromatic dispersion across 85% of the zone before dissolving at the very rim.
+- **Crisp Daylight 4-Tier `Flat (Material 3 Expressive)` Palette & 100% Borderless Radio Buttons:**
+  - Upgraded Light mode in `Flat` to a bright, clean 4-tier Google Material 3 Expressive daylight hierarchy (`#F5F7FC` canvas, `#FFFFFF` cards, `#EEF3FA` tonal controls, and pure vibrant accent tinting) without muddy gray-blue casts.
+  - Replaced stroked radio button rings in `Flat` with borderless tonal circles and made `Classic (Flat)` player transport preview buttons 100% opaque and seam-free.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.2.18)</b></summary>
+
+<br>
+
+- **Контрастные сатиновые пилюли (Tonal Satin Pills) без двойных рамок и мгновенное включение стекла (`Матовое стекло` и `Жидкое стекло`):**
+  - Устранён визуальный шум «стекла в рамке внутри стекла в рамке»: все вложенные кнопки, строки выбора, чипы и поля ввода внутри карточек и диалогов переведены на плотные контрастные сатиновые подложки без контурных обводок в невыбранном состоянии и с тонким акцентным бликом при выборе.
+  - Захват живого оптического фона теперь остаётся подключённым постоянно, поэтому переключение из темы `Flat` в `Матовое стекло` или `Жидкое стекло` мгновенно включает размытие и преломление без перезахода на экран.
+- **Честная оптика прокрутки плавающих окон и закреплённые шапки шторок:**
+  - Полностью убрано ложное затухание сверху и снизу в компактных диалогах без прокрутки (`Открыть Magnet / .torrent`, `Настройка TorrServer`, справка по режимам) — все элементы отображаются на 100% чётко.
+  - Шапки и нижние кнопки `Готово` во всех диалогах и шторках видеоплеера вынесены из скроллящейся области, а 44-dp зона оптики скролла превращена в прозрачную преломляющую линзу со спектральной дисперсией и растворением только у самого края.
+- **Чистая дневная палитра `Flat (Material 3 Expressive)` в светлой теме и радиокнопки без обводок:**
+  - Светлая тема в режиме `Flat` переведена на чистую 4-уровневую дневную палитру Google Material 3 Expressive (`#F5F7FC` фон экрана, `#FFFFFF` карточки, `#EEF3FA` вложенные элементы и тонировка чистым ярким акцентом) без грязно-серого оттенка.
+  - Радиокнопки в режиме `Flat` переведены с контурных колец на плоские тональные круги без рамок, а кнопки превью темы плеера `Классическая (Плоская)` сделаны на 100% непрозрачными и бесшовными.
+
+</details>
+
+---
+
 ## [v4.2.17] — `versionCode = 64` / `versionName = "4.2.17"`
 
 ### 🇬🇧 English
