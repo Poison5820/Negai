@@ -5,6 +5,38 @@
 
 ---
 
+## [v4.3.0] — `versionCode = 68` / `versionName = "4.3.0"`
+
+### 🇬🇧 English
+- **Instant "Ambient Video Glow" Toggle in Video Player Top HUD Bar:**
+  - Moved the **Ambient Video Glow** toggle out of the Settings screens (`Appearance` & `Video & Anime4K`) and placed a dedicated one-tap button directly in the video player's top HUD bar right between **Quality** (`1080p` / `4K`) and **Screen Orientation**.
+  - Tapping the button immediately switches between pure `#000000` OLED black letterboxing and atmospheric ambient video glow during playback, displaying a confirmation HUD notice pill (`Ambient Video Glow: ON / OFF`). Also available as a customizable quick-action chip (`Glow`) in the bottom toolbar.
+- **Cylindrical Scroll-Edge Meniscus Lens (`Liquid Glass`) & 9-Point Matte Diffusion (`Frosted Glass`):**
+  - Replaced simple alpha fade at the top and bottom scroll boundaries of lists and floating dialogs (`44 dp` optical zone) with a true **cylindrical meniscus lens** in `Liquid Glass` and **9-point matte blur diffusion** in `Frosted Glass`.
+  - In `Liquid Glass`, scrolling text and icons remain at 100% opacity across 90% of the lens zone (`rimDissolve = 1.0 - smoothstep(0.90, 1.0, t)`), undergoing lateral barrel expansion (`barrelX`), vertical meniscus wave compression, 5-tap RGB chromatic dispersion (`9.5 dp`), and a specular meniscus rim gleam before dissolving only at the final 10% edge.
+  - In `Frosted Glass`, scrolling content passes through a progressive 9-tap matte diffusion kernel (`r = 2.4x`) with 100% hold opacity across 88% of the zone, while `Flat (Material 3 Expressive)` preserves a clean gradient fade.
+- **100% Borderless "About Device" Screen in `Flat (Material 3 Expressive)`:**
+  - Migrated all hardware/software decoder cards, `HW Accelerated` / `SW Software` status badges, and legal action buttons on the **About Device** screen to canonical borderless `UnifiedSelectionRow`, `UnifiedBadgeChip`, and `UnifiedActionButton` components, eliminating the last remaining borders in `Flat` mode.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.3.0)</b></summary>
+
+<br>
+
+- **Быстрая кнопка «Фоновая подсветка» прямо в верхней панели видеоплеера:**
+  - Переключатель **«Фоновая подсветка под видео»** убран из разделов настроек (`Оформление` и `Видео и Anime4K`) и вынесен отдельной кнопкой в верхнюю панель управления видеоплеера — прямо между индикатором **Качества** (`1080p` / `4K`) и кнопкой **Ориентации экрана**.
+  - Нажатие мгновенно включает или выключает мягкое атмосферное свечение вокруг кадра прямо во время просмотра (по умолчанию сохраняется чисто-чёрный фон `#000000` OLED) с выводом аккуратного уведомления `Фоновая подсветка: Вкл / Выкл`. Кнопку также можно добавить в нижнюю панель быстрых действий.
+- **Цилиндрическая линза мениска скролла (`Жидкое стекло`) и 9-точечное матовое размытие (`Матовое стекло`):**
+  - Обычное полупрозрачное затухание на верхнем и нижнем краях прокрутки списков и плавающих окон (`44 dp` оптическая зона) заменено на физическое преломление **цилиндрического мениска линзы** в `Жидком стекле` и **9-точечное матовое рассеивание** в `Матовом стекле`.
+  - В теме `Жидкое стекло` строки и иконки на 90% высоты краевой зоны сохраняют 100% плотность без бледного выцветания (`rimDissolve = 1.0 - smoothstep(0.90, 1.0, t)`), проходя через бочкообразное растяжение к краям (`barrelX`), вертикальное сжатие волны мениска, 5-точечную хроматическую RGB-дисперсию (`9.5 dp`) и зеркальный блик грани, растворяясь лишь на последних 10% кромки.
+  - В теме `Матовое стекло` уходящий под шапку контент плавно размывается 9-точечным матовым ядром (`r = 2.4x`) без ранней потери прозрачности, а в теме `Flat` сохранён классический плавный фейд.
+- **Полное удаление рамок в разделе «Об устройстве» в теме `Flat (Material 3 Expressive)`:**
+  - Все карточки аппаратных и программных видео/аудио декодеров, бейджи `HW Аппаратный` / `SW Программный` и кнопки лицензий на экране **«Об устройстве»** переведены на каноничные `UnifiedSelectionRow`, `UnifiedBadgeChip` и `UnifiedActionButton` без единой рамки в режиме `Flat`.
+
+</details>
+
+---
+
 ## [v4.2.20] — `versionCode = 67` / `versionName = "4.2.20"`
 
 ### 🇬🇧 English
