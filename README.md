@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.3.3-00E5FF?style=flat-square" alt="Version 4.3.3" />
+  <img src="https://img.shields.io/badge/version-4.3.4-00E5FF?style=flat-square" alt="Version 4.3.4" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/license-Proprietary_(Closed_Source)-FF4D8D?style=flat-square" alt="Proprietary License" />
@@ -55,11 +55,11 @@ You can install and update Negai directly through **Obtainium** or grab the univ
 
 ---
 
-## ✨ What's New in Release 4.3.3 (Build 71)
+## ✨ What's New in Release 4.3.4 (Build 72)
 
-- **Overhauled HLS (`:hls:manifest.m3u8`), DASH, RTSP & Network Playlist Streaming**: Explicit MIME detection (`APPLICATION_M3U8` / `APPLICATION_MPD` / `APPLICATION_SS` / `APPLICATION_RTSP`), case-insensitive scheme normalization (`Https://` -> `https://`), modern browser `User-Agent`, pipe-header (`|Referer=...&User-Agent=...`) and remote `.m3u` (`#EXTINF` / `#EXTVLCOPT`) support, and protection against false `HW+` -> `SW` decoder downgrades on stream errors.
-- **Unified 100% UI & Font Scale in Video Player & Sheets**: Removed hidden `0.90x`/`0.88x` modal sheet downscaling and DPI shrinking at `100%` scale, and matched top HUD `1080p`/`4K` and `HDR` pills (`SemiBold`, `36 dp`) with adjacent HUD buttons.
-- **100% Transparent "Frameless" HUD Mode & Distinct "Frosted Glass" vs "Liquid Glass" in Player**: Pure zero-fill, zero-border floating icons in `Frameless` mode, contrasted against `76%` velvet-matte graphite in `Frosted Glass` and `24%` crystal optical lens with a `1.45 dp` `135°` diamond rim in `Liquid Glass`.
+- **Delicate Scroll-Edge Meniscus Calibration in Portrait & Landscape**: Reduced edge zone to `22/20 dp` in portrait and `14/13 dp` in landscape with 3.5x reduced geometric warping, `16%/11%` height clamping, and refined `0.85 dp` micro-dispersion for smooth, distraction-free scrolling.
+- **Auto-Bypass 3D Spatial Audio for Stereo (2.0) and Mono (1.0) Tracks**: Intelligent auto-bypass that restricts HRTF/XTC processing to multichannel `5.1/7.1` audio and streams stereo/mono tracks with 100% bit-transparent purity, backed by live status badges in Audio Sheet and Stream HUD.
+- **Zero Screen Black-Out Behind Floating Modal Windows**: Replaced recursive backdrop sampling on dialog scrims with clean translucent tinting, ensuring instant backdrop visibility and glass refraction without blackout stalls.
 
 ---
 
