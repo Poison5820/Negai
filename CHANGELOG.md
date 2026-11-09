@@ -5,6 +5,40 @@
 
 ---
 
+## [v4.3.4] — `versionCode = 72` / `versionName = "4.3.4"`
+
+### 🇬🇧 English
+- **Delicate Scroll-Edge Meniscus Calibration in Portrait & Landscape Modes (`UnifiedDesignSystem.kt`):**
+  - Reduced scroll-edge optical zone height from `36..44 dp` down to **`22 dp`** (`Liquid Glass`) / **`20 dp`** (`Frosted Glass`) in portrait mode, and to a slim **`14 dp`** / **`13 dp`** in landscape orientation.
+  - Capped maximum edge zone container fraction to `16%` in portrait and `11%` in landscape (down from `30%`), and reduced base chromatic dispersion to a delicate **`0.85 dp`**.
+  - Tuned the AGSL shader to weaken geometric wave warping by 3.5x (`scaleX = 1.0 + 0.022 * t2 * ...`, `dy = 0.065 * t2 * ...` in Liquid Glass; `dy = 0.04 * t2 * ...` in Frosted Glass) with smooth edge dissolving (`smoothstep(0.08, 1.0, t)`) and refined micro-dispersion so text never ripples violently across short landscape lists.
+- **Auto-Bypass 3D Spatial Audio for Stereo (2.0) and Mono (1.0) Tracks:**
+  - Configured `HrtfBinauralAudioProcessor`, `XtcSpeakerAudioProcessor`, and `SpatialAudioCoordinator` to activate 3D spatial audio strictly for multichannel streams (`5.1 / 7.1`, `channels > 2`), automatically switching to bit-transparent, zero-filtering bypass when playing standard 2.0 Stereo or 1.0 Mono tracks.
+  - Added live `Bypass 2.0 (5.1/7.1 only)` status badges and informative hints in the Audio Tracks Sheet, plus `3D: Bypass (2.0)` status reporting in Stream HUD.
+- **Zero Screen Black-Out Behind Floating Modal Windows in Glass Themes:**
+  - Removed duplicate `Modifier.drawBackdrop(...)` sampling from the fullscreen `Box` scrim in `BaseFloatingWindow` (which previously blanked out the screen to black in glass themes due to recursive `LayerBackdrop` sampling), replacing it with clean, translucent scrim tinting (`38%` dark / `22%` light in glass themes, `62%` / `45%` in Flat).
+  - Wired `mainScreenBackdrop.notifyContentScrolled()` to `mainScreenBackdrop.hasOpenModal` in `LibraryScreen.kt` so background content and glass refraction remain crystal-clear from the very first frame of opening any dialog.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.3.4)</b></summary>
+
+<br>
+
+- **Деликатная калибровка краевой преломляющей линзы скролла в портретном и альбомном режимах:**
+  - Высота оптической зоны уменьшена с громоздких `36..44 dp` до деликатных **`22 dp`** («Жидкое стекло») / **`20 dp`** («Матовое стекло») в портретном режиме и до тонких **`14 dp`** / **`13 dp`** в альбомной ориентации.
+  - Максимальная доля зоны от высоты окна ограничена до `16%` в портрете и `11%` в ландшафте (вместо старых `30%`), а базовая хроматическая дисперсия снижена до тонких **`0.85 dp`**.
+  - В AGSL-шейдере изгиб текста ослаблен в 3.5 раза (`scaleX = 1.0 + 0.022 * t2 * ...`, `dy = 0.065 * t2 * ...` в «Жидком стекле»; `dy = 0.04 * t2 * ...` в «Матовом стекле») с мягким растворением `smoothstep(0.08, 1.0, t)` и аккуратным сглаживанием — строки текста больше не «плавают» волнами при прокрутке.
+- **Автоматический обход (Auto-Bypass) пространственного звука 3D для стерео (2.0) и моно (1.0) дорожек:**
+  - Процессоры `HRTF` (для наушников) и `XTC` (для динамиков) теперь активируют виртуализацию объёма строго на многоканальных дорожках (`5.1 / 7.1`, каналов > 2), а для стандартных дорожек 2.0 Стерео и 1.0 Моно мгновенно переходят в чистый побитовый обход без изменения АЧХ.
+  - В шторку аудиодорожек добавлена индикация `Байпас 2.0 (Только для 5.1/7.1)` с подробным пояснением, а в «Монитор потока» (Stream HUD) выводится статус `3D: Байпас (2.0)`.
+- **Устранение потемнения экрана позади плавающих окон в темах стекла:**
+  - Убрано дублирующее размытие `Modifier.drawBackdrop` с полноэкранного скрима вокруг `BaseFloatingWindow` (вызывавшее уход фона в чёрный цвет из-за двойного захвата `LayerBackdrop`), скрим переведён на чистую полупрозрачную тонировку (`38%` / `22%` в темах стекла).
+  - Добавлен мгновенный вызов `notifyContentScrolled()` при открытии модального окна в `LibraryScreen.kt`, благодаря чему главный экран позади окна виден с первой миллисекунды без затемнения.
+
+</details>
+
+---
+
 ## [v4.3.3] — `versionCode = 71` / `versionName = "4.3.3"`
 
 ### 🇬🇧 English
