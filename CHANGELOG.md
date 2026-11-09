@@ -5,6 +5,38 @@
 
 ---
 
+## [v4.2.19] — `versionCode = 66` / `versionName = "4.2.19"`
+
+### 🇬🇧 English
+- **Modular 3-Engine Theme Architecture (`Flat`, `Frosted Glass`, `Liquid Glass`):**
+  - Separated the three visual engines into dedicated, isolated pipelines so each style obeys its own optical, shadow, and tonal rules without cross-theme leakage.
+  - **Flat (Material 3 Expressive):** Pure 4-tier tonal containment (`#F5F7FC` canvas, `#FFFFFF` cards, `#EEF3FA` nested controls, and vibrant accent-tinted active pills) with zero shaders, zero offscreen backdrop passes, and zero borders.
+  - **Frosted Glass & Liquid Glass:** Strict separation between top-level optical glass containers (`blur()` + `lens()` + `135°` bevel) and inner **Tonal Satin Pills** (tactile, borderless unselected controls with a subtle micro-shadow in Light mode and a `0.75 dp` accent highlight when selected).
+- **Pure Vibrant Palette Chroma in Light Theme:**
+  - Restored full chroma for all accent palettes (`Sakura`, `Neon Violet`, `Gold`, `Emerald`, `Crimson`, `Cyan`, and `Dynamic Monet`) in Light mode so selected cards, chips, and buttons display rich pastel-accent tints instead of muted gray-blue.
+- **In-Window Live Optical Backdrop & Unified Scroll-Edge Meniscus Across All Modals:**
+  - Enabled in-window live `LayerBackdrop` capture for all root library dialogs (`Appearance Quick Switcher`, `Negai Pro`, `Full License`, `What's New`, `Folder / Episode Sort`, `Hidden Folders`) plus Android 12+ hardware window blur (`FLAG_BLUR_BEHIND`) for standalone dialogs (`Open Magnet / .torrent`, `TorrServer Configuration`), eliminating dark opaque modal boxes over Light screens.
+  - Unified all floating dialogs and bottom sheets onto a single `36 dp` scroll-edge optical meniscus container with pinned headers and footers that stay 100% crisp when content fits and refract smoothly only while scrolling.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.2.19)</b></summary>
+
+<br>
+
+- **Модульная архитектура из 3 независимых движков тем (`Flat`, `Матовое стекло`, `Жидкое стекло`):**
+  - Три визуальные темы полностью разделены на изолированные конвейеры рендеринга, исключающие взаимное влияние шейдеров, рамок и теней.
+  - **Flat (Material 3 Expressive):** Эталонная 4-уровневая тональная иерархия (`#F5F7FC` фон, `#FFFFFF` карточки, `#EEF3FA` вложенные кнопки и сочные акцентные выбранные элементы) без шейдеров, `drawBackdrop` и контурных рамок.
+  - **Матовое стекло и Жидкое стекло:** Чёткое разделение между внешними оптическими контейнерами (`blur()` + `lens()` + `135°` фаска) и вложенными сатиновыми пилюлями **Tonal Satin Pills** (тактильные кнопки без рамок в покое, с мягкой микро-тенью в светлой теме и тонким бликом `0.75 dp` при выборе).
+- **Чистая насыщенность цветовых палитр в светлой теме:**
+  - Устранено приглушение цветности акцентных палитр (`Сакура`, `Неоновый фиолет`, `Золото`, `Изумруд`, ` Алый`, `Циан` и `Monet`) в светлом режиме — выбранные карточки, чипы и кнопки окрашиваются в чистый оттенок выбранной палитры без серо-синего налёта.
+- **Живой оптический бэкдроп во всех плавающих окнах и единая 36-dp линза скролла:**
+  - Все диалоги и нижние шторки главного экрана (`Быстрый выбор темы`, `Negai Pro`, `Лицензии`, `Что нового`, сортировка папок и серий, скрытые папки) переведены на прямой захват живого оптического фона окна, а отдельные системные диалоги (`Открыть Magnet / .torrent`, `Настройка TorrServer`) дополнены аппаратным размытием окна Android 12+ (`FLAG_BLUR_BEHIND`), что полностью убирает тёмные непрозрачные подложки поверх светлой темы.
+  - Все плавающие окна и нижние шторки объединены на базе единого контейнера с закреплённой шапкой и 36-dp зоной преломления скролла, которая включается строго при фактической прокрутке списка.
+
+</details>
+
+---
+
 ## [v4.2.18] — `versionCode = 65` / `versionName = "4.2.18"`
 
 ### 🇬🇧 English
