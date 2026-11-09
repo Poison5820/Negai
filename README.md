@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.2.13-00E5FF?style=flat-square" alt="Version 4.2.13" />
+  <img src="https://img.shields.io/badge/version-4.2.17-00E5FF?style=flat-square" alt="Version 4.2.17" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/license-Proprietary_(Closed_Source)-FF4D8D?style=flat-square" alt="Proprietary License" />
@@ -55,12 +55,11 @@ You can install and update Negai directly through **Obtainium** or grab the univ
 
 ---
 
-## ✨ What's New in Release 4.2.13 (Build 60)
+## ✨ What's New in Release 4.2.17 (Build 64)
 
-- **10-Component Atomic Design System**: Consolidated the entire UI across Library, Folders, Episodes, Recent, Torrents, Settings, and Player sheets onto 10 canonical components (`UnifiedSurfaceCard`, `UnifiedSelectionRow`, `UnifiedFloatingBar`, `UnifiedModalHeader/Footer`, `UnifiedActionButton`, `UnifiedIconButton`, `UnifiedFilterChip`, `UnifiedBadgeChip`, `UnifiedInputBar`, `UnifiedDropdownMenu`).
-- **Zero 90° Corner Bleed & Smooth 135° Glass Bevels**: Eliminated white and gray rectangular halos protruding behind rounded card and chip corners via hardware shape clipping and contour-accurate outline rendering; unified all glass cards, buttons, and chips with the exact same smooth 135° specular bevel as the floating navigation dock.
-- **Unified Modal Headers & "Done" Footers**: Standardized all dialogs, bottom sheets, and player control sheets onto `UnifiedModalHeader` and `UnifiedModalFooter` for consistent typography, icon badges, and confirmation buttons.
-- **Pure Borderless M3 Flat Theme**: Guaranteed 0% borders on cards, bars, modals, rows, and chips in the Flat theme, keeping a 1dp `outlineVariant` stroke exclusively on `OUTLINED` buttons and text input bars.
+- **Live Optical Glass Blur & Refraction (`Frosted Glass` & `Liquid Glass`)**: Restored frame-1 live `blur()` and `lens()` refraction for the top floating bar, bottom dock, and modals, plus a two-phase optical rim for crisp edge definition in Light theme.
+- **100% Seamless & Borderless `Flat (Material 3 Expressive)` Theme**: Eliminated all remaining border strokes, dividers, and double-clip anti-aliasing halos across theme selectors, palette grids, folder action pills, and dialogs.
+- **Pure `#000000` OLED Video Canvas, Zero-Crackle Dolby/DTS Resume & In-Window Player Modals**: Made the video player background pure `#000000` black by default with an optional **Ambient Video Glow** toggle, added 65 ms post-flush audio envelope seeding for crackle-free Dolby/DTS resume, held brightness/volume swipe HUDs for 850 ms, and rendered player sheets in-window to prevent status bar flashes.
 
 ---
 
