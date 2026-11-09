@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.3.6-00E5FF?style=flat-square" alt="Version 4.3.6" />
+  <img src="https://img.shields.io/badge/version-4.3.8-00E5FF?style=flat-square" alt="Version 4.3.8" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/license-Proprietary_(Closed_Source)-FF4D8D?style=flat-square" alt="Proprietary License" />
@@ -55,11 +55,11 @@ You can install and update Negai directly through **Obtainium** or grab the univ
 
 ---
 
-## ✨ What's New in Release 4.3.4 (Build 72)
+## ✨ What's New in Release 4.3.8 (Build 76)
 
-- **Delicate Scroll-Edge Meniscus Calibration in Portrait & Landscape**: Reduced edge zone to `22/20 dp` in portrait and `14/13 dp` in landscape with 3.5x reduced geometric warping, `16%/11%` height clamping, and refined `0.85 dp` micro-dispersion for smooth, distraction-free scrolling.
-- **Auto-Bypass 3D Spatial Audio for Stereo (2.0) and Mono (1.0) Tracks**: Intelligent auto-bypass that restricts HRTF/XTC processing to multichannel `5.1/7.1` audio and streams stereo/mono tracks with 100% bit-transparent purity, backed by live status badges in Audio Sheet and Stream HUD.
-- **Zero Screen Black-Out Behind Floating Modal Windows**: Replaced recursive backdrop sampling on dialog scrims with clean translucent tinting, ensuring instant backdrop visibility and glass refraction without blackout stalls.
+- **Unified Theme Badges & Status Indicators Across All Modal Windows**: Every slider value badge (`0ms`, `1.0x`, `+85s`, `100%`, `20 sp`), codec pill (`AAC • 192k`, `DTS`, `SRT`), decoder status chip (`Auto`, `HW`, `SW`), and compact `28 dp` `[i]` reference button across all player and app sheets now uses the canonical `Liquid Glass`, `Frosted Glass`, and `Flat` theme components with guaranteed WCAG text contrast.
+- **Unified Interactive Step & Preset Filter Chips**: Standardized audio/subtitle sync step pills (`-250ms..+250ms`, `-0.5s..+0.5s`), skip-intro step buttons, UI scale reset (`↻ 100%`), and the full playback speed grid (`0.5x..3.0x`) under a consistent, non-clipped filter chip design.
+- **Accurate Direct Stereo (`2.0`) Audio Status Copy**: Stereo tracks now display `2.0 Stereo (Native)` when 3D spatial audio is off, `Bypass 2.0 (5.1/7.1 only)` when enabled, and `Direct Stereo Output (2.0)` in the audio output route status line.
 
 ---
 
