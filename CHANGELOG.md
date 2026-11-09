@@ -3,6 +3,45 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.4.0] — `versionCode = 78` / `versionName = "4.4.0"`
+
+### 🇬🇧 English
+- **Seamless Cold Start for HLS & Live Network Streams:**
+  - Integrated `ResilientLoadErrorHandlingPolicy` into `DefaultMediaSourceFactory` and `HlsMediaSource.Factory`, progressively retrying manifest and chunk requests on transient CDN HTTP codes (`403/404/500/502/503/504`) and `ParserException` without aborting playback.
+  - Implemented automatic network stream playlist rebuilds with exponential backoff on source/network errors, preventing premature error dialogs during cold CDN manifest generation.
+- **Eliminated 1-Frame Start Video Flicker & Decoder Frame Drops:**
+  - Removed premature `isFirstFrameRendered = true` assignment in `onPlaybackStateChanged`, ensuring video presentation curtains open strictly when the first frame is rendered by `MediaCodec`.
+  - Removed video track disable/enable toggling during surface attachment that previously purged decoded initial frames.
+- **True Glass Transparency for Floating Modal Windows:**
+  - Removed opaque ambient mesh overlay (`fallbackMeshBackdrop`) in `UnifiedModalSurface`, revealing underlying live video and backdrop blur cleanly behind floating dialogs.
+  - Calibrated true glass modal backing alphas in `Liquid Glass` (`0.44f` dark / `0.58f` light with dome specular reflection and 135° diamond rim) and `Frosted Glass` (`0.64f` dark / `0.74f` light with soft satin veil and matte rim).
+- **Ultra-Light Edge-Outward Ambient Video Glow (Zero-Load on Fullscreen & 4K):**
+  - Added smart zero-load auto-pause that completely disables `PixelCopy` sampling and Canvas glow whenever video fills the screen (< 8dp black bar margins or non-fit scaling).
+  - Implemented concurrency protection with `AtomicBoolean` ensuring no overlapping frame capture calls.
+  - Added adaptive polling (1000ms for heavy 4K/60fps/HDR/high-bitrate videos, 650ms for 1080p/720p) with smooth color interpolation.
+  - Re-architected Ambilight canvas geometry: vibrant color gradients now radiate directly outward from the exact video boundaries into pillarbox and letterbox bars instead of being occluded beneath the video frame.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.4.0)</b></summary>
+
+<br>
+
+- **Бесшовный старт HLS и сетевых трансляций с первого раза:**
+  - Внедрена отказоустойчивая политика `ResilientLoadErrorHandlingPolicy` для `DefaultMediaSourceFactory` и `HlsMediaSource.Factory` с прогрессивной задержкой повтора при CDN-ошибках (`403/404/500/502/503/504`, `ParserException`) вместо сброса потока.
+  - Добавлен автоматический прогрев и пересборка плейлиста для сетевых потоков при ошибках источника и парсинга манифестов без вылета в ошибку.
+- **Устранение промаргивания первого кадра видео при начале воспроизведения:**
+  - Устранено преждевременное выставление флага готовности первого кадра в `onPlaybackStateChanged`, благодаря чему шторка видеоплеера открывается строго при фактической отрисовке кадра декодером `MediaCodec`.
+  - Удалён сброс видеотрека при подключении видеоповерхности в `attachVideoSurface`, приводивший к потере первого декодированного кадра.
+- **Настоящая прозрачность левитирующих окон в «Матовом стекле» и «Жидком стекле»:**
+  - Убрана глухая сетка подложки (`fallbackMeshBackdrop`) в `UnifiedModalSurface`, полностью открывая живое размытие и видеокадр позади всплывающих шторок и окон.
+  - Откалибрована полупрозрачная основа модальных окон: `0.44` (темная) / `0.58` (светлая) в «Жидком стекле» с купольным бликом и алмазной фаской 135°, и `0.64` / `0.74` в «Матовом стекле» с сатиновой вуалью.
+- **Сверхлёгкий краевой Ambient Video Glow с нулевой нагрузкой на тяжёлых видео:**
+  - Внедрено умное отключение сэмплера `PixelCopy` при отсутствии чёрных полей (< 8 dp) или растягивании кадра (`0% CPU/GPU`).
+  - Добавлена защита от наложения запросов захвата кадров и адаптивный интервал опроса (1000 мс на 4K/60fps/HDR, 650 мс на 1080p).
+  - Переработана геометрия Ambilight: сочные градиенты теперь исходят строго от внешних кромок видеокадра наружу в боковые и верхние поля.
+
+</details>
+
 ## [v4.3.9] — `versionCode = 77` / `versionName = "4.3.9"`
 
 ### 🇬🇧 English
