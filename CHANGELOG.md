@@ -5,6 +5,38 @@
 
 ---
 
+## [v4.2.20] — `versionCode = 67` / `versionName = "4.2.20"`
+
+### 🇬🇧 English
+- **Crystal-Clean Glass Body Without Vertical White-Black Gradients (`Liquid Glass` & `Frosted Glass`):**
+  - Removed the vertical white-to-black gradient overlay in `Liquid Glass` Dark mode that caused card tops to appear milky-gray and card bottoms muddy-black.
+  - Replaced it across both `Frosted Glass` and `Liquid Glass` containers with a delicate `135°` diagonal crystal veil reflex (`0.035f` / `0.07f` at the top-left corner fading to `100%` transparent by `38%`), keeping the glass body deep and uniform across its full height.
+- **Reference `v4.1.8` Obsidian-Graphite Glass & Translucent Quartz Capsules:**
+  - Restored the deep obsidian-graphite base tone (`#10131A` in `Frosted Glass`, `#10141D` in `Liquid Glass`, and `#0E1117` / `#0D1017` in modals) instead of bluish-gray `#151B27`.
+  - Replaced opaque slate-gray nested controls (`#28334A` / `#2A364F`) in Dark mode with translucent smoked-quartz glass pills (`#161B26` at `50%` alpha in `Frosted Glass` and `#151A24` at `40%` alpha in `Liquid Glass`) and luminous crystal-accent active capsules.
+- **Crisp 5-Stop `135°` Optical Bevel with Inset-Outline Clipping Compensation:**
+  - Fixed outer `.clip(shape)` eating half of the `135°` specular bevel stroke by rendering the contour on an inset outline (`inset(rimStroke * 0.5f)`), making 100% of the polished glass edge visible around rounded corners in both Dark and Light themes.
+  - Restored the 5-point `135°` optical highlight curve (`0.52f..0.78f` top-left peak, `0.02f..0.06f` mid-edge fade, and `0.24f..0.58f` bottom-right accent reflex) plus a subtle corner-only `0.75 dp` micro-chamfer (`0.0f` transparent along straight mid-edges) for unselected inner pills.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.2.20)</b></summary>
+
+<br>
+
+- **Чистое тело стекла без мутного вертикального бело-чёрного градиента (`Жидкое стекло` и `Матовое стекло`):**
+  - Полностью удалён вертикальный бело-чёрный градиент в тёмной теме `Жидкого стекла`, из-за которого верх карточек выглядел белёсо-мутным, а низ — грязно-чёрным.
+  - В обеих стеклянных темах для контейнеров добавлен тончайший диагональный `135°` кристаллический отблеск (`0.035f` / `0.07f` в верхнем левом углу с полным растворением уже к `38%` диагонали), сохраняющий глубокую однородность стекла по всей высоте.
+- **Благородный обсидианово-графитовый тон из эталона `v4.1.8` и полупрозрачные кварцевые капсулы:**
+  - Возвращён благородный обсидианово-графитовый тон карточек и панелей (`#10131A` в `Матовом стекле`, `#10141D` в `Жидком стекле` и `#0E1117` / `#0D1017` в модальных окнах) вместо уходящего в синеву `#151B27`.
+  - Сизо-серые пластиковые подложки вложенных кнопок (`#28334A` / `#2A364F`) в тёмной теме заменены на полупрозрачное дымчато-кварцевое стекло (`#161B26` с `alpha = 0.50f` в `Матовом стекле` и `#151A24` с `alpha = 0.40f` в `Жидком стекле`) и светящиеся акцентные капсулы при выборе.
+- **Острая 5-точечная `135°` фаска с компенсацией клиппинга (Inset Outline):**
+  - Исправлено срезание внешней половины блика фаски модификатором `.clip(shape)` за счёт отрисовки контура внутри `inset(rimStroke * 0.5f)` как в тёмной, так и в светлой теме — теперь 100% толщины полированной грани чётко видно на скруглениях.
+  - Восстановлена 5-точечная кривая диагонального блика из `v4.1.8` (`0.52f..0.78f` пик в левом верхнем углу, `0.02f..0.06f` утончение в середине грани и `0.24f..0.58f` цветной рефлекс в правом нижнем углу), а для невыбранных вложенных кнопок добавлена тончайшая угловая микро-фаска `0.75 dp` с полной прозрачностью (`0.0f`) посередине сторон.
+
+</details>
+
+---
+
 ## [v4.2.19] — `versionCode = 66` / `versionName = "4.2.19"`
 
 ### 🇬🇧 English
