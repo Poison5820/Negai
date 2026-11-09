@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/версия-4.2.18-00E5FF?style=flat-square" alt="Версия 4.2.18" />
+  <img src="https://img.shields.io/badge/версия-4.2.19-00E5FF?style=flat-square" alt="Версия 4.2.19" />
   <img src="https://img.shields.io/badge/пакет-app.negai.player-00B8D4?style=flat-square" alt="Пакет приложения" />
   <img src="https://img.shields.io/badge/платформа-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Платформа" />
   <img src="https://img.shields.io/badge/лицензия-Проприетарная_(Closed_Source)-FF4D8D?style=flat-square" alt="Проприетарная лицензия" />
