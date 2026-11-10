@@ -3,6 +3,48 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.4.9]
+
+### 🇬🇧 English
+- **Convex Collecting Liquid Glass Optics Without Inward Shrinking:**
+  - Redesigned the optical refraction shader across floating bars, modal sheets, and cards into a unified dome-convex collecting lens with balanced edge magnification and lateral light flare.
+  - Eliminated inward image shrinking and black border artifacts around the floating bottom dock, ensuring underlying album art and titles bend smoothly outward around the rounded glass rims without haze.
+  - Increased floating bar transparency depth while keeping text crystal-clear and removing opaque canvas backings beneath floating windows and panels.
+- **Pure Material 3 Expressive Geometry in Flat Theme & Button Styling:**
+  - Preserved continuous superellipse (G2) rounded corner curvature in the Flat theme when switching styles, preventing rounded cards from collapsing into rigid circular corners.
+  - Updated theme descriptions and button rendering to respect pure borderless Material 3 Expressive tonal container hierarchies.
+- **Reliable Brightness Gestures & Picture-in-Picture System Brightness Restoration:**
+  - Resolved an issue where localized language wrappers could prevent vertical brightness swipe gestures from interacting with the display window.
+  - Entering Picture-in-Picture (PiP) mode now automatically restores default system brightness, ensuring mini-window video playback never overrides your device screen brightness.
+  - Keeps display awake continuously during automated performance benchmark execution even while switching video decoders.
+- **Refined Benchmark Refresh Rate Accuracy & Movie Motion Interpolation:**
+  - Synchronizes display frame metrics sampling right after modal window dismissal to prevent open dialogs from artificially depressing benchmark frame rates.
+  - Prevents accidental background audio playback upon exiting the player during a benchmark run.
+  - Corrected motion interpolation resolution scaling so high-bitrate 1080p Blu-ray movies are never unnecessarily downscaled during frame smoothing.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.4.9)</b></summary>
+
+<br>
+
+- **Настоящая собирающая купольно-выпуклая линза в теме «Жидкое стекло» (Liquid Glass):**
+  - Оптический шейдер преломления на плавающих панелях, шторках и карточках полностью переработан в единую собирающую выпуклую линзу с мягким купольным увеличением и краевым преломлением.
+  - Устранено затягивание изображения внутрь панели и появление тёмных полей у краёв плавающего дока: обложки и заголовки под стеклом теперь плавно увеличиваются и красиво обтекают скругления граней без размытия в туман.
+  - Сбалансирована прозрачность плавающих панелей и убраны непрозрачные подложки под плавающими элементами и модальными окнами.
+- **Каноническая геометрия Material 3 Expressive в теме «Плоская» и исправление кнопок:**
+  - Сохранена плавная суперэллиптическая (G2) геометрия скругления углов в теме «Плоская», предотвращая переход форм в грубые циркулярные скругления при смене оформления.
+  - Обновлены описания тем и рендеринг кнопок в соответствии с чистым стандартом безрамочной тональной иерархии контейнеров Material 3 Expressive.
+- **Стабильные жесты яркости и сброс подсветки в режиме «Картинка в картинке»:**
+  - Исправлена ошибка, из-за которой контекст смены языка мог препятствовать работе вертикального свайпа яркости.
+  - При переходе в режим «Картинка в картинке» (PiP) локальная яркость плеера теперь автоматически сбрасывается к системной яркости экрана смартфона, предотвращая залипание максимальной яркости в мини-окне.
+  - Экран больше не гаснет во время автоматического бенчмарка при смене декодеров между этапами.
+- **Повышенная точность авто-бенчмарка и плавная интерполяция кадров в кино:**
+  - Замер кадровой частоты в авто-бенчмарке теперь стартует строго после закрытия окна настроек и стабилизации экрана, исключая ложное занижение герцовки из-за открытого диалога.
+  - Исключён случайный фоновый запуск звука при закрытии плеера во время бенчмарка.
+  - Исправлено определение разрешения для сглаживания движений: высокобитрейтные 1080p Blu-ray фильмы больше не урезаются по разрешению при интерполяции кадров.
+
+</details>
+
 ## [v4.4.8]
 
 ### 🇬🇧 English
