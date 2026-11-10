@@ -3,6 +3,70 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.4.5]
+
+### 🇬🇧 English
+- **True Convex Water-Drop Lens Optics in the Liquid Glass Theme:**
+  - Calibrated the optical refraction profile across floating bars, windows, and cards so text and icons passing beneath the glass bend smoothly along the curved meniscus rim without blurring into a haze.
+  - Increased the clarity of the central glass area in both Dark and Light modes and added a subtle inner specular rim reflection that highlights the physical thickness of each glass edge.
+- **Peak 120 / 144 Hz Scrolling on Custom OEM Skins & Theme Mode Icons:**
+  - Explicitly activates your display's highest refresh rate at native screen resolution across menus, lists, and settings so devices running Realme UI, ColorOS, HyperOS, and OneUI no longer throttle the interface to 60 Hz.
+  - Replaced plain colored dots on the base theme mode selector (Light, Dark, OLED, Auto, and Auto OLED) in the quick theme sheet and Settings with clear, recognizable icons.
+- **Reliable Online HLS Streaming & Automatic Decoder Recovery:**
+  - Fixed playback errors on online HLS streams whose links contain embedded file extensions before the manifest suffix.
+  - Improved hardware decoder stability across diverse Android chipsets and added automatic fallback to software decoding if a hardware video or audio codec encounters an unexpected runtime error.
+- **Cleaner Player Modal Windows & Unified Control Rounding:**
+  - Opening any settings or track window inside the video player now hides the underlying player buttons and applies live hardware blur directly to the video frame behind the window, eliminating distracting double-blurred button silhouettes.
+  - Expanded the visible list height inside the player tools window and unified the corner rounding of all player transport buttons, quick action chips, and floating status pills.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.4.5)</b></summary>
+
+<br>
+
+- **Эталонный эффект выпуклой водяной линзы в теме «Жидкое стекло» (Liquid Glass):**
+  - Откалибровано оптическое преломление на плавающих панелях, всплывающих окнах и карточках: контуры текста и иконок под стеклом теперь оставляют чёткий геометрический изгиб у самой кромки линзы без размытия в туман.
+  - Повышена прозрачность центральной части стекла в тёмной и светлой темах и добавлен тонкий внутренний зеркальный блик вдоль контура, подчёркивающий физическую толщину стеклянного бортика.
+- **Честные 120 / 144 Гц в интерфейсе на прошивках Realme UI, ColorOS, HyperOS и OneUI и иконки режима темы:**
+  - Приложение теперь явно запрашивает максимальную частоту обновления экрана в родном разрешении при навигации по спискам и настройкам, устраняя принудительное ограничение в 60 Гц для видеоплееров на сторонних оболочках Android.
+  - В окне быстрого выбора темы и в настройках оформления кружки предпросмотра на кнопках режима фона (Светлая, Тёмная, OLED, Авто и Авто OLED) заменены на понятные тематические иконки.
+- **Надёжный запуск онлайн-потоков HLS и авто-переключение декодера при сбоях:**
+  - Исправлена ошибка запуска потокового онлайн-видео по сложным ссылкам балансировщиков, содержащим расширение видеофайла внутри адреса манифеста.
+  - Повышена стабильность аппаратных декодеров на разных процессорах и добавлено автоматическое переключение на программный декодер видео или звука при непредвиденных сбоях системного кодека.
+- **Чистые всплывающие окна в видеоплеере и единая геометрия кнопок:**
+  - При открытии любого окна настроек в плеере кнопки управления теперь полностью скрываются, а живое аппаратное размытие накладывается напрямую на кадр видео позади окна без размытых силуэтов интерфейса.
+  - Увеличена полезная высота списков в окне инструментов плеера и приведены к единому скруглению все кнопки управления воспроизведением, чипы быстрых действий и плавающие индикаторы жестов.
+
+</details>
+
+## [v4.4.4]
+
+### 🇬🇧 English
+- **Crisper, Deeper Edge Refraction in the Liquid Glass Theme:**
+  - Refined the optical lens profile across floating bars, windows, and cards so light bends sharply along a focused outer rim while keeping the center of each surface crystal-clear.
+  - Reduced background pre-blur and lightened the glass surface tint on floating bars and cards so background colors and wallpaper details refract vividly through the edges.
+  - Enabled live edge refraction on main content cards over the background canvas and strengthened the top-edge specular highlight for a tactile thick-glass feel.
+- **Smoother 120 Hz Scrolling & Glass Rendering Optimizations:**
+  - Eliminated redundant layer clipping on shadowed glass panels and floating windows.
+  - Pre-cached glass bevel outlines and surface gradients outside the per-frame drawing loop to prevent memory allocations and garbage-collection pauses during fast 120 Hz scrolling.
+  - Streamlined the scroll-edge optical shader in the Frosted Glass theme to cut GPU texture sampling overhead nearly in half while maintaining a soft edge fade.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.4.4)</b></summary>
+
+<br>
+
+- **Глубокое и отчётливое краевое преломление в теме «Жидкое стекло» (Liquid Glass):**
+  - Обновлён оптический профиль линзы на плавающих панелях, всплывающих окнах и карточках: преломление теперь сфокусировано вдоль аккуратной внешней кромки с более сильным изгибом лучей и чистым прозрачным центром.
+  - Снижено предварительное размытие фона и уменьшена плотность тонирующей подложки на плавающих панелях и карточках, чтобы детали и цвета фона отчётливо преломлялись на стеклянных гранях.
+  - Включено живое краевое преломление на основных карточках поверх фонового полотна и усилен тонкий блик верхней грани для ощущения физического объёмного стекла.
+- **Плавная прокрутка 120 Гц и оптимизация рендеринга стекла:**
+  - Устранено двойное обрезание контуров на стеклянных панелях и модальных окнах с тенями.
+  - Контуры фасок и градиентные блики стеклянных поверхностей теперь кэшируются заранее и не пересоздаются на каждом кадре, что полностью исключает лишнюю нагрузку на память и микрофризы при быстрой прокрутке 120 Гц.
+  - Оптимизирован шейдер мягкого затухания краёв списков в теме «Матовое стекло» (Frosted Glass): нагрузка на видеоядро при скролле снижена почти вдвое без потери плавности края.
+
+</details>
+
 ## [v4.4.3]
 
 ### 🇬🇧 English
