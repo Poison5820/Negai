@@ -3,6 +3,48 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.4.7]
+
+### 🇬🇧 English
+- **Lateral Convex Edge Refraction in the Liquid Glass Theme:**
+  - Redesigned the optical lens behavior on the floating bottom dock, top header, floating windows, and cards so background content no longer shrinks inward or recedes into the distance.
+  - Added a convex side-edge meniscus effect that gently magnifies and bends cards and titles outward around the left and right edges and rounded corners as they scroll beneath the glass, while keeping text on the panels crisp and free of color fringing.
+- **Crisp Borderless Tonal Hierarchy in the Flat (Material 3 Expressive) Theme:**
+  - Refined the tonal step separation in the borderless Flat theme across Light, Dark, and OLED modes—especially in the Monochrome palette and when surface color tinting is turned off.
+  - **Light Mode Clarity:** Placed pure-white cards over a calm soft-gray screen background, gave nested buttons and chips a distinct tonal step inside cards, and styled the floating navigation dock and top bar with a deeper container tone so they never blend into white cards scrolling underneath.
+  - **High-Contrast Selection & Radio Indicators:** Selected rows, filter chips, and active navigation tabs now stand out immediately with a rich dark-graphite highlight and crisp white text and icons in Light Monochrome mode (or a balanced indigo-slate highlight when color tinting is disabled), paired with clearer unselected radio button indicators.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.4.7)</b></summary>
+
+<br>
+
+- **Объёмное боковое преломление краёв в теме «Жидкое стекло» (Liquid Glass):**
+  - Переработана оптика линзы на плавающем нижнем доке, верхней шапке, всплывающих окнах и карточках: фон под стеклом больше не сжимается к центру и не «проваливается вдаль».
+  - Добавлено выпуклое боковое преломление у левой и правой граней и на закруглениях углов — проезжающие под доком и шапкой карточки и заголовки теперь плавно увеличиваются и «обтекают» края стекла в стороны, а текст на самих панелях остаётся кристально чётким без радужных ореолов.
+- **Чёткая безрамочная тональная иерархия в теме «Плоская» (Flat Material 3 Expressive):**
+  - Выстроено контрастное разделение слоёв по яркости строго без рамок и контуров в светлом, тёмном и OLED режимах (особенно в палитре «Монохром» и при отключённой цветовой тонировке поверхностей).
+  - **Чистота в светлом режиме:** Чисто-белые карточки теперь контрастно лежат на спокойном светло-сером холсте экрана, вложенные кнопки и переключатели внутри карточек имеют собственный заметный тон, а плавающий нижний док и верхняя шапка выделены более плотным тоном и никогда не сливаются с проезжающими под ними белыми карточками.
+  - **Контрастный выбор и радио-индикаторы:** Выбранные строки, чипы и активная вкладка нижнего дока в светлом монохромном режиме теперь выделяются глубокой графитовой заливкой с чисто-белым текстом и иконками (или насыщенным пепельно-индиговым тоном при выключенной тонировке), а невыбранные кружки радио-кнопок стали заметнее на фоне строк.
+
+</details>
+
+## [v4.4.6]
+
+### 🇬🇧 English
+- **Smooth Satin Glass Balance in the Liquid Glass Theme:**
+  - Softened the background blur inside floating bars, cards, and modal windows so titles and icons remain effortlessly readable over busy backgrounds while preserving edge refraction.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.4.6)</b></summary>
+
+<br>
+
+- **Мягкое сатиновое сглаживание в теме «Жидкое стекло» (Liquid Glass):**
+  - Сбалансировано внутреннее сглаживание фона на плавающих панелях, карточках и всплывающих окнах для комфортного чтения текста поверх пёстрых обложек и списков с сохранением краевого преломления.
+
+</details>
+
 ## [v4.4.5]
 
 ### 🇬🇧 English
