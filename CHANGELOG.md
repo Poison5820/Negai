@@ -3,6 +3,50 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.4.8]
+
+### 🇬🇧 English
+- **Floating Windows Scrolling, Benchmark Layout & 120 Hz Dialog Responsiveness:**
+  - Restored smooth vertical scrolling across all floating windows and settings sheets throughout the player and main app.
+  - Updated the Performance Benchmark window so the primary start button stays pinned in the bottom bar and remains immediately accessible on the first screen at any interface scale or orientation, while duration chips wrap cleanly without squishing.
+  - Floating windows opened over the video player now preserve peak 120 / 144 Hz display responsiveness on Realme UI, ColorOS, and other custom Android skins instead of dropping to 30 Hz.
+- **Proportional Player Text & Control Scaling and Two-Row Portrait Top Header:**
+  - Fixed interface scaling in the video player so text labels, badges, and buttons scale together proportionally when adjusting Player UI Scale or Auto DPI Adaptation, including inside floating windows opened over the video.
+  - Added a clean two-row top header layout in portrait mode and on narrow screens: the first row keeps the back button, scrolling title, lock, and picture-in-picture controls comfortable to read, while the second row displays resolution, HDR, playlist, benchmark, ambient light, and orientation badges without cramping.
+- **Accurate Colors on Standard Videos After Watching HDR:**
+  - Fixed an issue where opening a standard video after watching an HDR10, HLG, or Dolby Vision video could leave HDR tone mapping active and make standard colors look washed out or overly compressed.
+- **Smooth High-Bitrate Blu-ray (.m2ts) Playback, Sharper Ambient Lighting & LTPO Efficiency:**
+  - Eliminated gradual frame drops during extended playback of heavy Blu-ray files with lossless 8-channel DTS-HD Master Audio tracks by expanding media buffer capacity and preventing false low-bitrate audio filtering on lossless surround streams.
+  - Upgraded the 4-zone Ambient Video Glow sampler to detect and ignore black letterbox and pillarbox bars, capturing livelier, more accurate colors directly from the active edges of the video frame.
+  - Improved adaptive refresh rate coordination with the Android system compositor during standard playback to save battery on LTPO displays.
+- **Refined Landscape Library Header & Search Bar Typography:**
+  - In landscape mode, the library search bar, last played file card, and quick action pills now scroll smoothly along with the folder list, freeing up vertical space so multiple rows of folders are visible at once.
+  - Fixed vertical text clipping on letters with descenders in search fields and harmonized the corner rounding of nested buttons inside compact bars.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.4.8)</b></summary>
+
+<br>
+
+- **Плавная прокрутка всплывающих окон, удобный бенчмарк и честные 120 Гц в диалогах:**
+  - Восстановлена плавная вертикальная прокрутка контента во всех всплывающих окнах и шторках настроек в плеере и главном меню.
+  - В окне «Бенчмарк производительности» главная кнопка запуска вынесена в нижнюю закреплённую панель и теперь всегда видна на первом экране при любом масштабе интерфейса и повороте экрана, а кнопки выбора длительности прогона аккуратно переносятся без сжатия текста.
+  - Открытие всплывающих окон поверх видео на прошивках Realme UI, ColorOS и других оболочках больше не сбрасывает частоту экрана до 30 Гц, сохраняя плавные 120 / 144 Гц.
+- **Честное масштабирование текста и кнопок в плеере и двухрядная портретная шапка:**
+  - Исправлено масштабирование в видеоплеере: при изменении ползунка масштаба интерфейса плеера и авто-адаптации под экран теперь пропорционально меняются не только отступы и плашки, но и весь текст как на панели управления, так и внутри открываемых поверх видео окон.
+  - В портретной ориентации и на узких экранах верхняя панель плеера теперь автоматически выстраивается в два удобных ряда: в верхнем ряду расположены кнопка возврата, бегущая строка названия, блокировка и «Картинка в картинке», а во втором — значки разрешения, HDR, серий, бенчмарка, фоновой подсветки и поворота экрана.
+- **Естественные цвета на обычных видео после просмотра HDR:**
+  - Исправлена ошибка, из-за которой при включении обычного видео сразу после просмотра ролика в HDR10, HLG или Dolby Vision в декодере мог сохраняться режим HDR, делавший картинку блеклой или серой.
+- **Плавное воспроизведение тяжёлых Blu-ray (.m2ts), точная фоновая подсветка и энергоэффективный LTPO:**
+  - Устранено постепенное накопление пропусков кадров при длительном просмотре тяжёлых Blu-ray файлов с многоканальными дорожками DTS-HD Master Audio 7.1 за счёт увеличенного буфера чтения и отключения ненужной фильтрации сжатого звука на аудиодорожках без потерь.
+  - Повышена точность 4-зонной фоновой подсветки вокруг видео: анализатор кадра теперь автоматически отсекает чёрные полосы по краям широкоформатных роликов и считывает живые оттенки строго с границ самого изображения.
+  - Улучшена передача точной частоты кадров системному экрану при обычном воспроизведении для экономии заряда батареи на LTPO-дисплеях.
+- **Удобная прокрутка шапки медиатеки в альбомном режиме и чистый текст в поиске:**
+  - В горизонтальной ориентации строка поиска, карточка последнего просмотренного файла и панель быстрых действий теперь плавно прокручиваются вверх вместе со списком папок, освобождая экран для одновременного обзора нескольких рядов карточек.
+  - Исправлено подрезание нижних хвостиков букв («р», «у», «й») в полях поиска и выровнены скругления вложенных кнопок внутри компактных панелей.
+
+</details>
+
 ## [v4.4.7]
 
 ### 🇬🇧 English
