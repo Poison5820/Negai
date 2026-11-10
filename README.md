@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.4.9-00E5FF?style=flat-square" alt="Version 4.4.9" />
+  <img src="https://img.shields.io/badge/version-4.5.1-00E5FF?style=flat-square" alt="Version 4.5.1" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/license-Proprietary_(Closed_Source)-FF4D8D?style=flat-square" alt="Proprietary License" />
@@ -55,12 +55,12 @@ You can install and update Negai directly through **Obtainium** or grab the univ
 
 ---
 
-## ✨ What's New in Release 4.4.2 (Build 80)
+## ✨ What's New in Release 4.5.1 (Build 89)
 
-- **Unified 4-Tier Concentric Corner Hierarchy (`28 dp / 22 dp / 14 dp / 10 dp / 8 dp`)**: Standardized all modals (`28 dp`), top/bottom bars, docks, cards, and inputs (`22 dp`), buttons, chips, rows, and active dock indicators (`14 dp`), and nested icon/status badges (`10 dp / 8 dp`), reserving full capsules strictly for switches, radio buttons, and seekbars.
-- **Refined 'Monochrome' (`MONOCHROME`) Optics**: Eliminated solid white card fills in dark mode—selected rows and cards now use a dark-graphite translucent surface (`#25272C` / `14%` white over dark glass) with crisp white text and a `135°` silver bevel, while high-contrast solid inversion (`#F2F2F2` / `#18181B`) applies exclusively to switches, radio dots, and seekbars.
-- **Adaptive Landscape Library & Left Navigation Rail**: Added a `56 dp` left vertical navigation rail in landscape mode and a compact 2-row header ('Search + Continue' side-by-side 50/50 and a `46 dp` 'Actions + Folder Count + Sort' bar), freeing over `120 dp` of vertical height for folder cards.
-- **Top Bar Decluttering, Neutral Action Pills & Localization**: Removed `MEMC`/`Anime4K` badges from the library top bar, standardized quick action pills (`Access`, `File`, `URL`, `Folder`) to a uniform neutral style, and completed English localization across storage status cards.
+- **True Glass Translucency & Five-Step Material 3 Expressive Contrast**: Restored full background blur, genuine translucency, and subtle matte grain on floating docks and modal windows in Frosted Glass, eliminated edge stretching in Liquid Glass, and calibrated five-step tonal contrast across Light, Dark, and OLED modes in the Flat theme.
+- **Proportional UI Scaling & Flicker-Free In-Screen Player Sheets**: Eliminated double text magnification when adjusting UI scale while keeping subtitle sizes independent, and unified all player sheets inside the fullscreen viewport without system bar flashes or lost scroll positions.
+- **Native 5.1 / 7.1 Surround Passthrough & Single-Stage Speaker 3D Audio**: Multichannel 5.1 and 7.1 tracks now pass directly to external soundbars and receivers when 3D audio is turned off, while speaker 3D virtualization runs as a clean single-stage processor supporting 24-bit, 32-bit, and floating-point audio.
+- **Smart LTPO Refresh Control, Smooth Ambient Glow, HDR & Benchmark v2**: Releases display refresh locks immediately on pause to save battery while restoring peak 120 / 144 Hz responsiveness on touch, eliminates Ambient Glow frame overhead, preserves native hardware HDR and Half-SBS 3D aspect ratios, and upgrades automated benchmark diagnostics.
 
 ---
 
