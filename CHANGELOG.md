@@ -3,6 +3,54 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.5.1]
+
+### 🇬🇧 English
+- **Accurate Interface & Subtitle Scaling and Seamless Player Sheets:**
+  - Fixed interface scaling across both the main app and the video player so text and controls scale linearly without oversized double-magnified labels, while keeping subtitle font sizes completely independent of control scaling.
+  - All player settings sheets and reference guides now open smoothly inside the fullscreen player viewport without system bar flashes, keeping background transport controls gently dimmed, blocking accidental background video seeks, and preserving your exact scroll position when viewing info cards.
+  - Improved landscape sheet width adaptation so floating windows stay crisp and never clip along screen edges at high zoom levels.
+- **Refined Frosted Glass, Liquid Glass & Material 3 Expressive Themes:**
+  - Restored full optical blur and genuine translucency with subtle micro-grain texture on floating bars, navigation docks, and modal windows in the Frosted Glass theme.
+  - Eliminated edge pixel stretching on narrow controls in the Liquid Glass theme and kept live background refraction active behind main library dialogs without dark screen flashes.
+  - Enhanced five-step tonal contrast, active navigation indicators, and tactile spring morphing across Light, Dark, and OLED modes in the Flat (Material 3 Expressive) theme, and added smooth scroll-edge optics to the Recent and Torrents tabs.
+- **Native 5.1 / 7.1 Surround Passthrough & Single-Stage Speaker 3D Audio:**
+  - Turning off 3D Spatial Audio on 5.1 and 7.1 surround tracks now passes multi-channel audio directly to external receivers, soundbars, and TVs without forced stereo downmixing.
+  - Upgraded speaker 3D virtualization to a cleaner single-stage spatial processor with high-resolution 24-bit, 32-bit, and floating-point audio support, eliminating double-filtering artifacts and instantly adapting when headphones are connected or disconnected.
+- **Adaptive Display Efficiency, Ambient Glow Smoothness, HDR & 3D Video Fixes:**
+  - Pausing a video or closing the player now immediately releases display refresh rate locks so LTPO screens can save battery, while touching player controls or opening menus instantly restores peak 120 / 144 Hz responsiveness.
+  - Eliminated background frame-rate overhead during Ambient Video Glow playback and restored accurate colors when Anime4K or motion smoothing is active.
+  - Preserved native hardware HDR output on HDR10, HLG, and Dolby Vision videos, improved Dolby Vision Profile 7 playback stability, and fixed horizontal or vertical squishing on Half Side-by-Side and Half Top-and-Bottom 3D movies.
+- **Google Play Purchase Reliability & Upgraded Performance Benchmark:**
+  - Hardened Google Play license verification and offline reconnection handling so purchase status stays accurately synchronized across devices.
+  - Upgraded the GitHub Lab performance benchmark to measure both Anime4K and motion smoothing shader load, automatically skip stages that do not apply to stereo audio or hardware HDR streams, and report live display refresh rate, stream buffering headroom, and multi-channel audio routing.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.5.1)</b></summary>
+
+<br>
+
+- **Точное масштабирование интерфейса и субтитров и бесшовные окна плеера:**
+  - Исправлено масштабирование в главном меню и видеоплеере: текст и кнопки теперь увеличиваются строго пропорционально без двойного раздувания шрифтов, а выбранный размер субтитров остаётся неизменным при любом масштабе панели управления.
+  - Все окна настроек и справочные карточки в плеере теперь плавно открываются внутри полноэкранной сцены без моргания системных полос, мягко приглушают панель управления на фоне, защищают от случайных нажатий сквозь окно и сохраняют позицию прокрутки при открытии подсказок.
+  - Исправлена адаптация ширины всплывающих окон в горизонтальной ориентации при увеличенном масштабе интерфейса без обрезки краёв.
+- **Обновлённая оптика тем «Матовое стекло», «Жидкое стекло» и «Плоская» (Material 3 Expressive):**
+  - В теме «Матовое стекло» возвращены полноценная полупрозрачность, глубокое размытие фона и деликатная матовая микротекстура на плавающих доках, шапках и модальных окнах.
+  - В теме «Жидкое стекло» устранены краевые искажения на узких элементах и сохранено живое преломление фона позади диалоговых окон библиотеки и папок без ухода экрана в черноту.
+  - В теме «Плоская» (Material 3 Expressive) усилено пятиступенчатое разделение оттенков карточек, вложенных кнопок и активной вкладки навигации в светлом, тёмном и OLED режимах, улучшен отклик нажатия кнопок и добавлено плавное краевое сглаживание списков на вкладках «Недавние» и «Торренты».
+- **Прямой вывод звука 5.1 / 7.1 и чистый пространственный 3D-звук на динамиках:**
+  - При отключении пространственного 3D-звука многоканальные дорожки 5.1 и 7.1 теперь передаются напрямую без принудительного сведения в стерео, сохраняя полноценное объёмное звучание на ресиверах, саундбарах и телевизорах.
+  - Режим объёмного звучания для стереодинамиков переведён на чистую одноступенчатую обработку с поддержкой аудио высокой чёткости (24 бит, 32 бит и с плавающей точкой) без двойной фильтрации и с мгновенным переключением при подключении или отключении наушников.
+- **Энергоэффективный LTPO-экран, лёгкая фоновая подсветка, HDR и стереопары 3D:**
+  - На паузе и при выходе из плеера экран теперь сразу переходит в адаптивный энергосберегающий режим, а при появлении панели управления или открытии меню мгновенно возвращается на плавные 120 / 144 Гц.
+  - Устранена лишняя фоновая нагрузка от подсветки краёв кадра и восстановлено точное считывание оттенков при включённом улучшении линий Anime4K или сглаживании движений.
+  - Сохранён прямой аппаратный вывод цвета для HDR10, HLG и Dolby Vision, повышена стабильность воспроизведения фильмов в Dolby Vision Profile 7 и исправлены пропорции кадра на анаморфных 3D-фильмах с горизонтальной и вертикальной стереопарой.
+- **Надёжная синхронизация покупок Google Play и обновлённый авто-бенчмарк:**
+  - Улучшена проверка статуса покупки и переподключение к Google Play при нестабильной сети.
+  - Авто-бенчмарк в GitHub Lab теперь замеряет нагрузку графических шейдеров как для Anime4K, так и для сглаживания движений, автоматически пропускает неприменимые этапы на стереодорожках и прямом выводе HDR, а также фиксирует реальную частоту экрана, запас буфера сети и конфигурацию аудиоканалов.
+
+</details>
+
 ## [v4.4.9]
 
 ### 🇬🇧 English
