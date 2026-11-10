@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.4.0-00E5FF?style=flat-square" alt="Version 4.4.0" />
+  <img src="https://img.shields.io/badge/version-4.4.3-00E5FF?style=flat-square" alt="Version 4.4.3" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/license-Proprietary_(Closed_Source)-FF4D8D?style=flat-square" alt="Proprietary License" />
@@ -55,15 +55,12 @@ You can install and update Negai directly through **Obtainium** or grab the univ
 
 ---
 
-## ✨ What's New in Release 4.3.9 (Build 77)
+## ✨ What's New in Release 4.4.2 (Build 80)
 
-- **Streamlined Hold Mini-Menus**: Disabled hold popups on Decoder and Scale buttons, kept only available audio tracks in the Audio hold menu, and removed the duplicate All Tools entry from the Tools hold menu.
-- **Persistent Auto Decoder Selection**: Selecting `AUTO (HW + SW)` in Audio Decoder stays highlighted during software fallback with real-time status in the header badge (`AUTO (SW)` / `AUTO (HW)`).
-- **100% Free & Default 3D Spatial Audio and Free 'Soft' Audio Cleanup**: 3D Spatial Audio (HRTF + XTC) is now enabled by default and free for everyone, and the 'Soft' profile in De-Artifact DSP is free and default.
-- **Compact 3-Button Row & [ⓘ] Technical Guide**: Modern horizontal 3-button selector (`Auto`, `HRTF 3D`, `XTC 3D`) and interactive `[ⓘ]` modal dialog for 3D surround sound.
-- **Cleaned Up Legal Navigation**: Removed duplicate Privacy Policy buttons from Settings and Device Info, consolidating all attributions into the planetary version sheet.
-- **Unified Interactive Step & Preset Filter Chips**: Standardized audio/subtitle sync step pills (`-250ms..+250ms`, `-0.5s..+0.5s`), skip-intro step buttons, UI scale reset (`↻ 100%`), and the full playback speed grid (`0.5x..3.0x`) under a consistent, non-clipped filter chip design.
-- **Accurate Direct Stereo (`2.0`) Audio Status Copy**: Stereo tracks now display `2.0 Stereo (Native)` when 3D spatial audio is off, `Bypass 2.0 (5.1/7.1 only)` when enabled, and `Direct Stereo Output (2.0)` in the audio output route status line.
+- **Unified 4-Tier Concentric Corner Hierarchy (`28 dp / 22 dp / 14 dp / 10 dp / 8 dp`)**: Standardized all modals (`28 dp`), top/bottom bars, docks, cards, and inputs (`22 dp`), buttons, chips, rows, and active dock indicators (`14 dp`), and nested icon/status badges (`10 dp / 8 dp`), reserving full capsules strictly for switches, radio buttons, and seekbars.
+- **Refined 'Monochrome' (`MONOCHROME`) Optics**: Eliminated solid white card fills in dark mode—selected rows and cards now use a dark-graphite translucent surface (`#25272C` / `14%` white over dark glass) with crisp white text and a `135°` silver bevel, while high-contrast solid inversion (`#F2F2F2` / `#18181B`) applies exclusively to switches, radio dots, and seekbars.
+- **Adaptive Landscape Library & Left Navigation Rail**: Added a `56 dp` left vertical navigation rail in landscape mode and a compact 2-row header ('Search + Continue' side-by-side 50/50 and a `46 dp` 'Actions + Folder Count + Sort' bar), freeing over `120 dp` of vertical height for folder cards.
+- **Top Bar Decluttering, Neutral Action Pills & Localization**: Removed `MEMC`/`Anime4K` badges from the library top bar, standardized quick action pills (`Access`, `File`, `URL`, `Folder`) to a uniform neutral style, and completed English localization across storage status cards.
 
 ---
 
