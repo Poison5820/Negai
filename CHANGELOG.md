@@ -3,42 +3,145 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
-## [v4.4.0] — `versionCode = 78` / `versionName = "4.4.0"`
+## [v4.4.3]
 
 ### 🇬🇧 English
-- **Seamless Cold Start for HLS & Live Network Streams:**
-  - Integrated `ResilientLoadErrorHandlingPolicy` into `DefaultMediaSourceFactory` and `HlsMediaSource.Factory`, progressively retrying manifest and chunk requests on transient CDN HTTP codes (`403/404/500/502/503/504`) and `ParserException` without aborting playback.
-  - Implemented automatic network stream playlist rebuilds with exponential backoff on source/network errors, preventing premature error dialogs during cold CDN manifest generation.
-- **Eliminated 1-Frame Start Video Flicker & Decoder Frame Drops:**
-  - Removed premature `isFirstFrameRendered = true` assignment in `onPlaybackStateChanged`, ensuring video presentation curtains open strictly when the first frame is rendered by `MediaCodec`.
-  - Removed video track disable/enable toggling during surface attachment that previously purged decoded initial frames.
-- **True Glass Transparency for Floating Modal Windows:**
-  - Removed opaque ambient mesh overlay (`fallbackMeshBackdrop`) in `UnifiedModalSurface`, revealing underlying live video and backdrop blur cleanly behind floating dialogs.
-  - Calibrated true glass modal backing alphas in `Liquid Glass` (`0.44f` dark / `0.58f` light with dome specular reflection and 135° diamond rim) and `Frosted Glass` (`0.64f` dark / `0.74f` light with soft satin veil and matte rim).
-- **Ultra-Light Edge-Outward Ambient Video Glow (Zero-Load on Fullscreen & 4K):**
-  - Added smart zero-load auto-pause that completely disables `PixelCopy` sampling and Canvas glow whenever video fills the screen (< 8dp black bar margins or non-fit scaling).
-  - Implemented concurrency protection with `AtomicBoolean` ensuring no overlapping frame capture calls.
-  - Added adaptive polling (1000ms for heavy 4K/60fps/HDR/high-bitrate videos, 650ms for 1080p/720p) with smooth color interpolation.
-  - Re-architected Ambilight canvas geometry: vibrant color gradients now radiate directly outward from the exact video boundaries into pillarbox and letterbox bars instead of being occluded beneath the video frame.
+- **GitHub Lab Experimental Suite & In-Player Performance Benchmark:**
+  - Added an **Experimental Features** section in **Settings → Miscellaneous** for GitHub releases with a toggle to unlock the built-in performance laboratory.
+  - **Automated Real-Media Benchmark:** Launch `[⚡ Benchmark]` directly from the video player top bar, the live stream monitor, or the player tools menu while watching any video to automatically test your device across a complete matrix of playback modes:
+    - Hardware vs. software video decoding.
+    - Real-time Anime4K neural upscaling (Fast, Balanced, and Ultra presets).
+    - Motion smoothing (MEMC) up to your screen's maximum refresh rate, plus combined Anime4K + MEMC stress testing.
+    - Edge-outward Ambient Video Glow sampling.
+    - Audio decoding, voice cleanup filters, and 3D Spatial Audio (binaural headphones and stereo speaker modes).
+  - **Smart Diagnostics & Instant Restoration:** Each test stage seeks back to the exact same video scene for a fair comparison, automatically restores your original player settings when finished or cancelled, and highlights whether your device handles every mode smoothly or where hardware limits occur.
+  - **One-Tap Report Export:** Copy the complete diagnostic report to your clipboard or share it as a file directly from the player or from Settings.
+- **Cleaner, Reader-Friendly Release Notes:**
+  - Redesigned the release history and update notes in the app and on GitHub to focus on clear, practical user improvements without internal developer jargon.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.4.3)</b></summary>
+
+<br>
+
+- **Лаборатория GitHub Lab и встроенный авто-бенчмарк производительности:**
+  - В раздел **Настройки → Прочее** для сборок GitHub добавлена карточка **«Экспериментальные функции»** с переключателем встроенного профилировщика и авто-бенчмарка.
+  - **Автоматическое тестирование на реальном видео:** Кнопка `[⚡ Бенчмарк]` в верхней панели видеоплеера, в Мониторе потока и в меню «Инструменты» запускает пошаговую проверку устройства прямо на текущем открытом видеофайле по всем ключевым режимам:
+    - Аппаратное и программное декодирование видео.
+    - Нейросетевое улучшение чёткости Anime4K (быстрый, сбалансированный и ультра-режимы).
+    - Сглаживание движений (MEMC) до максимальной герцовки экрана, а также совместный стресс-тест Anime4K + MEMC.
+    - Краевая фоновая подсветка кадра (Ambient Video Glow).
+    - Декодирование звука, очистка голосовых дорожек и пространственный 3D-звук для наушников и стереодинамиков.
+  - **Точное сравнение и возврат настроек:** Каждый этап тестирования прогоняется на одном и том же фрагменте видео для честного сравнения, по завершении или отмене теста все исходные настройки плеера автоматически возвращаются на место, а в итоговой сводке наглядно показывается запас производительности устройства и возможные узкие места.
+  - **Быстрый экспорт отчёта:** Итоговый отчёт автоматически сохраняется в памяти приложения — его можно скопировать в буфер обмена или отправить файлом прямо из окна результатов или из настроек.
+- **Понятный пользовательский формат списков изменений:**
+  - Обновления в истории версий внутри приложения и на GitHub теперь описываются простым и понятным языком без внутренних технических имён кода.
+
+</details>
+
+## [v4.4.2]
+
+### 🇬🇧 English
+- **Harmonized Concentric Corner Rounding Across the Entire Interface:**
+  - Unified the shape of all floating windows, top bars, navigation docks, cards, buttons, and status badges so nested elements align naturally with their outer containers.
+  - Full pill shapes are now reserved exclusively for sliding controls with circular thumbs (switches, radio buttons, and the playback timeline).
+- **Refined 'Monochrome' Palette Optics:**
+  - Selected cards and list rows in the dark Monochrome theme now use a comfortable dark-graphite highlight with crisp white text and a subtle silver rim instead of harsh solid-white fills.
+  - High-contrast black-and-white inversion is kept strictly on compact switches, radio dots, and timeline sliders for instant visual clarity.
+  - Preserved the gold star accent on Pro badges and matched theme mode preview outlines to your active accent color.
+- **Adaptive Landscape Library & Left Navigation Rail:**
+  - **Compact Two-Row Landscape Header:** Placed the search bar and a single-line "Continue Watching" card side by side on the top row, and merged folder counts and sorting controls into the quick action bar on the second row—freeing up significantly more vertical space for your media folders.
+  - **Left Navigation Rail in Landscape:** Moved the main navigation dock to a sleek vertical rail along the left edge of the screen when holding your device horizontally.
+- **Cleaner Top Bar, Neutral Action Buttons & Full English Localization:**
+  - Simplified the main library header next to the app logo to show only the interactive version badge.
+  - Styled all quick action bar buttons uniformly without permanent accent highlights on the storage access or file picker buttons.
+  - Completed English translations for all empty-folder prompts and storage status cards on the home screen.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.4.2)</b></summary>
+
+<br>
+
+- **Гармоничная система скруглений во всём интерфейсе:**
+  - Все всплывающие окна, верхние панели, карточки, кнопки, переключатели и бейджи приведены к единой концентрической геометрии, где форма внутренних элементов плавно повторяет контур внешних панелей.
+  - Полностью скруглённая форма капсулы оставлена только для переключателей, радиокнопок и полосы перемотки плеера.
+- **Обновлённая оптика палитры «Монохром»:**
+  - В тёмной теме палитры «Монохром» выбранные карточки и строки списков больше не заливаются слепящим белым цветом — теперь они сохраняют благородный тёмно-графитовый оттенок с чётким белым текстом и серебристой гранью.
+  - Контрастная чёрно-белая заливка применяется только к компактным индикаторам: тумблерам, точкам выбора и ползунку таймлайна.
+  - Сохранено золотое свечение значка Pro на выбранных строках и привязана обводка карточек выбора режима темы к цвету активной палитры.
+- **Адаптивная альбомная библиотека и боковая панель навигации:**
+  - **Компактная двухрядная шапка в ландшафте:** Строка поиска и карточка «Продолжить просмотр» теперь располагаются в один ряд бок о бок, а счётчик папок и кнопка сортировки объединены со строкой быстрых действий, открывая больше места под карточки видео.
+  - **Левая боковая панель навигации:** В горизонтальном положении экрана нижнее меню перестраивается в компактную вертикальную панель слева.
+- **Чистая верхняя панель, нейтральные кнопки и перевод:**
+  - Из главной шапки рядом с логотипом убраны лишние технические индикаторы — оставлен только значок текущей версии.
+  - Кнопки панели быстрых действий приведены к единому спокойному стилю без постоянной яркой подсветки на кнопках доступа и выбора файла.
+  - Завершён перевод на английский язык для всех подсказок выбора папок и карточек состояния памяти на главном экране.
+
+</details>
+
+## [v4.4.1]
+
+### 🇬🇧 English
+- **Active App Color Palette in the Video Player:**
+  - Fixed an issue where the video player controls and settings sheets defaulted to a standard purple accent.
+  - The video player now automatically uses your chosen app color theme (including Material You wallpaper colors and all built-in presets) for active buttons, sliders, switches, and badges while keeping player backgrounds comfortably dark.
+- **New Black-and-White 'Monochrome' Palette:**
+  - Added a pure black, white, and silver-graphite **Monochrome** color scheme with zero color tinting and crisp contrast between active and inactive controls in both dark and light modes.
+- **True Neutral Surface & Glass Tinting Toggle:**
+  - Turning off surface tinting in Settings now completely removes color casts from unselected cards, floating windows, buttons, and folder icons across all three interface styles (Flat, Frosted Glass, and Liquid Glass), applying accent color strictly to active selections.
+- **Natural Screen Brightness on HDR Videos:**
+  - Starting an HDR video no longer forces your screen brightness to 100%. The player now respects your current system brightness while still delivering rich hardware HDR highlights, changing brightness only when you swipe vertically on the screen.
+- **Smooth Adaptive 120 Hz Scrolling & Internal Optimization:**
+  - Restored full high-refresh-rate smoothness across library lists and menus immediately upon pausing or exiting a video, matching screen refresh rate to video frame rate strictly during active playback.
+  - Streamlined internal app architecture and audio-video processing modules for faster startup and smoother UI responsiveness.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.4.1)</b></summary>
+
+<br>
+
+- **Единая цветовая палитра приложения в видеоплеере:**
+  - Исправлена ошибка, из-за которой элементы управления и окна настроек внутри видеоплеера отображались со стандартным фиолетовым оттенком.
+  - Теперь видеоплеер наследует выбранную вами цветовую палитру приложения (включая цвета обоев Material You и все встроенные темы): фон панелей остаётся тёмным, а активные кнопки, ползунки, переключатели и бейджи окрашиваются в ваш акцентный цвет.
+- **Новая чёрно-белая палитра «Монохром»:**
+  - В выбор цветовых схем добавлена строгая ахроматическая палитра **«Монохром»** в чистых графитовых, серебристых и белых тонах без цветных примесей.
+- **Честная работа переключателя тонирования поверхностей:**
+  - При отключении тонирования в настройках цветной оттенок теперь полностью убирается с невыбранных карточек, всплывающих окон, кнопок и иконок папок во всех трёх стилях оформления («Flat», «Матовое стекло» и «Жидкое стекло»), оставляя цвет только на активных выбранных элементах.
+- **Естественная яркость экрана при просмотре HDR:**
+  - При запуске HDR-видео плеер больше не выкручивает яркость экрана на максимум автоматически: сохраняется ваша комфортная системная яркость с поддержкой аппаратного расширенного динамического диапазона, а изменить яркость всегда можно привычным вертикальным свайпом.
+- **Плавные 120 Гц в интерфейсе и внутренняя оптимизация:**
+  - Устранено ограничение герцовки экрана в меню: при выходе из плеера или постановке видео на паузу интерфейс мгновенно возвращается к плавной прокрутке 90/120 Гц.
+  - Проведена глубокая внутренняя оптимизация модулей приложения для более быстрого отклика интерфейса и экономии ресурсов устройства.
+
+</details>
+
+## [v4.4.0]
+
+### 🇬🇧 English
+- **Reliable First-Try Startup for Online Streams & Live Broadcasts:**
+  - Improved connection resilience when opening online HLS streams and live broadcasts, automatically retrying and recovering when streaming servers take extra time to prepare playlists instead of stopping with an error.
+- **Smooth Video Start Without Initial Frame Flicker:**
+  - Fixed a brief visual flash that could appear for a split second before the first video frame was drawn on screen.
+- **True Translucent Glass for Floating Windows:**
+  - Removed the dark backing layer behind floating dialogs and settings sheets in the **Frosted Glass** and **Liquid Glass** themes so live blurred video and background artwork shine through cleanly.
+- **Lightweight Edge-Outward Ambient Video Glow:**
+  - Redesigned the ambient video backlight so smooth color gradients radiate directly outward from the edges of the video frame into the top and side black bars.
+  - Ambient lighting now automatically pauses with zero processor or battery usage whenever a video fills the entire screen, and adapts its update speed on heavy 4K and 60 fps videos to keep playback silky smooth.
 
 <details>
 <summary><b>🇷🇺 На русском (Что нового в v4.4.0)</b></summary>
 
 <br>
 
-- **Бесшовный старт HLS и сетевых трансляций с первого раза:**
-  - Внедрена отказоустойчивая политика `ResilientLoadErrorHandlingPolicy` для `DefaultMediaSourceFactory` и `HlsMediaSource.Factory` с прогрессивной задержкой повтора при CDN-ошибках (`403/404/500/502/503/504`, `ParserException`) вместо сброса потока.
-  - Добавлен автоматический прогрев и пересборка плейлиста для сетевых потоков при ошибках источника и парсинга манифестов без вылета в ошибку.
-- **Устранение промаргивания первого кадра видео при начале воспроизведения:**
-  - Устранено преждевременное выставление флага готовности первого кадра в `onPlaybackStateChanged`, благодаря чему шторка видеоплеера открывается строго при фактической отрисовке кадра декодером `MediaCodec`.
-  - Удалён сброс видеотрека при подключении видеоповерхности в `attachVideoSurface`, приводивший к потере первого декодированного кадра.
-- **Настоящая прозрачность левитирующих окон в «Матовом стекле» и «Жидком стекле»:**
-  - Убрана глухая сетка подложки (`fallbackMeshBackdrop`) в `UnifiedModalSurface`, полностью открывая живое размытие и видеокадр позади всплывающих шторок и окон.
-  - Откалибрована полупрозрачная основа модальных окон: `0.44` (темная) / `0.58` (светлая) в «Жидком стекле» с купольным бликом и алмазной фаской 135°, и `0.64` / `0.74` в «Матовом стекле» с сатиновой вуалью.
-- **Сверхлёгкий краевой Ambient Video Glow с нулевой нагрузкой на тяжёлых видео:**
-  - Внедрено умное отключение сэмплера `PixelCopy` при отсутствии чёрных полей (< 8 dp) или растягивании кадра (`0% CPU/GPU`).
-  - Добавлена защита от наложения запросов захвата кадров и адаптивный интервал опроса (1000 мс на 4K/60fps/HDR, 650 мс на 1080p).
-  - Переработана геометрия Ambilight: сочные градиенты теперь исходят строго от внешних кромок видеокадра наружу в боковые и верхние поля.
+- **Надёжный запуск онлайн-трансляций и сетевых потоков с первого раза:**
+  - Повышена стабильность подключения к сетевым потокам и прямым трансляциям: плеер теперь автоматически дожидается готовности потока при задержках сервера и переподключается без сброса воспроизведения.
+- **Плавное открытие видео без промаргивания первого кадра:**
+  - Устранено краткое промаргивание экрана в момент открытия видеофайла и переключения видеоповерхности.
+- **Настоящая прозрачность всплывающих окон в стеклянных темах:**
+  - В темах **«Матовое стекло»** и **«Жидкое стекло»** убрана плотная непрозрачная подложка позади всплывающих окон и шторок настроек — теперь сквозь них мягко просвечивает живое размытое видео и фон приложения.
+- **Лёгкая краевая фоновая подсветка видео без нагрузки на 4K:**
+  - Фоновая подсветка (Ambient Video Glow) теперь строится прямо от внешних границ кадра, мягко окрашивая чёрные полосы по краям экрана.
+  - Когда видео открыто на весь экран без чёрных полос, подсветка автоматически переходит в спящий режим с нулевой нагрузкой на процессор и батарею, а на тяжёлых 4K и 60 fps видео работает в бережном режиме без просадок частоты кадров.
 
 </details>
 
