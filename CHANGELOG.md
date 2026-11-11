@@ -3,6 +3,38 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.5.7]
+
+### 🇬🇧 English
+- **Three-Mode Video & Audio Decoders (Auto / HW+ / SW & Auto / HW / SW) with Automatic Hardware Recovery:**
+  - Unified both video and audio decoder selectors into three clear options—Auto (default), Hardware (HW+ / HW), and Software (SW)—across the player menus and global Settings.
+  - Strictly separated your saved decoder preference from temporary per-file software fallback: when Auto is selected and a specific file requires software decoding, your Auto selection stays highlighted and untouched, and the player automatically retries hardware acceleration as soon as you open the next video or episode.
+  - The bottom player decoder button and the existing section header badge in both player menus and global Settings always show the decoder currently running in real time without cluttering the interface with extra chips, while tapping the bottom button smoothly cycles through Auto, HW+, and SW.
+- **Categorized Playback History (All, Local, Streaming & P2P):**
+  - Added a top category filter bar to the History screen with four views—All, Local, Streaming, and P2P—across all app editions.
+  - Automatically distinguishes local storage videos, direct online streams (HLS, DASH, and HTTP links), and P2P / TorrServer streams, displays a compact source badge on history cards in the All view, and lets you clear either the entire history or only the currently selected category.
+- **Full-Height Landscape Navigation Dock & Optical Vertical Centering Across All Capsules and Cards:**
+  - Expanded the left navigation dock in landscape and wide-screen layouts so its top edge aligns flush with the top header bar and its four section buttons distribute evenly down to the bottom margin.
+  - Centered text labels, icons, badges, and action buttons along a single horizontal center axis across the top header capsule, the landscape search and quick-resume row, the quick actions and sorting bar, the folder detail header, and all folder and episode cards.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.5.7)</b></summary>
+
+<br>
+
+- **Тройка декодеров видео и звука («Авто / HW+ / SW» и «Авто / HW / SW») со сбросом автоотката на новом видео:**
+  - Выбор декодера видео и звука приведён к единой тройке режимов — «Авто» (по умолчанию), аппаратный («HW+» для видео и «HW» для звука) и программный («SW») — во всех окнах плеера и в глобальных настройках.
+  - Пользовательская настройка полностью отделена от временного переключения на программный декодер: если в режиме «Авто» на сложном ролике произошёл автоматический переход на «SW», выбранной всегда остаётся кнопка «Авто», а при открытии любого следующего видео или серии плеер автоматически снова пробует аппаратный декодер.
+  - Кнопка декодера в нижней панели плеера и штатный бейдж в заголовке секции (в окнах плеера и в глобальных «Настройках») всегда показывают фактически работающий прямо сейчас декодер без добавления лишних плашек, а нажатие на нижнюю кнопку переключает режим по кругу («Авто -> HW+ -> SW»).
+- **Разделение экрана «История» на категории (Все, Локальные, Стриминг и P2P):**
+  - В верхней части вкладки «История» появилась капсула фильтрации из четырёх категорий — «Все», «Локальные», «Стриминг» и «P2P» — одинаково во всех сборках приложения.
+  - Записи истории автоматически распределяются между файлами устройства, прямыми сетевыми потоками и раздачами P2P / TorrServer: в режиме «Все» на карточках отображается компактный бейдж источника, а кнопка очистки удаляет либо всю историю, либо только выбранную категорию.
+- **Высокая боковая панель в горизонтальном режиме и идеальная центровка во всех капсулах и карточках:**
+  - Левая боковая панель навигации в альбомном режиме вытянута по высоте рабочей области вровень с верхней шапкой с равномерным распределением четырёх кнопок разделов.
+  - Выполнена точная оптическая центровка текста, иконок и бейджей по единой центральной горизонтальной линии в верхней шапке приложения, во втором и третьем рядах управления на экране «Папки», в шапке открытой папки и во всех карточках папок и серий.
+
+</details>
+
 ## [v4.5.6]
 
 ### 🇬🇧 English
