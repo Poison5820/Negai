@@ -3,6 +3,30 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.5.13]
+
+### 🇬🇧 English
+- **Seamless Decoder Switching & H.264 Playback Stability:**
+  - Eliminated video surface ownership conflicts when opening media or switching between Hardware (Auto / HW+) and Software (SW) decoders on the fly, preventing decoder initialization errors on standard 720p, 1080p, and 4K H.264 files.
+  - Preserved native memory limits for software H.264 decoding so Software (SW) fallback and manual SW mode initialize reliably across all Android devices.
+- **Accurate Player Benchmark Telemetry & Cleaner HUD:**
+  - Restored accurate rendered video frame and FPS reporting across all stages of the built-in player benchmark, alongside full glass backdrop sampling telemetry and gentler background frame capture.
+  - Kept center playback transport buttons strictly hidden whenever an error recovery card is displayed on screen.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.5.13)</b></summary>
+
+<br>
+
+- **Бесшовное переключение декодеров и стабильный запуск H.264:**
+  - Полностью устранены конфликты доступа к видеоповерхности при открытии файлов и переключении между аппаратным («Авто» / «HW+») и программным («SW») декодерами на лету, что исключает ошибки инициализации на обычных видео 720p, 1080p и 4K.
+  - Сохранены штатные лимиты памяти для программного декодирования H.264, благодаря чему режим «SW» и автоматический резервный декодер запускаются безотказно на любых устройствах.
+- **Точные замеры в бенчмарке плеера и чистый экран ошибки:**
+  - Восстановлен точный подсчёт отрисованных кадров и реального FPS на всех этапах встроенного бенчмарка плеера, добавлен полный учёт преломления стеклянного интерфейса и снижена фоновая нагрузка при открытой панели управления.
+  - Центральные кнопки паузы и перемотки теперь гарантированно скрыты при отображении карточки ошибки воспроизведения.
+
+</details>
+
 ## [v4.5.12]
 
 ### 🇬🇧 English
