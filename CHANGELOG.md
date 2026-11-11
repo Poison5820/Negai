@@ -9,29 +9,35 @@
 - **Three-Mode Video & Audio Decoders (Auto / HW+ / SW & Auto / HW / SW) with Automatic Hardware Recovery:**
   - Unified both video and audio decoder selectors into three clear options—Auto (default), Hardware (HW+ / HW), and Software (SW)—across the player menus and global Settings.
   - Strictly separated your saved decoder preference from temporary per-file software fallback: when Auto is selected and a specific file requires software decoding, your Auto selection stays highlighted and untouched, and the player automatically retries hardware acceleration as soon as you open the next video or episode.
-  - The bottom player decoder button and the existing section header badge in both player menus and global Settings always show the decoder currently running in real time without cluttering the interface with extra chips, while tapping the bottom button smoothly cycles through Auto, HW+, and SW.
+  - Preserved full hardware video decoding on high-bitrate Blu-ray .m2ts movies and added a protective memory ceiling so ultra-high-bitrate 4K recordings (250+ Mbps) play smoothly without running out of memory.
+- **Restored Video Thumbnails & Automatic In-Player Cover Capture:**
+  - Fixed a thumbnail loader conflict where cached preview images were misidentified as raw video streams, restoring folder covers and episode thumbnails across the library and history screens.
+  - Added automatic cover capture in the player: if a complex local video or disc file could not generate a preview in the background scanner, the player automatically captures a clean preview frame shortly after playback begins.
 - **Categorized Playback History (All, Local, Streaming & P2P):**
-  - Added a top category filter bar to the History screen with four views—All, Local, Streaming, and P2P—across all app editions.
-  - Automatically distinguishes local storage videos, direct online streams (HLS, DASH, and HTTP links), and P2P / TorrServer streams, displays a compact source badge on history cards in the All view, and lets you clear either the entire history or only the currently selected category.
-- **Full-Height Landscape Navigation Dock & Optical Vertical Centering Across All Capsules and Cards:**
-  - Expanded the left navigation dock in landscape and wide-screen layouts so its top edge aligns flush with the top header bar and its four section buttons distribute evenly down to the bottom margin.
-  - Centered text labels, icons, badges, and action buttons along a single horizontal center axis across the top header capsule, the landscape search and quick-resume row, the quick actions and sorting bar, the folder detail header, and all folder and episode cards.
+  - Added a top category filter bar to the History screen with four views—All, Local, Streaming, and P2P—across all app editions, with source badges in the All view and per-category history clearing.
+- **Clean Modal Background Blur, Benchmark State Reset & Landscape Dock Alignment:**
+  - Eliminated rectangular gray halos around the floating top header and bottom navigation dock when opening modal sheets and dialogs.
+  - Fixed the Player Benchmark so motion smoothing, upscaling shaders, and decoder modes always return to your exact prior settings upon completion or cancellation, and the Play/Pause button immediately updates to the Play icon when paused at the end of a test.
+  - Expanded the landscape side navigation dock to full workspace height and optically centered text, icons, and badges across all header capsules and cards.
 
 <details>
 <summary><b>🇷🇺 На русском (Что нового в v4.5.7)</b></summary>
 
 <br>
 
-- **Тройка декодеров видео и звука («Авто / HW+ / SW» и «Авто / HW / SW») со сбросом автоотката на новом видео:**
+- **Тройка декодеров видео и звука («Авто / HW+ / SW» и «Авто / HW / SW») и защита памяти на тяжёлых 4K-потоках:**
   - Выбор декодера видео и звука приведён к единой тройке режимов — «Авто» (по умолчанию), аппаратный («HW+» для видео и «HW» для звука) и программный («SW») — во всех окнах плеера и в глобальных настройках.
-  - Пользовательская настройка полностью отделена от временного переключения на программный декодер: если в режиме «Авто» на сложном ролике произошёл автоматический переход на «SW», выбранной всегда остаётся кнопка «Авто», а при открытии любого следующего видео или серии плеер автоматически снова пробует аппаратный декодер.
-  - Кнопка декодера в нижней панели плеера и штатный бейдж в заголовке секции (в окнах плеера и в глобальных «Настройках») всегда показывают фактически работающий прямо сейчас декодер без добавления лишних плашек, а нажатие на нижнюю кнопку переключает режим по кругу («Авто -> HW+ -> SW»).
+  - Пользовательская настройка полностью отделена от временного переключения на программный декодер: выбранной всегда остаётся кнопка «Авто», а при открытии любого следующего видео плеер снова включает аппаратное ускорение.
+  - Сохранено аппаратное декодирование на высокобитрейтных дисках Blu-ray .m2ts и добавлено жёсткое ограничение объёма буфера в памяти, полностью устраняющее вылеты на экстремально тяжёлых 4K-видео с битрейтом 250+ Мбит/с.
+- **Восстановление всех превью видео и автозахват обложек в плеере:**
+  - Устранён внутренний конфликт декодера картинок, из-за которого готовые кэшированные превью ошибочно обрабатывались как видеофайлы — обложки папок, серий и записей истории снова отображаются мгновенно.
+  - Добавлен автоматический захват превью во время просмотра: если для сложного локального файла не удалось извлечь кадр в фоновом сканере, плеер сам сохранит аккуратную обложку сразу после начала воспроизведения.
 - **Разделение экрана «История» на категории (Все, Локальные, Стриминг и P2P):**
-  - В верхней части вкладки «История» появилась капсула фильтрации из четырёх категорий — «Все», «Локальные», «Стриминг» и «P2P» — одинаково во всех сборках приложения.
-  - Записи истории автоматически распределяются между файлами устройства, прямыми сетевыми потоками и раздачами P2P / TorrServer: в режиме «Все» на карточках отображается компактный бейдж источника, а кнопка очистки удаляет либо всю историю, либо только выбранную категорию.
-- **Высокая боковая панель в горизонтальном режиме и идеальная центровка во всех капсулах и карточках:**
-  - Левая боковая панель навигации в альбомном режиме вытянута по высоте рабочей области вровень с верхней шапкой с равномерным распределением четырёх кнопок разделов.
-  - Выполнена точная оптическая центровка текста, иконок и бейджей по единой центральной горизонтальной линии в верхней шапке приложения, во втором и третьем рядах управления на экране «Папки», в шапке открытой папки и во всех карточках папок и серий.
+  - В верхней части вкладки «История» появилась капсула фильтрации из четырёх категорий — «Все», «Локальные», «Стриминг» и «P2P» — с компактным бейджем источника и возможностью очистить как всю историю, так и только выбранную категорию.
+- **Чистое размытие фона под окнами, сброс состояния после бенчмарка и геометрия в альбоме:**
+  - Убраны серые прямоугольные ореолы вокруг верхней шапки и нижней панели навигации при открытии всплывающих окон и диалогов.
+  - После завершения или остановки бенчмарка плеера сглаживание движений, шейдеры чёткости и декодеры гарантированно возвращаются к исходным пользовательским настройкам, а центральная кнопка управления сразу переключается на значок «Play».
+  - Левая боковая панель в альбомном режиме вытянута по всей высоте рабочей области, а текст, иконки и бейджи выровнены по единой центральной линии во всех капсулах и карточках.
 
 </details>
 
