@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.5.8-00E5FF?style=flat-square" alt="Version 4.5.8" />
+  <img src="https://img.shields.io/badge/version-4.5.11-00E5FF?style=flat-square" alt="Version 4.5.11" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/license-Proprietary_(Closed_Source)-FF4D8D?style=flat-square" alt="Proprietary License" />
@@ -55,11 +55,11 @@ You can install and update Negai directly through **Obtainium** or grab the univ
 
 ---
 
-## ✨ What's New in Release 4.5.8 (Build 96)
+## ✨ What's New in Release 4.5.11 (Build 99)
 
-- **Effortless 120 Hz Scrolling & Lighter Glass Rendering**: Reserved heavy optical refraction, background blur passes, and drop shadows strictly for top-level floating bars and outer modal windows, while disabling video backdrop capture when Frameless or Flat player controls are selected or during benchmark runs.
-- **Bit-Transparent Audio & Full Multichannel 3D Spatial Sound**: Eliminated false low-bitrate voice filtering on high-quality tracks or files without bitrate tags, added 3.0, 4.0, and 5.0 surround mixing for stereo speakers, and automatically preserves discrete multichannel audio in Auto decoder mode whenever 3D Spatial Audio is enabled.
-- **Stable HDR Playlist Transitions & Unified Licenses Search**: Prevented background playlist preloading from resetting active HDR playback, isolated the 7.1 spatial audio benchmark stage from background video decoding, and upgraded the Open Source Licenses search bar to the unified design system.
+- **Blu-ray 3D MVC & Multi-Resolution H.264 Playback**: Fixed video decoder initialization errors on Blu-ray 3D MVC movies and multi-resolution H.264 streams for smooth 1080p playback across both Hardware (Auto / HW+) and Software (SW) modes.
+- **Overlap-Free Player Error Card & Smart Decoder Recovery**: Centered the playback error dialog while hiding center transport buttons so retry controls are never obstructed, with non-destructive one-tap switching between Software (SW) and Hardware (HW+) decoding.
+- **Spacious 90% Floating Windows & Unified Done Footers**: Expanded all floating sheets and dialogs up to 90% of screen height in portrait and landscape with smooth vertical scrolling, pinned full-width Done confirmation buttons, and a cleaner Appearance settings page.
 
 ---
 
