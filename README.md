@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.5.6-00E5FF?style=flat-square" alt="Version 4.5.6" />
+  <img src="https://img.shields.io/badge/version-4.5.7-00E5FF?style=flat-square" alt="Version 4.5.7" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/license-Proprietary_(Closed_Source)-FF4D8D?style=flat-square" alt="Proprietary License" />
@@ -55,11 +55,11 @@ You can install and update Negai directly through **Obtainium** or grab the univ
 
 ---
 
-## ✨ What's New in Release 4.5.6 (Build 94)
+## ✨ What's New in Release 4.5.7 (Build 95)
 
-- **Restored Video Thumbnails & Accurate Duration Sync**: Restored missing folder covers and episode thumbnails across your library by isolating the thumbnail cache from internal image loader journals, improved frame capture on system folders and short clips, and automatically updates inaccurate library duration labels with the real video duration upon opening a file.
-- **Authentic Frosted & Liquid Glass on Player Windows (Live & Paused)**: Floating player windows now render real-time Frosted Glass blur and Liquid Glass lens refraction directly over the active or paused video frame with zero extra GPU overhead when menus are closed.
-- **Instant Post-Seek Playback, Honest Per-Episode Memory & UI Polish**: Eliminated infinite buffering after scrubbing the timeline slider, strictly enforced the "Remember settings for each episode" toggle, locked the player bottom bar divider to the exact center of the screen, extended the top status-bar scroll visor across all tabs, upgraded untinted Light-theme selected chips to dark graphite with white text, and fixed UI and player benchmark diagnostics.
+- **Three-Mode Video & Audio Decoders with Automatic Hardware Recovery**: Symmetrical Auto / HW+ / SW video and Auto / HW / SW audio decoder selectors that keep your Auto preference untouched during temporary software fallback and automatically retry hardware acceleration on every new video, while the bottom player button and section header badges show the live active decoder.
+- **Categorized Playback History (All, Local, Streaming & P2P)**: Filter your playback history by All, Local device files, external Streaming links, or P2P / TorrServer streams, with source badges in the All view and per-category history clearing.
+- **Full-Height Landscape Navigation Dock & Centered Capsule Geometry**: Expanded the landscape left navigation dock to span the full height of the workspace aligned flush with the top header bar, and centered text, icons, and badges along a unified horizontal center axis across all capsules and cards.
 
 ---
 
