@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.5.1-00E5FF?style=flat-square" alt="Version 4.5.1" />
+  <img src="https://img.shields.io/badge/version-4.5.3-00E5FF?style=flat-square" alt="Version 4.5.3" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/license-Proprietary_(Closed_Source)-FF4D8D?style=flat-square" alt="Proprietary License" />
@@ -55,12 +55,11 @@ You can install and update Negai directly through **Obtainium** or grab the univ
 
 ---
 
-## ✨ What's New in Release 4.5.1 (Build 89)
+## ✨ What's New in Release 4.5.3 (Build 91)
 
-- **True Glass Translucency & Five-Step Material 3 Expressive Contrast**: Restored full background blur, genuine translucency, and subtle matte grain on floating docks and modal windows in Frosted Glass, eliminated edge stretching in Liquid Glass, and calibrated five-step tonal contrast across Light, Dark, and OLED modes in the Flat theme.
-- **Proportional UI Scaling & Flicker-Free In-Screen Player Sheets**: Eliminated double text magnification when adjusting UI scale while keeping subtitle sizes independent, and unified all player sheets inside the fullscreen viewport without system bar flashes or lost scroll positions.
-- **Native 5.1 / 7.1 Surround Passthrough & Single-Stage Speaker 3D Audio**: Multichannel 5.1 and 7.1 tracks now pass directly to external soundbars and receivers when 3D audio is turned off, while speaker 3D virtualization runs as a clean single-stage processor supporting 24-bit, 32-bit, and floating-point audio.
-- **Smart LTPO Refresh Control, Smooth Ambient Glow, HDR & Benchmark v2**: Releases display refresh locks immediately on pause to save battery while restoring peak 120 / 144 Hz responsiveness on touch, eliminates Ambient Glow frame overhead, preserves native hardware HDR and Half-SBS 3D aspect ratios, and upgrades automated benchmark diagnostics.
+- **Automated Main Interface & Theme Optics Benchmark (GitHub Edition)**: Six-stage hands-free high-refresh stress test across Flat (Material 3 Expressive), Frosted Glass, and Liquid Glass—evaluating list scrolling, expressive control transitions, live translucent floating windows, and cover thumbnail scrolling in a safe memory sandbox with instant theme recommendations and report export.
+- **Timeline Seek Responsiveness Benchmark**: Automatically tests multi-point timeline jumps in the video player to measure real first-frame video recovery and audio resynchronization latency while flagging slow storage or container indexing bottlenecks.
+- **Isolated 7.1 Surround Audio Stress Test & Frame-Pacing Diagnostics**: Evaluates real multichannel throughput for headphone 3D binaural audio, speaker 3D virtualization, and voice clarity filtering on any open video without losing your playback position, alongside expanded graphics resolution and frame-cadence smoothness reporting.
 
 ---
 
