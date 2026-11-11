@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.5.3-00E5FF?style=flat-square" alt="Version 4.5.3" />
+  <img src="https://img.shields.io/badge/version-4.5.4-00E5FF?style=flat-square" alt="Version 4.5.4" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/license-Proprietary_(Closed_Source)-FF4D8D?style=flat-square" alt="Proprietary License" />
@@ -55,11 +55,11 @@ You can install and update Negai directly through **Obtainium** or grab the univ
 
 ---
 
-## ✨ What's New in Release 4.5.3 (Build 91)
+## ✨ What's New in Release 4.5.4 (Build 92)
 
-- **Automated Main Interface & Theme Optics Benchmark (GitHub Edition)**: Six-stage hands-free high-refresh stress test across Flat (Material 3 Expressive), Frosted Glass, and Liquid Glass—evaluating list scrolling, expressive control transitions, live translucent floating windows, and cover thumbnail scrolling in a safe memory sandbox with instant theme recommendations and report export.
-- **Timeline Seek Responsiveness Benchmark**: Automatically tests multi-point timeline jumps in the video player to measure real first-frame video recovery and audio resynchronization latency while flagging slow storage or container indexing bottlenecks.
-- **Isolated 7.1 Surround Audio Stress Test & Frame-Pacing Diagnostics**: Evaluates real multichannel throughput for headphone 3D binaural audio, speaker 3D virtualization, and voice clarity filtering on any open video without losing your playback position, alongside expanded graphics resolution and frame-cadence smoothness reporting.
+- **Blu-ray .m2ts Timeline, Hardware Decoding & 7.1 Surround Fixes**: Restored full timeline duration display, instant seeking, smooth Open-GOP hardware decoding at native frame rates, and 8-channel Dolby Digital Plus 7.1 surround playback on Blu-ray .m2ts movies.
+- **Reliable Per-File Audio & Subtitle Track Memory**: Immediately saves and restores your chosen secondary voiceover and subtitle tracks across all containers—even when multiple tracks share the same language.
+- **Gold Negai Premium Styling, Auto-Saved Benchmarks & 120 Hz Liquid Glass**: Warm gold purchase button and star medallion across all three themes, automatic sequential saving of benchmark reports to Downloads with auto-pause on completion, pure edge Liquid Glass refraction without center shrinking, smoother 120 Hz scrolling, and zero-allocation 7.1 spatial audio.
 
 ---
 
