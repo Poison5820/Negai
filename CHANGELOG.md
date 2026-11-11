@@ -3,6 +3,26 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.5.12]
+
+### 🇬🇧 English
+- **1080p 2D H.264 & Blu-ray Playback Hotfix:**
+  - Fixed a regression that caused standard 1080p 2D H.264 videos in MKV, MP4, and Blu-ray .m2ts containers to fail with a video decoder initialization error at launch.
+  - Preserved original 2D video stream headers untouched while keeping 3D MVC stream filtering strictly isolated to stereoscopic 3D releases.
+  - Tuned 1080p hardware decoder memory limits, enabled full software decoder priority when Software (SW) mode is selected, and restored automatic software fallback on demanding high-bitrate streams.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.5.12)</b></summary>
+
+<br>
+
+- **Исправление запуска стандартных 2D-видео H.264 1080p и дисков Blu-ray:**
+  - Устранён сбой инициализации видеодекодера при открытии обычных роликов и фильмов H.264 1080p в форматах MKV, MP4 и Blu-ray .m2ts.
+  - Обычные 2D-потоки теперь передаются декодеру в первозданном виде без пересборки заголовков и пакетов, а фильтрация стереоскопических данных включается исключительно на реальных фильмах 3D MVC.
+  - Оптимизирован объём памяти буферов для 1080p-видео, восстановлен приоритет программного декодера в режиме «SW» и возвращён бесшовный резервный переход на программное декодирование на тяжёлых потоках.
+
+</details>
+
 ## [v4.5.11]
 
 ### 🇬🇧 English
