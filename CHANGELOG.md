@@ -3,6 +3,42 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.5.5]
+
+### 🇬🇧 English
+- **Flicker-Free MEMC Motion Smoothing on Heavy & Grainy Cinema:**
+  - Eliminated flickering gray block grids and motion-boundary clamping artifacts when watching high-bitrate 4K releases and grainy live-action movies with MEMC motion smoothing enabled.
+  - Locked internal motion-smoothing resolution steadily during playback so heavy scenes never trigger mid-scene buffer resets or visual flashes, and unified 24 Hz reference frame rendering when Anime4K is off to prevent subtle sharpness or color strobing.
+- **Physical Liquid Glass Lens, Live Modal Blur & Top Scroll Visor:**
+  - Upgraded Liquid Glass headers, floating docks, and modal windows to uniform physical lens refraction with natural depth, subtle chromatic dispersion, and beveled specular rims across every surface size while maintaining effortless 120 Hz list scrolling in both glass themes.
+  - Restored live background blur behind all floating dialogs on the main screens without darkening the screen, and added a soft top status-bar visor that gently separates scrolled library cards from the system clock and battery icons.
+- **Accurate Seeking on Screen Recordings, Long-Keyframe MP4/MKV & Blu-ray .m2ts:**
+  - Fixed timeline scrubbing on screen recordings and MP4/MKV videos with sparse keyframes so seeking lands accurately on your chosen timestamp and holds your selected slider position smoothly instead of snapping back to 00:00.
+  - Accelerated timeline scrubbing and automated seek-responsiveness testing on high-bitrate Blu-ray .m2ts movies by jumping straight to the nearest preceding keyframe without redundant full-file scanning.
+- **Full-Color Video Thumbnails, Cleaner Player Overlays & Open-Source Credits:**
+  - Restored vibrant full-color episode and folder cover thumbnails (including Blu-ray .m2ts videos) and isolated interface benchmark test cards so temporary benchmark runs never overwrite real library thumbnails.
+  - Automatically hides the live stream statistics overlay while File Information or any other player dialog card is open, eliminated background memory allocations across the timeline progress bar, ambient edge lighting, and fading controls, harmonized margins across the app, and added open-source license attribution for AndroidLiquidGlass in the About and Licenses sections.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.5.5)</b></summary>
+
+<br>
+
+- **Плавное сглаживание движений MEMC на тяжёлых фильмах без мерцающей сетки:**
+  - Полностью устранены мерцающая серая сетка и блочные артефакты на границах движения при просмотре тяжёлых 4K-релизов и художественного кино с плёночным зерном со включённым сглаживанием MEMC.
+  - Зафиксировано внутреннее разрешение обработки на время воспроизведения ролика без резких перестроений буферов на сложных сценах, а также выровнен вывод опорных кадров на 24 Гц при выключенном Anime4K без стробирования резкости и оттенков.
+- **Физическая линза «Жидкого стекла», живое размытие под окнами и верхний козырёк скролла:**
+  - Панели шапки, парящий док и всплывающие окна в теме «Жидкое стекло» переведены на эталонную физическую линзу преломления с естественной глубиной, мягкой хроматической дисперсией и зеркальной гранью независимо от размеров панели при сохранении лёгкой прокрутки списков на 120 Гц.
+  - Возвращено живое размытие фона позади всех всплывающих диалогов главного экрана без ухода подложки в темноту, а при прокрутке списков под системными часами и индикаторами батареи появляется мягкий защитный козырёк для чистого чтения значков.
+- **Точная перемотка записей экрана, видео с длинными интервалами кадров и Blu-ray .m2ts:**
+  - Исправлен сброс перемотки в 00:00 на записях экрана и видеофайлах MP4/MKV с редкими ключевыми кадрами: плеер точно переходит к выбранному моменту и плавно удерживает выбранную позицию ползунка и таймера без скачков назад.
+  - Кратно ускорена перемотка по таймлайну и прохождение стресс-теста отзывчивости перемотки на тяжёлых файлах Blu-ray .m2ts за счёт прямого перехода к ближайшему ключевому кадру без лишнего сканирования файла.
+- **Полноцветные превью видео, чистые окна плеера и атрибуция лицензий:**
+  - Восстановлены чёткие полноцветные обложки папок и превью серий (включая файлы Blu-ray .m2ts), а тестовые карточки бенчмарка интерфейса полностью изолированы от кэша реальной медиатеки.
+  - Фоновая карточка статистики потока теперь автоматически скрывается на время открытия окна «Информация о файле» или других диалогов плеера, снижена нагрузка на память и батарею в плеере, выровнены боковые отступы на всех экранах, а в разделы «О приложении» и «Лицензии открытого ПО» добавлена атрибуция библиотеки AndroidLiquidGlass.
+
+</details>
+
 ## [v4.5.4]
 
 ### 🇬🇧 English
