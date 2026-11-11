@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.5.12-00E5FF?style=flat-square" alt="Version 4.5.12" />
+  <img src="https://img.shields.io/badge/version-4.5.13-00E5FF?style=flat-square" alt="Version 4.5.13" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/license-Proprietary_(Closed_Source)-FF4D8D?style=flat-square" alt="Proprietary License" />
@@ -55,11 +55,11 @@ You can install and update Negai directly through **Obtainium** or grab the univ
 
 ---
 
-## ✨ What's New in Release 4.5.12 (Build 100)
+## ✨ What's New in Release 4.5.13 (Build 101)
 
-- **1080p 2D H.264 & Blu-ray Decoder Hotfix**: Restored untouched passthrough for standard 1080p 2D H.264 MKV, MP4, and `.m2ts` videos, calibrated 1080p decoder buffer memory, enabled full Software (SW) mode priority, and preserved seamless software fallback while keeping 3D MVC playback isolated to stereoscopic streams.
-- **Overlap-Free Player Error Card & Smart Decoder Recovery**: Centered the playback error dialog while hiding center transport buttons so retry controls are never obstructed, with non-destructive one-tap switching between Software (SW) and Hardware (HW+) decoding.
-- **Spacious 90% Floating Windows & Unified Done Footers**: Expanded all floating sheets and dialogs up to 90% of screen height in portrait and landscape with smooth vertical scrolling, pinned full-width Done confirmation buttons, and a cleaner Appearance settings page.
+- **Conflict-Free Decoder Switching & H.264 Stability**: Eliminated video surface contention during decoder transitions across 720p, 1080p, and 4K H.264 videos, preserved safe native memory limits for Software (SW) decoding, and kept 3D MVC playback isolated to stereoscopic releases.
+- **Accurate Player Benchmark & Lighter Glass HUD**: Restored exact rendered frame and FPS reporting across all benchmark stages with full glass backdrop telemetry and gentler background sampling while player controls are visible.
+- **Unobstructed Error Card & Unified 90% Floating Windows**: Hid center transport controls whenever an error card is active and standardized all floating sheets and dialogs up to 90% of screen height with a pinned Done button.
 
 ---
 
