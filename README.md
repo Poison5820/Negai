@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.5.4-00E5FF?style=flat-square" alt="Version 4.5.4" />
+  <img src="https://img.shields.io/badge/version-4.5.5-00E5FF?style=flat-square" alt="Version 4.5.5" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/license-Proprietary_(Closed_Source)-FF4D8D?style=flat-square" alt="Proprietary License" />
@@ -55,11 +55,11 @@ You can install and update Negai directly through **Obtainium** or grab the univ
 
 ---
 
-## ✨ What's New in Release 4.5.4 (Build 92)
+## ✨ What's New in Release 4.5.5 (Build 93)
 
-- **Blu-ray .m2ts Timeline, Hardware Decoding & 7.1 Surround Fixes**: Restored full timeline duration display, instant seeking, smooth Open-GOP hardware decoding at native frame rates, and 8-channel Dolby Digital Plus 7.1 surround playback on Blu-ray .m2ts movies.
-- **Reliable Per-File Audio & Subtitle Track Memory**: Immediately saves and restores your chosen secondary voiceover and subtitle tracks across all containers—even when multiple tracks share the same language.
-- **Gold Negai Premium Styling, Auto-Saved Benchmarks & 120 Hz Liquid Glass**: Warm gold purchase button and star medallion across all three themes, automatic sequential saving of benchmark reports to Downloads with auto-pause on completion, pure edge Liquid Glass refraction without center shrinking, smoother 120 Hz scrolling, and zero-allocation 7.1 spatial audio.
+- **Flicker-Free Cinema MEMC Motion Smoothing**: Eliminated flickering gray block grids and motion-boundary clamping artifacts on high-bitrate 4K and grainy live-action movies, locked internal motion-smoothing resolution steadily during playback, and unified 24 Hz reference frame output without sharpness strobing.
+- **Authentic 120 Hz Liquid Glass Lens, Live Modal Blur & Top Scroll Visor**: Physical convex edge refraction, prism dispersion, and beveled specular depth across Liquid Glass headers, floating docks, and dialogs regardless of bar dimensions while preserving effortless 120 Hz scrolling, live background blur behind main-screen dialogs, and a soft top status-bar visor while scrolling.
+- **Frame-Accurate Long-GOP & Blu-ray .m2ts Seeking, Full-Color Thumbnails & Cleaner HUD**: Accurate timeline scrubbing on screen recordings and long-keyframe MP4/MKV videos without jumping back to `00:00`, near-instant keyframe-aligned Blu-ray `.m2ts` seeking, vibrant full-color video and `.m2ts` thumbnails isolated from benchmark runs, automatic hiding of the live stream overlay while player dialogs are open, and lower memory and battery overhead.
 
 ---
 
@@ -104,3 +104,4 @@ You can install and update Negai directly through **Obtainium** or grab the univ
 - **MIT KEMAR HRTF (MIT License)**: Binaural spatial audio impulse response filters derived from the [MIT Media Lab KEMAR HRTF Dataset](https://sound.media.mit.edu/resources/KEMAR.html) (Bill Gardner & Keith Martin). See [`LICENSE_MIT_KEMAR_HRTF.txt`](LICENSE_MIT_KEMAR_HRTF.txt).
 - **FFmpeg (GNU LGPL v2.1+)**: Software audio decoders provided through Media3 extension without GPL components. See [`LICENSE_FFMPEG.txt`](LICENSE_FFMPEG.txt).
 - **AndroidX Media3 (Apache 2.0)**: Core playback pipeline developed by Google LLC.
+- **AndroidLiquidGlass (Backdrop & Capsule) — Copyright Kyant0 (Apache License 2.0)**: Real-time refractive glass backdrop effects and continuous superellipse capsule geometry from [Kyant0/AndroidLiquidGlass](https://github.com/Kyant0/AndroidLiquidGlass).
