@@ -3,6 +3,44 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.5.6]
+
+### 🇬🇧 English
+- **Restored Video Thumbnails & Accurate Episode Duration Sync:**
+  - Fixed missing folder covers and episode preview thumbnails across the media library by isolating the thumbnail storage cache from internal image loader journals and automatically cleaning up corrupted legacy cache files on startup.
+  - Improved thumbnail extraction for system document folders, screen recordings, and short clips with sparse keyframes, and automatically updates inaccurate library duration labels with the real video duration as soon as the file is opened in the player.
+- **Authentic Frosted & Liquid Glass on Player Floating Windows (Live & Paused):**
+  - Floating player windows (Playback Tools, Audio & Subtitles, File Information, and Shader settings) now render genuine Frosted Glass blur and Liquid Glass lens refraction directly over the active video frame—including when playback is paused.
+  - Added hardware window blur support on Android 12+ for system dialogs inside the player while keeping zero extra graphics overhead while watching with menus closed.
+- **Instant Post-Seek Playback & Honest Per-Episode Settings Toggle:**
+  - Eliminated infinite buffering spinners after scrubbing the timeline slider on local videos, screen recordings, and Blu-ray .m2ts files so playback resumes immediately from your chosen timestamp.
+  - Fixed the "Remember settings for each episode" toggle in Settings -> Playback so individual audio tracks, subtitle choices, playback speed, video zoom, and sync offsets are saved and restored per file or series folder when enabled, and cleanly use your global defaults when turned off.
+- **Centered Player Bottom Bar, Extended Top Visor, Crisp Light Theme & Benchmark Fixes:**
+  - Locked the center divider in the player's bottom quick actions bar strictly to the middle of the screen with balanced left and right control groups.
+  - Extended the top status-bar scroll visor across all main tabs (including Settings) so scrolled cards never clash with the system clock or battery icons, and upgraded selected chips and rows in the Light theme (when color tint is off or in Monochrome) to high-contrast dark graphite with crisp white text and icons.
+  - Eliminated unnecessary background layer recording in the Flat theme during the interface benchmark, and fixed seek responsiveness testing and hardware decoder name reporting in the player benchmark.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.5.6)</b></summary>
+
+<br>
+
+- **Полное восстановление обложек видео и уточнение реальной длительности:**
+  - Восстановлено отображение пропавших обложек папок и превью серий во всей медиатеке: хранилище превью полностью отделено от внутренних журналов загрузчика изображений с автоматической очисткой повреждённого старого кэша при запуске.
+  - Улучшено создание превью для системных папок, записей экрана и коротких роликов с редкими ключевыми кадрами, а при открытии видео плеер автоматически заменяет неточную системную длительность карточки в списке на реальную длительность файла.
+- **Настоящее «Матовое» и «Жидкое стекло» у всплывающих окон плеера (в движении и на паузе):**
+  - Парящие окна плеера («Инструменты воспроизведения», дорожки звука и субтитров, свойства файла и настройки шейдеров) теперь отображают настоящее матовое размытие и оптическую линзу преломления прямо поверх видеокадра — даже когда фильм стоит на паузе.
+  - Для системных диалоговых окон плеера на Android 12+ дополнительно включено аппаратное размытие фона при полном отсутствии лишней нагрузки на видеокарту во время обычного просмотра с закрытыми меню.
+- **Мгновенное продолжение после перемотки и честное запоминание настроек серий:**
+  - Устранена бесконечная буферизация после перетаскивания ползунка времени на локальных видео, записях экрана и дисках Blu-ray .m2ts — воспроизведение продолжается мгновенно с выбранной секунды.
+  - Исправлена работа переключателя «Запоминать настройки для каждой серии» в разделе «Настройки -> Воспроизведение»: индивидуальная озвучка, субтитры, скорость, масштаб кадра и задержки синхронизации сохраняются и применяются для файла и папки сериала при включённой опции и строго следуют общим настройкам по умолчанию при её отключении.
+- **Центровка нижней панели плеера, верхний козырёк, контрастная светлая тема и точность бенчмарков:**
+  - Разделитель в нижней панели быстрых действий плеера жёстко зафиксирован ровно посередине экрана со сбалансированными левой и правой группами кнопок.
+  - Защитный козырёк под статус-баром расширен и добавлен на все вкладки главного экрана (включая «Настройки»), чтобы прокручиваемые карточки не сливались с часами и индикаторами, а выбранные кнопки и строки в светлой теме без цветного оттенка и в палитре «Монохром» получили контрастную тёмно-графитовую заливку с идеально читаемым белым текстом и иконками.
+  - В бенчмарке интерфейса убрана лишняя нагрузка в плоской теме для честного сравнения со стеклянными стилями, а в бенчмарке плеера исправлены замер скорости перемотки на локальных файлах и сохранение названия активного декодера видео в итоговом отчёте.
+
+</details>
+
 ## [v4.5.5]
 
 ### 🇬🇧 English
