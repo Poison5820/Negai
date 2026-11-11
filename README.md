@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.5.7-00E5FF?style=flat-square" alt="Version 4.5.7" />
+  <img src="https://img.shields.io/badge/version-4.5.8-00E5FF?style=flat-square" alt="Version 4.5.8" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/license-Proprietary_(Closed_Source)-FF4D8D?style=flat-square" alt="Proprietary License" />
@@ -55,11 +55,11 @@ You can install and update Negai directly through **Obtainium** or grab the univ
 
 ---
 
-## ✨ What's New in Release 4.5.7 (Build 95)
+## ✨ What's New in Release 4.5.8 (Build 96)
 
-- **Three-Mode Video & Audio Decoders with Automatic Hardware Recovery**: Symmetrical Auto / HW+ / SW video and Auto / HW / SW audio decoder selectors that keep your Auto preference untouched during temporary software fallback and automatically retry hardware acceleration on every new video, while the bottom player button and section header badges show the live active decoder.
-- **Categorized Playback History (All, Local, Streaming & P2P)**: Filter your playback history by All, Local device files, external Streaming links, or P2P / TorrServer streams, with source badges in the All view and per-category history clearing.
-- **Full-Height Landscape Navigation Dock & Centered Capsule Geometry**: Expanded the landscape left navigation dock to span the full height of the workspace aligned flush with the top header bar, and centered text, icons, and badges along a unified horizontal center axis across all capsules and cards.
+- **Effortless 120 Hz Scrolling & Lighter Glass Rendering**: Reserved heavy optical refraction, background blur passes, and drop shadows strictly for top-level floating bars and outer modal windows, while disabling video backdrop capture when Frameless or Flat player controls are selected or during benchmark runs.
+- **Bit-Transparent Audio & Full Multichannel 3D Spatial Sound**: Eliminated false low-bitrate voice filtering on high-quality tracks or files without bitrate tags, added 3.0, 4.0, and 5.0 surround mixing for stereo speakers, and automatically preserves discrete multichannel audio in Auto decoder mode whenever 3D Spatial Audio is enabled.
+- **Stable HDR Playlist Transitions & Unified Licenses Search**: Prevented background playlist preloading from resetting active HDR playback, isolated the 7.1 spatial audio benchmark stage from background video decoding, and upgraded the Open Source Licenses search bar to the unified design system.
 
 ---
 
