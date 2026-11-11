@@ -3,6 +3,72 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.5.11]
+
+### 🇬🇧 English
+- **Consolidated Playback & Interface Stability Release:**
+  - Delivered full release synchronization for Blu-ray 3D MVC and multi-resolution H.264 video playback across both Hardware (Auto / HW+) and Software (SW) decoder modes without startup errors.
+  - Finalized the centered, overlap-free player error recovery card with non-destructive decoder switching alongside spacious floating windows expanding up to 90% of screen height with a pinned Done confirmation button.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.5.11)</b></summary>
+
+<br>
+
+- **Консолидированный стабильный выпуск плеера и интерфейса:**
+  - Финализирована поддержка фильмов Blu-ray 3D MVC и многоразрешающих видеопотоков H.264 с чистым запуском как в аппаратном («Авто» / «HW+»), так и в программном («SW») режиме декодера без ошибок инициализации.
+  - Объединены центрированная карточка ошибки воспроизведения без пересечения с кнопками плеера и бережным переключением декодеров, а также просторные всплывающие окна высотой до 90% экрана с закреплённой кнопкой подтверждения «Готово».
+
+</details>
+
+## [v4.5.10]
+
+### 🇬🇧 English
+- **Adaptive Player Error Card Layout & Release Stabilization:**
+  - Refined button flow arrangement on the centered playback error card so retry and decoder recovery actions wrap cleanly across compact screens and multi-window layouts without clipping.
+  - Verified full compatibility with Blu-ray 3D MVC and multi-resolution H.264 streams across both Hardware (Auto / HW+) and Software (SW) decoder modes.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.5.10)</b></summary>
+
+<br>
+
+- **Адаптивная вёрстка карточки ошибки в плеере и стабилизация сборки:**
+  - Улучшено расположение кнопок повтора и смены декодера на центрированной карточке ошибки плеера — кнопки аккуратно переносятся и выравниваются на компактных экранах и в режиме разделённого окна без обрезки текста.
+  - Проверена полная совместимость с фильмами Blu-ray 3D MVC и многоразрешающими видео H.264 как в аппаратном («Авто» / «HW+»), так и в программном («SW») режиме декодирования.
+
+</details>
+
+## [v4.5.9]
+
+### 🇬🇧 English
+- **Blu-ray 3D MVC & Multi-Resolution H.264 Playback Compatibility:**
+  - Fixed video decoder startup failures on Blu-ray 3D MVC movies and multi-resolution H.264 streams so the full 1080p base picture plays smoothly in both Hardware (Auto / HW+) and Software (SW) decoder modes without crashing at launch.
+  - Tuned software video decoder buffer sizing and automatic track selection so secondary 3D extension streams never block playback.
+- **Clean Player Error Dialog & Non-Destructive Decoder Recovery:**
+  - Centered the in-player playback error card and automatically hid the floating center transport buttons whenever an error is displayed so retry controls are never covered or blocked.
+  - Upgraded the decoder recovery button on the error card to switch cleanly between Software (SW) and Hardware (HW+) decoding for the current video without overwriting your saved global Auto preference.
+- **Spacious Floating Windows & Unified Done Confirmation Footers:**
+  - Expanded all floating windows, track selectors, file detail dialogs, and player settings sheets up to 90% of available screen height in both portrait and landscape orientations with smooth vertical scrolling.
+  - Standardized a full-width Done confirmation button at the bottom of every floating window and removed developer benchmark clutter from the Appearance settings page.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.5.9)</b></summary>
+
+<br>
+
+- **Совместимость с фильмами Blu-ray 3D MVC и многоразрешающими видео H.264:**
+  - Устранены ошибки запуска видеодекодера на релизах Blu-ray 3D MVC и тестовых потоках H.264 с динамической сменой разрешения — полная базовая картинка 1080p стабильно воспроизводится как в аппаратном («Авто» / «HW+»), так и в программном («SW») режиме декодера.
+  - Оптимизирован размер входного буфера для программного декодера видео, а дополнительные служебные потоки второго ракурса 3D больше не мешают старту воспроизведения.
+- **Аккуратное окно ошибки плеера и умное восстановление декодера:**
+  - Карточка ошибки воспроизведения теперь выравнивается строго по центру рабочей области, а центральные кнопки перемотки и паузы автоматически скрываются на время показа ошибки и больше никогда не перекрывают кнопки действий.
+  - Кнопка смены декодера на карточке ошибки теперь предлагает переключение на программный («SW») или возврат к аппаратному («HW+») декодеру в зависимости от текущего режима, не перезаписывая вашу основную настройку «Авто».
+- **Просторные всплывающие окна до 90% высоты экрана и единая кнопка «Готово»:**
+  - Все плавающие окна, списки дорожек, свойства файлов и шторки настроек плеера теперь раскрываются до 90% доступной высоты экрана в портретном и альбомном режимах с плавной вертикальной прокруткой.
+  - В нижней части каждого всплывающего окна закреплена полноразмерная кнопка подтверждения «Готово», а страница настроек «Оформление» очищена от отладочного блока авто-бенчмарка.
+
+</details>
+
 ## [v4.5.8]
 
 ### 🇬🇧 English
