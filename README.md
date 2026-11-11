@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.5.5-00E5FF?style=flat-square" alt="Version 4.5.5" />
+  <img src="https://img.shields.io/badge/version-4.5.6-00E5FF?style=flat-square" alt="Version 4.5.6" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/license-Proprietary_(Closed_Source)-FF4D8D?style=flat-square" alt="Proprietary License" />
@@ -55,11 +55,11 @@ You can install and update Negai directly through **Obtainium** or grab the univ
 
 ---
 
-## ✨ What's New in Release 4.5.5 (Build 93)
+## ✨ What's New in Release 4.5.6 (Build 94)
 
-- **Flicker-Free Cinema MEMC Motion Smoothing**: Eliminated flickering gray block grids and motion-boundary clamping artifacts on high-bitrate 4K and grainy live-action movies, locked internal motion-smoothing resolution steadily during playback, and unified 24 Hz reference frame output without sharpness strobing.
-- **Authentic 120 Hz Liquid Glass Lens, Live Modal Blur & Top Scroll Visor**: Physical convex edge refraction, prism dispersion, and beveled specular depth across Liquid Glass headers, floating docks, and dialogs regardless of bar dimensions while preserving effortless 120 Hz scrolling, live background blur behind main-screen dialogs, and a soft top status-bar visor while scrolling.
-- **Frame-Accurate Long-GOP & Blu-ray .m2ts Seeking, Full-Color Thumbnails & Cleaner HUD**: Accurate timeline scrubbing on screen recordings and long-keyframe MP4/MKV videos without jumping back to `00:00`, near-instant keyframe-aligned Blu-ray `.m2ts` seeking, vibrant full-color video and `.m2ts` thumbnails isolated from benchmark runs, automatic hiding of the live stream overlay while player dialogs are open, and lower memory and battery overhead.
+- **Restored Video Thumbnails & Accurate Duration Sync**: Restored missing folder covers and episode thumbnails across your library by isolating the thumbnail cache from internal image loader journals, improved frame capture on system folders and short clips, and automatically updates inaccurate library duration labels with the real video duration upon opening a file.
+- **Authentic Frosted & Liquid Glass on Player Windows (Live & Paused)**: Floating player windows now render real-time Frosted Glass blur and Liquid Glass lens refraction directly over the active or paused video frame with zero extra GPU overhead when menus are closed.
+- **Instant Post-Seek Playback, Honest Per-Episode Memory & UI Polish**: Eliminated infinite buffering after scrubbing the timeline slider, strictly enforced the "Remember settings for each episode" toggle, locked the player bottom bar divider to the exact center of the screen, extended the top status-bar scroll visor across all tabs, upgraded untinted Light-theme selected chips to dark graphite with white text, and fixed UI and player benchmark diagnostics.
 
 ---
 
