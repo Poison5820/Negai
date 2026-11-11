@@ -3,6 +3,42 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.5.4]
+
+### 🇬🇧 English
+- **Blu-ray .m2ts Timeline, Hardware Decoding & 7.1 Surround Fixes:**
+  - Restored full timeline duration display and instant seek scrubbing on all local Blu-ray .m2ts movies, ensuring the automated seek responsiveness benchmark also runs reliably.
+  - Fixed video header detection and Open-GOP Blu-ray frame recovery so 1080p H.264 and 4K HEVC movies stay on fast hardware decoding at their native cinematic frame rate without dropping intermediate frames or jumping erratically.
+  - Fixed 7.1 Dolby Digital Plus surround sound playback and audio-video synchronization on Blu-ray .m2ts releases so multichannel audio plays smoothly without muting.
+- **Reliable Per-File Audio & Subtitle Track Memory:**
+  - Selecting a secondary voiceover or subtitle track (even when a movie has multiple tracks in the same language, or on .m2ts files) is now saved immediately and restored automatically on reopen without being overwritten by global language preferences.
+- **Negai Premium Gold Styling & Benchmark Convenience:**
+  - Restored warm gold styling for the purchase button, star medallion, and Premium badge in the Negai Premium dialog across the Flat, Frosted Glass, and Liquid Glass themes.
+  - Completed video player and main interface benchmarks now save numbered diagnostic reports automatically to your device Downloads folder without overwriting previous runs, and automatically pause video playback when the test finishes.
+- **Pure Edge Liquid Glass Optics, 120 Hz Scrolling & Spatial Audio Optimization:**
+  - Refined the Liquid Glass lens so refraction, gentle chromatic dispersion, and specular highlights occur cleanly along the curved outer rim while keeping the center completely undistorted without shrinking text.
+  - Accelerated library and folder scrolling to maintain smooth 120 Hz performance in glass themes with lighter cover thumbnail memory usage, and eliminated background memory allocations during 7.1 surround 3D audio playback.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.5.4)</b></summary>
+
+<br>
+
+- **Исправление таймлайна, аппаратного декодирования и звука 7.1 в Blu-ray .m2ts:**
+  - Полностью восстановлено отображение длительности, шкалы времени и мгновенной перемотки на всех локальных фильмах Blu-ray .m2ts, включая корректную работу автоматического теста скорости перемотки.
+  - Исправлена инициализация видеопотока и обработка открытых групп кадров на дисках Blu-ray: фильмы 1080p H.264 и 4K HEVC стабильно воспроизводятся на аппаратном декодере с родной кинематографической частотой кадров без пропусков промежуточных сцен и рывков картинки.
+  - Восстановлено воспроизведение восьмиканального звука Dolby Digital Plus 7.1 и точная синхронизация аудио и видео на ремуксах и дисках .m2ts.
+- **Надёжное запоминание выбранной озвучки и субтитров:**
+  - Выбор второй или любой другой аудиодорожки и субтитров теперь сохраняется мгновенно и точно восстанавливается при повторном открытии файла во всех контейнерах — даже если в файле несколько дорожек одного языка.
+- **Золотое оформление окна Negai Premium и улучшения бенчмарков:**
+  - Кнопка покупки, верхний звёздный медальон и значок в окне Negai Premium получили выразительное тёплое золотое оформление во всех трёх темах интерфейса («Плоская», «Матовое стекло» и «Жидкое стекло»).
+  - Отчёты бенчмарков видеоплеера и основного интерфейса теперь автоматически сохраняются в системную папку «Загрузки» с порядковой нумерацией файлов без перезаписи прошлых замеров, а по завершении теста фильм автоматически ставится на паузу.
+- **Чистая краевая линза «Жидкого стекла», плавные 120 Гц и оптимизация 3D-звука:**
+  - Обновлена оптика темы «Жидкое стекло»: объёмное преломление, мягкая дисперсия света и блик работают строго по скруглённой кромке элементов, оставляя центральную область идеально чёткой без эффекта уменьшения текста.
+  - Ускорена прокрутка списков медиатеки и обложек папок для стабильных 120 Гц в стеклянных темах, а конвейер пространственного 3D-звука 7.1 полностью освобождён от фоновых выделений памяти.
+
+</details>
+
 ## [v4.5.3]
 
 ### 🇬🇧 English
