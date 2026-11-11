@@ -3,6 +3,78 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.5.3]
+
+### 🇬🇧 English
+- **Automated Main Interface & Theme Optics Benchmark (GitHub Edition):**
+  - Added a hands-free six-stage interface benchmark accessible from Appearance settings, Diagnostics, and the quick developer header button to measure real high-refresh smoothness across the Flat (Material 3 Expressive), Frosted Glass, and Liquid Glass themes.
+  - Automatically tests reversible high-speed list scrolling, tactile navigation dock and control shape transitions, floating modal windows over live moving backgrounds, and intensive cover thumbnail scrolling.
+  - Safely previews each theme style in temporary memory without overwriting your personal theme preferences, always restoring your active look and tab even if stopped mid-run.
+  - Compares the exact graphics and frame-time cost of Frosted Glass and Liquid Glass against the Flat baseline, recommends the ideal theme style for your screen, and lets you copy or share the full diagnostic report in one tap.
+- **Upgraded Video Player Benchmark with Seek & 7.1 Surround Stress Tests:**
+  - Added an automated timeline seek responsiveness test that jumps across four points in the video to measure real first-frame recovery and audio resynchronization speed, highlighting slow storage or container indexing bottlenecks while skipping live non-seekable streams automatically.
+  - Added an isolated 7.1 surround sound stress test that benchmarks headphone 3D binaural spatialization, speaker 3D virtualization, and voice clarity restoration throughput even when watching a regular stereo video, returning you to your exact playback spot afterward.
+  - Expanded playback diagnostics with active graphics pipeline resolution, rendering mode details, and frame-pacing smoothness metrics, alongside internal modularity and stability optimizations.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.5.3)</b></summary>
+
+<br>
+
+- **Автоматический бенчмарк основного интерфейса и оптики тем (сборка GitHub):**
+  - Добавлен шестиэтапный автоматический стресс-тест главного интерфейса (запускается из разделов «Оформление», «Диагностика» или быстрой кнопки в шапке в режиме разработчика) для проверки реальной плавности при высокой герцовке в темах «Плоская» (Material 3 Expressive), «Матовое стекло» и «Жидкое стекло».
+  - Без участия рук проверяет скоростную прокрутку насыщенных списков карточек, упругую трансформацию вкладок дока и переключателей, плавное открытие всплывающих окон над живым движущимся фоном и интенсивный скролл сетки видеообложек.
+  - Переключает темы строго во временной песочнице в памяти без перезаписи ваших личных настроек оформления и гарантированно возвращает привычный вид и вкладку после завершения или отмены.
+  - Наглядно сравнивает нагрузку стеклянных тем относительно базовой плоской темы, рекомендует оптимальный визуальный стиль для вашего устройства и позволяет в одно нажатие скопировать или отправить подробный отчёт.
+- **Обновлённый бенчмарк видеоплеера с проверкой перемотки и 3D-звука 7.1:**
+  - Добавлен автоматический тест отзывчивости перемотки: плеер выполняет серию переходов по таймлайну, замеряет реальное время до появления первого кадра и восстановления звука, выявляет задержки чтения контейнера и автоматически пропускает потоковые прямые эфиры.
+  - Добавлен изолированный стресс-тест многоканального звука 7.1, который проверяет запас мощности процессора для бинаурального 3D-звука в наушниках, объёмной виртуализации динамиков и фильтра чёткости речи даже при открытом обычном стереофайле с возвратом на вашу исходную секунду просмотра.
+  - Расширена диагностика вывода изображения с учётом активного разрешения обработки и равномерности смены кадров, а также проведена внутренняя оптимизация стабильности и модульности приложения.
+
+</details>
+
+## [v4.5.2]
+
+### 🇬🇧 English
+- **Crash-Free High-Bitrate 4K & Blu-ray .m2ts Playback:**
+  - Eliminated out-of-memory crashes on high-bitrate 4K and Blu-ray remux movies by dynamically adapting playback buffer memory to your device capacity and immediately reclaiming unused memory when switching tracks, decoders, or closing a video.
+  - Redesigned Blu-ray .m2ts stream reading to reuse memory buffers instead of creating temporary copies on every packet, eliminating background memory spikes and micro-stutters during intense action scenes.
+  - Added full initialization support for 1080p Blu-ray H.264 and 4K HEVC video headers so hardware decoding starts cleanly without visual macroblocking or unnecessary software decoder fallbacks.
+- **Instant Keyframe Seeking & Embedded Blu-ray PGS Subtitles:**
+  - Resuming or seeking inside .m2ts movies now jumps accurately to the nearest preceding keyframe, eliminating multi-second startup delays and gray or garbled transition frames.
+  - Added built-in support for Blu-ray PGS graphic subtitles inside .m2ts files, including language selection and subtitle sync adjustments.
+- **Smart Per-Episode & Series Folder Playback Memory:**
+  - The player now automatically remembers your chosen audio track, subtitle track (including turning subtitles off), audio and subtitle sync offsets, playback speed, and video zoom mode for each individual file.
+  - Starting the next episode in the same series folder automatically carries over your preferred voiceover language, subtitle choice, sync timing, speed, and screen zoom from the previous episode.
+- **Lighter 7.1 Spatial Audio, Faster Library Loading & Benchmark Restoration:**
+  - Optimized the surround audio pipeline so 5.1 and 7.1 tracks are spatialized into stereo before delay and voice cleanup filtering, cutting audio processor load on multichannel movies.
+  - Reduced storage overhead when reading video metadata and chapters from local folders, and automatically stops background thumbnail generation as soon as you leave a folder screen.
+  - Running the automated performance benchmark now preserves and restores your active audio track, internal or external subtitles, and sync offsets upon completion or cancellation.
+  - Improved internal modularity and build stability, with automated cloud builds focused exclusively on the GitHub community edition.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.5.2)</b></summary>
+
+<br>
+
+- **Стабильное воспроизведение тяжёлых 4K-фильмов и Blu-ray .m2ts без вылетов:**
+  - Полностью устранены вылеты из-за нехватки оперативной памяти на фильмах и ремуксах с высоким битрейтом: объём буфера подстраивается под возможности устройства и мгновенно очищается при остановке видео, смене дорожки или переключении декодера.
+  - Потоковое чтение контейнеров Blu-ray .m2ts переведено на постоянные буферы без лишних временных копий в памяти, благодаря чему исчезли фоновые подвисания во время динамичных сцен.
+  - Исправлена передача параметров видеопотока для 1080p Blu-ray H.264 и 4K HEVC, что обеспечивает стабильный запуск аппаратного декодирования без рассыпания картинки и падения кадровой частоты.
+- **Мгновенная перемотка с ключевого кадра и графические субтитры Blu-ray PGS:**
+  - Продолжение просмотра не с начала и любая перемотка в файлах .m2ts теперь выполняют точный переход к ближайшему ключевому кадру без долгих задержек старта и серых артефактов на экране.
+  - Добавлена поддержка встроенных графических субтитров Blu-ray PGS в файлах .m2ts с выбором языка и настройкой задержки.
+- **Умное запоминание дорожек, синхронизации и масштаба для серий и папок:**
+  - Плеер автоматически сохраняет выбранную аудиодорожку, субтитры (включая их полное отключение), задержку звука и субтитров, скорость воспроизведения и режим масштабирования кадра для каждого просмотренного файла.
+  - При переходе к следующей серии в той же папке сериала плеер автоматически подхватывает выбранную вами озвучку, настройку субтитров, синхронизацию, скорость и масштаб экрана от предыдущего эпизода.
+- **Лёгкий 3D-звук 7.1, быстрая медиатека и сохранение настроек после бенчмарка:**
+  - Оптимизирована цепочка обработки многоканального звука 5.1 и 7.1: пространственное сведение в стерео теперь выполняется до линии задержки и очистки голоса, что заметно снижает нагрузку на процессор и расход заряда.
+  - Ускорено чтение свойств видеофайлов и встроенных глав из памяти устройства, а фоновая генерация превью серий теперь мгновенно останавливается при выходе из папки.
+  - После завершения или отмены встроенного авто-бенчмарка плеер полностью возвращает выбранную звуковую дорожку, внутренние или внешние субтитры и настройки синхронизации.
+  - Повышена общая стабильность и модульность приложения, а облачная сборка релизов сфокусирована на открытом выпуске для GitHub.
+
+</details>
+
 ## [v4.5.1]
 
 ### 🇬🇧 English
