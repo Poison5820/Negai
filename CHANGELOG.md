@@ -3,6 +3,36 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.5.8]
+
+### 🇬🇧 English
+- **Effortless 120 Hz Scrolling & Lighter Glass Rendering:**
+  - Restricted heavy optical lens refraction, background blur passes, and elevated drop shadows strictly to top-level floating bars and outer modal windows, so scrolling through large episode lists and nested dialog cards stays locked at peak refresh rates with minimal battery drain.
+  - Replaced full-screen edge shaders in the Flat and Frosted Glass themes with lightweight edge fading, and disabled live video backdrop capture whenever Frameless or Flat player controls are selected or while the performance benchmark is running.
+- **Bit-Transparent Audio Fidelity & Expanded Multichannel 3D Spatial Audio:**
+  - Fixed automatic low-bitrate voice restoration so tracks with high bitrates or containers without explicit bitrate tags play through completely untouched without artificial filtering.
+  - Added full center and surround channel mixing for 3.0, 4.0, and 5.0 audio formats on stereo speakers, and automatically routes multichannel tracks (AAC, FLAC, Opus, AC-3, and E-AC-3 with more than 2 channels) to the high-precision software decoder in Auto mode whenever 3D Spatial Audio is enabled so discrete surround channels are never flattened to stereo by the system codec.
+- **Reliable HDR Playlist Transitions, Unified Licenses Search & Benchmark Precision:**
+  - Prevented background preloading of the next playlist episode from prematurely resetting HDR mode on the currently playing video, and improved stability when updating HDR10+ dynamic scene metadata and switching episodes after a temporary decoder fallback.
+  - Pauses live video decoding during the isolated 7.1 spatial audio benchmark stage for clean memory measurements, and upgraded the Open Source Licenses search field to match the unified theme design system.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.5.8)</b></summary>
+
+<br>
+
+- **Плавная прокрутка 120 Гц и облегчённый рендеринг стеклянных тем:**
+  - Тяжёлое оптическое преломление, размытие фона и глубокие тени теперь применяются только к главным парящим панелям и внешним контурам всплывающих окон — прокрутка длинных списков серий и карточек внутри диалогов работает на максимальной герцовке экрана без лишнего нагрева и расхода заряда.
+  - В темах «Плоская» и «Матовое стекло» полноэкранный шейдер краёв списка заменён на лёгкое плавное затухание, а в видеоплеере захват фонового кадра полностью отключается при выборе безрамочного или плоского стиля панели управления, а также во время работы окна бенчмарка.
+- **Чистый неокрашенный звук по умолчанию и расширенный многоканальный 3D-звук:**
+  - Исправлена автоматическая очистка низкобитрейтного звука: дорожки с высоким качеством или файлы без прописанного в контейнере битрейта теперь передаются без малейшего вмешательства фильтров и окрашивания частот.
+  - Добавлено полноценное сведение центрального и тыловых каналов для форматов 3.0, 4.0 и 5.0 при выводе пространственного звука на стереодинамики, а в режиме декодера «Авто» при включённом 3D-звуке любые многоканальные дорожки (AAC, FLAC, Opus, AC-3 и E-AC-3) автоматически декодируются с сохранением всех каналов без принудительного сжатия в обычное стерео.
+- **Стабильный HDR в плейлистах, единый поиск в лицензиях и точность бенчмарка:**
+  - Фоновая подготовка следующей серии в плейлисте больше не сбрасывает активный режим HDR на текущем видео, повышена надёжность обновления динамических метаданных HDR10+ и переключения между сериями после временного отката декодера.
+  - Во время изолированного теста многоканального звука 7.1 в бенчмарке фоновое воспроизведение видео ставится на паузу для абсолютно точного замера памяти, а поле поиска в окне «Открытые лицензии» приведено к единому стилю приложения.
+
+</details>
+
 ## [v4.5.7]
 
 ### 🇬🇧 English
