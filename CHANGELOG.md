@@ -3,6 +3,84 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.5.18]
+
+### 🇬🇧 English
+- **Unified Visual Theme Synchronization Across All Player Floating Windows:**
+  - Synchronized every floating sheet and modal window in the video player — including Audio Tracks, Subtitles, Playback Speed, Screen Zoom, Episodes, Chapters, Video Quality, Decoder Mode, Anime4K Upscaling, Motion Smoothing, Volume Boost, Sleep Timer, Skip Intro, Technical File Info, Quick Action Button Customization, and the Pipeline Benchmark — so they all follow the active player visual style identically to the Playback Tools menu.
+  - Selecting the **Flat** or **Frameless** player style now renders all player modals with crisp, opaque tonal cards and clean borders without forced glass translucency, while **Frosted Glass** and **Liquid Glass** uniformly apply deep background blur and 3D edge refraction across every window and hold-gesture quick menu.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.5.18)</b></summary>
+
+<br>
+
+- **Единая синхронизация стиля оформления во всех плавающих окнах плеера:**
+  - Приведены к единому источнику темы все всплывающие окна и шторки видеоплеера: выбор озвучки, субтитры, скорость воспроизведения, масштаб экрана, список серий, главы, качество потока, режим декодера, улучшение контуров Anime4K, сглаживание движений, усиление звука, таймер сна, пропуск заставки, техническая информация о файле, настройка быстрых кнопок и встроенный бенчмарк.
+  - При выборе **плоского** или **безрамочного** стиля все окна плеера теперь отображаются в честном плоском оформлении с плотными контрастными карточками без принудительной стеклянной прозрачности, а в режимах **«Матовое стекло»** и **«Жидкое стекло»** все окна и быстрые меню удержания единообразно используют глубокое размытие фона и 3D-преломление краёв.
+
+</details>
+
+## [v4.5.17]
+
+### 🇬🇧 English
+- **Deep Optical Glass Blur & Refraction in All Floating Windows:**
+  - Restored continuous live background capture behind open modals so every floating window, settings sheet, and dialog in both the video player and media library displays rich, translucent Frosted Glass and Liquid Glass blur with 3D edge refraction over live video and artwork.
+  - Tuned modal glass translucency and system window blur so underlying video colors and scene lighting remain vividly visible without sacrificing text contrast.
+- **Full-HUD Liquid Glass & Frosted Glass Optics & Instant Scrubbing Response:**
+  - Extended real-time Liquid Glass lens refraction and Frosted Glass blur to every individual player HUD element, including top bar buttons, resolution and HDR badges, center playback transport buttons, chapter and A-B loop pills, and bottom quick action buttons.
+  - Accelerated video backdrop capture during timeline scrubbing and unified ambient edge lighting with glass backdrop sampling into a single shared pass, eliminating refraction lag on the seekbar and transport buttons.
+  - Background player HUD buttons now fade out completely whenever a floating modal sheet opens, keeping the screen clean and distraction-free.
+- **Expanded 14-Stage Built-In Player Benchmark:**
+  - Added two new interactive UI stress stages to the built-in player benchmark: **Stage 10 (HUD Motion & Liquid Scrubbing)** testing continuous timeline scrubbing and HUD fade transitions over live video, and **Stage 11 (Floating Glass Modal + 120Hz Scroll)** measuring real-time frame pacing and GPU load while smoothly scrolling a blurred floating window over playing video.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.5.17)</b></summary>
+
+<br>
+
+- **Глубокое оптическое размытие и преломление во всех плавающих окнах:**
+  - Восстановлен непрерывный захват живой подложки сцены при открытии всплывающих окон: теперь все модальные шторки и диалоги в плеере и медиатеке отображают настоящее глубокое размытие и краевое преломление «Жидкого стекла» и «Матового стекла» поверх идущего видео и обложек.
+  - Сбалансирована прозрачность стеклянных окон для выразительной передачи цветов видео на фоне при сохранении безупречной читаемости текста.
+- **Оптика Жидкого и Матового стекла на всех кнопках HUD и мгновенный отклик перемотки:**
+  - Живое оптическое преломление и матовое размытие подключены ко всем элементам управления плеера: верхним кнопкам, индикаторам разрешения и HDR, всем пяти центральным кнопкам пульта, пилюлям глав и повтора A–B, а также кнопкам нижней панели быстрых действий.
+  - Ускорено обновление стеклянной подложки во время ведения ползунка таймлайна, а расчёт фоновой подсветки краёв объединён с захватом кадра для стекла без дублирования операций и без отставания преломления от видео.
+  - При открытии любого плавающего окна кнопки основного интерфейса плеера теперь плавно и полностью скрываются, не просвечивая под окном.
+- **Расширенный 14-этапный встроенный бенчмарк плеера:**
+  - Во встроенный бенчмарк добавлены два новых интерактивных этапа проверки интерфейса поверх видео: **Этап 10 (Динамика HUD и скраббинг стекла)** с автоматическим ведением ползунка перемотки и плавным затуханием панелей, а также **Этап 11 (Плавающее окно: Блюр + Скролл 120 Гц)** с непрерывной прокруткой размытого плавающего окна в реальном времени.
+
+</details>
+
+## [v4.5.16]
+
+### 🇬🇧 English
+- **Pitch-Accurate Multichannel Dolby 5.1/7.1 & Seamless Spatial Audio Switching:**
+  - Enforced a consistent stereo output stage across all multichannel surround tracks, completely eliminating fast-forwarded audio pitch shifts and rebuffering pauses when toggling 3D headphone binaural audio or speaker crosstalk cancellation on the fly.
+  - Routed multichannel surround formats in automatic decoder mode directly through discrete multichannel decoding so all surround channels are preserved before downmixing or 3D spatial processing.
+- **Instant Video Motion on Seek & Zero-Overhead Ambient Glass Sampling:**
+  - Eliminated frozen video frames after seeking or starting complex anime episodes by preventing forward keyframe jumps past the target playback position.
+  - Coordinated background frame capture between ambient edge lighting and liquid/frosted glass refraction with a shared lock and zero-allocation callbacks, eliminating memory pressure spikes.
+- **Persistent Benchmark Crash Recovery & Hardware Telemetry Accuracy:**
+  - Added a persistent crash recovery journal to the built-in player benchmark that captures the active test stage, memory state, system exit reason, and event trace if a session is interrupted, offering one-tap export on restart.
+  - Improved hardware video decoder detection, baseline hardware stage preparation, and isolated audio stress testing in the player benchmark.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.5.16)</b></summary>
+
+<br>
+
+- **Стабильный многоканальный звук Dolby 5.1/7.1 и бесшовное переключение 3D-аудио:**
+  - Обеспечена неизменная двухканальная геометрия выходного звукового тракта на всех многоканальных дорожках, что полностью устраняет эффект ускоренного воспроизведения звука и паузы буферизации при включении или выключении бинаурального звука для наушников и пространственного режима для стереодинамиков на лету.
+  - Многоканальные дорожки объёмного звука в автоматическом режиме декодера всегда направляются через дискретное многоканальное декодирование с сохранением всех каналов сцены.
+- **Мгновенный старт движения кадра при перемотке и бережный захват фонового свечения:**
+  - Устранено трёхсекундное замирание картинки после перемотки и при запуске серий со сложной структурой ключевых кадров за счёт запрета перескока вперёд за выбранную точку времени.
+  - Захват кадра для фоновой подсветки краёв экрана и преломления стеклянных панелей объединён через общий синхронизатор без создания лишних объектов в памяти.
+- **Журнал восстановления после сбоев и точная телеметрия в бенчмарке плеера:**
+  - Во встроенный бенчмарк плеера добавлен энергонезависимый журнал диагностики, который сохраняет текущий этап, состояние памяти, системную причину завершения процесса и цепочку событий при аварийной остановке с возможностью просмотра и экспорта отчёта после перезапуска.
+  - Повышена точность распознавания аппаратных видеодекодеров, автоматического возврата к аппаратному режиму перед первым этапом и чистоты замеров процессорного стресс-теста звука.
+
+</details>
+
 ## [v4.5.15]
 
 ### 🇬🇧 English
