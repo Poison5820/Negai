@@ -3,6 +3,92 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.5.23]
+
+### 🇬🇧 English
+- **Crisp, Artifact-Free Motion Smoothing Across All Modes:**
+  - Eliminated jelly warping, smeared intermediate frames, and double-contour ghosting during fast action, camera pans, dialogue animations, and explosions across Cinema, Smooth 60, Max Refresh Rate, and Anime motion modes.
+  - Preserved natural smoothness on variable-cadence anime scenes drawn on twos and threes without abrupt motion dropouts or rhythmic judder.
+  - Added dual-frame line contour protection across every motion smoothing preset so character outlines and fine details stay razor-sharp.
+- **Full-Speed Player Interface & Locked High Refresh Rate:**
+  - Restored full panel frame rate when motion smoothing and real-time upscaling are active, eliminating frame-rate halving and micro-stutters when opening floating windows or scrubbing the timeline in Liquid Glass and Frosted Glass themes.
+  - Locked the display to its peak refresh rate throughout motion-smoothed playback so showing or hiding the player controls never triggers screen mode flashes or cadence hiccups.
+- **Universal Multichannel Stereo Downmixing & Build Reliability:**
+  - Ensured every audio channel layout from mono up to 7.1 surround mixes cleanly to stereo with balanced headroom and zero distortion when virtual surround is turned off.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.5.23)</b></summary>
+
+<br>
+
+- **Чёткое сглаживание движений без «желе» и каши между кадрами:**
+  - Полностью устранены искажения фона, двоение контуров и размытые промежуточные кадры на резких движениях, панорамах камеры, мимике персонажей и спецэффектах во всех режимах плавности («Кино», «Плавные 60», «Максимум экрана» и «Аниме»).
+  - Сохранена непрерывная плавность на классической аниме-рисовке с переменной частотой кадров без внезапных отключений сглаживания и рывков ритма.
+  - Защита чёткости контуров и тонких линий теперь работает во всех режимах сглаживания движений, а не только в профиле для аниме.
+- **Плавный стеклянный интерфейс и стабильная максимальная герцовка:**
+  - Устранено проседание частоты кадров видео и интерфейса при одновременной работе шейдерного улучшения картинки, сглаживания движений и тем «Жидкое стекло» / «Матовое стекло».
+  - Частота обновления экрана надёжно удерживается на пиковом режиме без переключений и подёргиваний при появлении и скрытии панели управления плеера.
+- **Надёжное сведение любых многоканальных дорожек:**
+  - Обеспечено чистое сведение всех многоканальных форматов звука от моно до 7.1 в стерео с защитой от перегрузок и искажений громкости.
+
+</details>
+
+## [v4.5.22]
+
+### 🇬🇧 English
+- **Refreshed Defaults & Smart Automatic Preferences:**
+  - Set the signature **Sakura** accent theme as the default palette for fresh installations.
+  - Added automatic audio and subtitle language matching that dynamically follows your chosen app interface language (Russian, English, or system language).
+  - Enabled smart automatic sound cleanup by default for low-bitrate voiceovers while keeping manual DSP overrides deselected until explicitly chosen, with one-tap toggle-off back to Auto mode.
+- **Unified Interface Alignment & Streamlined 7-Category Settings:**
+  - Unified horizontal screen margins and full-width card alignment across every library tab, folder browser, top bar, and Settings page in both portrait and landscape orientations.
+  - Reorganized global Settings into 7 focused categories (General & Appearance, Controls & Playback, Video & Enhancements, Audio, Subtitles, Network & Storage, and Device & About) with clean diagnostics tools placed inside Device & About and File Information.
+- **Tabbed Player Sheets & Pure-JVM Audio Mixing:**
+  - Organized the player's Playback Tools, Audio, and Subtitles floating windows into equal-width segmented tabs for faster navigation without long scrolling.
+  - Upgraded the surround-to-stereo downmixer for reliable 1–8 channel mixing with smooth overload protection.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.5.22)</b></summary>
+
+<br>
+
+- **Обновлённые настройки по умолчанию и умная автоматика:**
+  - Фирменная цветовая палитра **«Сакура»** установлена в качестве стандартного акцента для новых установок.
+  - Добавлен автоматический подбор языка озвучки и субтитров «Как язык интерфейса», который динамически подстраивается под русский, английский или системный язык приложения.
+  - Умная автоочистка звука включена по умолчанию только для низкобитрейтных дорожек; ручные профили не выделяются до явного выбора, а повторное нажатие по активному профилю возвращает в режим Авто.
+- **Единая ширина интерфейса и компактные Настройки из 7 разделов:**
+  - Выровнены отступы и единая ширина всех карточек, фильтров и верхней панели на экранах Папок, Истории, Торрентов и Настроек в портретном и альбомном режимах.
+  - Глобальные Настройки перегруппированы в 7 логичных категорий («Общие и внешний вид», «Управление и воспроизведение», «Видео и улучшение кадра», «Звук», «Субтитры», «Сеть, P2P и хранилище», «Устройство и о приложении»), а диагностические инструменты перенесены в «Устройство и о приложении» и «Сведения о файле».
+- **Вкладки в окнах плеера и обновлённое сведение звука:**
+  - Окна инструментов просмотра, аудио и субтитров разделены на удобные равноширокие вкладки без длинной прокрутки.
+  - Обновлён модуль сведения многоканального звука (от 1 до 8 каналов в стерео) с чистой защитой от перегрузки.
+
+</details>
+
+## [v4.5.21]
+
+### 🇬🇧 English
+- **True 7.1 Surround Recognition & Decoding for Blu-ray DTS-HD Master Audio:**
+  - Fixed Blu-ray `.m2ts` movies with a 2.0 stereo core and 7.1 surround extension so the full 8-channel lossless audio stream is assembled and decoded instead of falling back to 2-channel stereo core audio.
+  - Updated the player audio selector, top status bar, and File Info modal to immediately display the true 7.1 surround channel layout and high-definition audio format.
+- **Pop-Free Video Transitions & Clean Surround Downmix:**
+  - Eliminated audio crackling, clicks, and residual filter noise when switching between videos, changing audio tracks, or toggling sound enhancements.
+  - Balanced 5.1 and 7.1 surround-to-stereo downmix levels when headphone virtual surround is turned off so loud action scenes and bass effects play cleanly without digital clipping or distortion.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.5.21)</b></summary>
+
+<br>
+
+- **Честное распознавание и декодирование 7.1-канального звука DTS-HD Master Audio на дисках Blu-ray:**
+  - Исправлено чтение дорожек Blu-ray `.m2ts` со стерео-ядром 2.0 и расширением 7.1 — теперь плеер собирает и декодирует полноценный 8-канальный поток без потерь вместо урезанного 2-канального базового ядра.
+  - В меню выбора аудиодорожек, верхней панели статуса и окне «Информация о файле» теперь сразу отображается реальная конфигурация 7.1 Surround и точный формат звука высокой чёткости.
+- **Переключение видео без хрипов и чистое сведение объёмного звука:**
+  - Полностью устранены щелчки, хрипы и остаточные помехи аудиофильтров при переходе от одного видео к другому, смене звуковой дорожки и переключении улучшений звука.
+  - Сбалансированы уровни громкости при сведении многоканального звука 5.1 и 7.1 в стерео без пространственного режима — громкие динамичные сцены и низкие частоты звучат чисто и без перегрузок.
+
+</details>
+
 ## [v4.5.20]
 
 ### 🇬🇧 English
