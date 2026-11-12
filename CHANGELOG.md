@@ -3,6 +3,34 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.5.14]
+
+### 🇬🇧 English
+- **Rock-Solid Video Surface Lifecycle & Playback Stability:**
+  - Stabilized video surface binding across playback start, pause, and controls visibility changes, ensuring the rendering surface is never prematurely destroyed or swapped while the video decoder initializes.
+  - Eliminated redundant surface reconnection events on video aspect ratio changes and protected graphics pipelines with strict single-release teardown.
+  - Guaranteed main-thread surface attachment and detachment, eliminating background thread state conflicts.
+- **Robust Software Decoding & Comprehensive Error Diagnostics:**
+  - Preserved default input buffer sizing for standard 1080p streams across hardware and software decoders, eliminating decoder configuration failures.
+  - Enabled automatic software fallback for high-bitrate and Blu-ray streams without arbitrary resolution caps.
+  - Enhanced error diagnostics with detailed system codec codes and underlying exception descriptions.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.5.14)</b></summary>
+
+<br>
+
+- **Полная стабилизация жизненного цикла видеоповерхности:**
+  - Устранено нежелательное пересоздание и переключение видеоповерхности при старте воспроизведения, паузе и скрытии элементов управления, что защищает декодер от потери рабочей поверхности в момент инициализации.
+  - Убраны лишние повторные привязки поверхности при изменении соотношения сторон кадра и внедрена строгая однократная очистка графических ресурсов.
+  - Гарантировано подключение и отключение видеоповерхности строго в главном потоке интерфейса без фоновых конфликтов.
+- **Надёжный программный декодер и подробная диагностика ошибок:**
+  - Сохранены стандартные размеры входного буфера для видео 1080p на аппаратных и программных декодерах, предотвращая сбои настройки видеокодека.
+  - Разрешён автоматический переход на программный декодер для тяжёлых файлов Blu-ray и видео с высоким битрейтом без искусственных ограничений.
+  - В карточку ошибки добавлено подробное отображение системных кодов декодера и точных причин сбоя.
+
+</details>
+
 ## [v4.5.13]
 
 ### 🇬🇧 English
