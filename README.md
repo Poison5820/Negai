@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.5.14-00E5FF?style=flat-square" alt="Version 4.5.14" />
+  <img src="https://img.shields.io/badge/version-4.5.15-00E5FF?style=flat-square" alt="Version 4.5.15" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/license-Proprietary_(Closed_Source)-FF4D8D?style=flat-square" alt="Proprietary License" />
@@ -55,11 +55,11 @@ You can install and update Negai directly through **Obtainium** or grab the univ
 
 ---
 
-## ✨ What's New in Release 4.5.14 (Build 102)
+## ✨ What's New in Release 4.5.15 (Build 103)
 
-- **Rock-Solid Video Surface Lifecycle**: Permanently stabilized video surface selection across play, pause, and controls visibility changes, eliminating premature surface detachment during decoder configuration.
-- **Redundant Attachment Guard**: Removed duplicate surface callbacks on aspect ratio updates and guarded graphics shader pipelines against repeated resource destruction.
-- **Safe Software Decoding & Transparent Diagnostics**: Preserved default input buffer sizing for standard 1080p video streams across hardware and software decoders, allowed universal software fallback on Blu-ray streams, and added detailed system diagnostic codes and root causes to playback error reports.
+- **Thread-Safe Codec Initialization**: Completely eliminated cross-thread player state queries during video decoder setup, preventing `IllegalStateException` crashes across both hardware and software modes.
+- **Scrollable Error Diagnostics**: Added smooth vertical scrolling and generous line height to the player error card so full error traces and system exception codes are always readable.
+- **Deep Root Cause Inspection**: Diagnostic reporting now unwraps nested exception chains to expose the exact underlying system failure rather than generic format strings.
 
 ---
 
