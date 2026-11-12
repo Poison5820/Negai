@@ -3,6 +3,30 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.5.19]
+
+### 🇬🇧 English
+- **Flawless Dual-Layer 4K Blu-ray Dolby Vision Profile 7 Playback:**
+  - Fixed playback crashes and resolution conflicts on dual-layer 4K Blu-ray Dolby Vision Profile 7 (FEL and MEL) releases in `.m2ts`, `.ts`, `.mp4`, and `.mkv` containers by completely stripping embedded 1080p enhancement layer streams before frames reach the hardware 4K video decoder.
+  - Enforced dedicated hardware 4K decoding for Dolby Vision Profile 7 base layers and blocked unintended fallback to slow software decoding on 4K HDR and Dolby Vision movies.
+- **High-Bitrate 4K HDR10+ Stability & Instant HDR Display Activation:**
+  - Optimized hardware video decoder input buffer memory allocation for 4K Ultra HD streams, resolving decoder initialization memory errors on high-bitrate 4K HDR10+ videos with lossless surround audio.
+  - Added pre-start HDR container detection and intelligent 10-bit HDR recognition for videos missing standard container color tags, activating the HDR display pipeline from the very first frame without screen flashes or surface restarts.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.5.19)</b></summary>
+
+<br>
+
+- **Безошибочное воспроизведение двухслойных фильмов 4K Blu-ray Dolby Vision Profile 7:**
+  - Устранены сбои декодера и конфликты разрешений при запуске двухслойных релизов 4K Blu-ray Dolby Vision Profile 7 (FEL и MEL) в контейнерах `.m2ts`, `.ts`, `.mp4` и `.mkv` за счёт полной очистки вложенного дополнительного потока 1080p перед подачей кадров на аппаратный 4K-декодер.
+  - Закреплено строго аппаратное декодирование базового 4K-слоя для видео Dolby Vision Profile 7 и заблокирован нежелательный автоматический переход на медленный программный декодер на фильмах 4K HDR и Dolby Vision.
+- **Стабильность тяжёлых роликов 4K HDR10+ и мгновенное включение экрана HDR:**
+  - Оптимизировано выделение памяти входных буферов аппаратного декодера для потоков 4K Ultra HD, что полностью устраняет ошибки нехватки памяти при запуске высокобитрейтных видео 4K HDR10+ с многоканальным звуком.
+  - Добавлено предварительное распознавание HDR до старта декодера и умное определение 10-битного HDR-профиля на файлах без стандартных цветовых метаданных контейнера — экран сразу открывается в режиме HDR с первого кадра без моргания и пересоздания видеоповерхности.
+
+</details>
+
 ## [v4.5.18]
 
 ### 🇬🇧 English
