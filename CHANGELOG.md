@@ -3,6 +3,36 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.5.20]
+
+### 🇬🇧 English
+- **Artifact-Free Blu-ray `.m2ts` Playback & Instant High-Bitrate Seeking:**
+  - Eliminated green screen flashes and corrupted macroblocks when starting or seeking Blu-ray `.m2ts` discs and transport streams by enforcing strict keyframe synchronization and discarding incomplete intermediate frames until the first clean keyframe arrives.
+  - Dramatically accelerated post-seek frame recovery on high-bitrate `.m2ts` and Ultra HD movies by expanding transport stream timestamp scanning and snapping directly to clean sync keyframes instead of decoding dozens of heavy frames in the background.
+- **Accurate Live Decoder Status & 4K 10-Bit HDR Hardware Protection:**
+  - Fixed the player quick action decoder badge so it always reflects the actual running hardware or software video decoder in real time, and ensured tapping Retry or toggling the decoder button cleanly restores hardware acceleration.
+  - Protected demanding 4K 10-bit HDR and HDR10+ movies from accidentally starting on slow software decoding and eliminated mid-playback decoder memory errors on 4K HDR10+ releases.
+- **Zero-Stutter Liquid Glass Scrubbing & Benchmark Precision:**
+  - Eliminated memory churn and garbage collection micro-stutters while dragging the timeline seekbar in Liquid Glass mode and during dual-layer Dolby Vision playback.
+  - Improved accuracy across the final stages of the built-in player benchmark, preserving true hardware video codec reporting, steady interactive scrubbing measurement, surround downmix channel reporting, and isolated 8-channel spatial audio stress profiling.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.5.20)</b></summary>
+
+<br>
+
+- **Чистое воспроизведение дисков Blu-ray `.m2ts` без зелёных вспышек и мгновенная перемотка:**
+  - Полностью устранены зелёные экраны и рассыпание картинки при запуске и перемотке дисков Blu-ray `.m2ts` и транспортных потоков за счёт строгой привязки к полноценным ключевым кадрам и отсечения неполных промежуточных кадров после сброса буфера.
+  - Многократно ускорен показ первого кадра после перемотки на тяжёлых высокобитрейтных фильмах `.m2ts` и Ultra HD благодаря расширенному окну поиска меток времени и мгновенному переходу к ближайшему чистому ключевому кадру.
+- **Честная индикация режима декодера и защита видео 4K 10-бит HDR:**
+  - Исправлен индикатор декодера на нижней панели плеера — теперь он всегда точно показывает реально работающий в данный момент аппаратный или программный декодер, а кнопка повтора и переключение режима гарантированно возвращают полноценное аппаратное ускорение.
+  - Добавлена защита тяжёлых фильмов 4K 10-бит HDR и HDR10+ от случайного запуска на медленном программном декодере и устранены сбои памяти видеодекодера во время просмотра роликов 4K HDR10+.
+- **Плавное ведение ползунка в «Жидком стекле» и точность встроенного бенчмарка:**
+  - Устранены лишние выделения памяти и микрофризы сборки мусора при непрерывном ведении ползунка таймлайна в стиле «Жидкое стекло», а также при просмотре фильмов Dolby Vision.
+  - Повышена точность заключительных этапов встроенного бенчмарка плеера: сохраняется реальный профиль аппаратного видеодекодера в итоговом отчёте, обеспечена непрерывная активность панели управления на этапе интерактивной перемотки, уточнён отчёт выходных аудиоканалов при сведении объёмного звука и полностью изолирован синтетический тест 8-канальной аудиообработки.
+
+</details>
+
 ## [v4.5.19]
 
 ### 🇬🇧 English
