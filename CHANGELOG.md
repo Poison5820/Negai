@@ -3,6 +3,30 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.5.15]
+
+### 🇬🇧 English
+- **Thread-Safe Decoder Initialization & Zero Playback Crashes:**
+  - Removed all background thread player state access inside the video decoder pipeline, completely eliminating `IllegalStateException` crashes during hardware and software decoder initialization.
+  - Ensured all video format, timeline, and color space state transitions execute exclusively on the main user interface thread.
+- **Scrollable Error Diagnostics with Deep Root Cause Identification:**
+  - Added vertical scrolling and expanded text capacity to the player error card, preventing truncation of lengthy diagnostic information.
+  - Implemented recursive root cause inspection that bypasses generic format wrappers to reveal exact system exception details.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.5.15)</b></summary>
+
+<br>
+
+- **Потокобезопасная инициализация декодера и стабильный запуск:**
+  - Полностью исключены обращения к состоянию плеера из фонового потока декодера, что полностью устраняет ошибку `IllegalStateException` и сбои инициализации аппаратного и программного декодеров при открытии любых файлов.
+  - Все обновления параметров видео, таймлайна и цветовых пространств перенесены строго в главный поток интерфейса.
+- **Прокручиваемая карточка ошибки и глубокая диагностика:**
+  - Добавлена плавная вертикальная прокрутка и увеличен лимит строк в окне ошибки плеера, благодаря чему длинные системные сообщения не обрезаются.
+  - Реализован рекурсивный поиск первопричины сбоя, отображающий точный класс и текст системного исключения за общими заголовками форматов.
+
+</details>
+
 ## [v4.5.14]
 
 ### 🇬🇧 English
