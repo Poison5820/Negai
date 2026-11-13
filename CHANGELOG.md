@@ -3,6 +3,30 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.6.3]
+
+### 🇬🇧 English
+- **Artifact-Free Motion Smoothing Across All Profiles:**
+  - Eliminated block tearing and mosaic disintegration during camera pans and fast character movement by synchronizing motion analysis strictly with each active frame pair and applying spatial median and bilateral smoothing with automatic occlusion protection when foreground objects cross over the background.
+- **Natural Line Thickness & Progressive Clarity in Anime4K (Fast → HQ → Ultra):**
+  - Rebalanced the HQ and Ultra upscaling profiles so dark ink outlines never get over-squeezed or eaten away: Fast performs a lightweight single-pass directional screen-space upscale, HQ adds contour deblurring and subpixel diagonal anti-aliasing while preserving original stroke weight, and Ultra cleans compression noise and banding on flat color fills before multi-pass native-resolution line reconstruction.
+- **Unified Fast / HQ / Ultra Preset Names & Single-Row Layout:**
+  - Standardized Anime4K preset names and badges to Fast, HQ, and Ultra arranged in a clean single-row three-column selector across global Settings, the player Picture window, quick-action menus, HUD badges, and the built-in info guide.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.6.3)</b></summary>
+
+<br>
+
+- **Чистое сглаживание движений без распада на блоки:**
+  - Полностью устранены блочные артефакты и «рассыпание» кадра на всех режимах уплавнения: анализ движения теперь жёстко синхронизирован с текущей парой кадров, дополнен медианным и билатеральным сглаживанием поля движения и мягкой защитой на участках перекрытия фона в динамичных сценах.
+- **Естественная толщина контуров и честная градация качества в Anime4K («Быстрый» → «Чёткий» → «Ультра»):**
+  - Исправлено чрезмерное пережатие и «съедание» толщины линий на старших профилях: режим «Быстрый» выполняет лёгкий однопроходный направленный апскейл в разрешении экрана, «Чёткий» устраняет размытие сведения и сглаживает диагональную «лесенку» с сохранением авторской толщины штриха, а «Ультра» предварительно очищает плоские заливки от артефактов сжатия и бандинга перед многопроходной реконструкцией линий в нативном разрешении дисплея.
+- **Единые названия профилей «Быстрый / Чёткий / Ультра» в один ряд:**
+  - Приведены к единому лаконичному виду названия и бейджи профилей Anime4K во всём приложении, в окне справки и на индикаторах плеера, а переключатель профилей в настройках и окне «Картинка» теперь компактно располагается в одну строку из трёх кнопок.
+
+</details>
+
 ## [v4.6.2]
 
 ### 🇬🇧 English
