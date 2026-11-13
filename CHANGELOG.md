@@ -3,6 +3,64 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.5.26]
+
+### 🇬🇧 English
+- **Instant Seeking & Smooth Resume on MKV, MP4 & 3D Blu-ray Video:**
+  - Resolved an endless loading stall when scrubbing the timeline or resuming playback mid-episode on standard MKV and MP4 containers as well as 3D Blu-ray movie rips across both hardware and software video decoders.
+  - Kept raw keyframe recovery checks strictly isolated to Blu-ray transport streams while seamlessly extracting clean 2D base frames from 3D multiview video tracks on any seek position.
+- **Crystal-Clear Uncompressed Blu-ray LPCM Surround & Automatic Multichannel Track Selection:**
+  - Eliminated loud white-noise hiss on uncompressed Blu-ray LPCM 5.1 and 7.1 soundtracks by accurately reading packet headers, preserving multichannel sample boundaries across transport packets, and mapping surround speaker channels cleanly.
+  - Enabled automatic selection and immediate playback of high-bitrate multichannel audio tracks on phones, tablets, and stereo headphones without requiring manual track selection after opening a file.
+- **Accurate Per-Episode Video Bitrate Telemetry:**
+  - Cleared previous stream bitrate and codec readouts immediately when switching between files so high-bitrate Blu-ray values never carry over onto subsequent videos, and added accurate container bitrate estimation when explicit stream tags are absent.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.5.26)</b></summary>
+
+<br>
+
+- **Мгновенная перемотка и продолжение просмотра на MKV, MP4 и 3D Blu-ray:**
+  - Полностью устранено бесконечное ожидание буферизации при перемотке ползунком и запуске воспроизведения не с самого начала на файлах MKV, MP4 и 3D-изданиях Blu-ray как на аппаратном, так и на программном декодере.
+  - Проверка восстановления ключевого кадра оставлена строго для транспортных потоков Blu-ray, а из 3D-дорожек при перемотке в любую точку чисто выделяется основной 2D-ракурс без задержек.
+- **Чистый несжатый звук Blu-ray LPCM 5.1 / 7.1 и автовыбор многоканальных дорожек:**
+  - Полностью устранено громкое шипение на несжатых дорожках Blu-ray LPCM 5.1 и 7.1 за счёт точного разбора заголовков пакетов, строгого сохранения границ многоканальных сэмплов и правильной раскладки объёмных каналов.
+  - Многоканальные аудиодорожки с высоким битрейтом теперь автоматически выбираются и звучат с первой секунды открытия файла на любых смартфонах, планшетах и в стереонаушниках без ручного включения в меню звука.
+- **Честный расчёт и сброс битрейта видео при смене файлов:**
+  - Параметры битрейта и кодеков предыдущего фильма мгновенно очищаются при переходе к следующему ролику без «залипания» старых значений, а для контейнеров без явной метки потока выполняется точная оценка реального битрейта видео.
+
+</details>
+
+## [v4.5.25]
+
+### 🇬🇧 English
+- **Searchable Language Picker & Unified Tabbed Floating Windows:**
+  - Replaced cramped multi-chip language grids with a clean searchable floating window for choosing the app interface language as well as default audio and subtitle languages across Flat, Frosted Glass, and Liquid Glass themes.
+  - Standardized equal-width segmented tabs and clean scroll boundaries across all multi-tab player windows so scrolling lists never overlap header tabs.
+- **Crisp Form Labels & Full-Width Selection Cards Without Text Clipping:**
+  - Placed input field titles cleanly above uniform single-line input capsules and aligned paired login and password fields across network and server settings.
+  - Replaced narrow side-by-side option tiles with spacious full-width selection cards across appearance palettes, video decoders, motion smoothing, upscaling presets, audio decoders, voice cleanup modes, and orientation controls so titles and badges stay readable without truncation.
+- **Unified Picture Window & Streamlined Audio, Subtitles & Playback Tools:**
+  - Combined screen zoom, video decoder selection, Anime4K upscaling, motion smoothing, ambient video glow, and high refresh rate settings into a single three-tab Picture floating window accessible directly from quick actions.
+  - Refined the three-tab Audio window (Tracks, Enhancements with volume boost, voice cleanup, and 3D spatial sound, and Codec & Delay with universal audio sync) and reorganized Playback Tools into dedicated Tools and Info tabs featuring picture-in-picture, background audio, live stream buffer status, file details, and playback diagnostics.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.5.25)</b></summary>
+
+<br>
+
+- **Плавающее окно выбора языка с поиском и ровные вкладки шторок:**
+  - Узкие сетки кнопок выбора языка заменены удобным плавающим окном с мгновенным поиском для выбора языка интерфейса, а также языка озвучки и субтитров по умолчанию во всех темах оформления.
+  - Во всех многовкладочных окнах плеера внедрены идеально выровненные равноширокие вкладки и чёткая граница прокрутки без наползания списка на шапку окна.
+- **Чёткие подписи полей ввода и полноширинные карточки без обрезки текста:**
+  - Заголовки полей ввода вынесены аккуратной строкой над полем единой высоты, а парные поля логина и пароля идеально выровнены между собой.
+  - Узкие двухколоночные плитки заменены просторными полноширинными карточками для цветовых палитр, декодеров видео и звука, режимов плавности и улучшения кадра, очистки голоса и поворота экрана — длинные названия и пометки больше не обрезаются.
+- **Единое окно «Картинка» и обновлённые окна «Аудио», «Субтитры» и «Инструменты»:**
+  - Масштаб кадра, выбор видеодекодера, улучшение чёткости Anime4K, сглаживание движений, фоновая подсветка и высокая герцовка экрана объединены в удобное трёхвкладочное окно «Картинка».
+  - Упорядочено окно «Аудио» из трёх вкладок (дорожки, улучшения со звуковым усилением, очисткой речи и объёмным звучанием, а также кодек и универсальная задержка звука) и обновлено окно «Инструменты» с отдельными вкладками быстрых функций просмотра и живой информации о потоке, буфере, файле и тесте производительности.
+
+</details>
+
 ## [v4.5.24]
 
 ### 🇬🇧 English
