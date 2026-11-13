@@ -3,6 +3,36 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.5.27]
+
+### 🇬🇧 English
+- **Streamlined 8-Section Global Settings & Clean Visual Hierarchy:**
+  - Reorganized global Settings into eight clear sections—Appearance, Controls & Playback, Video & Upscaling, Audio & Sound, Subtitles, Network & Storage, Diagnostics & Reset, and Device & About—with generous bottom scroll clearance above the floating navigation bar.
+  - Removed redundant display refresh rate switches (automatic panel sync remains active seamlessly), cleared verbose technical descriptions across theme and video cards, and upgraded base background themes and default streaming quality presets to spacious full-width selection cards.
+- **Faster Gesture Access, Richer Subtitle Styling & Built-In Info Guides:**
+  - Placed the player controls auto-hide timer and touch gesture settings right at the top of Controls & Playback alongside a dedicated screen-edge gesture protection toggle.
+  - Added a searchable external subtitle text encoding picker (Auto-detect, Unicode, Cyrillic, Western European, and Japanese encodings), a character outline and shadow toggle, unconstrained color chips, and a smooth bottom subtitle margin slider.
+  - Added built-in information guides for audio decoders, TorrServer setup, and custom search indexers, plus a direct Changelog button inside the About Negai Player card.
+- **Community Edition Clarity & Faster Release Packaging:**
+  - Updated GitHub Community Edition legal and about cards with clear open-source license attributions and streamlined automated release builds.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.5.27)</b></summary>
+
+<br>
+
+- **Обновлённая 8-раздельная структура глобальных настроек и чистая вёрстка:**
+  - Глобальные настройки упорядочены в восемь наглядных разделов: «Оформление и интерфейс», «Управление и воспроизведение», «Видео и апскейлинг», «Звук и аудиодорожки», «Субтитры», «Сеть, P2P и хранилище», «Диагностика и сброс» и «Устройство и о приложении» с комфортным запасом прокрутки над нижней панелью навигации.
+  - Убраны лишние переключатели частоты обновления экрана (адаптивная синхронизация работает автоматически), очищены громоздкие технические пояснения в карточках тем и видео, а выбор режима фона и качества потока по умолчанию переведён на удобные полноширинные карточки.
+- **Быстрый доступ к жестам, расширенная настройка субтитров и встроенные справки:**
+  - Таймер автоскрытия кнопок плеера и блок сенсорных жестов с переключателем защиты краёв экрана вынесены в самое начало раздела «Управление и воспроизведение».
+  - В разделе «Субтитры» добавлены плавающее окно выбора кодировки текста с мгновенным поиском (автоопределение, Юникод, кириллические, западноевропейские и японская кодировки), переключатель контура и тени букв, необрезаемые кнопки цветов и плавный ползунок нижнего отступа субтитров.
+  - Добавлены информационные справки для декодеров звука, сервера TorrServer и поисковых индексаторов, а в карточке «О приложении» появилась кнопка быстрого открытия списка изменений.
+- **Чистое оформление сборки Community Edition и ускорение выпуска релизов:**
+  - В сборке для GitHub уточнены формулировки карточки редакции и открытых лицензий, а также оптимизирована автоматическая сборка установочных пакетов.
+
+</details>
+
 ## [v4.5.26]
 
 ### 🇬🇧 English
