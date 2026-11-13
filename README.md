@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.5.23-FF80AB?style=flat-square" alt="Version 4.5.23" />
+  <img src="https://img.shields.io/badge/version-4.5.24-FF80AB?style=flat-square" alt="Version 4.5.24" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/license-Proprietary_(Closed_Source)-FF4D8D?style=flat-square" alt="Proprietary License" />
@@ -55,11 +55,11 @@ You can install and update Negai directly through **Obtainium** or grab the univ
 
 ---
 
-## ✨ What's New in Release 4.5.23
+## ✨ What's New in Release 4.5.24
 
-- **Crisp, Jelly-Free Motion Smoothing**: Eliminated jelly warping, background bubbles, and ghosted contours during fast action, camera pans, and variable-cadence anime across Cinema, Smooth 60, Max Refresh Rate, and Anime presets.
-- **Full-Rate Liquid Glass HUD & Locked High Refresh Rate**: Restored full-rate smoothness when opening glass menus or scrubbing the timeline during active shader upscaling and motion smoothing, keeping the panel locked at its peak refresh rate.
-- **Universal Multichannel Stereo Downmix**: Clean, clip-free stereo downmixing across every audio layout from mono up to 7.1 surround.
+- **True Aspect-Preserving Video Zoom**: Fixed Fill (Zoom) mode so videos expand edge-to-edge on ultrawide displays without stretching faces or objects across both direct hardware HDR surfaces and real-time shader upscaling.
+- **Instant Blu-ray Seeking & Clean Software Decoding**: Eliminated multi-second seek delays, audio stalls, and green macroblock flashes in software decoding on high-bitrate Blu-ray transport streams.
+- **Pristine 7.1 Surround Audio & Transparent Auto Cleanup**: Eliminated peak-volume crackle on lossless 7.1 Blu-ray soundtracks, reused stream buffer pools to eliminate background memory churn, and clarified automatic voice cleanup bypass status on lossless and high-bitrate tracks.
 
 ---
 
