@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.5.29-FF80AB?style=flat-square" alt="Version 4.5.29" />
+  <img src="https://img.shields.io/badge/version-4.6.1-FF80AB?style=flat-square" alt="Version 4.6.1" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/license-Proprietary_(Closed_Source)-FF4D8D?style=flat-square" alt="Proprietary License" />
@@ -55,11 +55,11 @@ You can install and update Negai directly through **Obtainium** or grab the univ
 
 ---
 
-## ✨ What's New in Release 4.5.28
+## ✨ What's New in Release 4.6.0
 
-- **Compact Multi-Column Grids Across Settings & Quick Theme**: Replaced tall single-column option lists with crisp two- and three-column grids for themes, dual-swatch accent palettes, visual styles, decoders, video zoom, Anime4K, motion smoothing, 3D spatial sound, voice cleanup, streaming quality, orientation, and episode transitions.
-- **Single-Line Language & Subtitle Encoding Rows**: Streamlined interface, audio, and subtitle language pickers along with external subtitle text encoding into clean single-line selector rows displaying the active value on the right.
-- **Compact In-Player Picture, Audio & Tools Windows**: Updated floating player windows with compact multi-column option grids and single-line toggles so adjustments fit comfortably on screen without excessive scrolling.
+- **Three-Tier Smart Intro, Recap & Credits Skip**: Detects cold-open intros, recaps, and closing credits across the full timeline using embedded chapters, optional privacy-first text-only online timestamps, and customizable manual step fallback, with Button or Auto-Skip modes, a four-second Undo pill, post-credits scene protection, and timeline markers.
+- **Universal Continue Watching Card**: Resumes your latest unfinished local video, direct network stream, or multi-episode P2P TorrServer playlist right from the Home screen with Stream and P2P badges and automatic server address adaptation.
+- **Interactive P2P Sources Manager & Clean Magnet Input**: Organizes P2P search into clear categories (All Sources, Anime, Movies & TV, General, and My Indexers), lets you pause or delete individual sources, and adds one-tap clipboard paste to the Magnet dialog.
 
 ---
 
