@@ -3,6 +3,38 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.6.2]
+
+### 🇬🇧 English
+- **Smart Subtitle Classification, Flexible Auto-Selection & Clear Settings Guides:**
+  - Automatically distinguishes on-screen Signs tracks from Full dialogue and hearing-impaired subtitle tracks across both embedded streams and companion files, showing clear Signs and SDH badges right inside the player subtitle window.
+  - Added four automatic subtitle modes in Subtitles settings—Off, Signs Only (ideal when watching dubbed releases without distracting dialogue lines), Prefer Signs (default), and Full Subtitles—while reliably keeping subtitles hidden on start when turned off.
+  - Clarified external subtitle pairing and catalog labels across Subtitles and Network & Storage settings, complete with built-in guides explaining automatic subtitle rules and custom JSON catalog links.
+- **One-Tap Clean Video Frame Screenshot:**
+  - Added a Screenshot quick-action button for the player bottom bar customizer alongside a Save Frame button in Playback Tools to capture a crisp, lossless video frame directly to your Gallery—completely free of player buttons or subtitles while preserving active Anime4K upscaling.
+- **Two-Finger Pinch-to-Zoom & Pan:**
+  - Smoothly zoom in up to 3.5× and pan across any detail in the frame using two fingers without interfering with single-finger taps, double-tap skip, hold-to-accelerate, or swipe gestures, complete with a floating reset pill to snap back to 1.0× anytime.
+- **Live Stream Download Speed & TorrServer Peers in Player:**
+  - Upgraded the Live Stream Stats overlay and the stream card in Playback Tools to show real-time download speed alongside pre-buffered playback time, plus live connected seeds and active peers when watching via TorrServer.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.6.2)</b></summary>
+
+<br>
+
+- **Умное разделение субтитров («Надписи» и «Полные»), гибкий автовыбор и понятные справки:**
+  - Плеер автоматически отличает дорожки экранных надписей и вывесок от полных диалогов и субтитров для слабослышащих как внутри контейнера, так и во внешних файлах, отмечая их аккуратными бейджами «Надписи» и «SDH» в окне субтитров.
+  - В разделе «Субтитры» появились четыре режима автовыбора: «Выключен» (строго без субтитров при запуске), «Только надписи» (удобно при просмотре в озвучке без дублирования речи), «Сначала надписи» (по умолчанию) и «Полные диалоги».
+  - Переименованы туманные пункты и добавлены подробные встроенные справки в настройках субтитров и внешних каталогов раздела «Сеть и хранилище».
+- **Чистый скриншот видеокадра без интерфейса:**
+  - В меню настройки нижней панели плеера и в шторку «Инструменты» добавлено сохранение чистого кадра в альбом Галереи одним касанием — без кнопок управления и текста субтитров, но с сохранением активного улучшения чёткости Anime4K.
+- **Двухпальцевое приближение и панорамирование кадра (Pinch-to-Zoom):**
+  - Приближайте любой участок видео до 3.5× и плавно перемещайте кадр двумя пальцами прямо во время просмотра или на паузе без малейшего конфликта с одиночными жестами перемотки, яркости и громкости, а всплывающая капсула сверху позволяет мгновенно сбросить масштаб к 1.0×.
+- **Живая скорость загрузки потока и пиры TorrServer в плеере:**
+  - В компактном инфо-оверлее поверх видео и на карточке потока во вкладке «Информация» теперь в реальном времени отображаются текущая скорость скачивания и запас буфера, а при просмотре через TorrServer — число активных сидов и пиров раздачи.
+
+</details>
+
 ## [v4.6.1]
 
 ### 🇬🇧 English
