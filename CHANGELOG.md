@@ -3,6 +3,62 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.5.29]
+
+### 🇬🇧 English
+- **Seamless Two-Way Surface Switching & True High-Rate Motion Smoothing:**
+  - Eliminated video freezes when switching between direct hardware playback and real-time Anime4K or motion smoothing in either direction, ensuring continuous video rendering without stalls.
+  - Upgraded real-time motion smoothing to synthesize genuine intermediate frames at 60 and 120 frames per second while automatically unlocking high display refresh rates during active interpolation.
+- **Effortless Timeline Scrubbing & Silky Glass Scrolling:**
+  - Streamlined background glow sampling and timeline timecode formatting so dragging the seek bar and scrolling through floating Liquid Glass windows stay responsive with zero frame drops or memory spikes.
+- **Faster Quick-Action Buttons & Refined Audio & Picture Windows:**
+  - Updated the Scale quick-action button to cycle directly through Fit, Fill, and Stretch with a single tap.
+  - Enabled single-tap ON/OFF toggling on the Anime4K and Motion Smoothing quick-action buttons while keeping hold-and-swipe preset menus.
+  - Moved 3D Spatial Audio to the top of the Audio enhancements tab and global Audio settings, and arranged Anime4K upscaling presets into a clean two-row grid inside the Picture window.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.5.29)</b></summary>
+
+<br>
+
+- **Бесшовное переключение режимов экрана и честное сглаживание движений 60/120 к/с:**
+  - Полностью устранено замирание картинки при включении и отключении шейдеров Anime4K и сглаживания движений в обе стороны — видео продолжает воспроизводиться мгновенно и без пауз.
+  - Сглаживание движений теперь формирует полноценные промежуточные кадры с реальным удвоением и учетверением плавности до 60 и 120 кадров в секунду и автоматически переводит экран на повышенную герцовку.
+- **Лёгкая перемотка по шкале времени и плавная прокрутка стеклянных окон:**
+  - Оптимизированы обновление фоновой подсветки и отрисовка таймкода при перетаскивании ползунка, благодаря чему перемотка и прокрутка плавающих окон «Жидкого стекла» работают без микрофризов и лишней нагрузки на память.
+- **Быстрые кнопки управления и удобные шторки «Звук» и «Картинка»:**
+  - Кнопка «Масштаб» на нижней панели теперь переключает режимы «Вписать → Заполнение → Растянуть» одним касанием без лишнего меню.
+  - Кнопки «Anime4K» и «Плавность» включают и выключают улучшение одним коротким нажатием, сохраняя быстрое меню выбора профиля по удержанию.
+  - Блок «Пространственный звук 3D» вынесен на первое место во вкладке улучшений звука и в глобальных настройках аудио, а выбор профилей Anime4K в окне «Картинка» выстроен в ровную сетку из двух рядов.
+
+</details>
+
+## [v4.5.28]
+
+### 🇬🇧 English
+- **Compact Multi-Column Grids Across Global Settings & Quick Theme Sheet:**
+  - Replaced tall single-column option lists with crisp two- and three-column selection grids so settings cards stay scannable without endless vertical scrolling.
+  - Arranged background themes, accent color palettes (with dual-tone color swatches), visual interface styles, player button themes, Anime4K upscaling profiles, motion smoothing modes, 3D spatial sound, voice cleanup presets, default streaming quality, screen orientation, and episode transition actions into balanced multi-column layouts.
+  - Added a built-in information guide explaining Flat, Frosted Glass, and Liquid Glass visual styles while keeping selection cards concise and single-line.
+- **Streamlined Single-Line Modal Triggers & Compact Player Windows:**
+  - Refined interface language, preferred audio language, preferred subtitle language, and external subtitle text encoding rows into clean single-line selector bars displaying the active choice on the right.
+  - Updated the Picture, Audio, and Playback Tools floating windows inside the player with compact three-column zoom, decoder, and episode-end selectors alongside two-column Anime4K, motion smoothing, spatial sound, voice cleanup, and orientation grids.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.5.28)</b></summary>
+
+<br>
+
+- **Компактные двух- и трёхколоночные сетки в глобальных настройках и быстром оформлении:**
+  - Длинные одноколоночные списки вариантов заменены аккуратными двух- и трёхколоночными сетками выбора без избыточного растягивания страниц по высоте.
+  - Фоновые темы, акцентные палитры с двухцветными индикаторами, стили интерфейса, темы кнопок плеера, профили чёткости Anime4K, сглаживание движений, пространственный звук 3D, очистка голоса, качество потока по умолчанию, ориентация экрана и переход между сериями выстроены в ровные симметричные сетки.
+  - Для стилей оформления интерфейса добавлена встроенная информационная справка без загромождения самих карточек лишними описаниями.
+- **Лаконичные однострочные кнопки выбора и компактные плавающие окна плеера:**
+  - Строки выбора языка интерфейса, языка аудио, языка субтитров и кодировки внешних субтитров переведены в компактный однострочный вид с показом текущего значения справа.
+  - Плавающие окна изображения, звука и инструментов плеера обновлены с использованием компактных сеток масштаба кадра, декодеров видео и аудио, профилей улучшения картинки и звука, ориентации экрана и действия по окончании серии.
+
+</details>
+
 ## [v4.5.27]
 
 ### 🇬🇧 English
