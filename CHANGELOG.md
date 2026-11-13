@@ -3,6 +3,38 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.5.24]
+
+### 🇬🇧 English
+- **True Aspect-Preserving Video Zoom & Scaling Modes:**
+  - Fixed the Fill (Zoom) display mode so widescreen and standard videos expand to fill ultrawide phone and tablet screens with natural, undistorted character and object proportions instead of stretching horizontally.
+  - Synchronized Fit, Fill, and Stretch geometry identically across both direct hardware HDR playback and real-time shader upscaling and motion smoothing.
+- **Instant Blu-ray Seeking & Artifact-Free Software Decoding:**
+  - Dramatically reduced post-seek recovery delays and eliminated brief audio stalls when scrubbing high-bitrate Blu-ray transport streams or switching decoder modes on the fly.
+  - Eliminated green macroblock flashes when starting or seeking Blu-ray videos in software decoding mode by waiting cleanly for a complete reference frame while immediately recognizing open-group recovery points.
+- **Crystal-Clear 7.1 Surround Audio, Memory Reuse & Honest Auto Sound Cleanup Status:**
+  - Eliminated subtle crackling and timing drift on lossless 7.1 Blu-ray surround soundtracks during loud action peaks across both 3D headphone and stereo speaker spatial modes.
+  - Reused stream buffer memory pools across seeks and decoder switches to prevent background memory churn and garbage collection spikes.
+  - Updated the Audio menu so smart automatic voice cleanup clearly shows an unhighlighted bypass status on lossless and high-bitrate soundtracks rather than appearing active.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.5.24)</b></summary>
+
+<br>
+
+- **Честная геометрия масштабирования кадра («Вписать», «Заполнение», «Растянуть»):**
+  - Исправлен режим «Заполнение»: теперь видео заполняет широкоформатный экран без чёрных полос со строгим сохранением естественных пропорций лиц и объектов за счёт аккуратной симметричной обрезки краёв, не превращаясь в горизонтальное растягивание.
+  - Режимы «Вписать», «Заполнение» и «Растянуть» теперь работают абсолютно одинаково как на прямом аппаратном выводе HDR, так и при включённом улучшении чёткости и плавности движений.
+- **Мгновенная перемотка Blu-ray и чистый старт в программном декодере:**
+  - Многократно ускорено появление кадра после перемотки на тяжёлых фильмах Blu-ray с высоким битрейтом и устранены заминки звука при перемотке и смене режима декодера на лету.
+  - Полностью устранены зелёные вспышки и квадраты при запуске и перемотке Blu-ray в программном режиме декодирования благодаря точному распознаванию точек восстановления кадра и отсечению неполных промежуточных кадров.
+- **Чистейший звук 7.1 без хрипов, экономия памяти и точный статус автоочистки речи:**
+  - Устранены остаточные похрипывания и микросбои синхронизации на громких боевых сценах с многоканальными дорожками 7.1 как в бинауральном 3D-режиме для наушников, так и на стереодинамиках.
+  - Обеспечено бережное повторное использование памяти потокового буфера при перемотках и переключениях декодеров без фоновых скачков расхода памяти.
+  - В меню звука умный автоматический режим очистки голоса больше не подсвечивается как активный и наглядно показывает статус обхода на качественных и несжатых аудиодорожках.
+
+</details>
+
 ## [v4.5.23]
 
 ### 🇬🇧 English
