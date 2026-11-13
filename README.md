@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.5.24-FF80AB?style=flat-square" alt="Version 4.5.24" />
+  <img src="https://img.shields.io/badge/version-4.5.26-FF80AB?style=flat-square" alt="Version 4.5.26" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/license-Proprietary_(Closed_Source)-FF4D8D?style=flat-square" alt="Proprietary License" />
@@ -55,11 +55,11 @@ You can install and update Negai directly through **Obtainium** or grab the univ
 
 ---
 
-## ✨ What's New in Release 4.5.24
+## ✨ What's New in Release 4.5.26
 
-- **True Aspect-Preserving Video Zoom**: Fixed Fill (Zoom) mode so videos expand edge-to-edge on ultrawide displays without stretching faces or objects across both direct hardware HDR surfaces and real-time shader upscaling.
-- **Instant Blu-ray Seeking & Clean Software Decoding**: Eliminated multi-second seek delays, audio stalls, and green macroblock flashes in software decoding on high-bitrate Blu-ray transport streams.
-- **Pristine 7.1 Surround Audio & Transparent Auto Cleanup**: Eliminated peak-volume crackle on lossless 7.1 Blu-ray soundtracks, reused stream buffer pools to eliminate background memory churn, and clarified automatic voice cleanup bypass status on lossless and high-bitrate tracks.
+- **Instant Seeking on MKV, MP4 & 3D Blu-ray**: Eliminated endless buffering stalls when scrubbing or resuming mid-episode on MKV, MP4, and 3D Blu-ray rips across hardware and software decoders.
+- **Crystal-Clear Blu-ray LPCM 5.1 / 7.1 & Auto Multichannel Audio**: Fixed white-noise hiss on uncompressed Blu-ray LPCM surround soundtracks and enabled automatic startup selection for high-bitrate multichannel tracks.
+- **Accurate Per-Episode Video Bitrate**: Reset stream bitrate and codec readouts cleanly on every file transition with accurate container bitrate estimation.
 
 ---
 
