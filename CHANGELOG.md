@@ -3,6 +3,62 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.6.1]
+
+### 🇬🇧 English
+- **Instant Zero-Pause Switching for Anime4K, Motion Smoothing & Split Comparison:**
+  - Toggling Anime4K upscaling, switching enhancement profiles, adjusting sharpness strength, enabling motion smoothing, or dragging the Before/After comparison divider now takes effect on the very next frame—without video restarts, keyframe jumps, or audio hiccups, and even while playback is paused.
+- **Authentic Anime4K Line Thinning & Native-Resolution Ink Reconstruction:**
+  - Rebuilt all three Anime4K profiles to genuinely narrow blurry upscaled line skirts and restore rich dark ink strokes at full screen resolution without bright white halos, with progressive refinement from Fast through Balanced to Ultra (which also cleans flat cel compression noise before upscaling).
+- **True 60 & 120 FPS Motion Smoothing for Anime Cadences & Fast Pans:**
+  - Upgraded real-time frame interpolation to recognize repeated two- and three-frame anime drawings so motion glides evenly across the entire hold duration rather than pausing mid-beat, while keeping character outlines crisp and resolving background overlaps cleanly without ghosting.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.6.1)</b></summary>
+
+<br>
+
+- **Мгновенное бесшовное переключение Anime4K, плавности движений и режима «До / После»:**
+  - Включение и выключение чёткости Anime4K, смена профилей, регулировка ползунка силы, переключение сглаживания движений и перемещение шторки «До / После» теперь применяются буквально в следующем кадре — без перезапуска видео, рывков изображения и даже когда плеер стоит на паузе.
+- **Настоящее утончение контуров и восстановление чернильных линий в Anime4K:**
+  - Переработана математика всех трёх профилей Anime4K: размытые толстые контуры реально сужаются, а тёмные штрихи рисовки восстанавливают плотность в полном нативном разрешении экрана без белых ореолов вокруг линий; максимальный профиль дополнительно очищает заливки от шума сжатия перед повышением чёткости.
+- **Честная плавность 60 и 120 кадров/с с учётом двух- и трёхкадровой рисовки аниме:**
+  - Сглаживание движений теперь распознаёт дублирующиеся кадры классической аниме-анимации и равномерно выстраивает фазу движения на всём протяжении удержания рисунка, сохраняя чёткие контуры персонажей и аккуратно обрабатывая перекрытия фона на быстрых панорамах без двоения.
+
+</details>
+
+## [v4.6.0]
+
+### 🇬🇧 English
+- **P2P Sources Manager, Clear Categories & Streamlined Magnet Input:**
+  - Replaced technical P2P filter chips with clear categories—All Sources, Anime, Movies & TV, General, and My Indexers—and added clear source and category badges on every search result card.
+  - Added an interactive P2P Sources window accessible from both Network & Storage settings and the P2P tab header, allowing you to temporarily pause or permanently remove individual built-in or custom sources and restore defaults anytime.
+  - Cleaned up the Open Magnet or Torrent window by removing third-party client buttons and adding a one-tap Paste button right inside the link field.
+- **Universal Continue Watching Across Local Files, Streams & P2P:**
+  - Upgraded the Continue Watching card on the Home screen to seamlessly resume your latest unfinished video regardless of whether it comes from local device storage, a direct network stream, or a P2P TorrServer session, complete with a Stream or P2P source badge.
+  - Restores full multi-episode playlists with paired external audio and subtitle tracks when resuming network or P2P sessions and automatically adapts saved TorrServer links if your server address changes.
+- **Three-Tier Smart Intro, Recap & Credits Skip Across the Full Timeline:**
+  - Detects openings, recaps, and end credits anywhere along the timeline—including cold-open intros and closing credits—using embedded file chapters first, optional privacy-first text-only online timestamps second (off by default), and a customizable manual step in the first half of the video as a fallback.
+  - Supports both contextual HUD button mode and automatic segment skipping with a four-second Undo pill to jump right back, preserves post-credits scenes automatically, highlights detected segments on the seek bar, and includes a built-in guide in Controls & Playback settings.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.6.0)</b></summary>
+
+<br>
+
+- **Менеджер источников P2P, понятные категории и лаконичное окно Magnet:**
+  - Туманные фильтры на вкладке P2P заменены наглядными категориями: «Все источники», «Аниме», «Кино и сериалы», «Общие каталоги» и «Мои индексаторы», а на карточках раздач появились аккуратные бейджи источника и рубрики.
+  - В разделе «Сеть и хранилище» и в шапке вкладки P2P появилось интерактивное окно «Источники поиска P2P», где можно по одному временно выключать или полностью удалять любые встроенные и пользовательские каталоги с возможностью сброса по умолчанию.
+  - Окно открытия Magnet-ссылки и торрент-файла очищено от кнопок сторонних клиентов и дополнено удобной кнопкой вставки ссылки из буфера обмена в одно касание.
+- **Универсальное «Продолжить просмотр» для памяти устройства, потоков и P2P:**
+  - Карточка «Продолжить просмотр» на главном экране теперь подхватывает последнее недосмотренное видео из любого источника — локальной папки, прямого сетевого потока или P2P-раздачи TorrServer — и отмечает сетевые сессии аккуратным бейджем «Поток» или «P2P».
+  - При возврате к сетевому или P2P-сериалу полностью восстанавливается список серий вместе с внешними дорожками озвучки и субтитров, а адрес TorrServer автоматически обновляется при смене настроек сервера.
+- **Трёхуровневый умный пропуск заставок, повторов и титров по всей шкале видео:**
+  - Пропуск теперь находит опенинги после пролога, краткие пересказы и финальные титры в любой точке серии: сначала по встроенным главам файла, затем (по желанию) через приватный текстовый поиск онлайн-таймкодов без загрузки обложек (по умолчанию выключен), а при отсутствии разметки — классическим шагом в первой половине видео.
+  - Доступны режим контекстной кнопки на экране плеера и автоматический пропуск сегментов с всплывающей плашкой «Вернуть» на четыре секунды, бережным сохранением сцен после титров, цветовой разметкой сегментов на полосе прокрутки и встроенной справкой в разделе «Управление и воспроизведение».
+
+</details>
+
 ## [v4.5.29]
 
 ### 🇬🇧 English
@@ -12,9 +68,12 @@
 - **Effortless Timeline Scrubbing & Silky Glass Scrolling:**
   - Streamlined background glow sampling and timeline timecode formatting so dragging the seek bar and scrolling through floating Liquid Glass windows stay responsive with zero frame drops or memory spikes.
 - **Faster Quick-Action Buttons & Refined Audio & Picture Windows:**
-  - Updated the Scale quick-action button to cycle directly through Fit, Fill, and Stretch with a single tap.
-  - Enabled single-tap ON/OFF toggling on the Anime4K and Motion Smoothing quick-action buttons while keeping hold-and-swipe preset menus.
-  - Moved 3D Spatial Audio to the top of the Audio enhancements tab and global Audio settings, and arranged Anime4K upscaling presets into a clean two-row grid inside the Picture window.
+  - Updated the Scale quick-action button to cycle directly through Fit, Fill, and Stretch with a single tap without opening a popup menu.
+  - Enabled single-tap ON/OFF toggling on the Anime4K, Motion Smoothing, and new 3D Audio quick-action buttons while preserving hold-and-swipe preset menus.
+  - Placed 3D Spatial Audio first and Compressed Audio Cleanup second across both the player Audio enhancements tab and global Audio settings, and arranged Anime4K and motion smoothing profiles into clean compact two-row grids.
+- **Pure Technical Device Info & Experimental Features Switch:**
+  - Focused the Device Info section strictly on hardware diagnostics—display modes, HDR support, processor, memory, audio output pipeline, and hardware/software media decoders.
+  - Added an Experimental Features toggle (off by default) in Advanced & Reset to keep diagnostic and benchmark tools neatly tucked away until explicitly enabled while keeping the Reset All Settings card always accessible.
 
 <details>
 <summary><b>🇷🇺 На русском (Что нового в v4.5.29)</b></summary>
@@ -26,10 +85,13 @@
   - Сглаживание движений теперь формирует полноценные промежуточные кадры с реальным удвоением и учетверением плавности до 60 и 120 кадров в секунду и автоматически переводит экран на повышенную герцовку.
 - **Лёгкая перемотка по шкале времени и плавная прокрутка стеклянных окон:**
   - Оптимизированы обновление фоновой подсветки и отрисовка таймкода при перетаскивании ползунка, благодаря чему перемотка и прокрутка плавающих окон «Жидкого стекла» работают без микрофризов и лишней нагрузки на память.
-- **Быстрые кнопки управления и удобные шторки «Звук» и «Картинка»:**
-  - Кнопка «Масштаб» на нижней панели теперь переключает режимы «Вписать → Заполнение → Растянуть» одним касанием без лишнего меню.
-  - Кнопки «Anime4K» и «Плавность» включают и выключают улучшение одним коротким нажатием, сохраняя быстрое меню выбора профиля по удержанию.
-  - Блок «Пространственный звук 3D» вынесен на первое место во вкладке улучшений звука и в глобальных настройках аудио, а выбор профилей Anime4K в окне «Картинка» выстроен в ровную сетку из двух рядов.
+- **Быстрые кнопки управления и удобные окна «Звук» и «Картинка»:**
+  - Кнопка «Масштаб» на нижней панели теперь переключает режимы «Вписать → Заполнение → Растянуть» одним касанием без всплывающего меню.
+  - Кнопки «Anime4K», «Плавность» и новая кнопка «3D-звук» мгновенно включают и выключают улучшение одним коротким нажатием, сохраняя удобное меню выбора профиля по удержанию.
+  - Блок «Пространственный звук 3D» поставлен на первое место, а «Очистка сжатого звука» — сразу под ним как в шторке «Звук», так и в глобальных настройках аудио; все сетки профилей собраны в компактные ряды не более двух строк.
+- **Чистая техническая «Информация об устройстве» и переключатель экспериментальных функций:**
+  - Раздел «Информация об устройстве» полностью очищен от посторонних карточек и показывает только технические параметры экрана, процессора, памяти, аудиовывода и декодеров.
+  - В разделе «Особые настройки и сброс» добавлен единый переключатель «Экспериментальные функции» (по умолчанию выключен), управляющий показом инструментов диагностики и бенчмарков в настройках и плеере при постоянной доступности кнопки полного сброса настроек.
 
 </details>
 
