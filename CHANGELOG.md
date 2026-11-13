@@ -3,6 +3,30 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.6.4]
+
+### 🇬🇧 English
+- **One-Tap Video Decoder Cycling on the Player Bar:**
+  - Tapping the Decoder quick-action button on the player bottom bar now cycles directly through Auto, HW+, and SW modes with an immediate badge update on the button—without opening a modal or hold menu—while full Picture and Shader settings remain one tap away at the top of Playback Tools.
+- **Player Theme Selector Back in Playback Tools:**
+  - Restored the compact two-column Player Theme selector inside the Playback Tools ("More") window so you can switch between Classic OLED, Glass Capsule, Cyber Neon, and Pure Icons on the fly during playback.
+- **Two-Finger Pinch-to-Zoom Toggle & Always-On Edge Swipe Guard:**
+  - Added a dedicated Two-Finger Pinch-to-Zoom toggle in Controls & Playback gesture settings (automatically resetting any active zoom when turned off) and made screen-edge swipe protection permanently active to prevent accidental system-gesture conflicts.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.6.4)</b></summary>
+
+<br>
+
+- **Мгновенное переключение декодера одним касанием в плеере:**
+  - Нажатие на кнопку «Декодер» в нижней панели плеера теперь сразу переключает режим по кругу («Авто» → «HW+» → «SW») с наглядным обновлением подписи на самой кнопке без открытия лишних меню, а полное окно настроек картинки и шейдеров вынесено в самое начало шторки «Инструменты» («Ещё»).
+- **Выбор «Темы плеера» внутри меню «Ещё»:**
+  - В первую вкладку окна «Инструменты» возвращён компактный двухколоночный блок выбора темы оформления кнопок плеера с мгновенным применением стиля прямо во время просмотра.
+- **Переключатель зума двумя пальцами и постоянная защита краёв экрана:**
+  - В карточку сенсорных жестов раздела «Управление и воспроизведение» добавлен переключатель «Масштабирование двумя пальцами (Зум)» с автоматическим сбросом приближения при выключении, а защита краёв экрана от случайных свайпов теперь включена постоянно по умолчанию.
+
+</details>
+
 ## [v4.6.3]
 
 ### 🇬🇧 English
