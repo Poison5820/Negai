@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.5.26-FF80AB?style=flat-square" alt="Version 4.5.26" />
+  <img src="https://img.shields.io/badge/version-4.5.27-FF80AB?style=flat-square" alt="Version 4.5.27" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/license-Proprietary_(Closed_Source)-FF4D8D?style=flat-square" alt="Proprietary License" />
@@ -55,11 +55,11 @@ You can install and update Negai directly through **Obtainium** or grab the univ
 
 ---
 
-## ✨ What's New in Release 4.5.26
+## ✨ What's New in Release 4.5.27
 
-- **Instant Seeking on MKV, MP4 & 3D Blu-ray**: Eliminated endless buffering stalls when scrubbing or resuming mid-episode on MKV, MP4, and 3D Blu-ray rips across hardware and software decoders.
-- **Crystal-Clear Blu-ray LPCM 5.1 / 7.1 & Auto Multichannel Audio**: Fixed white-noise hiss on uncompressed Blu-ray LPCM surround soundtracks and enabled automatic startup selection for high-bitrate multichannel tracks.
-- **Accurate Per-Episode Video Bitrate**: Reset stream bitrate and codec readouts cleanly on every file transition with accurate container bitrate estimation.
+- **Streamlined 8-Section Settings & Full-Width Cards**: Reorganized global Settings into eight clear sections free of verbose technical descriptions, with spacious full-width cards for base themes and streaming quality and generous bottom scroll clearance.
+- **Searchable Subtitle Encoding, Character Outline & Bottom Margin**: Pick external subtitle encodings (Auto-detect, Unicode, Cyrillic, Western European, and Japanese) from a searchable floating window, toggle character outlines, and adjust bottom subtitle positioning smoothly.
+- **Top-of-Page Gestures, Info Guides & Instant Changelog Access**: Placed auto-hide timing and touch gestures (including screen-edge protection) at the top of Controls & Playback, added built-in info guides for audio decoders, TorrServer, and custom indexers, and added a direct Changelog button in the About card.
 
 ---
 
