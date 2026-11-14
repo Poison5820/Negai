@@ -3,6 +3,34 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.6.22]
+
+### 🇬🇧 English
+- **Official Material 3 Expressive Loading Indicator & Non-Overlapping Buffering Stage:**
+  - Adopted the official Material 3 Expressive morphing loading indicator across the entire application and separated the center buffering spinner from the stream status capsule below it, automatically hiding center transport buttons while buffering so controls and loading indicators never overlap.
+- **Unified Frosted Glass Micro-Grain Across All Player HUD Elements:**
+  - Extended the pixel-sharp Frosted Glass micro-texture across every player top-bar capsule, bottom quick-action button, status pill, and timeline seek bar whenever the Matte Glass theme is active, matching the floating windows and main interface.
+- **True Buffered Stream Margin & Quick Speed-Badge Toggles:**
+  - Fixed the network stream buffer counter so it starts cleanly from zero and reports the actual ahead-of-playback buffered duration without inflating to the full movie length on direct HTTP/TorrServer streams, and added convenient toggles for the top-bar speed badge right inside the live stream info card, TorrServer settings, and Playback Settings.
+- **Complete Interface Control Unification & Polish:**
+  - Unified all remaining filter chips across P2P search, TorrServer sheets, quick-action customization, settings, and open-source license views into the shared glass design system for consistent contrast, geometry, and touch feedback.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.6.22)</b></summary>
+
+<br>
+
+- **Официальный индикатор загрузки Material 3 Expressive и разделение слоёв при буферизации:**
+  - Во всём приложении подключён штатный многогранный индикатор загрузки Material 3 Expressive, а в видеоплеере при буферизации центральные кнопки воспроизведения и перемотки автоматически уступают место индикатору и вынесенной ниже плашке статуса без малейшего наложения элементов.
+- **Единая микротекстура «Матового стекла» на всех элементах интерфейса плеера:**
+  - Чёткая физическая микротекстура матового стекла теперь единообразно покрывает верхнюю шапку, нижние кнопки быстрых действий, статусные плашки и шкалу времени плеера при выборе матовой темы оформления.
+- **Честный расчёт запаса буфера потока и быстрое управление значком скорости:**
+  - Исправлен подсчёт предзагруженного буфера на прямых потоках и раздачах — теперь счётчик начинается строго с нуля и показывает реальный запас вперёд в секундах вместо полной длительности фильма, а включить или скрыть значок скорости в шапке плеера можно прямо из карточки статистики потока, настроек сервера или параметров воспроизведения.
+- **Полная унификация чипов фильтрации и элементов управления:**
+  - Все переключатели и фильтры в поиске раздач, шторках сервера, настройке быстрых кнопок, параметрах и окне открытых лицензий переведены на единую оптическую систему компонентов с выверенной контрастностью и геометрией.
+
+</details>
+
 ## [v4.6.21]
 
 ### 🇬🇧 English
