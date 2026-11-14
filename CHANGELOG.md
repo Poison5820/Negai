@@ -3,6 +3,36 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.6.18]
+
+### 🇬🇧 English
+- **Instant Live Video Refraction Under Liquid Glass:**
+  - Liquid Glass controls, capsules, and floating sheets in the player now refract every live video frame directly in real time with zero visual lag, zero background frame copies, and idle resource usage whenever controls are hidden.
+- **Locked 120 FPS Motion Smoothing Without Micro-Stutters:**
+  - Balanced frame-pacing across new decoded frames and streamlined optical-flow execution so motion smoothing stays locked at native high refresh rates without periodic frame drops, even when combined with spatial upscaling and surround audio.
+- **Accurate Automatic Detection Between 2D Anime & Live-Action Cinema:**
+  - Refined **Auto** scene recognition so live-action movies, dark scenes, skin gradients, and natural film grain reliably route to **AMD FSR**, while hand-drawn 2D cel animation and crisp ink contours route to **Anime4K**.
+- **Featherlight Timeline Scrubbing, Modal Scrolling & Clear Three-Group Upscale Controls:**
+  - Eliminated background memory churn during high-refresh timeline scrubbing, player overlay animations, and floating menu scrolling for effortless touch responsiveness.
+  - Organized Upscale & Sharpness across Video Settings, the "Enhance" tab in the "More" menu, and floating fine-tuning sheets into three labeled groups (**Upscale Engine**, **Quality Preset**, **Sharpness & Detail**) with live **Auto** routing hints, calm dimmed off-state styling, one-tap activation, and a complete two-section reference guide.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.6.18)</b></summary>
+
+<br>
+
+- **Мгновенное живое преломление видео под «Жидким стеклом» без задержек:**
+  - Стеклянные панели, капсулы и плавающие шторки плеера теперь преломляют живой кадр видео напрямую в реальном времени без малейшего отставания от движения в сцене, без фонового копирования кадров и с нулевой нагрузкой при скрытом интерфейсе.
+- **Стабильные 120 к/с при сглаживании движений без микрофризов:**
+  - Сбалансировано распределение нагрузки между новыми кадрами видео и ускорен расчёт оптического потока, благодаря чему уплавнение движений удерживает максимальную частоту экрана без периодических просадок даже совместно с апскейлом и объёмным звуком.
+- **Точное автоматическое распознавание 2D-аниме и живого кино:**
+  - Улучшен анализ кадра в режиме **«Авто»**: живые фильмы, сериалы, плавные светотеневые переходы и естественное плёночное зерно безошибочно направляются на **AMD FSR**, а рисованная 2D-анимация с чётким контуром и заливками — на **Anime4K**.
+- **Лёгкая перемотка на высокой герцовке, плавная прокрутка шторок и наглядная структура апскейла:**
+  - Устранены лишние фоновые операции с памятью при быстрой перемотке по шкале времени, анимациях панелей и прокрутке стеклянных окон.
+  - Все панели «Апскейл и резкость» в настройках, вкладке «Улучшения» меню «Ещё» и плавающих окнах разделены на три подписанные группы (**«Алгоритм»**, **«Профиль качества»**, **«Резкость и детализация»**) с живыми подсказками выбранного движка, спокойным приглушением в выключенном состоянии, включением в одно касание и полным двухсекционным справочником режимов.
+
+</details>
+
 ## [v4.6.17]
 
 ### 🇬🇧 English
