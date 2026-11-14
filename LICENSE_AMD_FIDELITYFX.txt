@@ -1,6 +1,7 @@
-AMD FidelityFX Optical Flow (FidelityFX SDK) Upstream Attribution
+AMD FidelityFX Optical Flow & Super Resolution 1.0 (EASU + RCAS) Upstream Attribution
 https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK
-Copyright (c) 2023-2026 Advanced Micro Devices, Inc. All rights reserved.
+https://github.com/GPUOpen-Effects/FidelityFX-FSR
+Copyright (c) 2021-2026 Advanced Micro Devices, Inc. All rights reserved.
 
 MIT License
 
