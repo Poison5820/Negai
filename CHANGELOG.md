@@ -3,6 +3,34 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.6.21]
+
+### 🇬🇧 English
+- **Crisp Micro-Grain & Single-Layer Clarity for Frosted Glass:**
+  - Refined the Frosted Glass visual style and the Matte Glass player seek bar with an ultra-fine, razor-sharp physical micro-texture aligned directly to screen pixels—eliminating blurry grain blotches and preventing cards inside floating windows from stacking a second layer of grain.
+- **True Screen-Center Alignment for All Floating Windows:**
+  - Every floating dialog and control sheet across the library and video player now aligns precisely to the exact geometric center of the display in both portrait and landscape orientations, staying symmetrically balanced around camera cutouts, rounded corners, and system bars.
+- **Live Network Speed & Buffer Badge in the Player Top Bar:**
+  - During network and P2P playback, the player top bar now shows a steady tabular-digit badge with live download throughput and buffered playback margin (or current buffer reserve when fully pre-cached), opening or closing the detailed stream overlay on tap and configurable from Playback Settings or the player menu.
+- **Comprehensive Four-Tab "More" Menu in the Player:**
+  - Expanded the in-player **More** window into four organized tabs—**Player**, **Gestures**, **Enhance**, and **Interface**—bringing playback speed, aspect mode, decoders, Smart Skip, high-refresh display tuning, swipe & pinch gesture controls, spatial upscaling, motion smoothing, audio enhancement, visual themes, quick-action customization, and live stream diagnostics together without leaving your video.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.6.21)</b></summary>
+
+<br>
+
+- **Тончайшая микротекстура и чистота слоёв в теме «Матовое стекло»:**
+  - Тема «Матовое стекло» и матовая шкала времени плеера получили чёткую физическую микротекстуру, выровненную строго по пикселям экрана — без размытых пятен шума и без повторного наложения зерна на карточках внутри плавающих окон.
+- **Идеальное центрирование всех плавающих окон на экране:**
+  - Все плавающие диалоги и шторки управления в библиотеке и видеоплеере теперь располагаются строго по геометрическому центру дисплея как в портретной, так и в альбомной ориентации, сохраняя полную симметрию относительно выреза камеры и системных панелей.
+- **Живой индикатор скорости сети и буфера в верхней панели плеера:**
+  - При просмотре сетевых потоков и раздач в верхней шапке плеера отображается аккуратный значок с ровными табличными цифрами текущей скорости загрузки и запаса буфера вперёд (либо накопленного резерва при полной подгрузке), который открывает подробную сводку потока по нажатию и настраивается в параметрах воспроизведения и меню плеера.
+- **Полное четырёхвкладочное меню «Ещё» прямо во время просмотра:**
+  - Окно **«Ещё»** в плеере объединено в четыре наглядные вкладки — **«Плеер»**, **«Жесты»**, **«Улучшения»** и **«Интерфейс»** — позволяя мгновенно управлять скоростью, масштабом кадра, декодерами, умным пропуском, частотой экрана, всеми жестами и масштабированием щипком, повышением чёткости, сглаживанием движений, обработкой звука, темами плеера, нижней панелью быстрых кнопок и диагностикой потока не прерывая сеанс.
+
+</details>
+
 ## [v4.6.20]
 
 ### 🇬🇧 English
