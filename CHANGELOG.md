@@ -3,6 +3,64 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.6.17]
+
+### 🇬🇧 English
+- **Crystal-Clear Liquid Glass Optics & High-Contrast Readability Across Every Screen:**
+  - Refined the Liquid Glass visual style across the library, folders, search, settings, and player with crisp edge refraction, a clean specular rim, and zero milky haze or color fringing—distinctly separated from the soft matte blur of Frosted Glass.
+  - Boosted badge, button, and secondary label contrast over bright video scenes, snow, sky, and light album art across every light, dark, and monochrome theme.
+- **Silky-Smooth Window Transitions & Natural Live Video Glass Backdrop:**
+  - Floating sheets, menus, and player controls now animate smoothly without layout jumps or background frame hitches, paired with a sharper, gently crossfading live video backdrop under player glass capsules and zero extra background work while controls are hidden.
+- **Consistent Native 120+ Hz Display Smoothness & Streamlined Smart Skip:**
+  - Maintains native 120+ Hz high-refresh fluidity across app navigation, floating dialogs, player overlays, and 60 FPS motion smoothing while still releasing the panel for power saving when paused.
+  - Styled the Smart Skip Undo notice as a compact floating pill anchored neatly above the timeline when controls are visible or in the bottom corner when hidden, and made manual intro skip trigger once per episode unless undone or rewound to the opening.
+- **Streamlined Five-Release In-App Changelog:**
+  - The in-app Release History card now focuses on the five latest versions with a direct button to browse the complete release archive on GitHub.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.6.17)</b></summary>
+
+<br>
+
+- **Кристально чистая оптика «Жидкого стекла» и высокая контрастность на любом фоне:**
+  - Откалибрована оптика стиля «Жидкое стекло» во всех разделах библиотеки, папок, поиска, настроек и плеера: точное краевое преломление и тонкая световая грань без молочной пелены и радужных ореолов наглядно отличаются от мягкого матового рассеивания в теме «Матовое стекло».
+  - Повышена читаемость акцентных бейджей, кнопок и подписей поверх ярких сцен, неба, снега и светлых обложек во всех светлых, тёмных и монохромных палитрах.
+- **Плавные анимации плавающих окон и мягкий живой видеофон под стеклом:**
+  - Плавающие шторки, меню и панели плеера открываются и скрываются плавно и без малейших рывков, а живой видеофон под стеклянными капсулами плеера стал заметно чётче, обновляется с мягким перетеканием кадров и полностью отключается при скрытом интерфейсе для экономии заряда.
+- **Стабильное удержание 120+ Гц во всём приложении и аккуратный умный пропуск:**
+  - Высокая частота обновления экрана 120+ Гц стабильно удерживается при навигации по разделам, открытии диалогов, работе элементов плеера и в режиме уплавнения «60 к/с» с сохранением бережной экономии энергии на паузе.
+  - Уведомление об отмене умного пропуска оформлено в виде компактной плавающей капсулы справа над шкалой времени при открытых кнопках или в углу экрана при скрытом интерфейсе, а ручной пропуск заставки срабатывает один раз за серию и не появляется повторно без возврата к началу.
+- **Лаконичная история изменений внутри приложения:**
+  - В карточке «О приложении» теперь отображаются пять последних выпусков с удобной кнопкой перехода к полному списку всех изменений на GitHub.
+
+</details>
+
+## [v4.6.16]
+
+### 🇬🇧 English
+- **AMD FidelityFX Super Resolution 1.0 Spatial Upscaling for Cinema, Series & 3D Animation:**
+  - Added open-source AMD FidelityFX Super Resolution 1.0 spatial upscaling tailored for live-action movies, TV series, and 3D CGI, combining directional elliptical edge upsampling with anti-ringing contrast sharpening so fine textures, skin detail, and natural film grain stay crisp without halos or plastic smoothing.
+- **Unified Upscale & Sharpness Module with Smart "Auto / Anime4K / AMD FSR" Switching:**
+  - Added a single-row three-mode engine selector (**Auto**, **Anime4K**, **AMD FSR**) across Video Settings, the "Enhance" tab in the in-player "More" menu, and floating fine-tuning sheets, with instant live switching even while paused and optional per-episode settings memory.
+  - In **Auto** mode, the player analyzes frame visuals in the background without any playback stutter, automatically engaging **Anime4K** for 2D cel animation and **AMD FSR 1.0** for live-action cinema and 3D content, while showing the active engine in the Stream HUD, quick-action badges, and Before / After split comparison.
+- **Refined Built-In Reference Guide & Open-Source Attribution:**
+  - Updated the interactive Upscale & Sharpness guide and Open-Source Licenses catalog with clear descriptions of **Auto**, **Anime4K**, and **AMD FSR 1.0** alongside full MIT License attribution for Advanced Micro Devices.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.6.16)</b></summary>
+
+<br>
+
+- **Пространственный апскейлер AMD FidelityFX Super Resolution 1.0 для кино, сериалов и 3D-анимации:**
+  - Интегрирован открытый алгоритм пространственного масштабирования AMD FidelityFX Super Resolution 1.0 для живых фильмов, сериалов и трёхмерной графики: направленный эллиптический фильтр и адаптивное усиление резкости с защитой от ореолов раскрывают фактуру ткани, поры кожи и благородное плёночное зерно без «пластикового» размытия.
+- **Единый модуль «Апскейл и резкость» с переключателем «Авто / Anime4K / AMD FSR»:**
+  - В настройках видео, на вкладке «Улучшения» меню плеера «Ещё» и в плавающих окнах точной настройки добавлен симметричный выбор движка (**Авто**, **Anime4K**, **AMD FSR**) с мгновенным откликом на лету и на паузе, а также с поддержкой запоминания выбора для каждого эпизода.
+  - В режиме **«Авто»** плеер незаметно анализирует характер изображения без малейших задержек, автоматически включая **Anime4K** на рисованном 2D-аниме и **AMD FSR 1.0** на фильмах, сериалах и 3D-анимации с живой индикацией выбранного алгоритма в мониторе потока, на кнопке нижней панели и при сравнении «До / После».
+- **Обновлённое справочное руководство и открытые лицензии:**
+  - Обновлены встроенная справка по режимам апскейла и раздел открытых лицензий с подробным описанием работы **«Авто»**, **Anime4K** и **AMD FSR 1.0**, а также полной атрибуцией лицензии MIT от Advanced Micro Devices.
+
+</details>
+
 ## [v4.6.15]
 
 ### 🇬🇧 English
