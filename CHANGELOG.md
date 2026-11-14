@@ -3,6 +3,56 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.6.15]
+
+### 🇬🇧 English
+- **Artifact-Free Roof Tiles & Repeating Patterns Over Smoke in AMD FidelityFX Optical Flow:**
+  - Added global camera-pan estimation and directional stripe-slip regularization across all smoothing modes (×2, 60 FPS, and Max Hz), keeping repeating roof tiles, fences, grilles, and brickwork steady and intact even when smoke or mist drifts across them.
+- **Halo-Free Thin Vertical Foreground Pillars & Clean Edge Disocclusions:**
+  - Refined asymmetric open-endpoint synthesis and edge-aware flow validation so thin vertical posts, tree branches, cables, and foreground silhouettes glide smoothly over panning backgrounds without halos or smeared edges.
+- **Stronger 120 Hz LTPO Display Retention Alongside Hardware Decoding:**
+  - Added direct window surface-layer refresh rate voting so system LTPO governors keep the panel locked at 120 Hz during active motion smoothing without dropping back to 60 Hz when hardware video decoding is active, while releasing immediately on pause.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.6.15)</b></summary>
+
+<br>
+
+- **Стабильная черепица крыш и периодические текстуры сквозь дым в AMD FidelityFX Optical Flow:**
+  - Добавлена глобальная оценка панорамы камеры и направленное подавление скольжения вдоль полос во всех режимах уплавнения («×2», «60 к/с», «Макс. Гц»), благодаря чему черепица крыш, заборы, решётки и кладка остаются абсолютно ровными без ряби и разрывов даже за клубами дыма или тумана.
+- **Чистые тонкие столбы переднего плана без ореолов на границах перекрытий:**
+  - Улучшен асимметричный обход открывающегося фона и краевая фильтрация потока: тонкие вертикальные столбы, ветви деревьев, провода и узкие силуэты переднего плана плавно проходят по панорамируемому фону без ореолов и размазывания границ.
+- **Усиленное удержание 120 Гц на LTPO-дисплеях при аппаратном декодировании:**
+  - Реализовано прямое голосование частоты обновления на уровне корневой поверхности окна, исключающее принудительный сброс адаптивных LTPO-экранов со 120 Гц до 60 Гц при работе аппаратного видеодекодера с мгновенным возвратом к экономии заряда на паузе.
+
+</details>
+
+## [v4.6.14]
+
+### 🇬🇧 English
+- **Dedicated "Enhance" Tab in the In-Player "More" Menu:**
+  - Added a dedicated equal-width "Enhance" tab inside the player's "More" menu with clearly organized cards for Upscale & Sharpness, Motion Interpolation, and Before / After split-screen comparison.
+  - Displays live active profile badges or automatic bypass reasons (such as native 4K or 10-bit HDR), single-row three-mode selectors, interactive reference guides, and graphics pipeline selection showing the active rendering path in real time.
+- **Compact Floating Fine-Tuning Windows Over Live or Paused Video:**
+  - Upgraded the dedicated Upscale & Sharpness and Motion Interpolation floating panels so you can adjust sharpness across an expanded 10% to 150% range with one-tap 100% reset, switch frequency modes, or drag the Before / After split divider from 5% to 95% with instant visual feedback even while playback is paused.
+- **"Fine-tune…" Shortcut in Quick-Action Hold Menus:**
+  - Preserved instant single-tap toggling on the player bar's quick-action chips while adding a convenient "Fine-tune…" button at the bottom of the long-press hold mini-menu for immediate access to full enhancement controls.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.6.14)</b></summary>
+
+<br>
+
+- **Выделенная вкладка «Улучшения» в меню плеера «Ещё»:**
+  - В меню «Ещё» внутри плеера добавлена отдельная вкладка «Улучшения» с наглядными карточками «Апскейл и резкость», «Интерполяция кадров» и «Сравнение До / После».
+  - На карточках отображаются живые индикаторы активного профиля или причины авто-обхода (нативный 4K или 10-битный HDR), симметричные ряды режимов, кнопки справочных руководств и выбор графического конвейера с показом текущего режима рендеринга.
+- **Компактные плавающие окна точной настройки поверх живого кадра и на паузе:**
+  - Обновлены прицельные плавающие окна апскейла и уплавнения движений: силу резкости теперь можно плавно регулировать в расширенном диапазоне от 10% до 150% со сбросом к 100% в одно касание, а шторку сравнения «До / После» — двигать от 5% до 95% с мгновенным откликом на экране даже на паузе.
+- **Быстрый переход «Точная настройка…» из мини-меню удержания:**
+  - Сохранено мгновенное включение и выключение улучшений одиночным нажатием на быстрые кнопки нижней панели плеера, а в конец всплывающего мини-меню при удержании добавлена кнопка «Точная настройка…» для быстрого открытия полного окна параметров.
+
+</details>
+
 ## [v4.6.13]
 
 ### 🇬🇧 English
