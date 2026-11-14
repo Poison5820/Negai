@@ -3,6 +3,30 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.6.13]
+
+### 🇬🇧 English
+- **Tear-Free Diagonal Contours & Roof Ridges Over Moving Smoke in AMD FidelityFX Optical Flow:**
+  - Upgraded coarse motion search to a dense neighborhood scan with dedicated wide-panorama refinement and background-coherence gating, keeping thin diagonal structures, roof ridges, and foreground silhouettes crisp and intact even when smoke, fog, or mist drifts behind them.
+- **Clean Fast Arm Swings & Combat Motion in 2D Animation:**
+  - Added four-direction occlusion edge scouting, tighter round-trip flow validation, and edge-guided bicubic fallback synthesis so rapid 2s/3s anime arm swings and action choreography stay sharp without layering or ghosting.
+- **Uninterrupted 120 Hz LTPO Display Retention & Hardware VSync Pacing:**
+  - Eliminated adaptive refresh rate drops from 120 Hz back to 60 Hz after lifting a finger from the screen on modern LTPO smartphones while consuming zero extra battery when paused or idle, paired with hardware display-pulse phase timing for ultra-steady motion cadence.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.6.13)</b></summary>
+
+<br>
+
+- **Целостность наклонных контуров и крыш на фоне дыма в AMD FidelityFX Optical Flow:**
+  - Грубый поиск движения переведён на плотное сканирование окрестности с отдельным уточнением быстрых панорам и проверкой согласованности фона, благодаря чему тонкие наклонные линии, коньки крыш и силуэты остаются цельными и не рвутся, когда за ними плывёт дым или туман.
+- **Чистые быстрые взмахи рук и боевые сцены в 2D-рисовке:**
+  - Внедрён четырёхсторонний краевой обход перекрытий, ужесточённая перекрёстная проверка векторов и мягкий бикубический резервный синтез, полностью устраняющие расслоение и ореолы на резких взмахах рук в каденции 2s/3s.
+- **Непрерывное удержание 120 Гц на LTPO-экранах и аппаратное тактование фаз:**
+  - Устранён принудительный сброс частоты адаптивных LTPO-дисплеев со 120 Гц до 60 Гц через пару секунд после отпускания пальца от экрана при нулевом лишнем расходе батареи на паузе, а расчёт промежуточных фаз привязан напрямую к аппаратным импульсам обновления экрана.
+
+</details>
+
 ## [v4.6.12]
 
 ### 🇬🇧 English
