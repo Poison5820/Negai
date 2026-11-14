@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/версия-4.6.9-FF80AB?style=flat-square" alt="Версия 4.6.9" />
+  <img src="https://img.shields.io/badge/версия-4.6.12-FF80AB?style=flat-square" alt="Версия 4.6.12" />
   <img src="https://img.shields.io/badge/пакет-app.negai.player-00B8D4?style=flat-square" alt="Пакет приложения" />
   <img src="https://img.shields.io/badge/платформа-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Платформа" />
   <img src="https://img.shields.io/badge/лицензия-Проприетарная_(Closed_Source)-FF4D8D?style=flat-square" alt="Проприетарная лицензия" />
@@ -34,7 +34,7 @@
 ## Главные преимущества Negai
 
 - 🎬 **Чёткое аниме с Anime4K**: Восстанавливает чёткость контуров и деталей на лету с помощью нейросетевых GLSL-шейдеров.
-- ⚡ **Плавность движений (MEMC)**: Преобразует 24 к/с аниме и кино в 60 к/с или максимальную герцовку экрана (90–165 Гц).
+- ⚡ **Плавность движений (MEMC)**: Преобразует 24 к/с аниме и кино в удвоение **×2** (48/60 к/с), **60 к/с** или **Макс. Гц** (90–165 Гц) на базе открытого алгоритма **AMD FidelityFX Optical Flow (MIT License)** в едином конвейере с `Anime4K`.
 - 🌊 **Стеклянный интерфейс и парящий док**: Темы «Жидкое стекло» и «Матовое стекло» с оптическим преломлением, зеркальными бликами и парящим скругленным доком навигации.
 - 🌈 **Естественный HDR**: Аппаратный вывод HDR10, HLG и Dolby Vision без искусственного завышения системной яркости.
 - 🎧 **Пространственный звук и очистка голоса**: 3D бинауральный звук в наушниках (MIT KEMAR HRTF) для 5.1/7.1 дорожек, усиление громкости до 200% и фильтр низкобитрейтной озвучки.
@@ -101,6 +101,7 @@
 
 - **Negai Player**: Проприетарное программное обеспечение с закрытым исходным кодом. Copyright © 2026 Negai Player. Все права защищены. Публичный репозиторий используется исключительно для распространения сборок и публикации лицензий.
 - **Anime4K (MIT License)**: Шейдеры повышения чёткости аниме на базе [bloc97/Anime4K](https://github.com/bloc97/Anime4K) (Copyright © 2019–2021 bloc97). См. [`LICENSE_ANIME4K.txt`](LICENSE_ANIME4K.txt).
+- **AMD FidelityFX Optical Flow (MIT License)**: Иерархический 32-битный конвейер оценки оптического потока и интерполяции кадров на базе [AMD FidelityFX SDK](https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK) (Copyright © 2023–2026 Advanced Micro Devices, Inc.). См. [`LICENSE_AMD_FIDELITYFX.txt`](LICENSE_AMD_FIDELITYFX.txt).
 - **MIT KEMAR HRTF (MIT License)**: Бинауральные импульсные фильтры пространственного звука на базе набора [MIT Media Lab KEMAR HRTF](https://sound.media.mit.edu/resources/KEMAR.html) (Bill Gardner & Keith Martin). См. [`LICENSE_MIT_KEMAR_HRTF.txt`](LICENSE_MIT_KEMAR_HRTF.txt).
 - **FFmpeg (GNU LGPL v2.1+)**: Программное декодирование звука через расширение Media3 без компонентов под лицензией GPL. См. [`LICENSE_FFMPEG.txt`](LICENSE_FFMPEG.txt).
 - **AndroidX Media3 (Apache 2.0)**: Мультимедийный стек от компании Google LLC.
