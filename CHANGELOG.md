@@ -3,6 +3,32 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.6.7]
+
+### 🇬🇧 English
+- **Normalized S-Curve Edge Gathering & Micro-Contrast in Anime4K:**
+  - Calibrated contour-slope steepening in the 16-bit GPU compute pipeline so blurry line slopes gather with full strength into crisp ink boundaries while keeping stroke centers completely stationary to preserve 100% of the artist's original line width, paired with unclipped normal-axis micro-contrast recovery and dark-ink headroom.
+- **Trajectory-Projected Motion Vectors & Wider Spatial Smoothing in MEMC:**
+  - Upgraded bidirectional frame synthesis to project candidate motion vectors from surrounding neighborhoods directly onto the intermediate frame trajectory at phase `t`, choosing the vector with minimum forward-backward photometric error so fast-moving outlines stay sharp across the entire motion path instead of blurring midway between frames.
+  - Expanded shared-memory bilateral flow smoothing to a wider 5x5 neighborhood and reduced static drag on flat anime cel fills so moving contours glide cleanly across uniform backgrounds.
+- **Live Renderer Status Synchronization in Stream HUD:**
+  - Synchronized the Stream HUD renderer status line with live GPU compute initialization so the active 16-bit compute mode is always displayed accurately.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.6.7)</b></summary>
+
+<br>
+
+- **Нормализация крутизны контуров и микроконтраста в Anime4K:**
+  - Откалибрована передаточная кривая сгущения краёв в 16-битном вычислительном конвейере: размытые склоны линий теперь собираются в чёткий штрих в полную силу при строго неподвижном центре контура (сохраняя 100% авторской толщины рисовки) и дополняются восстановлением микроконтраста вдоль нормали без светлых ореолов.
+- **Проекция траектории движения по фазе и широкое сглаживание в MEMC:**
+  - Двунаправленный синтез промежуточных кадров теперь проецирует соседние векторы движения точно в точку прохождения контура на текущей фазе кадра и выбирает вектор с минимальной ошибкой совпадения между прошлым и текущим кадром, благодаря чему быстрые контуры остаются резкими на всём пути движения и не размываются в середине фазы.
+  - Пространственное билатеральное сглаживание потока в быстрой памяти GPU расширено до окна 5×5, а вес покоя на плоских заливках снижен, чтобы однотонные фоны не притормаживали соседние движущиеся линии.
+- **Мгновенная синхронизация статуса рендера в «Мониторе потока»:**
+  - Строка активного рендера в информационном оверлее плеера теперь мгновенно синхронизируется с инициализацией вычислительного конвейера GPU.
+
+</details>
+
 ## [v4.6.6]
 
 ### 🇬🇧 English
