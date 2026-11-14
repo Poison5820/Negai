@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.6.9-FF80AB?style=flat-square" alt="Version 4.6.9" />
+  <img src="https://img.shields.io/badge/version-4.6.12-FF80AB?style=flat-square" alt="Version 4.6.12" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/license-Proprietary_(Closed_Source)-FF4D8D?style=flat-square" alt="Proprietary License" />
@@ -34,7 +34,7 @@ Whether you are enjoying high-bitrate 4K Blu-ray releases on your couch or watch
 ## Why You'll Love Negai
 
 - 🎬 **Crisp Anime with Real-Time Anime4K**: Reconstructs soft line art and sharpens details on the fly using neural GLSL shaders.
-- ⚡ **Motion Smoothing (MEMC)**: Interpolates 24 fps anime and cinema up to 60 fps or maximum screen refresh rate (90–165 Hz) for buttery-smooth motion.
+- ⚡ **Motion Smoothing (MEMC)**: Interpolates 24 fps anime and cinema via **×2** frame doubling (48/60 fps), **60 FPS**, or **Max Hz** (90–165 Hz) using the open-source **AMD FidelityFX Optical Flow (MIT License)** algorithm in a unified pipeline with `Anime4K`.
 - 🌊 **Fluid Glass & Floating Navigation Dock**: Elegant Liquid Glass and Frosted Glass interfaces with optical reflections, specular gleams, and a floating rounded navigation dock tailored for modern gesture control.
 - 🌈 **Natural YouTube-Style HDR**: Hardware HDR presentation (HDR10, HLG, Dolby Vision) that preserves your device's natural screen brightness without blinding overrides.
 - 🎧 **Spatial Audio & De-Artifact DSP**: Immersive 3D binaural headphone audio (MIT KEMAR HRTF) for 5.1/7.1 tracks, volume boost up to 200%, and voice clarity restoration for low-bitrate dubs.
@@ -101,6 +101,7 @@ You can install and update Negai directly through **Obtainium** or grab the univ
 
 - **Negai Player**: Proprietary, closed-source software. Copyright © 2026 Negai Player. All Rights Reserved. This repository serves exclusively as the official binary release showcase and third-party license notice.
 - **Anime4K (MIT License)**: Real-time anime video upscaling shaders based on [bloc97/Anime4K](https://github.com/bloc97/Anime4K) (Copyright © 2019–2021 bloc97). See [`LICENSE_ANIME4K.txt`](LICENSE_ANIME4K.txt).
+- **AMD FidelityFX Optical Flow (MIT License)**: Multi-scale 32-bit Census optical flow motion estimation and frame interpolation pipeline adapted from the [AMD FidelityFX SDK](https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK) (Copyright © 2023–2026 Advanced Micro Devices, Inc.). See [`LICENSE_AMD_FIDELITYFX.txt`](LICENSE_AMD_FIDELITYFX.txt).
 - **MIT KEMAR HRTF (MIT License)**: Binaural spatial audio impulse response filters derived from the [MIT Media Lab KEMAR HRTF Dataset](https://sound.media.mit.edu/resources/KEMAR.html) (Bill Gardner & Keith Martin). See [`LICENSE_MIT_KEMAR_HRTF.txt`](LICENSE_MIT_KEMAR_HRTF.txt).
 - **FFmpeg (GNU LGPL v2.1+)**: Software audio decoders provided through Media3 extension without GPL components. See [`LICENSE_FFMPEG.txt`](LICENSE_FFMPEG.txt).
 - **AndroidX Media3 (Apache 2.0)**: Core playback pipeline developed by Google LLC.
