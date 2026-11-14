@@ -3,6 +3,30 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.6.8]
+
+### 🇬🇧 English
+- **Structure-Aware Pyramidal Optical Flow (MEMC):**
+  - Added local structure-tensor cornerness and edge-tangent analysis to coarse motion search, penalizing false aperture sliding along long straight anime outlines while locking true two-dimensional corners and textured details.
+- **Regional Camera Pan Stabilization & Median-Bilateral Refinement:**
+  - Introduced regional 5-point median camera-pan estimation during mid-level pyramid refinement, paired with a hybrid 9-point median and luma-guided bilateral filter with outlier and shear-coherence gating.
+- **5-Point Patch Consistency & Static-Detail Protection in Frame Synthesis:**
+  - Upgraded bidirectional frame synthesis with 5-point cross-patch verification, instant static-detail locking when unshifted frames match cleanly, forward-backward motion consistency occlusion weighting, and neighborhood highlight/shadow clamping.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.6.8)</b></summary>
+
+<br>
+
+- **Структурно-ориентированный пирамидальный поиск движения (MEMC):**
+  - В грубый уровень оптического потока добавлен анализ локального структурного тензора (угловатости и касательной контура), подавляющий ложное «скольжение» векторов вдоль длинных прямых линий рисовки и точно фиксирующий реальные углы и детали.
+- **Стабилизация панорам камеры и медианно-билатеральное уточнение:**
+  - На среднем уровне пирамиды внедрена оценка глобального сдвига панорамы по региональной пятиточечной медиане в сочетании с гибридной 9-точечной медианной и яркостно-билатеральной фильтрацией и защитой от выбросов и сдвиговых разрывов.
+- **Пятиточечная проверка достоверности синтеза и защита статичных деталей:**
+  - Финальный синтез промежуточных кадров оснащён 5-точечной проверкой совпадения окрестности, мгновенной фиксацией неподвижных элементов без размытия, анализом прямого и обратного согласования потока на перекрытиях и строгим ограничением экстремумов яркости.
+
+</details>
+
 ## [v4.6.7]
 
 ### 🇬🇧 English
