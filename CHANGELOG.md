@@ -3,6 +3,60 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.6.6]
+
+### 🇬🇧 English
+- **16-Bit Floating-Point GPU Compute Video Pipeline:**
+  - Upgraded the real-time shader engine to a dedicated GPU compute architecture with 16-bit floating-point color precision and fast on-chip shared memory, eliminating intermediate color banding and quantization loss across multi-pass video enhancements.
+- **Three-Level Pyramidal Motion Interpolation (MEMC):**
+  - Introduced a hierarchical three-level optical flow pyramid that tracks wide camera pans and fast action across a 4x larger motion radius without contour tearing, block artifacts, or mid-frame phase snaps, while smoothly propagating outline motion across flat anime color fills.
+- **Shared-Memory Anime4K Reconstruction & Bicubic Upscaling:**
+  - Rebuilt Fast, HQ, and Ultra upscaling around workgroup shared-memory tiles, unclipped positive and negative contour restoration, 4-tap bicubic diagonal smoothing, and symmetric S-curve edge steepening with fine output dithering.
+- **Graphics Pipeline Selector & Live Runtime HUD Status:**
+  - Added a three-mode Graphics Pipeline selector (Auto, Vulkan 1.1, GLES 3.1) in Settings with an updated built-in guide and live active backend reporting in the Stream HUD.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.6.6)</b></summary>
+
+<br>
+
+- **Вычислительный видеоконвейер GPU с 16-битной точностью (FP16):**
+  - Видеообработка переведена на архитектуру вычислительных шейдеров с 16-битной плавающей точкой и быстрой разделяемой памятью графического процессора, что полностью исключает потерю полутонов и ступенчатые градиенты между проходами фильтрации.
+- **Трёхуровневый пирамидальный расчёт движения (MEMC):**
+  - Внедрён иерархический трёхуровневый поиск оптического потока, который уверенно отслеживает быстрые панорамы камеры и динамичные сцены в 4 раза более широком радиусе без разрывов контуров, блочных артефактов и рывков в середине фазы, плавно передавая движение линий внутрь однотонных заливок рисовки.
+- **Реконструкция Anime4K в общей памяти GPU и бикубический апскейл:**
+  - Профили «Быстрый», «Чёткий» и «Ультра» переведены на тайловую обработку в быстрой локальной памяти видеоядра с раздельной реконструкцией светлых и тёмных полуволн контура без промежуточного клиппинга, бикубическим выравниванием наклонных линий, симметричным сохранением толщины штриха и финальным дизерингом.
+- **Выбор графического конвейера и честная индикация в «Мониторе потока»:**
+  - В раздел «Видео и шейдеры» добавлен трёхколоночный выбор графического API («Авто», «Vulkan 1.1», «GLES 3.1») с подробной встроенной справкой и отображением реально активного вычислительного режима в информационном оверлее плеера.
+
+</details>
+
+## [v4.6.5]
+
+### 🇬🇧 English
+- **Restored True Anime4K Line Clarity Across Fast, HQ & Ultra:**
+  - Fixed source-frame sampling scale so upscaling shaders analyze actual video pixels rather than stretched screen pixels, and introduced symmetric S-curve contour sharpening that crisps up blurry edges while preserving 100% of the artist's original stroke width.
+  - Enhanced HQ and Ultra profiles with directional deblurring, dark-ink depth recovery without bright halos, 5-point diagonal anti-aliasing, and flat-fill compression cleanup.
+- **Smooth, Coherent Motion Interpolation (MEMC) for Anime & Cinema:**
+  - Resolved flat-fill motion dropouts and block artifacts by propagating confident contour motion smoothly across uniform anime cel fills, restoring full motion scale during spatial smoothing, eliminating mid-frame phase snaps on occlusions, and pacing intermediate frames directly on the display render clock.
+- **Clean Stream HUD Status Label:**
+  - Removed the duplicate prefix in the Stream HUD overlay when displaying active motion smoothing modes.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.6.5)</b></summary>
+
+<br>
+
+- **Возвращена настоящая чёткость линий Anime4K на профилях «Быстрый», «Чёткий» и «Ультра»:**
+  - Исправлен масштаб выборки исходного видеокадра во всех проходах апскейла и внедрено симметричное сгущение размытых краёв контуров, которое делает рисовку идеально резкой при 100% сохранении авторской толщины штриха.
+  - В профилях «Чёткий» и «Ультра» усилены устранение размытия и восстановление глубины тёмной туши без белых ореолов, пятиточечное сглаживание диагональных линий и очистка плоских заливок от артефактов сжатия.
+- **Плавная и цельная работа уплавнения движений (MEMC) в аниме и кино:**
+  - Устранены пропуск движения на однотонных заливках, ступенчатые рывки на перекрытиях и замирания фазы между кадрами: движение чётких контуров теперь плавно передаётся внутрь заливок рисовки, а промежуточные кадры тактуются строго в ритме обновления экрана.
+- **Аккуратное отображение статуса в «Мониторе потока»:**
+  - Убрано дублирование слова MEMC в информационном окне потока при активном сглаживании движений.
+
+</details>
+
 ## [v4.6.4]
 
 ### 🇬🇧 English
