@@ -3,6 +3,62 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.6.20]
+
+### 🇬🇧 English
+- **Smooth Aspect-Mode Frame Expansion & Contraction Without Jumps:**
+  - Switching between **Fit**, **Zoom**, and **Stretch** now smoothly expands and contracts the video frame with natural spring motion instead of snapping abruptly—keeping image sharpness intact, updating glass refraction even while paused, and gliding ambient letterbox/pillarbox glow cleanly to and from the screen edges on both standard and HDR playback.
+- **Fluid Play / Pause Icon Morphing & Tactile Seek Impulses:**
+  - Across every player control theme, the center Play and Pause symbol now morphs continuously between a rounded play triangle and twin pause bars, while tapping Rewind or Forward responds with a crisp rotational and elastic touch impulse.
+- **Expressive Morphing Loading Indicator Across the Entire App:**
+  - Replaced plain circular spinners throughout video buffering, library scanning, P2P search, source checks, and server setup dialogs with a unified expressive geometric loader that smoothly rotates and morphs through star, polygon, clover, and rounded forms.
+- **Directional Player Overlay Motion & Live Predictive Back Gestures:**
+  - Showing or hiding player controls now glides the top bar from above, settles the bottom timeline and quick-action bar from below, and softly scales the center transport buttons in unison, while swiping back from folder screens or the video player follows your finger in real time and springs cleanly back into place if canceled.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.6.20)</b></summary>
+
+<br>
+
+- **Плавное расширение и сжатие кадра при смене масштаба без скачков:**
+  - Переключение режимов **«По размеру»**, **«Заполнение»** и **«Растянуть»** теперь плавно раскрывает и собирает кадр на пружинной траектории без резкой перестройки картинки — сохраняя чёткость апскейла, живое преломление под стеклом даже на паузе и синхронное схождение фоновой подсветки полей к краям экрана как на обычном видео, так и в HDR.
+- **Живое перетекание значка «Пуск / Пауза» и упругий отклик перемотки:**
+  - Во всех темах оформления плеера центральная кнопка воспроизведения плавно перетекает из скруглённого треугольника в две капсулы паузы, а кнопки перемотки назад и вперёд отзываются ощутимым вращательным и пружинным импульсом при нажатии.
+- **Выразительный многогранный индикатор загрузки во всём приложении:**
+  - Стандартные круговые индикаторы при буферизации видео, сканировании медиатеки, поиске раздач и проверке серверов заменены на единый выразительный индикатор с непрерывным вращением и перетеканием многогранных и округлых форм.
+- **Направленное движение панелей плеера и живой жест возврата назад:**
+  - При появлении и скрытии интерфейса плеера верхняя шапка мягко выезжает сверху, нижняя панель со шкалой времени опускается вниз, а центральные кнопки упруго масштабируются в такт затенению; системный свайп «Назад» с края экрана в папках и видеоплеере теперь плавно уменьшает и сдвигает сцену вслед за пальцем и мягко возвращает её на место при отмене жеста.
+
+</details>
+
+## [v4.6.19]
+
+### 🇬🇧 English
+- **Floating Frame Preview Window During Timeline Scrubbing:**
+  - Dragging along the player timeline now displays a floating glass preview window that smoothly follows your finger, showing the nearest keyframe thumbnail, exact target timestamp, and chapter title for local videos and direct streams (with a compact timestamp capsule for adaptive live streams and a dedicated toggle in Playback Settings).
+- **True Glass Refraction on Floating Buttons & In-Window Dropdown Menus:**
+  - Floating action buttons (such as the "Resume" / "Start" button on folder screens) and context dropdown menus across episode cards, search results, and P2P lists now genuinely refract or diffuse the live screen content beneath them inside the main window, complete with smooth spring transitions and edge-aware positioning without blurring the rest of the page.
+- **Expressive Coarse Matte Grain for Frosted Glass:**
+  - Upgraded the Frosted Glass visual style and the Matte Glass player theme with a tactile, soft-lit sandblasted matte grain across floating bars, modals, cards, and the timeline seek bar, giving matte surfaces unmistakable physical depth distinct from crystal Liquid Glass.
+- **Reliable Multi-Catalog Online Intro & Credits Skip Lookup:**
+  - Online Smart Skip now resolves anime series across three independent catalogs with DNS-over-HTTPS resilience, accurately recognizes bracketed and parenthesized episode numbers without confusing release years or video resolutions, falls back cleanly when episode lengths vary between broadcast and Blu-ray editions, and avoids showing manual intro skip prompts on short clips.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.6.19)</b></summary>
+
+<br>
+
+- **Плавающее окно предпросмотра кадра при перемотке по шкале времени:**
+  - При ведении пальцем по шкале прогресса плеера над ползунком плавно следует стеклянное окошко с кадром сцены, точным временем и названием текущей главы для локальных файлов и прямых потоков (а также аккуратная капсула времени для адаптивных трансляций и отдельный переключатель в настройках воспроизведения).
+- **Живое преломление на плавающих кнопках и выпадающих меню внутри окна:**
+  - Плавающие кнопки действий (включая кнопку «Продолжить» / «Начать» на экране папки) и контекстные выпадающие меню карточек серий, результатов поиска и списков раздач теперь по-настоящему преломляют и рассеивают живой контент прямо под собой с плавной пружинной анимацией и точным позиционированием у краёв экрана без размытия остальной страницы.
+- **Выразительная фактура матированного стекла с объёмным зерном:**
+  - Тема «Матовое стекло» и матовая капсула плеера получили благородную пескоструйную микротекстуру с мягким светотеневым объёмом на панелях, карточках, окнах и шкале перемотки, наглядно подчёркивающую тактильную разницу с кристально прозрачным «Жидким стеклом».
+- **Безотказный онлайн-поиск таймкодов заставок и титров по трём каталогам:**
+  - Онлайн-поиск умного пропуска теперь сопоставляет тайтлы сразу через три независимых каталога аниме с поддержкой защищённого DNS, безошибочно распознаёт номера серий в квадратных и круглых скобках (не путая их с годом выпуска или разрешением видео), находит разметку даже при разнице хронометража между ТВ-версией и Blu-ray и не предлагает пропуск заставки на коротких роликах.
+
+</details>
+
 ## [v4.6.18]
 
 ### 🇬🇧 English
