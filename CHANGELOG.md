@@ -3,6 +3,30 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.6.9]
+
+### 🇬🇧 English
+- **AMD FidelityFX Optical Flow Motion Engine (MEMC):**
+  - Introduced a new hierarchical GPU compute motion pipeline based on AMD FidelityFX Optical Flow (MIT) featuring 9-tap anti-aliased pyramid downsampling, 32-bit ternary structural census matching resilient to lighting shifts, flat-region motion propagation so solid anime color fills move coherently with character outlines, static thin-element locking that protects subtitles and fine details over moving backgrounds, and 5-tap bicubic Catmull-Rom warping with anti-ringing protection.
+- **Lossless Joint Anime4K + MEMC Pipeline & 120 Hz Frame Caching:**
+  - Unified Anime4K and MEMC into a single end-to-end pipeline at full 1080p resolution: denoising and contour deblurring now run once per source video frame before optical flow estimation so motion vectors track crisp, clean edges, while screen-space directional upscaling and synthesized frames are cached across high-refresh display cycles.
+- **Three Unified MEMC Frequency Modes (`×2` / `60 FPS` / `Max Hz`):**
+  - Streamlined motion interpolation into a single three-column row across Settings and the Picture sheet: true **×2 Doubling (48/60 fps)** with exact midpoint phase synthesis and harmonic refresh matching, **Smooth 60 FPS**, and **Max Display Rate (90–165 Hz)** with full 100% vector reach across all modes.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.6.9)</b></summary>
+
+<br>
+
+- **Конвейер оптического потока AMD FidelityFX Optical Flow (MEMC):**
+  - Внедрена новая иерархическая вычислительная архитектура оценки движения на базе AMD FidelityFX Optical Flow (MIT) с 9-точечным сглаживающим построением пирамиды, 32-битным структурным анализом контуров, автоматическим заполнением векторов внутри однотонных заливок рисовки (чтобы заливки персонажей двигались синхронно с контурами), жёсткой защитой неподвижных субтитров и мелких деталей на фоне движения, а также 5-точечной бикубической интерполяцией Catmull-Rom с защитой от звона.
+- **Сквозной совместный конвейер Anime4K + MEMC без потери разрешения и с кэшированием на 120 Гц:**
+  - Anime4K и MEMC объединены в единый конвейер с полным сохранением разрешения 1080p: очистка шума и деблур контуров выполняются ровно один раз на каждый исходный видеокадр до расчёта оптического потока, а синтезированные промежуточные фазы и финальный направленный апскейл кэшируются между тактами высокочастотного экрана.
+- **Три универсальных режима частоты MEMC (`×2` / `60 к/с` / `Макс. Гц`):**
+  - Выбор интерполяции кадров в настройках и окне «Картинка» приведён к наглядному ряду из трёх кнопок с полным 100% доведением фазы движения: честное **Удвоение ×2 (48/60 к/с)** с кратной частотой экрана, **Плавность 60 к/с** и **Максимум экрана (90–165 Гц)**.
+
+</details>
+
 ## [v4.6.8]
 
 ### 🇬🇧 English
