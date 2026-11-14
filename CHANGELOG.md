@@ -3,6 +3,78 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.6.12]
+
+### 🇬🇧 English
+- **Hybrid AMD FidelityFX Optical Flow & FSR 3 Scene Analyzer with Instant 2s/3s Duplicate Bypass:**
+  - Added a GPU scene and cadence analyzer that automatically distinguishes 2D cel animation from live-action cinema to adapt flat-region motion propagation, detects scene cuts instantly, and bypasses all motion-search passes on repeated 2s/3s anime holds to save battery and prevent shimmer.
+- **FSR 3 Asymmetric Occlusion Resolution & Expanded Wide-Panorama Search:**
+  - Replaced symmetric blending on disoccluded edges with single-anchor directional selection so fast-moving arms, weapons, and foreground characters never split into multiple ghosted copies, while expanding the coarse search horizon for sweeping camera pans.
+- **Unlocked Joint Anime4K HQ / Ultra + MEMC, Strict LTPO High-Refresh Lock & Automatic Audio Lip-Sync:**
+  - Unlocked full Anime4K HQ and Ultra contour restoration alongside active motion interpolation, enforced strict fixed-source display refresh locking so LTPO screens never drop to 60 Hz when player controls hide, and added automatic one-frame audio sync compensation during active SDR motion smoothing.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.6.12)</b></summary>
+
+<br>
+
+- **Гибридный анализатор сцены AMD FidelityFX Optical Flow & FSR 3 и мгновенный пропуск дублей 2s/3s:**
+  - Внедрён графический анализатор кадра, который автоматически отличает 2D-аниме от живого кино для точной передачи движения внутри однотонных заливок, мгновенно распознаёт резкие склейки сцен и полностью пропускает тяжёлый поиск векторов на статичных дублях рисовки (2s/3s), экономя заряд батареи и устраняя дрожание контуров.
+- **Асимметричное разрешение перекрытий FSR 3 и расширенный захват быстрых панорам:**
+  - На границах перекрытий фона (взмахи рук, оружия, быстрые движения персонажей) вместо смешивания двух несовпадающих областей применяется выбор одного достоверного кадра, что полностью устраняет эффект расслоения и раздвоения конечностей, а также расширен радиус поиска для быстрых панорам камеры.
+- **Совместная работа Anime4K «Чёткий» / «Ультра» с MEMC, жёсткое удержание 120 Гц и автосинхронизация звука:**
+  - Профили улучшения чёткости Anime4K «Чёткий» и «Ультра» теперь работают совместно со сглаживанием движений без принудительного понижения режима, дисплеи с адаптивной частотой LTPO надёжно удерживают 120 Гц после скрытия кнопок плеера, а звуковая дорожка автоматически синхронизируется с интерполированным видеорядом с точностью до кадра.
+
+</details>
+
+## [v4.6.11]
+
+### 🇬🇧 English
+- **Bidirectional AMD FidelityFX Optical Flow & Anti-Aliasing Verification:**
+  - Upgraded the motion estimation pipeline to full forward-and-backward multi-scale 9-point patch search with circular consistency validation and edge-preserving confidence smoothing, eliminating speckle artifacts on repeating textures (fences, roof tiles, foliage) and preventing contour tearing during fast arm swings and rapid action.
+- **High-Refresh LTPO Display Lock During Active MEMC & Instant Pause Release:**
+  - Keeps 120 Hz+ LTPO displays locked at their optimal high refresh rate (96 Hz / 120 Hz / 144 Hz) whenever motion interpolation is actively playing, and immediately releases the display lock when playback is paused, enters Picture-in-Picture, or MEMC is turned off—showing a clear Paused status in the Stream HUD.
+- **Smooth Subframe Phase Pacing:**
+  - Calibrated intermediate frame phase stepping to the display refresh interval and tightened cadence bounds so 24 fps anime and cinema scenes glide evenly without early-frame jumps.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.6.11)</b></summary>
+
+<br>
+
+- **Двунаправленный оптический поток AMD FidelityFX и перекрёстная проверка сходимости:**
+  - Конвейер оценки движения переведён на полноценный двунаправленный поиск (вперёд и назад) по 9-точечным патчам с проверкой круговой сходимости векторов и сглаживанием маски достоверности вдоль контуров, что полностью устраняет артефакты «крошки» на периодических текстурах (заборах, черепице, листве) и разрывы при быстрых взмахах рук.
+- **Удержание высокой частоты LTPO-экрана при активном MEMC и экономия заряда на паузе:**
+  - Во время активного воспроизведения с включённым сглаживанием движений плеер удерживает высокую частоту обновления экрана (96 / 120 / 144 Гц) без просадок до 60 Гц, а при постановке на паузу, переходе в режим «Картинка в картинке» или отключении MEMC мгновенно возвращает экран к адаптивному энергосберегающему режиму с наглядной индикацией паузы в мониторе потока.
+- **Равномерный темп промежуточных фаз:**
+  - Шаг синтеза промежуточных кадров синхронизирован с реальным периодом обновления экрана и защищён от растяжения при редких дублях декодера, обеспечивая равномерное движение без рывка в начале кадра.
+
+</details>
+
+## [v4.6.10]
+
+### 🇬🇧 English
+- **Symmetric Midpoint Trajectory & Panorama Stability in AMD FidelityFX Optical Flow:**
+  - Refined multi-scale pyramid motion estimation with symmetric midpoint phase sampling across coarse and fine search passes, consistent motion confidence tracking across pyramid levels, and wide camera-pan protection so fast action scenes and sweeping panoramas stay smooth without premature fallback.
+- **Complete AMD FidelityFX Optical Flow (MIT License) Attribution:**
+  - Added full open-source MIT License attribution and official repository links for AMD FidelityFX Optical Flow (Advanced Micro Devices, Inc.) in the About card, the Open-Source Licenses catalog across all distribution builds, and the public release documentation.
+- **Updated Interactive Reference Guides for MEMC & Graphics Pipelines:**
+  - Synchronized the interactive info guides for Frame Interpolation (×2, 60 FPS, and Max Hz) and Graphics Pipelines with detailed explanations of the 3-level AMD FidelityFX Optical Flow architecture and joint Anime4K integration.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.6.10)</b></summary>
+
+<br>
+
+- **Симметричная фазовая траектория и стабильность панорам в AMD FidelityFX Optical Flow:**
+  - Усовершенствован многоуровневый пирамидальный расчёт движения с симметричным вычислением центральной фазы на грубом и точном уровнях поиска, сквозным сохранением достоверности векторов между каскадами пирамиды и защитой широких панорам камеры от ложного срабатывания детектора смены сцены.
+- **Полная правовая атрибуция AMD FidelityFX Optical Flow (MIT License):**
+  - В карточку «О приложении», каталог открытых лицензий во всех вариантах сборки и публичную документацию добавлена полная атрибуция открытой лицензии MIT для AMD FidelityFX Optical Flow (Advanced Micro Devices, Inc.) с прямой ссылкой на официальный репозиторий.
+- **Обновлённые интерактивные справки по режимам MEMC и графическому конвейеру:**
+  - Справочные окна по сглаживанию движений («×2», «60 к/с» и «Макс. Гц») и выбору графического конвейера синхронизированы с описанием трёхуровневой архитектуры AMD FidelityFX Optical Flow и совместной работы с Anime4K.
+
+</details>
+
 ## [v4.6.9]
 
 ### 🇬🇧 English
