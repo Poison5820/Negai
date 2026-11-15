@@ -3,6 +3,26 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.7.0]
+
+### 🇬🇧 English
+- Fixed video frame freezes during rapid or repeated seeking in online and P2P streams.
+- Fixed automatic opening and ending timestamp detection for bilingual and streaming anime releases.
+- Improved the open player skip button so manual forward jumps work anywhere in the episode with quick undo.
+- Improved the double-tap seek indicator placement near the top of the screen and Settings navigation with instant search.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.7.0)</b></summary>
+
+<br>
+
+- Исправлено зависание кадра при быстрой и многократной перемотке онлайн- и P2P-потоков.
+- Исправлено автоматическое распознавание таймкодов опенингов и эндингов для русскоязычных и потоковых релизов.
+- Улучшена кнопка пропуска в открытом меню плеера для ручного прыжка в любой момент серии с возвратом.
+- Улучшено расположение индикатора перемотки двойным касанием в верхней части экрана и навигация по настройкам с поиском.
+
+</details>
+
 ## [v4.6.33]
 
 ### 🇬🇧 English
