@@ -3,6 +3,38 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.6.23]
+
+### 🇬🇧 English
+- **Instant Live Video Frame in Glass Player Controls:**
+  - Glass buttons, top-bar capsules, and quick-action pills now refract the current live video frame from the very first moment the player overlay fades in, eliminating stale frames carried over from earlier overlay openings on both standard and HDR playback.
+- **Zero Frame Jump on Pause & Resume During Motion Smoothing:**
+  - Pressing Pause or Resume while motion smoothing is active now holds the exact frame currently on screen without jumping backward or forward by a frame, while still allowing instant live adjustments to upscaling presets, sharpness, and split comparison while paused.
+- **Immediate Timeline Seek Preview & Parallel Frame Decoding:**
+  - Touching the seek bar now opens the floating frame preview card immediately on contact before dragging, backed by background keyframe pre-warming and parallel local frame decoding for smooth, responsive scrubbing across long episodes and movies.
+- **Authentic Video Aspect Ratios in Seek Preview Cards:**
+  - The timeline seek preview card now adapts its frame proportions and card width to match the true aspect ratio of the video—supporting classic 4:3 anime, standard 16:9 widescreen, 21:9 ultrawide cinema, and vertical 9:16 videos without cropping or distortion.
+- **Spatial Outer-Rim Ambient Video Glow:**
+  - Upgraded the ambient screen glow to sample strictly along the outermost rim of the active video frame and project a two-dimensional spatial light field onto the surrounding letterbox and pillarbox bars, accurately reflecting localized bright highlights and colors along each part of the frame edge.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.6.23)</b></summary>
+
+<br>
+
+- **Мгновенный актуальный кадр в стеклянных кнопках плеера при появлении:**
+  - Стеклянные кнопки, капсулы верхней панели и нижние быстрые действия теперь преломляют текущий живой кадр видео с первой же доли секунды плавного появления интерфейса — без кратковременного показа старого кадра с прошлого открытия меню как на обычном видео, так и в режиме HDR.
+- **Остановка и продолжение воспроизведения без скачка кадра при сглаживании движений:**
+  - Нажатие паузы и возобновление просмотра при включённом сглаживании движений теперь фиксирует на экране именно тот кадр, на котором вы остановились, без малейшего перескока вперёд или назад, сохраняя при этом мгновенный отклик переключения профилей чёткости и режима сравнения на паузе.
+- **Молниеносное окно предпросмотра при касании шкалы и параллельное декодирование:**
+  - Карточка предпросмотра кадра теперь появляется мгновенно в момент первого прикосновения к полосе перемотки ещё до начала сдвига пальца, а параллельное декодирование в два потока и фоновая подготовка ключевых точек обеспечивают в 3–4 раза более быстрый отклик при быстрой прокрутке.
+- **Родные пропорции кадра в окне предпросмотра перемотки:**
+  - Окно предпросмотра на шкале времени автоматически подстраивает форму миниатюры и ширину карточки под реальные пропорции видео — от классического аниме 4:3 и стандартного 16:9 до ультрашироких фильмов 21:9 и вертикальных роликов 9:16 без обрезки краёв.
+- **Пространственная контурная фоновая подсветка полей по внешней кромке кадра:**
+  - Фоновая подсветка полей вокруг видео теперь считывает свет строго по внешней кромке кадра и строит двумерную пространственную карту свечения: если яркий объект или вспышка находится только в одном углу или части края, мягкое свечение появляется именно в этой зоне.
+
+</details>
+
 ## [v4.6.22]
 
 ### 🇬🇧 English
