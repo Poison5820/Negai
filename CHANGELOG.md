@@ -3,6 +3,26 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.6.32]
+
+### 🇬🇧 English
+- Fixed hardware benchmark stage switching, scene replay accuracy, and automatic pause after completion.
+- Fixed frame rate counter accuracy and cinema sharpening in native resolution graphics mode.
+- Improved ambient video glow transitions for seamless color blending across every screen refresh.
+- Improved scrolling smoothness inside floating glass player sheets and benchmark bottleneck diagnostics.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.6.32)</b></summary>
+
+<br>
+
+- Исправлено переключение режимов на этапах теста производительности, повтор тестовой сцены и автопауза в финале.
+- Исправлена точность счётчика кадров и работа резкости кино в графическом режиме без масштабирования.
+- Улучшена плавность переходов фоновой подсветки вокруг кадра для мягкой смены оттенков без рывков.
+- Улучшена плавность прокрутки списков внутри стеклянных окон плеера и точность итоговых вердиктов теста.
+
+</details>
+
 ## [v4.6.31]
 
 ### 🇬🇧 English
