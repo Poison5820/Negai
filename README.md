@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.6.30-FF80AB?style=flat-square" alt="Version 4.6.30" />
+  <img src="https://img.shields.io/badge/version-4.6.31-FF80AB?style=flat-square" alt="Version 4.6.31" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/GPU-Vulkan_1.1_%E2%80%A2_GLES_3.1_FP16-7C4DFF?style=flat-square" alt="GPU Compute" />
@@ -42,11 +42,13 @@ Install and update Negai automatically via **Obtainium** or download the univers
 
 ---
 
-## ✨ What's New in Release 4.6.30
+## ✨ What's New in Release 4.6.31
 
-- Improved the Pro screen and Settings card with clear descriptions of every unlocked feature.
-- Improved Store and Community edition screens by removing external tip-jar and donation links.
-- Improved in-app and online release notes with short, easy-to-scan change summaries.
+- Fixed top bar gap bleed-through when scrolling in Frosted and Liquid Glass themes.
+- Improved folder and episode lists with pinned headers and cleaner pull-to-refresh spacing.
+- Improved folder and video count labels so they no longer resemble buttons.
+- Improved video settings by combining adaptive screen refresh options into one switch.
+- Improved the Negai Premium dialog layout and removed its duplicate Settings card.
 
 ---
 
@@ -89,7 +91,7 @@ Install and update Negai automatically via **Obtainium** or download the univers
 | **Distribution** | GitHub Releases & Obtainium | Google Play Store |
 | **Core 4K HDR / Vulkan 1.1 / GLES 3.1 / `HRTF` Player** | Included | Included |
 | **120+ World Languages & External Track Pairing** | Included | Included |
-| **Negai Pro (`HQ/Ultra` Upscale, `60/Max Hz` MEMC, `BWE` Audio, Glass Themes & Dual Palettes)** | Unlocked out of the box | Optional one-time **Negai Pro** unlock via Google Play Billing |
+| **Negai Premium (`HQ/Ultra` Upscale, `60/Max Hz` MEMC, `BWE` Audio, Glass Themes & Dual Palettes)** | Unlocked out of the box | Optional one-time **Negai Premium** unlock via Google Play Billing |
 | **Built-in P2P Indexer Search Catalog** | Included (configurable + custom APIs) | Omitted for Play Store policy compliance (user-configured endpoints only) |
 | **Ads & User Tracking** | None | None |
 
