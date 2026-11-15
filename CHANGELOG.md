@@ -3,35 +3,157 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.6.30]
+
+### 🇬🇧 English
+- Improved the Pro screen and Settings card with clear descriptions of every unlocked feature.
+- Improved Store and Community edition screens by removing external tip-jar and donation links.
+- Improved in-app and online release notes with short, easy-to-scan change summaries.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.6.30)</b></summary>
+
+<br>
+
+- Улучшено описание возможностей на экране подписки и в разделе настроек без размытых формулировок.
+- Улучшено оформление редакций приложения за счёт полного удаления внешних ссылок на пожертвования.
+- Улучшен формат истории обновлений в приложении и на странице релизов для быстрого чтения.
+
+</details>
+
+## [v4.6.29]
+
+### 🇬🇧 English
+- Added over one hundred twenty world and regional languages for audio and subtitle selection.
+- Improved automatic pairing of external voiceover and subtitle folders across multilingual episode releases.
+- Added release search filters by voiceover presence, subtitle availability, and your preferred language settings.
+- Added recognized voiceover and subtitle language badges directly on release search cards.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.6.29)</b></summary>
+
+<br>
+
+- Добавлено более ста двадцати мировых и региональных языков для выбора озвучки и субтитров.
+- Улучшен автоматический подбор внешних папок озвучки и субтитров в многоязычных релизах.
+- Добавлены фильтры поиска раздач по наличию озвучки, субтитров и выбранным в настройках языкам.
+- Добавлены наглядные метки распознанных языков озвучки и субтитров на карточках результатов поиска.
+
+</details>
+
+## [v4.6.28]
+
+### 🇬🇧 English
+- Added a next-generation graphics video engine with instant switching during playback.
+- Improved anime upscaling, cinema sharpening, and motion smoothing efficiency on modern smartphones.
+- Improved automatic fallback to the classic graphics mode on older device drivers.
+- Added live active graphics engine status inside the player stream monitor card.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.6.28)</b></summary>
+
+<br>
+
+- Добавлен графический видеодвижок нового поколения с мгновенным переключением прямо во время просмотра.
+- Улучшена энергоэффективность масштабирования аниме, резкости кино и сглаживания движений на современных смартфонах.
+- Улучшен автоматический переход на классический режим графики при ограничениях видеодрайвера устройства.
+- Добавлено отображение активного графического режима в карточке монитора потока плеера.
+
+</details>
+
+## [v4.6.27]
+
+### 🇬🇧 English
+- Added adaptive display synchronization for smooth, flicker-free playback on high-refresh smartphone screens.
+- Improved smooth transitions across hybrid anime scenes with mixed animation and credits speeds.
+- Added screen panel type and supported refresh rate diagnostics in Device Info.
+- Added a live frame-hold cadence indicator inside the player stream monitor card.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.6.27)</b></summary>
+
+<br>
+
+- Добавлена адаптивная синхронизация экрана для плавного воспроизведения без мерцания на высокогерцовых дисплеях.
+- Улучшена плавность переходов в гибридных сценах аниме с разной скоростью анимации и титров.
+- Добавлено определение типа матрицы и доступных частот обновления в разделе информации об устройстве.
+- Добавлен живой индикатор кратности показа кадров в карточке монитора потока плеера.
+
+</details>
+
+## [v4.6.26]
+
+### 🇬🇧 English
+- Fixed subtle panning judder when watching movies and anime on high-refresh screens.
+- Added live frame rate and active screen refresh readouts in the stream monitor.
+- Improved the built-in performance benchmark with continuous video playback and cinema upscaling checks.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.6.26)</b></summary>
+
+<br>
+
+- Исправлены микрорывки на панорамах камеры при просмотре аниме и кино на высокогерцовых экранах.
+- Добавлено живое отображение частоты кадров и активной герцовки экрана в мониторе потока.
+- Улучшен встроенный тест производительности с непрерывным воспроизведением видео и проверкой масштабирования кино.
+
+</details>
+
+## [v4.6.25]
+
+### 🇬🇧 English
+- Added an elastic pull-to-refresh gesture across folder, episode, history, and release lists.
+- Improved visual contrast between the warm charcoal Dark theme and pitch-black OLED mode.
+- Improved Light theme active button accents when card color tinting is turned off.
+- Improved the Flat theme with clean solid folder icons and action badges.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.6.25)</b></summary>
+
+<br>
+
+- Добавлен упругий жест обновления потягиванием вниз в списках папок, серий, истории и раздач.
+- Улучшено визуальное разделение между графитовой Тёмной темой и глубоким чёрным режимом OLED.
+- Улучшена мягкая цветовая подсветка активных кнопок в Светлой теме без тонирования карточек.
+- Улучшен Плоский стиль интерфейса с лаконичными однотонными значками папок и кнопок.
+
+</details>
+
+## [v4.6.24]
+
+### 🇬🇧 English
+- Improved the Frosted Glass theme with a crisp, uniform matte finish across surfaces.
+- Added live video blur and matte texture to active player buttons and tabs.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.6.24)</b></summary>
+
+<br>
+
+- Улучшена тема Матовое стекло за счёт равномерной матовой фактуры на всех панелях.
+- Добавлено живое матовое размытие видео на активных кнопках плеера и панели навигации.
+
+</details>
+
 ## [v4.6.23]
 
 ### 🇬🇧 English
-- **Instant Live Video Frame in Glass Player Controls:**
-  - Glass buttons, top-bar capsules, and quick-action pills now refract the current live video frame from the very first moment the player overlay fades in, eliminating stale frames carried over from earlier overlay openings on both standard and HDR playback.
-- **Zero Frame Jump on Pause & Resume During Motion Smoothing:**
-  - Pressing Pause or Resume while motion smoothing is active now holds the exact frame currently on screen without jumping backward or forward by a frame, while still allowing instant live adjustments to upscaling presets, sharpness, and split comparison while paused.
-- **Immediate Timeline Seek Preview & Parallel Frame Decoding:**
-  - Touching the seek bar now opens the floating frame preview card immediately on contact before dragging, backed by background keyframe pre-warming and parallel local frame decoding for smooth, responsive scrubbing across long episodes and movies.
-- **Authentic Video Aspect Ratios in Seek Preview Cards:**
-  - The timeline seek preview card now adapts its frame proportions and card width to match the true aspect ratio of the video—supporting classic 4:3 anime, standard 16:9 widescreen, 21:9 ultrawide cinema, and vertical 9:16 videos without cropping or distortion.
-- **Spatial Outer-Rim Ambient Video Glow:**
-  - Upgraded the ambient screen glow to sample strictly along the outermost rim of the active video frame and project a two-dimensional spatial light field onto the surrounding letterbox and pillarbox bars, accurately reflecting localized bright highlights and colors along each part of the frame edge.
+- Fixed brief stale video frames inside glass player buttons when controls appear.
+- Fixed single-frame jumps when pausing or resuming video during motion smoothing.
+- Improved timeline scrubbing with an instant preview window on first touch.
+- Improved seek preview cards to match vertical, classic, widescreen, and ultrawide video proportions.
+- Improved ambient video glow to follow localized bright colors along frame edges.
 
 <details>
 <summary><b>🇷🇺 На русском (Что нового в v4.6.23)</b></summary>
 
 <br>
 
-- **Мгновенный актуальный кадр в стеклянных кнопках плеера при появлении:**
-  - Стеклянные кнопки, капсулы верхней панели и нижние быстрые действия теперь преломляют текущий живой кадр видео с первой же доли секунды плавного появления интерфейса — без кратковременного показа старого кадра с прошлого открытия меню как на обычном видео, так и в режиме HDR.
-- **Остановка и продолжение воспроизведения без скачка кадра при сглаживании движений:**
-  - Нажатие паузы и возобновление просмотра при включённом сглаживании движений теперь фиксирует на экране именно тот кадр, на котором вы остановились, без малейшего перескока вперёд или назад, сохраняя при этом мгновенный отклик переключения профилей чёткости и режима сравнения на паузе.
-- **Молниеносное окно предпросмотра при касании шкалы и параллельное декодирование:**
-  - Карточка предпросмотра кадра теперь появляется мгновенно в момент первого прикосновения к полосе перемотки ещё до начала сдвига пальца, а параллельное декодирование в два потока и фоновая подготовка ключевых точек обеспечивают в 3–4 раза более быстрый отклик при быстрой прокрутке.
-- **Родные пропорции кадра в окне предпросмотра перемотки:**
-  - Окно предпросмотра на шкале времени автоматически подстраивает форму миниатюры и ширину карточки под реальные пропорции видео — от классического аниме 4:3 и стандартного 16:9 до ультрашироких фильмов 21:9 и вертикальных роликов 9:16 без обрезки краёв.
-- **Пространственная контурная фоновая подсветка полей по внешней кромке кадра:**
-  - Фоновая подсветка полей вокруг видео теперь считывает свет строго по внешней кромке кадра и строит двумерную пространственную карту свечения: если яркий объект или вспышка находится только в одном углу или части края, мягкое свечение появляется именно в этой зоне.
+- Исправлено мелькание старого кадра в стеклянных кнопках плеера при появлении панели управления.
+- Исправлен перескок на соседний кадр при нажатии паузы во время сглаживания движений.
+- Улучшена перемотка по шкале времени с мгновенным появлением окна предпросмотра при касании.
+- Улучшена форма окна предпросмотра с автоматической подстройкой под родные пропорции любого видео.
+- Улучшена фоновая подсветка вокруг видео с точной передачей света у краёв кадра.
 
 </details>
 
