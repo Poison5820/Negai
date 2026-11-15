@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.6.31-FF80AB?style=flat-square" alt="Version 4.6.31" />
+  <img src="https://img.shields.io/badge/version-4.6.32-FF80AB?style=flat-square" alt="Version 4.6.32" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/GPU-Vulkan_1.1_%E2%80%A2_GLES_3.1_FP16-7C4DFF?style=flat-square" alt="GPU Compute" />
@@ -42,13 +42,12 @@ Install and update Negai automatically via **Obtainium** or download the univers
 
 ---
 
-## ✨ What's New in Release 4.6.31
+## ✨ What's New in Release 4.6.32
 
-- Fixed top bar gap bleed-through when scrolling in Frosted and Liquid Glass themes.
-- Improved folder and episode lists with pinned headers and cleaner pull-to-refresh spacing.
-- Improved folder and video count labels so they no longer resemble buttons.
-- Improved video settings by combining adaptive screen refresh options into one switch.
-- Improved the Negai Premium dialog layout and removed its duplicate Settings card.
+- Fixed hardware benchmark stage switching, scene replay accuracy, and automatic pause after completion.
+- Fixed frame rate counter accuracy and cinema sharpening in native resolution graphics mode.
+- Improved ambient video glow transitions for seamless color blending across every screen refresh.
+- Improved scrolling smoothness inside floating glass player sheets and benchmark bottleneck diagnostics.
 
 ---
 
