@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.7.0-FF80AB?style=flat-square" alt="Version 4.7.0" />
+  <img src="https://img.shields.io/badge/version-4.7.2-FF80AB?style=flat-square" alt="Version 4.7.2" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/GPU-Vulkan_1.1_%E2%80%A2_GLES_3.1_FP16-7C4DFF?style=flat-square" alt="GPU Compute" />
@@ -38,16 +38,16 @@ Install and update Negai automatically via **Obtainium** or download the univers
 - **Supported CPU ABIs**: `arm64-v8a`, `armeabi-v7a`, `x86_64`, `x86` (16 KB memory-page aligned)
 - **Minimum OS**: Android 8.0+ (API 26+; Android 10+ API 29 required for native Vulkan 1.1 `AHardwareBuffer` zero-copy path)
 - **Automatic Updates via Obtainium**: Tap the badge above or add `https://github.com/Poison5820/Negai` in [Obtainium](https://github.com/ImranR98/Obtainium).
-- **Release History & Privacy**: [`CHANGELOG.md`](CHANGELOG.md) · [`PRIVACY.md`](PRIVACY.md)
+- **Release Notes & Privacy**: [GitHub Releases](https://github.com/Poison5820/Negai/releases) · [`PRIVACY.md`](PRIVACY.md)
 
 ---
 
-## ✨ What's New in Release 4.7.0
+## ✨ What's New in Release 4.7.2
 
-- Added instant keyword search at the top of Settings across every category.
-- Improved Settings navigation with ten clear categories, grouped cards, and auto-hidden bottom tabs.
-- Improved Appearance, Player, Media, and Device settings by removing duplicate presets and frames.
-- Fixed rectangular tap highlights overflowing rounded badges, buttons, and cards across the app.
+- Improved video upscaling speed and frame timing accuracy on modern graphics processors.
+- Improved ambient video glow smoothness on screen borders without visible color bands.
+- Improved scrolling smoothness inside floating glass menus during active video playback.
+- Fixed public repository documentation links and automated release notes formatting.
 
 ---
 
@@ -125,7 +125,7 @@ Install and update Negai automatically via **Obtainium** or download the univers
 
 ## 📄 Licensing, Privacy & Open-Source Attributions
 
-- **Negai Player**: Proprietary, closed-source software. Copyright © 2026 Negai Player. All Rights Reserved. This public repository serves as the official release distribution hub, issue tracker, and open-source attribution notice. Read our [`PRIVACY.md`](PRIVACY.md) and [`CHANGELOG.md`](CHANGELOG.md).
+- **Negai Player**: Proprietary, closed-source software. Copyright © 2026 Negai Player. All Rights Reserved. This public repository serves as the official release distribution hub, issue tracker, and open-source attribution notice. Read our [`PRIVACY.md`](PRIVACY.md).
 - **Anime4K (MIT License)**: Real-time anime line reconstruction shaders based on [bloc97/Anime4K](https://github.com/bloc97/Anime4K) (Copyright © 2019–2021 bloc97). See [`LICENSE_ANIME4K.txt`](LICENSE_ANIME4K.txt).
 - **AMD FidelityFX Optical Flow & Super Resolution 1.0 (MIT License)**: Hierarchical 32-bit Census optical flow motion estimation and edge-adaptive elliptical spatial upsampling (`EASU + RCAS`) adapted from the [AMD FidelityFX SDK](https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK) (Copyright © 2021–2026 Advanced Micro Devices, Inc.). See [`LICENSE_AMD_FIDELITYFX.txt`](LICENSE_AMD_FIDELITYFX.txt).
 - **MIT KEMAR HRTF (MIT License)**: Binaural spatial audio impulse responses derived from the [MIT Media Lab KEMAR HRTF Dataset](https://sound.media.mit.edu/resources/KEMAR.html) (Bill Gardner & Keith Martin). See [`LICENSE_MIT_KEMAR_HRTF.txt`](LICENSE_MIT_KEMAR_HRTF.txt).
