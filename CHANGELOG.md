@@ -3,6 +3,24 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.6.33]
+
+### 🇬🇧 English
+- Added a live Compact mode toggle in Appearance settings for denser list layouts.
+- Improved default card, chip, and list spacing across folders, history, and search screens.
+- Improved grouped interface settings with clean section headers and connected row containers.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.6.33)</b></summary>
+
+<br>
+
+- Добавлен переключатель компактного режима в настройках оформления для более плотного показа списков.
+- Улучшены стандартные отступы карточек, фильтров и списков в папках, истории и поиске.
+- Улучшена группировка переключателей оформления за счёт чистых заголовков и связных карточек.
+
+</details>
+
 ## [v4.6.32]
 
 ### 🇬🇧 English
