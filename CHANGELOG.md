@@ -3,6 +3,28 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
+## [v4.6.31]
+
+### 🇬🇧 English
+- Fixed top bar gap bleed-through when scrolling in Frosted and Liquid Glass themes.
+- Improved folder and episode lists with pinned headers and cleaner pull-to-refresh spacing.
+- Improved folder and video count labels so they no longer resemble buttons.
+- Improved video settings by combining adaptive screen refresh options into one switch.
+- Improved the Negai Premium dialog layout and removed its duplicate Settings card.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.6.31)</b></summary>
+
+<br>
+
+- Исправлен просвет прокручиваемого списка над верхней панелью в стеклянных темах оформления.
+- Улучшена прокрутка папок и серий с закреплённой шапкой и аккуратным потягиванием вниз.
+- Улучшено оформление счётчиков папок и видео без лишней обводки под кнопку.
+- Улучшены настройки видео за счёт объединения адаптивной частоты экрана в один переключатель.
+- Улучшено окно Negai Premium и убрана дублирующая карточка из раздела настроек.
+
+</details>
+
 ## [v4.6.30]
 
 ### 🇬🇧 English
