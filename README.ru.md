@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/версия-4.7.0-FF80AB?style=flat-square" alt="Версия 4.7.0" />
+  <img src="https://img.shields.io/badge/версия-4.7.2-FF80AB?style=flat-square" alt="Версия 4.7.2" />
   <img src="https://img.shields.io/badge/пакет-app.negai.player-00B8D4?style=flat-square" alt="Пакет приложения" />
   <img src="https://img.shields.io/badge/платформа-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Платформа" />
   <img src="https://img.shields.io/badge/GPU-Vulkan_1.1_%E2%80%A2_GLES_3.1_FP16-7C4DFF?style=flat-square" alt="GPU Compute" />
@@ -38,16 +38,16 @@
 - **Поддерживаемые архитектуры**: `arm64-v8a`, `armeabi-v7a`, `x86_64`, `x86` (выравнивание страниц памяти 16 КБ)
 - **Минимальная версия ОС**: Android 8.0+ (API 26+; для нативного zero-copy конвейера Vulkan 1.1 `AHardwareBuffer` требуется Android 10+ API 29)
 - **Автообновления через Obtainium**: Нажмите на бейдж выше или добавьте `https://github.com/Poison5820/Negai` в [Obtainium](https://github.com/ImranR98/Obtainium).
-- **История изменений и приватность**: [`CHANGELOG.md`](CHANGELOG.md) · [`PRIVACY.md`](PRIVACY.md)
+- **Описания релизов и приватность**: [GitHub Releases](https://github.com/Poison5820/Negai/releases) · [`PRIVACY.md`](PRIVACY.md)
 
 ---
 
-## ✨ Что нового в релизе 4.7.0
+## ✨ Что нового в релизе 4.7.2
 
-- Добавлен мгновенный поиск по ключевым словам сверху главного экрана настроек по всем разделам.
-- Улучшена навигация по настройкам с десятью понятными разделами и автоскрытием нижней панели.
-- Улучшены страницы оформления, плеера, медиа и устройства без лишних рамок и дублей.
-- Исправлены прямоугольные блики нажатия, выходившие за скруглённые края карточек, кнопок и меток.
+- Улучшена скорость масштабирования видео и точность расчёта времени кадра на графическом процессоре.
+- Улучшена плавность фоновой подсветки вокруг кадра без ступенчатых цветовых полос.
+- Улучшена плавность прокрутки внутри всплывающих стеклянных меню во время просмотра видео.
+- Исправлены ссылки в публичной документации и оформление автоматических описаний релизов.
 
 ---
 
@@ -125,7 +125,7 @@
 
 ## 📄 Лицензии, приватность и открытые компоненты
 
-- **Negai Player**: Проприетарное программное обеспечение с закрытым исходным кодом. Copyright © 2026 Negai Player. Все права защищены. Публичный репозиторий используется исключительно для публикации официальных сборок, приёма обращений и уведомлений об открытых лицензиях. См. [`PRIVACY.md`](PRIVACY.md) и [`CHANGELOG.md`](CHANGELOG.md).
+- **Negai Player**: Проприетарное программное обеспечение с закрытым исходным кодом. Copyright © 2026 Negai Player. Все права защищены. Публичный репозиторий используется исключительно для публикации официальных сборок, приёма обращений и уведомлений об открытых лицензиях. См. [`PRIVACY.md`](PRIVACY.md).
 - **Anime4K (MIT License)**: Шейдеры реконструкции линий аниме на базе [bloc97/Anime4K](https://github.com/bloc97/Anime4K) (Copyright © 2019–2021 bloc97). См. [`LICENSE_ANIME4K.txt`](LICENSE_ANIME4K.txt).
 - **AMD FidelityFX Optical Flow & Super Resolution 1.0 (MIT License)**: Иерархический 32-битный конвейер оценки оптического потока и эллиптический пространственный апскейлер (`EASU + RCAS`) на базе [AMD FidelityFX SDK](https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK) (Copyright © 2021–2026 Advanced Micro Devices, Inc.). См. [`LICENSE_AMD_FIDELITYFX.txt`](LICENSE_AMD_FIDELITYFX.txt).
 - **MIT KEMAR HRTF (MIT License)**: Бинауральные импульсные характеристики пространственного звука на базе набора [MIT Media Lab KEMAR HRTF](https://sound.media.mit.edu/resources/KEMAR.html) (Bill Gardner & Keith Martin). См. [`LICENSE_MIT_KEMAR_HRTF.txt`](LICENSE_MIT_KEMAR_HRTF.txt).
