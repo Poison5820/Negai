@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.7.4-FF80AB?style=flat-square" alt="Version 4.7.4" />
+  <img src="https://img.shields.io/badge/version-4.7.5-FF80AB?style=flat-square" alt="Version 4.7.5" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/GPU-Vulkan_1.1_%E2%80%A2_GLES_3.1_FP16-7C4DFF?style=flat-square" alt="GPU Compute" />
@@ -42,13 +42,13 @@ Install and update Negai automatically via **Obtainium** or download the univers
 
 ---
 
-## ✨ What's New in Release 4.7.4
+## ✨ What's New in Release 4.7.5
 
-- Fixed brief old-frame flashes and micro-stutters when toggling frame interpolation or upscaling during playback.
-- Added active upscale engine labels and a quick engine selector on the upscale button.
-- Improved the player bottom bar with centered enhancement controls and exact custom button ordering.
-- Improved the player tools menu with four compact tabs, clean groups, and a close button.
-- Fixed brief central loading flashes when seeking quickly inside local video files.
+- Improved opening and ending detection accuracy on dubbed releases with automatic stereo music matching.
+- Added separate left and right quick action zones in the player bottom control bar.
+- Simplified center control themes into six distinct shapes with independent panel surface styles.
+- Fixed brief first-frame stalls and playback button flicker when resuming episodes.
+- Improved list scrolling responsiveness and swipe inertia across library and settings screens.
 
 ---
 
