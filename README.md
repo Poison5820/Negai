@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.7.7-FF80AB?style=flat-square" alt="Version 4.7.7" />
+  <img src="https://img.shields.io/badge/version-4.7.8-FF80AB?style=flat-square" alt="Version 4.7.8" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/GPU-Vulkan_1.1_%E2%80%A2_GLES_3.1_FP16-7C4DFF?style=flat-square" alt="GPU Compute" />
@@ -42,12 +42,11 @@ Install and update Negai automatically via **Obtainium** or download the univers
 
 ---
 
-## ✨ What's New in Release 4.7.7
+## ✨ What's New in Release 4.7.8
 
-- Fixed unwanted button background tints in frameless player overlay mode.
-- Fixed stray borders around cards, badges, and buttons in the flat theme.
-- Improved frosted glass surfaces with a softer, finer satin texture.
-- Improved pull-to-refresh so lists scroll freely underneath the floating indicator.
+- Fixed item selection and cancel gestures inside player quick-action hold menus.
+- Improved upscale engine switching inside the quick-action menu without closing it.
+- Improved P2P search with a compact filter button and unified filter window.
 
 ---
 
