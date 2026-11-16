@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.7.2-FF80AB?style=flat-square" alt="Version 4.7.2" />
+  <img src="https://img.shields.io/badge/version-4.7.4-FF80AB?style=flat-square" alt="Version 4.7.4" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/GPU-Vulkan_1.1_%E2%80%A2_GLES_3.1_FP16-7C4DFF?style=flat-square" alt="GPU Compute" />
@@ -42,12 +42,13 @@ Install and update Negai automatically via **Obtainium** or download the univers
 
 ---
 
-## ✨ What's New in Release 4.7.2
+## ✨ What's New in Release 4.7.4
 
-- Improved video upscaling speed and frame timing accuracy on modern graphics processors.
-- Improved ambient video glow smoothness on screen borders without visible color bands.
-- Improved scrolling smoothness inside floating glass menus during active video playback.
-- Fixed public repository documentation links and automated release notes formatting.
+- Fixed brief old-frame flashes and micro-stutters when toggling frame interpolation or upscaling during playback.
+- Added active upscale engine labels and a quick engine selector on the upscale button.
+- Improved the player bottom bar with centered enhancement controls and exact custom button ordering.
+- Improved the player tools menu with four compact tabs, clean groups, and a close button.
+- Fixed brief central loading flashes when seeking quickly inside local video files.
 
 ---
 
