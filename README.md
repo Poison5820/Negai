@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.7.12-FF80AB?style=flat-square" alt="Version 4.7.12" />
+  <img src="https://img.shields.io/badge/version-4.7.13-FF80AB?style=flat-square" alt="Version 4.7.13" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/GPU-Vulkan_1.1_%E2%80%A2_GLES_3.1_FP16-7C4DFF?style=flat-square" alt="GPU Compute" />
@@ -42,13 +42,13 @@ Install and update Negai automatically via **Obtainium** or download the univers
 
 ---
 
-## ✨ What's New in Release 4.7.12
+## ✨ What's New in Release 4.7.13
 
-- Added the Ruby and Sapphire dual-tone palette for dark and light themes.
-- Improved color balance across interface palettes for calmer backgrounds and clearer active highlights.
-- Improved scroll edge refraction with softer, more natural glass transitions across lists and menus.
-- Fixed floating windows appearing blank or clipped after rotating the screen to landscape mode.
-- Fixed glass theme previews after frameless mode and enabled interactive timeline scrubbing in previews.
+- Pinned the bottom quick-actions center divider so active mode chips expand without shifting controls.
+- Cleaned up auto upscale badges to show only the active engine and quality preset.
+- Kept the unified deck player controls theme consistent even when side panels are frameless.
+- Refined edge ambient glow sampling and made bottom navigation bar transitions smooth and symmetric.
+- Focused P2P language filtering on audio tracks and simplified all mode guides into plain language.
 
 ---
 
