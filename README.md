@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.7.8-FF80AB?style=flat-square" alt="Version 4.7.8" />
+  <img src="https://img.shields.io/badge/version-4.7.10-FF80AB?style=flat-square" alt="Version 4.7.10" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/GPU-Vulkan_1.1_%E2%80%A2_GLES_3.1_FP16-7C4DFF?style=flat-square" alt="GPU Compute" />
@@ -42,11 +42,11 @@ Install and update Negai automatically via **Obtainium** or download the univers
 
 ---
 
-## ✨ What's New in Release 4.7.8
+## ✨ What's New in Release 4.7.10
 
-- Fixed item selection and cancel gestures inside player quick-action hold menus.
-- Improved upscale engine switching inside the quick-action menu without closing it.
-- Improved P2P search with a compact filter button and unified filter window.
+- Improved frosted and liquid glass buttons in the player with authentic depth and refraction.
+- Improved the glass timeline slider thumb to genuinely blur and refract underlying video frames.
+- Fixed rare background playback crashes when switching player themes or video decoder modes.
 
 ---
 
