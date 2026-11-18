@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.7.14-FF80AB?style=flat-square" alt="Version 4.7.14" />
+  <img src="https://img.shields.io/badge/version-4.7.16-FF80AB?style=flat-square" alt="Version 4.7.16" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/GPU-Vulkan_1.1_%E2%80%A2_GLES_3.1_FP16-7C4DFF?style=flat-square" alt="GPU Compute" />
@@ -42,13 +42,13 @@ Install and update Negai automatically via **Obtainium** or download the univers
 
 ---
 
-## ✨ What's New in Release 4.7.14
+## ✨ What's New in Release 4.7.16
 
-- Improved smart opening and ending detection to find exact theme boundaries without early prologue shifts.
-- Added folder-level theme memory so openings and endings stay recognized across all episodes.
-- Fixed video freezing while audio continues playing during automatic or manual episode transitions.
-- Restored episode number badges in folders and playlists with smart title number filtering.
-- Added a library setting to show or hide episode number badges across all lists.
+- Restored accurate automatic opening and ending detection across episodes with shifted prologues.
+- Eliminated the tap delay so player controls appear immediately on screen touch.
+- Improved frosted glass satin grain, list card thumbnails, and compact episode badges.
+- Added full-screen pull-to-refresh and smoother keyboard scrolling across library and folder tabs.
+- Improved playback stability on virtual and cloud emulator graphics drivers.
 
 ---
 
