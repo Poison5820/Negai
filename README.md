@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.7.28-FF80AB?style=flat-square" alt="Version 4.7.28" />
+  <img src="https://img.shields.io/badge/version-4.7.29-FF80AB?style=flat-square" alt="Version 4.7.29" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/GPU-Vulkan_1.1_%E2%80%A2_GLES_3.1_FP16-7C4DFF?style=flat-square" alt="GPU Compute" />
@@ -42,13 +42,13 @@ Install and update Negai automatically via **Obtainium** or download the univers
 
 ---
 
-## ✨ What's New in Release 4.7.28
+## ✨ What's New in Release 4.7.29
 
-- Kept live download speed and buffer reserve always visible on network streams.
-- Prevented partial song matches from triggering false opening skips during regular scenes.
-- Automatically bypassed motion smoothing on 4K high-frame-rate videos to keep playback smooth.
-- Fixed flickering resolution stats, repositioned the stream monitor card, and smoothed glass menus.
-- Saved thumbnail diagnostics across app restarts for reliable export from player settings.
+- Fixed library thumbnails on heavy Blu-ray streams with open frame groups and preserved exact preview diagnostics.
+- Prevented opening and ending skip timers from leaking between episodes and raised the length limit for longer openings.
+- Eliminated interface fade lag over 4K 60 fps videos for instant smooth control appearance.
+- Restored the stream monitor card to the bottom-right corner with drag repositioning and double-tap header reset.
+- Fixed stuck press states on skip and quick-action buttons and made 4K graphics benchmark comparisons fair.
 
 ---
 
