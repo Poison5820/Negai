@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.7.31-FF80AB?style=flat-square" alt="Version 4.7.31" />
+  <img src="https://img.shields.io/badge/version-4.7.32-FF80AB?style=flat-square" alt="Version 4.7.32" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/GPU-Vulkan_1.1_%E2%80%A2_GLES_3.1_FP16-7C4DFF?style=flat-square" alt="GPU Compute" />
@@ -42,13 +42,12 @@ Install and update Negai automatically via **Obtainium** or download the univers
 
 ---
 
-## ✨ What's New in Release 4.7.31
+## ✨ What's New in Release 4.7.32
 
-- Eliminated audio crackling and clipping on loud surround tracks when binaural headphones or speaker widening is enabled, with smoother mode switching.
-- Fixed green flashes and frame freezes when using the software video decoder with the Vulkan graphics engine.
-- Fixed 4K benchmark runs getting stuck on the software video decoder after bypassed upscaling stages.
-- Fixed timeline seek previews sticking on the opening frame when scrubbing Blu-ray transport streams.
-- Fixed impossible bitrate values shown in file details on certain Blu-ray videos.
+- Fixed 7.1 surround audio channel switching glitches after resuming or seeking Blu-ray streams.
+- Eliminated green flashing frames when software video decoding runs on Vulkan-capable devices.
+- Restored fast low-latency graphics rendering speed during hardware video playback in Vulkan.
+- Improved software-to-hardware video decoder transitions during player performance benchmarks.
 
 ---
 
