@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.7.29-FF80AB?style=flat-square" alt="Version 4.7.29" />
+  <img src="https://img.shields.io/badge/version-4.7.30-FF80AB?style=flat-square" alt="Version 4.7.30" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/GPU-Vulkan_1.1_%E2%80%A2_GLES_3.1_FP16-7C4DFF?style=flat-square" alt="GPU Compute" />
@@ -42,13 +42,12 @@ Install and update Negai automatically via **Obtainium** or download the univers
 
 ---
 
-## ✨ What's New in Release 4.7.29
+## ✨ What's New in Release 4.7.30
 
-- Fixed library thumbnails on heavy Blu-ray streams with open frame groups and preserved exact preview diagnostics.
-- Prevented opening and ending skip timers from leaking between episodes and raised the length limit for longer openings.
-- Eliminated interface fade lag over 4K 60 fps videos for instant smooth control appearance.
-- Restored the stream monitor card to the bottom-right corner with drag repositioning and double-tap header reset.
-- Fixed stuck press states on skip and quick-action buttons and made 4K graphics benchmark comparisons fair.
+- Automatically bypasses redundant spatial upscaling on 4K videos across both Vulkan and OpenGL engines.
+- Unified motion smoothing resolution for 4K and high-frame-rate videos to keep playback fast and smooth.
+- Made 4K benchmark comparisons fairer by skipping bypassed upscale stages and checking shader resolution parity.
+- Added a separate toggle for offline audio intro detection and expanded ending search for long episodes.
 
 ---
 
