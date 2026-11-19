@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.7.17-FF80AB?style=flat-square" alt="Version 4.7.17" />
+  <img src="https://img.shields.io/badge/version-4.7.24-FF80AB?style=flat-square" alt="Version 4.7.24" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/GPU-Vulkan_1.1_%E2%80%A2_GLES_3.1_FP16-7C4DFF?style=flat-square" alt="GPU Compute" />
@@ -42,13 +42,13 @@ Install and update Negai automatically via **Obtainium** or download the univers
 
 ---
 
-## ✨ What's New in Release 4.7.17
+## ✨ What's New in Release 4.7.24
 
-- Restored smooth high-refresh list scrolling and softened frosted glass satin grain across menus.
-- Improved video thumbnail generation and eliminated false episode numbers on standalone clips and recordings.
-- Accelerated automatic opening and ending recognition with steady background detection across folder episodes.
-- Fixed video freezing when switching episodes or jumping back to the episode start.
-- Made exiting the player instant and prevented screen dimming during playback and benchmarks.
+- Made exiting the player instant without freezes on heavy high-bitrate and surround videos.
+- Restored timeline frame previews while scrubbing heavy disc streams and high-dynamic-range files.
+- Eliminated black library thumbnails while preserving naturally green scenes without false rejections.
+- Upgraded automatic opening skip with stricter multi-episode consensus and diagnostic export in settings.
+- Improved hardware benchmark accuracy with fair graphics comparison, warmup isolation, and heavy-file tests.
 
 ---
 
