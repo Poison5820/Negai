@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/версия-4.7.32-FF80AB?style=flat-square" alt="Версия 4.7.32" />
+  <img src="https://img.shields.io/badge/версия-4.9.12-FF80AB?style=flat-square" alt="Версия 4.9.12" />
   <img src="https://img.shields.io/badge/пакет-app.negai.player-00B8D4?style=flat-square" alt="Пакет приложения" />
   <img src="https://img.shields.io/badge/платформа-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Платформа" />
   <img src="https://img.shields.io/badge/GPU-Vulkan_1.1_%E2%80%A2_GLES_3.1_FP16-7C4DFF?style=flat-square" alt="GPU Compute" />
@@ -42,19 +42,20 @@
 
 ---
 
-## ✨ Что нового в релизе 4.7.32
+## ✨ Что нового в релизе 4.9.12
 
-- Исправлен сбой переключения каналов на объёмных 7.1 аудиодорожках после перемотки и возобновления Blu-ray файлов.
-- Убран зелёный стробоскоп при работе программного видеодекодера на устройствах с поддержкой Vulkan.
-- Восстановлена высокая скорость и низкая задержка отрисовки кадров при аппаратном воспроизведении в Vulkan.
-- Повышена стабильность переключения между программным и аппаратным видеодекодером во время бенчмарка плеера.
+- Добавлены Ночной режим для чётких диалогов, тонкомпенсация на низкой громкости и мгновенный A/B-обход улучшений.
+- Объединены все звуковые фильтры в кнопке «Улучшение звука», а вкладка «Звук» разделена на «Дорожки» и «Улучшения».
+- Исправлено наложение системного окна громкости на Android 16 и восстановлена регулировка громкости с Bluetooth-наушников.
+- Капсула ускорения по удержанию стала компактной по центру, а также исправлено залипание скорости 0.5× после Инспектора.
+- Смягчены ступеньки и перешарп в режиме Anime4K Ultra, а подпись автоматического сглаживания упрощена до «Авто».
 
 ---
 
 ## Ключевые технологии и возможности
 
 ### 1. Двухбэкендовый GPU Compute видеоконвейер (`Vulkan 1.1` и `OpenGL ES 3.1 FP16`)
-- **Нативный Vulkan 1.1 (`NDK 27 / C++20 / SPIR-V`) и OpenGL ES 3.1 (`FP16`)**: Переключение между режимами `Авто`, `Vulkan 1.1` и `OpenGL ES 3.1` прямо во время просмотра с мгновенным безопасным резервированием при ограничениях драйвера. Кадры SDR и 3D поступают в Vulkan напрямую из декодера без копирования в памяти (`AImageReader` / `AHardwareBuffer` + `VkSamplerYcbcrConversion`) и выводятся по расписанию развёртки (`VK_GOOGLE_display_timing`), а 2D 10-бит HDR направляется напрямую в **Hardware Composer (`HWC`)**.
+- **Нативный Vulkan 1.1 (`NDK 27 / C++20 / SPIR-V`) и OpenGL ES 3.1 (`FP16`)**: Переключение между режимами `Авто`, `Vulkan 1.1` и `OpenGL ES 3.1` прямо во время просмотра с мгновенным безопасным резервированием при ограничениях драйвера. Кадры SDR, HDR10/HDR10+/HLG и 3D поступают в Vulkan напрямую из декодера без копирования в памяти (`AImageReader` / `AHardwareBuffer` + `VkSamplerYcbcrConversion`), выводятся в 10-битный PQ/HLG swapchain или через тонмаппинг `ITU-R BT.2390` в SDR и синхронизируются по `VK_GOOGLE_display_timing`, а Dolby Vision и чистый HDR без эффектов направляются напрямую в **Hardware Composer (`HWC`)**.
 - **Двухдвижковое пространственное масштабирование (`Авто / Anime4K v4 / AMD FSR 1.0`)**:
   - **Anime4K (`Быстро / Качество / Ультра`)**: Сохраняет 100% естественную толщину авторского штриха благодаря симметричному S-образному укрупнению границ, касательному сглаживанию Catmull-Rom, защите светов и треугольному дизерингу.
   - **AMD FidelityFX Super Resolution 1.0 (`EASU + RCAS`)**: 12-точечный эллиптический апскейл Lanczos2 и контрастно-адаптивная резкость для игрового кино, сериалов и 3D-анимации.
@@ -128,6 +129,7 @@
 - **Negai Player**: Проприетарное программное обеспечение с закрытым исходным кодом. Copyright © 2026 Negai Player. Все права защищены. Публичный репозиторий используется исключительно для публикации официальных сборок, приёма обращений и уведомлений об открытых лицензиях. См. [`PRIVACY.md`](PRIVACY.md).
 - **Anime4K (MIT License)**: Шейдеры реконструкции линий аниме на базе [bloc97/Anime4K](https://github.com/bloc97/Anime4K) (Copyright © 2019–2021 bloc97). См. [`LICENSE_ANIME4K.txt`](LICENSE_ANIME4K.txt).
 - **AMD FidelityFX Optical Flow & Super Resolution 1.0 (MIT License)**: Иерархический 32-битный конвейер оценки оптического потока и эллиптический пространственный апскейлер (`EASU + RCAS`) на базе [AMD FidelityFX SDK](https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK) (Copyright © 2021–2026 Advanced Micro Devices, Inc.). См. [`LICENSE_AMD_FIDELITYFX.txt`](LICENSE_AMD_FIDELITYFX.txt).
+- **RIFE / Practical-RIFE (MIT License)**: Архитектура нейросетевой интерполяции кадров на базе [megvii-research/ECCV2022-RIFE](https://github.com/megvii-research/ECCV2022-RIFE) и [hzwer/Practical-RIFE](https://github.com/hzwer/Practical-RIFE) (Copyright © 2020–2024 Megvii Research & Zhewei Huang). Конвертированные веса модели (`negai_rife_v426_fp16.bin`) распространяются по лицензии MIT в репозитории [Poison5820/Negai](https://github.com/Poison5820/Negai). См. [`LICENSE_RIFE.txt`](LICENSE_RIFE.txt).
 - **MIT KEMAR HRTF (MIT License)**: Бинауральные импульсные характеристики пространственного звука на базе набора [MIT Media Lab KEMAR HRTF](https://sound.media.mit.edu/resources/KEMAR.html) (Bill Gardner & Keith Martin). См. [`LICENSE_MIT_KEMAR_HRTF.txt`](LICENSE_MIT_KEMAR_HRTF.txt).
 - **FFmpeg (GNU LGPL v2.1+)**: Многоканальное программное декодирование звука через расширение AndroidX Media3 без компонентов под лицензией GPL. См. [`LICENSE_FFMPEG.txt`](LICENSE_FFMPEG.txt).
 - **AndroidX Media3 (Apache License 2.0)**: Мультимедийный стек воспроизведения от компании Google LLC.

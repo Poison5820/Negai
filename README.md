@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.7.32-FF80AB?style=flat-square" alt="Version 4.7.32" />
+  <img src="https://img.shields.io/badge/version-4.9.12-FF80AB?style=flat-square" alt="Version 4.9.12" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/GPU-Vulkan_1.1_%E2%80%A2_GLES_3.1_FP16-7C4DFF?style=flat-square" alt="GPU Compute" />
@@ -42,19 +42,20 @@ Install and update Negai automatically via **Obtainium** or download the univers
 
 ---
 
-## ✨ What's New in Release 4.7.32
+## ✨ What's New in Release 4.9.12
 
-- Fixed 7.1 surround audio channel switching glitches after resuming or seeking Blu-ray streams.
-- Eliminated green flashing frames when software video decoding runs on Vulkan-capable devices.
-- Restored fast low-latency graphics rendering speed during hardware video playback in Vulkan.
-- Improved software-to-hardware video decoder transitions during player performance benchmarks.
+- Added Night Mode dialogue compression, low-volume loudness compensation, and instant original-sound bypass.
+- Combined all sound tools under the Audio Enhancement button and split Audio tab into Tracks and Enhancements.
+- Fixed Android 16 system volume popup conflicts and restored Bluetooth headset volume control.
+- Made the hold-to-speed badge compact and centered, and fixed slow playback sticking after closing Frame Inspector.
+- Reduced stair-stepping and harsh edges in Anime4K Ultra while simplifying the automatic motion smoothing label.
 
 ---
 
 ## Core Engineering Pillars
 
 ### 1. Dual-Backend GPU Compute Video Engine (`Vulkan 1.1` & `OpenGL ES 3.1 FP16`)
-- **Native Vulkan 1.1 (`NDK 27 / C++20 / SPIR-V`) & OpenGL ES 3.1 (`FP16`)**: Select `Auto`, `Vulkan 1.1`, or `OpenGL ES 3.1` live during playback with automatic zero-crash driver fallback. Hardware-decoded SDR and 3D frames enter Vulkan directly via zero-copy `AImageReader` / `AHardwareBuffer` (`VkSamplerYcbcrConversion`) and pace presentation via `VK_GOOGLE_display_timing`, while 2D 10-bit HDR routes directly to **Hardware Composer (`HWC`)**.
+- **Native Vulkan 1.1 (`NDK 27 / C++20 / SPIR-V`) & OpenGL ES 3.1 (`FP16`)**: Select `Auto`, `Vulkan 1.1`, or `OpenGL ES 3.1` live during playback with automatic zero-crash driver fallback. Hardware-decoded SDR, HDR10/HDR10+/HLG, and 3D frames enter Vulkan directly via zero-copy `AImageReader` / `AHardwareBuffer` (`VkSamplerYcbcrConversion`), output natively to 10-bit PQ/HLG swapchains or `ITU-R BT.2390` SDR tone mapping, and pace presentation via `VK_GOOGLE_display_timing`, while Dolby Vision and unenhanced HDR route directly to **Hardware Composer (`HWC`)**.
 - **Dual-Engine Spatial Upscaling (`Auto / Anime4K v4 / AMD FSR 1.0`)**:
   - **Anime4K (`Fast / HQ / Ultra`)**: Preserves 100% natural ink-line thickness via symmetric S-curve edge steepening, 4-tap Catmull-Rom tangent anti-aliasing, highlight clamping, and triangular dithering.
   - **AMD FidelityFX Super Resolution 1.0 (`EASU + RCAS`)**: 12-tap elliptical Lanczos2 upsampling + contrast-adaptive sharpening tailored for live-action cinema, TV series, and 3D CGI.
@@ -128,6 +129,7 @@ Install and update Negai automatically via **Obtainium** or download the univers
 - **Negai Player**: Proprietary, closed-source software. Copyright © 2026 Negai Player. All Rights Reserved. This public repository serves as the official release distribution hub, issue tracker, and open-source attribution notice. Read our [`PRIVACY.md`](PRIVACY.md).
 - **Anime4K (MIT License)**: Real-time anime line reconstruction shaders based on [bloc97/Anime4K](https://github.com/bloc97/Anime4K) (Copyright © 2019–2021 bloc97). See [`LICENSE_ANIME4K.txt`](LICENSE_ANIME4K.txt).
 - **AMD FidelityFX Optical Flow & Super Resolution 1.0 (MIT License)**: Hierarchical 32-bit Census optical flow motion estimation and edge-adaptive elliptical spatial upsampling (`EASU + RCAS`) adapted from the [AMD FidelityFX SDK](https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK) (Copyright © 2021–2026 Advanced Micro Devices, Inc.). See [`LICENSE_AMD_FIDELITYFX.txt`](LICENSE_AMD_FIDELITYFX.txt).
+- **RIFE / Practical-RIFE (MIT License)**: Neural frame interpolation architecture based on [megvii-research/ECCV2022-RIFE](https://github.com/megvii-research/ECCV2022-RIFE) and [hzwer/Practical-RIFE](https://github.com/hzwer/Practical-RIFE) (Copyright © 2020–2024 Megvii Research & Zhewei Huang). Converted model weights (`negai_rife_v426_fp16.bin`) are distributed under the MIT License in [Poison5820/Negai](https://github.com/Poison5820/Negai). See [`LICENSE_RIFE.txt`](LICENSE_RIFE.txt).
 - **MIT KEMAR HRTF (MIT License)**: Binaural spatial audio impulse responses derived from the [MIT Media Lab KEMAR HRTF Dataset](https://sound.media.mit.edu/resources/KEMAR.html) (Bill Gardner & Keith Martin). See [`LICENSE_MIT_KEMAR_HRTF.txt`](LICENSE_MIT_KEMAR_HRTF.txt).
 - **FFmpeg (GNU LGPL v2.1+)**: Multichannel software audio decoding via AndroidX Media3 extension compiled strictly without GPL modules. See [`LICENSE_FFMPEG.txt`](LICENSE_FFMPEG.txt).
 - **AndroidX Media3 (Apache License 2.0)**: Core media playback framework by Google LLC.
