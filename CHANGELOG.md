@@ -3,7 +3,25 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
-> Older versions (v4.9.2 and earlier) are archived in `CHANGELOG_ARCHIVE.md`.
+> Older versions (v4.9.3 and earlier) are archived in `CHANGELOG_ARCHIVE.md`.
+
+## [v4.9.13]
+
+### 🇬🇧 English
+- Eliminated RIFE neural motion smoothing stutters in ×2 and 60 Hz modes with non-blocking real-frame presentation, post-present flow scheduling, and dedicated flow-time tracking.
+- Fixed fast-moving object breakup in ×2 optical flow at mid-interval with deeper 3-stage coarse refinement and stricter sharp-background fallback.
+- Restored automatic RIFE neural activation for anime in Auto mode on native FP16 GPUs, with silent fallback to optical flow under sustained load or severe thermal throttling.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.9.13)</b></summary>
+
+<br>
+
+- Устранены рывки нейросетевого сглаживания RIFE в режимах ×2 и 60 Гц за счёт опережающего расчёта движения после показа реального кадра и точного контроля времени потока.
+- Убрано рассыпание быстро движущихся объектов в оптическом потоке ×2 на середине интервала за счёт расширенного многошагового поиска и более строгого отката к резкому фону.
+- Восстановлена автоматическая активация нейросети RIFE для аниме в режиме «Авто» на видеоускорителях с поддержкой FP16, с тихим переходом на оптический поток при нехватке запаса или перегреве.
+
+</details>
 
 ## [v4.9.12]
 
@@ -193,22 +211,3 @@
 
 </details>
 
-## [v4.9.3]
-
-### 🇬🇧 English
-- Added a standalone synthetic RIFE Neural graphics benchmark in Additional settings without opening video.
-- Added a dedicated RIFE vs Optical Flow comparison preset to the player pipeline benchmark.
-- Expanded benchmark reports with shader 95th percentile timings, neural frame share, and 60/120 Hz verdicts.
-- Added automatic saving of synthetic neural benchmark reports to Downloads with quick sharing.
-
-<details>
-<summary><b>🇷🇺 На русском (Что нового в v4.9.3)</b></summary>
-
-<br>
-
-- Добавлен автономный синтетический тест видеоускорителя RIFE Neural без открытия видео в разделе «Дополнительно».
-- Добавлен пресет сравнения нейросетевой интерполяции RIFE и оптического потока в бенчмарк плеера.
-- В отчёт бенчмарка добавлены 95-й процентиль времени шейдеров, доля кадров нейросети и вердикт для 60 и 120 Гц.
-- Добавлено сохранение отчёта теста нейросети в папку «Загрузки» и быстрая отправка результатов.
-
-</details>
