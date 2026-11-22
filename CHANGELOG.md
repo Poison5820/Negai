@@ -3,7 +3,25 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
-> Older versions (v4.9.3 and earlier) are archived in `CHANGELOG_ARCHIVE.md`.
+> Older versions (v4.9.4 and earlier) are archived in `CHANGELOG_ARCHIVE.md`.
+
+## [v4.9.14]
+
+### 🇬🇧 English
+- Accelerated neural motion smoothing on mobile GPUs for smoother high-refresh anime playback.
+- Eliminated jelly-like distortion on fast dark scenes in neural smoothing while keeping smooth pans.
+- Prevented fast-moving foreground objects from shattering in optical flow with cohesive sharp fallback.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.9.14)</b></summary>
+
+<br>
+
+- Ускорено нейросетевое сглаживание движений на мобильных видеоускорителях для плавного воспроизведения при высокой герцовке.
+- Устранено «желейное» искажение на быстрых тёмных сценах в нейросетевом сглаживании без потери плавности панорам.
+- Убрано рассыпание быстро движущихся объектов в оптическом потоке за счёт цельного резкого отката.
+
+</details>
 
 ## [v4.9.13]
 
@@ -188,26 +206,6 @@
 - Добавлено рабочее разрешение 448×256 с сохранением пропорций для режима ×2 и устранено нестабильное переключение между нейросетью и оптическим потоком.
 - В синтетический тест нейросети добавлена проверка точности векторов движения и статичного фона, а также отдельный профиль качества ×2.
 - Исправлено затирание локального поиска опенингов и эндингов при обновлении плеера и расширена диагностика локального анализа серий.
-
-</details>
-
-## [v4.9.4]
-
-### 🇬🇧 English
-- Accelerated neural motion smoothing several times with cached frame flow and faster graphics math.
-- Sped up automatic Anime and Cinema style detection so video switches accurately within seconds.
-- Fixed cancelled local intro and ending scans and started local analysis immediately with online lookup.
-- Updated the synthetic neural graphics benchmark with flow, blend, and amortized frame timing metrics.
-
-<details>
-<summary><b>🇷🇺 На русском (Что нового в v4.9.4)</b></summary>
-
-<br>
-
-- В разы ускорена нейросетевая интерполяция кадров за счёт кэширования потока и оптимизации вычислений.
-- Ускорено автоопределение стиля «Аниме» и «Кино» для точного переключения уже на первых секундах серии.
-- Исправлен сбой отмены локального поиска опенингов и запущен его параллельный старт с онлайн-базой.
-- Обновлён синтетический тест нейросети с замером потока, смешивания и усреднённого времени кадра.
 
 </details>
 
