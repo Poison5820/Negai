@@ -7,9 +7,9 @@ MIT License
 
 Notice for Negai Player:
 The neural frame interpolation model architecture and converted FP16 weights
-package (`negai_rife_v426_fp16.bin`) used by Negai Player's optional
-RIFE Neural motion smoothing engine are derived from RIFE / Practical-RIFE
-and distributed under the terms of this MIT License at
+packages (`negai_rife_v422_lite_fp16.bin`, `negai_rife_v426_fp16.bin`) used by
+Negai Player's optional RIFE Neural motion smoothing engine are derived from
+RIFE / Practical-RIFE and distributed under the terms of this MIT License at
 https://github.com/Poison5820/Negai.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy

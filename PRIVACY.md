@@ -1,7 +1,7 @@
 # Privacy Policy — Negai Media Player
 
 **Effective Date:** November 7, 2026  
-**Last Updated:** November 7, 2026  
+**Last Updated:** November 23, 2026  
 **Application Name:** Negai Media Player (`negai`)  
 **Public Privacy Policy URL:** [https://github.com/Poison5820/Negai/blob/main/PRIVACY.md](https://github.com/Poison5820/Negai/blob/main/PRIVACY.md)  
 **Source & Issue Tracker:** [https://github.com/Poison5820/Negai/issues](https://github.com/Poison5820/Negai/issues)
@@ -45,6 +45,7 @@ Negai requests only the minimum Android permissions strictly necessary to play y
 | :--- | :--- |
 | **`READ_MEDIA_VIDEO`** & **`READ_MEDIA_AUDIO`** *(Android 13 / API 33+)* | Used exclusively on-device to discover and play local video files (`.mkv`, `.mp4`, `.m2ts`, `.avi`, `.webm`, `.mov`, `.ts`), automatically match external voiceover audio tracks (`.mka`, `.mp3`, `.flac`, `.ac3`, `.dts`, `.ogg`, `.aac`, `.opus`), and load external subtitle files (`.srt`, `.ass`, `.ssa`, `.vtt`). |
 | **`READ_EXTERNAL_STORAGE`** *(Android 12 / API 32 and below)* & **`READ_MEDIA_VISUAL_USER_SELECTED`** | Used on older Android versions (or via Android Photo Picker / Storage Access Framework) to read local media folders, video episodes, external audio/subtitle files, and user-opened `.torrent` files stored on internal storage, SD cards, or USB OTG drives. Your filenames, folder structures, and media contents never leave your device. |
+| **`MANAGE_EXTERNAL_STORAGE`** *(GitHub Community Edition `app.negai.player` only; omitted from Google Play Edition)* | Optional user-granted All Files Access used strictly on-device in the GitHub edition to scan local media folders with nested external audio tracks (`.mka`, `.flac`, `.dts`), fonts, and `.ass`/`.srt` subtitles without SAF latency. Never declared in `com.negai.player`. |
 | **`INTERNET`** | Used strictly for **user-initiated** network actions: playing direct network streams (`http://`, `https://`, HLS `.m3u8`, DASH `.mpd`), connecting to a user-configured local or LAN **TorrServer** daemon (e.g., `http://127.0.0.1:8090`), and performing user-initiated P2P stream searches (including optional DNS-over-HTTPS resolution when enabled in Settings). Negai never transmits background telemetry or usage logs over the internet. |
 | **`MODIFY_AUDIO_SETTINGS`** | Used locally by the audio engine to configure spatial audio routing (3D HRTF binaural convolution and XTC speaker crosstalk cancellation), detect headphone/Bluetooth audio routing changes, and apply hardware `LoudnessEnhancer` volume boost. |
 | **`FOREGROUND_SERVICE`** & **`FOREGROUND_SERVICE_MEDIA_PLAYBACK`** | Used to keep media playback active in a standard Android `MediaSessionService` notification when using Picture-in-Picture (PiP) mode or when background audio playback is enabled by the user. |
@@ -67,7 +68,7 @@ All application data created during your use of Negai is stored exclusively insi
 ## 5. Third-Party Services & User-Initiated Connections
 
 - **TorrServer & P2P Streaming:** If you configure a TorrServer URL or open a magnet/`.torrent` link, your device connects directly to the TorrServer host or P2P indexers you specify. Negai acts solely as a client interface and does not proxy, log, or monitor your network traffic.
-- **Open-Source Libraries:** Negai incorporates open-source components running strictly on-device, including **AndroidX Media3 / ExoPlayer** (Apache 2.0), **FFmpeg** (GNU LGPL v2.1+), **Anime4K Shaders** (MIT License), and **MIT KEMAR HRTF** (MIT License). None of these libraries collect or transmit user data.
+- **Open-Source Libraries:** Negai incorporates open-source components running strictly on-device, including **AndroidX Media3 / ExoPlayer** (Apache 2.0), **FFmpeg** (GNU LGPL v2.1+), **Anime4K Shaders** (MIT License), **ArtCNN C4F16** (MIT License), **AMD FidelityFX SDK** (MIT License), **Qualcomm Snapdragon Game Super Resolution v1** (BSD-3-Clause License), **RIFE / Practical-RIFE** (MIT License), **MIT KEMAR HRTF** (MIT License), and **AndroidLiquidGlass** (Apache 2.0). None of these libraries collect or transmit user data.
 
 ---
 
@@ -109,8 +110,10 @@ If you have any questions, concerns, or requests regarding this Privacy Policy o
 
 ## 3. Используемые разрешения Android
 - **`READ_MEDIA_VIDEO`, `READ_MEDIA_AUDIO`, `READ_EXTERNAL_STORAGE`:** Используются исключительно для локального поиска и воспроизведения видеофайлов, внешних аудиодорожек (`.mka`, `.mp3`, `.flac`), субтитров (`.srt`, `.ass`) и открытия локальных `.torrent`-файлов на вашем устройстве.
+- **`MANAGE_EXTERNAL_STORAGE` (только сборка GitHub `app.negai.player`):** Опциональный локальный доступ ко всем файлам для быстрого поиска видео, внешних озвучек и субтитров во вложенных папках. Полностью отсутствует в сборке Google Play (`com.negai.player`).
 - **`INTERNET`:** Используется только по инициативе пользователя для потокового воспроизведения по прямым ссылкам, связи с локальным или сетевым сервером **TorrServer** и поиска P2P-потоков.
 - **`MODIFY_AUDIO_SETTINGS`:** Используется локально для работы пространственного аудио (3D HRTF / XTC), автосинхронизации Bluetooth и аппаратного усиления громкости (`LoudnessEnhancer`).
+- **`FOREGROUND_SERVICE` и `FOREGROUND_SERVICE_MEDIA_PLAYBACK`:** Используются для стабильного воспроизведения в режиме «Картинка в картинке» (PiP) и фонового аудио через системную службу `MediaSessionService`.
 
-## 4. Контакты
-По всем вопросам конфиденциальности обращайтесь через официальный трекер задач: [https://github.com/Poison5820/Negai/issues](https://github.com/Poison5820/Negai/issues).
+## 4. Открытые библиотеки и контакты
+Все сторонние компоненты (AndroidX Media3, FFmpeg, Anime4K, ArtCNN C4F16, AMD FidelityFX, Qualcomm SGSR v1, RIFE / Practical-RIFE, MIT KEMAR HRTF, AndroidLiquidGlass) работают строго локально на устройстве и не передают никаких данных. По всем вопросам конфиденциальности обращайтесь через официальный трекер задач: [https://github.com/Poison5820/Negai/issues](https://github.com/Poison5820/Negai/issues).

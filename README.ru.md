@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/версия-4.9.14-FF80AB?style=flat-square" alt="Версия 4.9.14" />
+  <img src="https://img.shields.io/badge/версия-4.10.0-FF80AB?style=flat-square" alt="Версия 4.10.0" />
   <img src="https://img.shields.io/badge/пакет-app.negai.player-00B8D4?style=flat-square" alt="Пакет приложения" />
   <img src="https://img.shields.io/badge/платформа-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Платформа" />
   <img src="https://img.shields.io/badge/GPU-Vulkan_1.1_%E2%80%A2_GLES_3.1_FP16-7C4DFF?style=flat-square" alt="GPU Compute" />
@@ -26,7 +26,7 @@
 
 ## О проекте
 
-**Negai** — флагманский высокопроизводительный 4K-видеоплеер для Android, созданный для ценителей аниме, фильмов и сериалов. Плеер объединяет нативный графический видеоконвейер **Vulkan 1.1 (`SPIR-V`)** и **OpenGL ES 3.1 (`FP16`)**, реконструкцию **Anime4K** + **AMD FidelityFX (`FSR 1.0` и `Optical Flow MEMC`)**, мобильную **Адаптивную синхронизацию (`VRR / LFC`)**, естественный **4K HDR10 / Dolby Vision**, бинауральный звук **MIT KEMAR HRTF**, оптические темы **«Жидкое» и «Матовое стекло»**, поддержку **120+ языков мира** для автоподбора дорожек и прямой стриминг через **TorrServer** — полностью без рекламы и аналитических трекеров.
+**Negai** — флагманский высокопроизводительный 4K-видеоплеер для Android, созданный для ценителей аниме, фильмов и сериалов. Плеер объединяет нативный графический видеоконвейер **Vulkan 1.1 (`SPIR-V`)** и **OpenGL ES 3.1 (`FP16`)**, апскейлеры **Anime4K** + **ArtCNN C4F16** + **AMD FSR 1.0** + **Qualcomm SGSR v1** и **16-битный Дебандинг**, **6-кадровый Lookahead MEMC** (**RIFE v4.22-lite** и **TV-уровень 3DRS/OBMC Optical Flow**), мобильную **Адаптивную синхронизацию (`VRR / LFC`)**, естественный **4K HDR10 / Dolby Vision**, бинауральный звук **MIT KEMAR HRTF**, оптические темы **«Жидкое» и «Матовое стекло»**, поддержку **120+ языков мира** для автоподбора дорожек и прямой стриминг через **TorrServer** — полностью без рекламы и аналитических трекеров.
 
 ---
 
@@ -42,11 +42,12 @@
 
 ---
 
-## ✨ Что нового в релизе 4.9.14
+## ✨ Что нового в релизе 4.10.0
 
-- Ускорено нейросетевое сглаживание движений на мобильных видеоускорителях для плавного воспроизведения при высокой герцовке.
-- Устранено «желейное» искажение на быстрых тёмных сценах в нейросетевом сглаживании без потери плавности панорам.
-- Убрано рассыпание быстро движущихся объектов в оптическом потоке за счёт цельного резкого отката.
+- Перестроен конвейер сглаживания движений MEMC на 6-кадровый Lookahead-буфер с опережающим выпуском кадров декодера и точным распознаванием темпа 1s / 2s / 3s в аниме.
+- Добавлена двойная буферизация нейросетевого потока RIFE с 2-чанковым разбиением на экранах 85 Гц и выше для устранения подёргиваний и холостых проходов GPU.
+- Оптический поток на Vulkan Compute переведён на TV-уровень алгоритмов: предиктивный поиск 3DRS, многовекторный синтез OBMC, сглаженные маски артефактов и единый тракт апскейла после MEMC.
+- Добавлены нейросетевой апскейлер ArtCNN C4F16 для аниме, быстрый однопроходный Qualcomm SGSR v1 для кино и отключаемый 16-битный Дебандинг градиентов перед апскейлом.
 
 ---
 
@@ -54,11 +55,13 @@
 
 ### 1. Двухбэкендовый GPU Compute видеоконвейер (`Vulkan 1.1` и `OpenGL ES 3.1 FP16`)
 - **Нативный Vulkan 1.1 (`NDK 27 / C++20 / SPIR-V`) и OpenGL ES 3.1 (`FP16`)**: Переключение между режимами `Авто`, `Vulkan 1.1` и `OpenGL ES 3.1` прямо во время просмотра с мгновенным безопасным резервированием при ограничениях драйвера. Кадры SDR, HDR10/HDR10+/HLG и 3D поступают в Vulkan напрямую из декодера без копирования в памяти (`AImageReader` / `AHardwareBuffer` + `VkSamplerYcbcrConversion`), выводятся в 10-битный PQ/HLG swapchain или через тонмаппинг `ITU-R BT.2390` в SDR и синхронизируются по `VK_GOOGLE_display_timing`, а Dolby Vision и чистый HDR без эффектов направляются напрямую в **Hardware Composer (`HWC`)**.
-- **Двухдвижковое пространственное масштабирование (`Авто / Anime4K v4 / AMD FSR 1.0`)**:
+- **Многодвижковое пространственное масштабирование (`Авто / Anime4K v4 / ArtCNN C4F16 / AMD FSR 1.0 / Qualcomm SGSR v1`) и 16-битный Дебандинг**:
+  - **16-битный Дебандинг**: Опциональное лёгкое сглаживание ступенчатых градиентов в FP16 строго после MEMC и до апскейла (0 мс при отключении).
   - **Anime4K (`Быстро / Качество / Ультра`)**: Сохраняет 100% естественную толщину авторского штриха благодаря симметричному S-образному укрупнению границ, касательному сглаживанию Catmull-Rom, защите светов и треугольному дизерингу.
-  - **AMD FidelityFX Super Resolution 1.0 (`EASU + RCAS`)**: 12-точечный эллиптический апскейл Lanczos2 и контрастно-адаптивная резкость для игрового кино, сериалов и 3D-анимации.
-  - **Асинхронный GPU-анализатор стиля (`Авто`)**: Каждые 24 кадра без блокировки рендера распознаёт заливки 2D-аниме и полутона кино прямо на GPU (`Авто → Anime4K / AMD FSR`).
-- **Сглаживание движений AMD FidelityFX Optical Flow MEMC (`×2 / 60 к/с / Макс. Гц`)**: 3-уровневая пирамида 16-точечного тернарного Census-потока (удвоение `×2` 48/60 к/с, `60 к/с` или `Макс. Гц` `90–165 Гц`) с билатеральным переносом контуров на плоские заливки аниме, интерактивной шторкой сравнения **«До / После»** и **мгновенным откликом 0 мс** даже на паузе без перемоток и пересоздания поверхности.
+  - **ArtCNN C4F16 (`MIT`)**: Компактная 2× нейросеть восстановления чётких контуров для аниме в FP16 на Vulkan 1.1 Compute с ленивым выделением тензоров GPU.
+  - **AMD FidelityFX Super Resolution 1.0 (`EASU + RCAS`) и Qualcomm SGSR v1 (`BSD-3-Clause`)**: Выбор между двухпроходным эллиптическим Lanczos2 + RCAS и быстрым однопроходным 12-точечным направленным апскейлом для кино, сериалов и 3D-анимации.
+  - **Асинхронный GPU-анализатор стиля (`Авто`)**: Без блокировки рендера распознаёт заливки 2D-аниме и полутона кино прямо на GPU (`Авто → Anime4K / AMD FSR`).
+- **6-кадровый Lookahead MEMC (`RIFE v4.22-lite` и `TV-уровень 3DRS/OBMC Optical Flow`)**: Опережающее FIFO-кольцо декодера с точным определением темпа `1s / 2s / 3s` в аниме, двойная буферизация нейропотока RIFE с 2-чанковым разбиением на `>= 85 Гц` и TV-уровень оптического потока 3DRS + OBMC (`×2 / 60 к/с / Макс. Гц`), интерактивная шторка сравнения **«До / После»** и **мгновенный отклик 0 мс** даже на паузе.
 
 ### 2. Адаптивная синхронизация экрана (`VRR / LFC`), 4K HDR/DV и форматы
 - **Мобильная Адаптивная синхронизация (`VRR / LFC`) и трекинг `VFR`**: Определяет точный класс матрицы дисплея (`LTPO ARR`, `Multi-Hz Seamless VRR`, `Multi-Hz LFC` или `Fixed 60 Hz`), удерживает максимальный кратный контейнер обновления (например, `120 Гц` `5×` для `23.976 к/с`) без рывков `3:2 pulldown` и без мигания гаммы OLED при переключении режимов, а также в реальном времени отслеживает гибридный `VFR` (`23.976 ↔ 59.94 ↔ 29.97 к/с`).
@@ -114,7 +117,7 @@
 │     Media3 / ExoPlayer + GPU/DSP       │  │    Хранилище и сетевой стек    │
 │ • Vulkan 1.1 NDK / SPIR-V (Zero-Copy)  │  │ • DataStore + быстрый кэш      │
 │ • OpenGL ES 3.1 FP16 / Direct HWC HDR  │  │ • Room история и продолжение   │
-│ • Anime4K v4 • AMD FSR 1.0 • FFX MEMC  │  │ • 120+ языков и парсер сабов   │
+│ • ArtCNN • SGSR • Anime4K • FSR • MEMC │  │ • 120+ языков и парсер сабов   │
 │ • BDAV .m2ts • FFmpeg • KEMAR HRTF DSP │  │ • TorrServer и DoH-клиент      │
 └────────────────────────────────────────┘  └────────────────────────────────┘
 ```
@@ -126,8 +129,10 @@
 
 - **Negai Player**: Проприетарное программное обеспечение с закрытым исходным кодом. Copyright © 2026 Negai Player. Все права защищены. Публичный репозиторий используется исключительно для публикации официальных сборок, приёма обращений и уведомлений об открытых лицензиях. См. [`PRIVACY.md`](PRIVACY.md).
 - **Anime4K (MIT License)**: Шейдеры реконструкции линий аниме на базе [bloc97/Anime4K](https://github.com/bloc97/Anime4K) (Copyright © 2019–2021 bloc97). См. [`LICENSE_ANIME4K.txt`](LICENSE_ANIME4K.txt).
+- **ArtCNN C4F16 (MIT License)**: Компактная нейросеть 2× масштабирования аниме и веса модели, конвертированные из [Artoriuz/ArtCNN](https://github.com/Artoriuz/ArtCNN) (Copyright © 2024 Joao Chrisostomo, Kacper Michajłow). См. [`LICENSE_ARTCNN.txt`](LICENSE_ARTCNN.txt).
 - **AMD FidelityFX Optical Flow & Super Resolution 1.0 (MIT License)**: Иерархический 32-битный конвейер оценки оптического потока и эллиптический пространственный апскейлер (`EASU + RCAS`) на базе [AMD FidelityFX SDK](https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK) (Copyright © 2021–2026 Advanced Micro Devices, Inc.). См. [`LICENSE_AMD_FIDELITYFX.txt`](LICENSE_AMD_FIDELITYFX.txt).
-- **RIFE / Practical-RIFE (MIT License)**: Архитектура нейросетевой интерполяции кадров на базе [megvii-research/ECCV2022-RIFE](https://github.com/megvii-research/ECCV2022-RIFE) и [hzwer/Practical-RIFE](https://github.com/hzwer/Practical-RIFE) (Copyright © 2020–2024 Megvii Research & Zhewei Huang). Конвертированные веса модели (`negai_rife_v426_fp16.bin`) распространяются по лицензии MIT в репозитории [Poison5820/Negai](https://github.com/Poison5820/Negai). См. [`LICENSE_RIFE.txt`](LICENSE_RIFE.txt).
+- **Qualcomm Snapdragon Game Super Resolution v1 (BSD-3-Clause License)**: Однопроходный мобильный направленный апскейлер на базе [SnapdragonStudios/snapdragon-gsr](https://github.com/SnapdragonStudios/snapdragon-gsr) (Copyright © 2023 Qualcomm Innovation Center, Inc.). См. [`LICENSE_QUALCOMM_SGSR.txt`](LICENSE_QUALCOMM_SGSR.txt).
+- **RIFE / Practical-RIFE (MIT License)**: Архитектура нейросетевой интерполяции кадров на базе [megvii-research/ECCV2022-RIFE](https://github.com/megvii-research/ECCV2022-RIFE) и [hzwer/Practical-RIFE](https://github.com/hzwer/Practical-RIFE) (Copyright © 2020–2024 Megvii Research & Zhewei Huang). Конвертированные веса модели (`negai_rife_v422_lite_fp16.bin` и legacy `negai_rife_v426_fp16.bin`) распространяются по лицензии MIT в репозитории [Poison5820/Negai](https://github.com/Poison5820/Negai). См. [`LICENSE_RIFE.txt`](LICENSE_RIFE.txt).
 - **MIT KEMAR HRTF (MIT License)**: Бинауральные импульсные характеристики пространственного звука на базе набора [MIT Media Lab KEMAR HRTF](https://sound.media.mit.edu/resources/KEMAR.html) (Bill Gardner & Keith Martin). См. [`LICENSE_MIT_KEMAR_HRTF.txt`](LICENSE_MIT_KEMAR_HRTF.txt).
 - **FFmpeg (GNU LGPL v2.1+)**: Многоканальное программное декодирование звука через расширение AndroidX Media3 без компонентов под лицензией GPL. См. [`LICENSE_FFMPEG.txt`](LICENSE_FFMPEG.txt).
 - **AndroidX Media3 (Apache License 2.0)**: Мультимедийный стек воспроизведения от компании Google LLC.

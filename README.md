@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.9.14-FF80AB?style=flat-square" alt="Version 4.9.14" />
+  <img src="https://img.shields.io/badge/version-4.10.0-FF80AB?style=flat-square" alt="Version 4.10.0" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/GPU-Vulkan_1.1_%E2%80%A2_GLES_3.1_FP16-7C4DFF?style=flat-square" alt="GPU Compute" />
@@ -26,7 +26,7 @@
 
 ## Overview
 
-**Negai** is a modern, flagship-grade Android 4K video player engineered for anime enthusiasts and cinema purists. It combines a native **Vulkan 1.1 (`SPIR-V`)** and **OpenGL ES 3.1 (`FP16`)** compute video pipeline, **Anime4K** + **AMD FidelityFX (`FSR 1.0` & `Optical Flow MEMC`)**, mobile **Adaptive Sync (`VRR / LFC`)**, natural **4K HDR10 / Dolby Vision**, zero-allocation **MIT KEMAR HRTF** spatial audio, refractive **Liquid & Frosted Glass** interfaces, **120+ world languages** for automatic track pairing, and direct **TorrServer P2P** streaming — with zero ads and zero tracking.
+**Negai** is a modern, flagship-grade Android 4K video player engineered for anime enthusiasts and cinema purists. It combines a native **Vulkan 1.1 (`SPIR-V`)** and **OpenGL ES 3.1 (`FP16`)** compute video pipeline, **Anime4K** + **ArtCNN C4F16** + **AMD FSR 1.0** + **Qualcomm SGSR v1** + **16-bit Debanding**, **6-frame Lookahead MEMC** (**RIFE v4.22-lite** & **TV-style 3DRS/OBMC Optical Flow**), mobile **Adaptive Sync (`VRR / LFC`)**, natural **4K HDR10 / Dolby Vision**, zero-allocation **MIT KEMAR HRTF** spatial audio, refractive **Liquid & Frosted Glass** interfaces, **120+ world languages** for automatic track pairing, and direct **TorrServer P2P** streaming — with zero ads and zero tracking.
 
 ---
 
@@ -42,11 +42,12 @@ Install and update Negai automatically via **Obtainium** or download the univers
 
 ---
 
-## ✨ What's New in Release 4.9.14
+## ✨ What's New in Release 4.10.0
 
-- Accelerated neural motion smoothing on mobile GPUs for smoother high-refresh anime playback.
-- Eliminated jelly-like distortion on fast dark scenes in neural smoothing while keeping smooth pans.
-- Prevented fast-moving foreground objects from shattering in optical flow with cohesive sharp fallback.
+- Rebuilt MEMC motion smoothing around a 6-frame Lookahead ring with ahead-of-time decoder frame release and exact 1s / 2s / 3s anime cadence detection.
+- Added double-buffered RIFE neural flow calculation with 2-chunk scheduling at 85 Hz and above to eliminate high-refresh stutters and remove redundant pre-restore passes.
+- Upgraded Vulkan Compute optical flow to TV-style 3DRS predictive block search, multi-vector OBMC synthesis, and blurred soft artifact masks with a unified post-MEMC upscale path.
+- Added ArtCNN C4F16 neural anime upscaling, single-pass Qualcomm SGSR v1 cinema upscaling, and optional 16-bit Debanding before upscaling.
 
 ---
 
@@ -54,11 +55,13 @@ Install and update Negai automatically via **Obtainium** or download the univers
 
 ### 1. Dual-Backend GPU Compute Video Engine (`Vulkan 1.1` & `OpenGL ES 3.1 FP16`)
 - **Native Vulkan 1.1 (`NDK 27 / C++20 / SPIR-V`) & OpenGL ES 3.1 (`FP16`)**: Select `Auto`, `Vulkan 1.1`, or `OpenGL ES 3.1` live during playback with automatic zero-crash driver fallback. Hardware-decoded SDR, HDR10/HDR10+/HLG, and 3D frames enter Vulkan directly via zero-copy `AImageReader` / `AHardwareBuffer` (`VkSamplerYcbcrConversion`), output natively to 10-bit PQ/HLG swapchains or `ITU-R BT.2390` SDR tone mapping, and pace presentation via `VK_GOOGLE_display_timing`, while Dolby Vision and unenhanced HDR route directly to **Hardware Composer (`HWC`)**.
-- **Dual-Engine Spatial Upscaling (`Auto / Anime4K v4 / AMD FSR 1.0`)**:
+- **Multi-Engine Spatial Upscaling (`Auto / Anime4K v4 / ArtCNN C4F16 / AMD FSR 1.0 / Qualcomm SGSR v1`) & 16-bit Debanding**:
+  - **16-bit Debanding**: Optional lightweight FP16 gradient smoother strictly after MEMC and before spatial upscaling (0 ms bypass when disabled).
   - **Anime4K (`Fast / HQ / Ultra`)**: Preserves 100% natural ink-line thickness via symmetric S-curve edge steepening, 4-tap Catmull-Rom tangent anti-aliasing, highlight clamping, and triangular dithering.
-  - **AMD FidelityFX Super Resolution 1.0 (`EASU + RCAS`)**: 12-tap elliptical Lanczos2 upsampling + contrast-adaptive sharpening tailored for live-action cinema, TV series, and 3D CGI.
-  - **Asynchronous GPU Style Probe (`Auto`)**: Classifies cel-shaded animation vs live-action gradients on the GPU every 24 frames with zero pipeline stalls (`Auto → Anime4K / AMD FSR`).
-- **AMD FidelityFX Optical Flow MEMC (`×2 / 60 FPS / Max Hz`)**: 3-level hierarchical 16-tap Ternary Census optical flow (`48/60 fps` cinema doubling, `60 FPS`, or `Max Hz` `90–165 Hz`) with bilateral contour propagation for flat 2D anime fills, interactive **Split Compare** slider, and **0ms instant live & paused redraws** without seeks or surface reloads.
+  - **ArtCNN C4F16 (`MIT`)**: Compact 2× neural anime upscaler running in FP16 on Vulkan 1.1 Compute with lazy GPU tensor allocation for crisp contour restoration.
+  - **AMD FidelityFX Super Resolution 1.0 (`EASU + RCAS`) & Qualcomm SGSR v1 (`BSD-3-Clause`)**: Choose between 2-pass elliptical Lanczos2 + RCAS or ultra-fast single-pass 12-tap directional mobile upscaling for cinema, series, and 3D CGI.
+  - **Asynchronous GPU Style Probe (`Auto`)**: Classifies cel-shaded animation vs live-action gradients on the GPU with zero pipeline stalls (`Auto → Anime4K / AMD FSR`).
+- **6-Frame Lookahead MEMC (`RIFE v4.22-lite` & `TV-Style 3DRS/OBMC Optical Flow`)**: Ahead-of-time decoder FIFO with exact `1s / 2s / 3s` anime cadence detection, double-buffered RIFE neural flow with 2-chunk scheduling at `>= 85 Hz`, and TV-style 3DRS predictive search + OBMC synthesis (`×2 / 60 FPS / Max Hz`), plus interactive **Split Compare** slider and **0ms instant live & paused redraws**.
 
 ### 2. Adaptive Display Sync (`VRR / LFC`), 4K HDR/DV & Transport Formats
 - **Mobile Adaptive Sync (`VRR / LFC`) & Hybrid `VFR` Tracking**: Classifies your screen panel (`LTPO ARR`, `Multi-Hz Seamless VRR`, `Multi-Hz LFC`, or `Fixed 60 Hz`), locks onto peak harmonic refresh containers (such as `120 Hz` `5×` for `23.976 fps`) to eliminate `3:2 pulldown` judder and OLED mode-switch gamma flicker, and tracks hybrid anime `VFR` transitions (`23.976 ↔ 59.94 ↔ 29.97 fps`) in real time.
@@ -114,7 +117,7 @@ Install and update Negai automatically via **Obtainium** or download the univers
 │     Media3 / ExoPlayer + GPU/DSP       │  │   Persistence & Network Layer  │
 │ • Vulkan 1.1 NDK / SPIR-V (Zero-Copy)  │  │ • DataStore + Fast Boot Cache  │
 │ • OpenGL ES 3.1 FP16 / Direct HWC HDR  │  │ • Room History & Resume Store  │
-│ • Anime4K v4 • AMD FSR 1.0 • FFX MEMC  │  │ • 120+ Lang Matcher & Subtitles│
+│ • ArtCNN • SGSR • Anime4K • FSR • MEMC │  │ • 120+ Lang Matcher & Subtitles│
 │ • BDAV .m2ts • FFmpeg • KEMAR HRTF DSP │  │ • TorrServer & DoH Client      │
 └────────────────────────────────────────┘  └────────────────────────────────┘
 ```
@@ -126,8 +129,10 @@ Install and update Negai automatically via **Obtainium** or download the univers
 
 - **Negai Player**: Proprietary, closed-source software. Copyright © 2026 Negai Player. All Rights Reserved. This public repository serves as the official release distribution hub, issue tracker, and open-source attribution notice. Read our [`PRIVACY.md`](PRIVACY.md).
 - **Anime4K (MIT License)**: Real-time anime line reconstruction shaders based on [bloc97/Anime4K](https://github.com/bloc97/Anime4K) (Copyright © 2019–2021 bloc97). See [`LICENSE_ANIME4K.txt`](LICENSE_ANIME4K.txt).
+- **ArtCNN C4F16 (MIT License)**: Compact neural 2× anime upscaling architecture and weights converted from [Artoriuz/ArtCNN](https://github.com/Artoriuz/ArtCNN) (Copyright © 2024 Joao Chrisostomo, Kacper Michajłow). See [`LICENSE_ARTCNN.txt`](LICENSE_ARTCNN.txt).
 - **AMD FidelityFX Optical Flow & Super Resolution 1.0 (MIT License)**: Hierarchical 32-bit Census optical flow motion estimation and edge-adaptive elliptical spatial upsampling (`EASU + RCAS`) adapted from the [AMD FidelityFX SDK](https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK) (Copyright © 2021–2026 Advanced Micro Devices, Inc.). See [`LICENSE_AMD_FIDELITYFX.txt`](LICENSE_AMD_FIDELITYFX.txt).
-- **RIFE / Practical-RIFE (MIT License)**: Neural frame interpolation architecture based on [megvii-research/ECCV2022-RIFE](https://github.com/megvii-research/ECCV2022-RIFE) and [hzwer/Practical-RIFE](https://github.com/hzwer/Practical-RIFE) (Copyright © 2020–2024 Megvii Research & Zhewei Huang). Converted model weights (`negai_rife_v426_fp16.bin`) are distributed under the MIT License in [Poison5820/Negai](https://github.com/Poison5820/Negai). See [`LICENSE_RIFE.txt`](LICENSE_RIFE.txt).
+- **Qualcomm Snapdragon Game Super Resolution v1 (BSD-3-Clause License)**: Single-pass mobile directional spatial upscaler adapted from [SnapdragonStudios/snapdragon-gsr](https://github.com/SnapdragonStudios/snapdragon-gsr) (Copyright © 2023 Qualcomm Innovation Center, Inc.). See [`LICENSE_QUALCOMM_SGSR.txt`](LICENSE_QUALCOMM_SGSR.txt).
+- **RIFE / Practical-RIFE (MIT License)**: Neural frame interpolation architecture based on [megvii-research/ECCV2022-RIFE](https://github.com/megvii-research/ECCV2022-RIFE) and [hzwer/Practical-RIFE](https://github.com/hzwer/Practical-RIFE) (Copyright © 2020–2024 Megvii Research & Zhewei Huang). Converted model weights (`negai_rife_v422_lite_fp16.bin` and legacy `negai_rife_v426_fp16.bin`) are distributed under the MIT License in [Poison5820/Negai](https://github.com/Poison5820/Negai). See [`LICENSE_RIFE.txt`](LICENSE_RIFE.txt).
 - **MIT KEMAR HRTF (MIT License)**: Binaural spatial audio impulse responses derived from the [MIT Media Lab KEMAR HRTF Dataset](https://sound.media.mit.edu/resources/KEMAR.html) (Bill Gardner & Keith Martin). See [`LICENSE_MIT_KEMAR_HRTF.txt`](LICENSE_MIT_KEMAR_HRTF.txt).
 - **FFmpeg (GNU LGPL v2.1+)**: Multichannel software audio decoding via AndroidX Media3 extension compiled strictly without GPL modules. See [`LICENSE_FFMPEG.txt`](LICENSE_FFMPEG.txt).
 - **AndroidX Media3 (Apache License 2.0)**: Core media playback framework by Google LLC.
