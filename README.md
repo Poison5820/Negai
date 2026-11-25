@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.10.1-FF80AB?style=flat-square" alt="Version 4.10.1" />
+  <img src="https://img.shields.io/badge/version-4.11.0-FF80AB?style=flat-square" alt="Version 4.11.0" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/GPU-Vulkan_1.1_%E2%80%A2_GLES_3.1_FP16-7C4DFF?style=flat-square" alt="GPU Compute" />
@@ -42,11 +42,12 @@ Install and update Negai automatically via **Obtainium** or download the univers
 
 ---
 
-## ✨ What's New in Release 4.10.1
+## ✨ What's New in Release 4.11.0
 
-- Restored crisp, delicate frosted glass texture on high-DPI displays with gentle attenuation on HD+ screens, keeping grain visible on popups, modals, and settings cards while suppressing it on small nested controls.
-- Streamlined the Upscale quick-hold mini-menu into a single compact horizontal row of all five engines (`Auto / Anime4K / ArtCNN / FSR / SGSR`) with no wrapping on landscape screens.
-- Tightened preset row spacing and collapsed unused quality tiers when ArtCNN is selected so the Upscale popover stays cleanly above the bottom HUD bar and seekbar.
+- Upgraded the internal audio DSP pipeline to **32-bit `PCM_FLOAT`** with low-latency output buffering (`100–250 ms`) and a unified soft-clip output limiter.
+- Added a built-in **10-band 32-bit float Biquad Equalizer** (`31 Hz – 16 kHz`) with genre presets, automatic headroom protection, and zipper-free real-time smoothing.
+- Introduced an independent **2.0 Stereo Virtualizer** for headphones, preserved low-end bass (`< 250 Hz`) in speaker **XTC**, and updated **Auto** spatial routing across multichannel HRTF, stereo widening, and speakers.
+- Accelerated **ArtCNN C4F16** with **Winograd `F(2×2, 3×3)` + UBO** shaders, sped up cold start with adaptive low-end device profiles, and stabilized **10-frame Lookahead MEMC**, RIFE precomputation hit rate, and Optical Flow artifact guards.
 
 ---
 
@@ -67,10 +68,10 @@ Install and update Negai automatically via **Obtainium** or download the univers
 - **Natural YouTube-Style 4K HDR & Dolby Vision**: Hardware-accelerated 10-bit `HDR10`, `HDR10+`, `HLG`, and **Dolby Vision** (including zero-allocation Profile 7 Enhancement Layer NAL sanitization) using native `COLOR_MODE_HDR` without blinding system brightness overrides.
 - **Broad Codec, Blu-ray BDAV & 3D Support**: Hardware-first `H.264`, `HEVC Main10`, `VP9`, and `AV1` (`Auto / HW+ / SW`), dedicated 192-byte **Blu-ray BDAV (`.m2ts` / `.ts`)** transport demuxer with PGS bitmap subtitles, and **3D Side-by-Side (`SBS`) / Top-and-Bottom (`TAB`)** playback.
 
-### 3. Zero-Allocation Spatial Audio & Voice Restoration DSP
-- **3D Spatial Audio (`MIT KEMAR HRTF` & `XTC`)**: Real-time 5.1/7.1 binaural headphone convolution (`MIT Media Lab KEMAR HRTF`) with interaural time delay and stereo speaker **Crosstalk Cancellation (`XTC`)**.
-- **Voice De-Artifact & Bandwidth Extension (`BWE`) DSP**: 4-mode zero-allocation PCM voice restoration (`Off`, `Soft`, `Standard`, `BWE Upscale`) with automatic activation on low-bitrate lossy voiceovers while bypassing lossless codecs.
-- **300% Volume Boost, Lossless Surround & Bluetooth Sync**: Clipping-guarded volume amplification up to **300%**, **FFmpeg** multichannel decoding (`DTS`, `DTS-HD Master Audio 7.1`, `Dolby TrueHD + Atmos`, `EAC3`, `FLAC`, `Opus`), and **Bluetooth Audio Delay** compensation (`-5000 ms` to `+5000 ms`).
+### 3. Zero-Allocation 32-Bit Float Audio, 10-Band EQ & Spatial DSP
+- **32-Bit Float Audio Pipeline & 10-Band Biquad Equalizer**: Low-latency `PCM_FLOAT` internal signal path with a single final soft-clip limiter, paired with a 10-band ISO equalizer (`31 Hz – 16 kHz`), genre presets, automatic headroom compensation, and instant session A/B bypass.
+- **3D Spatial Audio (`MIT KEMAR HRTF`, `2.0 Stereo Virtualizer` & `XTC`)**: Real-time 5.1/7.1 binaural headphone convolution (`MIT Media Lab KEMAR HRTF`), dedicated 2.0 stereo headphone stage widening, and bass-protected stereo speaker **Crosstalk Cancellation (`XTC`)** with smart **Auto** output routing.
+- **Voice De-Artifact, 300% Volume Boost, Lossless Surround & Bluetooth Sync**: 4-mode zero-allocation voice restoration (`Off`, `Soft`, `Standard`, `BWE Upscale`), clipping-guarded volume amplification up to **300%**, **FFmpeg** multichannel decoding (`DTS`, `DTS-HD Master Audio 7.1`, `Dolby TrueHD + Atmos`, `EAC3`, `FLAC`, `Opus`), and **Bluetooth Audio Delay** compensation (`-5000 ms` to `+5000 ms`).
 
 ### 4. Multi-Engine Glass UI, Smart Playback, 120+ Languages & P2P Streaming
 - **Three Optical UI Engines & Palettes**: Choose **Flat** (Material 3 Expressive), **Frosted Glass** (matte blur + micro-crystal grain), or **Liquid Glass** (physical lens refraction + `135°` specular bevel) across **Light**, warm charcoal **Dark (`#131417`)**, and true **OLED (`#000000`)** modes, paired with 4 player HUD themes (`Classic OLED`, `Glass Capsule`, `Cyber Neon`, `Pure Icons`) and elastic **Material 3 Expressive Pull-to-Refresh**.

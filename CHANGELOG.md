@@ -3,7 +3,29 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
-> Older versions (v4.9.7 and earlier) are archived in `CHANGELOG_ARCHIVE.md`.
+> Older versions (v4.9.8 and earlier) are archived in `CHANGELOG_ARCHIVE.md`.
+
+## [v4.11.0]
+
+### 🇬🇧 English
+- Upgraded the internal sound engine to high-precision floating-point processing with lower output latency.
+- Added a ten-band graphic equalizer with genre presets, automatic headroom protection, and smooth transitions.
+- Introduced dedicated stereo headphone widening, cleaner speaker crosstalk bass, and smarter automatic spatial routing.
+- Accelerated neural anime upscaling, improved cold startup speed, and added adaptive low-end device profiles.
+- Stabilized lookahead motion smoothing frame order, neural precomputation hit rate, and optical flow guards.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.11.0)</b></summary>
+
+<br>
+
+- Звуковой тракт переведён на точную обработку с плавающей точкой и сниженную задержку вывода.
+- Добавлен десятиполосный эквалайзер с пресетами, защитой запаса громкости и плавным сглаживанием без щелчков.
+- Добавлено расширение стереосцены в наушниках, сохранён бас динамиков и обновлена автоматическая маршрутизация объёма.
+- Ускорен нейросетевой апскейл аниме, сокращено время холодного запуска и добавлены адаптивные профили устройств.
+- Стабилизирован порядок кадров опережающего сглаживания, восстановлен предрасчёт нейросети и усилена защита оптического потока.
+
+</details>
 
 ## [v4.10.1]
 
@@ -182,27 +204,5 @@
 - Ползунок инспектора кадров в режиме ×2 закреплён на трёх реальных фазах кадра.
 - Повышена точность границ опенингов и эндингов с отсечением лишних секунд диалогов.
 - Обновлены подписи нейросетевой модели до RIFE v4.26 и убрана обрезка текста бенчмарка.
-
-</details>
-
-## [v4.9.8]
-
-### 🇬🇧 English
-- Upgraded bundled anime neural motion smoothing to the newer RIFE v4.26 model.
-- Routed automatic motion smoothing to use neural interpolation for anime ×2 and optical flow for movies or high frame rates.
-- Enforced a strict two-phase ×2 frame cadence for smooth, even 48 fps motion.
-- Added static background lock and edge-aware flow checks to reduce jelly distortion on anime.
-- Expanded optical flow search range for cleaner fast camera pans and large movements.
-
-<details>
-<summary><b>🇷🇺 На русском (Что нового в v4.9.8)</b></summary>
-
-<br>
-
-- Обновлена встроенная нейросетевая модель сглаживания аниме до официальной версии RIFE v4.26.
-- В авторежиме нейросеть теперь работает для аниме в ×2, а для кино и 60/Макс. Гц выбирается оптический поток.
-- Закреплён строгий двухфазный ритм режима ×2 для ровной плавности 48 кадров в секунду.
-- Добавлена фиксация статичного фона и защита контуров от эффекта «желе» на движущемся аниме.
-- Расширен радиус поиска оптического потока для более чистых быстрых панорам и резких движений.
 
 </details>
