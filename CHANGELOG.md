@@ -3,7 +3,27 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
-> Older versions (v4.9.6 and earlier) are archived in `CHANGELOG_ARCHIVE.md`.
+> Older versions (v4.9.7 and earlier) are archived in `CHANGELOG_ARCHIVE.md`.
+
+## [v4.10.1]
+
+### 🇬🇧 English
+- Restored crisp, delicate frosted glass texture on high-DPI screens with gentle attenuation on HD+ displays.
+- Kept frosted glass texture visible on popups, modals, and settings cards while suppressing double grain on small nested controls.
+- Streamlined the Upscale quick-hold mini-menu into a single compact row of all five engines without wrapping.
+- Tightened preset row spacing and collapsed unused quality presets when ArtCNN is selected so the menu stays clear of the seekbar.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.10.1)</b></summary>
+
+<br>
+
+- Возвращена чёткая деликатная фактура матового стекла на экранах высокого разрешения с мягким снижением на HD+-дисплеях.
+- Сохранена текстура матового стекла на всплывающих меню, модалках и карточках настроек при подавлении лишнего шума на мелких вложенных контролах.
+- Разгружен верх мини-меню «Апскейл»: все пять движков выстроены в одну компактную строку без переноса.
+- Уменьшены вертикальные отступы строк пресетов и свёрнуты неиспользуемые уровни качества при выборе ArtCNN, чтобы меню не перекрывало сикбар.
+
+</details>
 
 ## [v4.10.0]
 
@@ -184,25 +204,5 @@
 - Закреплён строгий двухфазный ритм режима ×2 для ровной плавности 48 кадров в секунду.
 - Добавлена фиксация статичного фона и защита контуров от эффекта «желе» на движущемся аниме.
 - Расширен радиус поиска оптического потока для более чистых быстрых панорам и резких движений.
-
-</details>
-
-## [v4.9.7]
-
-### 🇬🇧 English
-- Accelerated local intro and ending audio scanning dramatically with in-process decoding and unthrottled codecs.
-- Restored full high-refresh smoothness for neural motion smoothing on 90–120 Hz screens.
-- Reduced contour ghosting and increased detail in anime neural motion smoothing with sharper occlusion blending.
-- Refined player interface animations with snappy fade-out and decelerated fade-in curves.
-
-<details>
-<summary><b>🇷🇺 На русском (Что нового в v4.9.7)</b></summary>
-
-<br>
-
-- В разы ускорен локальный аудиопоиск опенингов и эндингов за счёт быстрого встроенного декодирования.
-- Восстановлена высокая частота кадров нейросетевого сглаживания в режиме максимальной герцовки.
-- Уменьшено двоение контуров и повышена детализация нейросетевой интерполяции на аниме за счёт чёткой маски границ.
-- Улучшена плавность появления и исчезновения элементов интерфейса плеера за счёт асимметричных кривых анимации.
 
 </details>

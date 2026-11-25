@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.10.0-FF80AB?style=flat-square" alt="Version 4.10.0" />
+  <img src="https://img.shields.io/badge/version-4.10.1-FF80AB?style=flat-square" alt="Version 4.10.1" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/GPU-Vulkan_1.1_%E2%80%A2_GLES_3.1_FP16-7C4DFF?style=flat-square" alt="GPU Compute" />
@@ -42,12 +42,11 @@ Install and update Negai automatically via **Obtainium** or download the univers
 
 ---
 
-## ✨ What's New in Release 4.10.0
+## ✨ What's New in Release 4.10.1
 
-- Rebuilt MEMC motion smoothing around a 6-frame Lookahead ring with ahead-of-time decoder frame release and exact 1s / 2s / 3s anime cadence detection.
-- Added double-buffered RIFE neural flow calculation with 2-chunk scheduling at 85 Hz and above to eliminate high-refresh stutters and remove redundant pre-restore passes.
-- Upgraded Vulkan Compute optical flow to TV-style 3DRS predictive block search, multi-vector OBMC synthesis, and blurred soft artifact masks with a unified post-MEMC upscale path.
-- Added ArtCNN C4F16 neural anime upscaling, single-pass Qualcomm SGSR v1 cinema upscaling, and optional 16-bit Debanding before upscaling.
+- Restored crisp, delicate frosted glass texture on high-DPI displays with gentle attenuation on HD+ screens, keeping grain visible on popups, modals, and settings cards while suppressing it on small nested controls.
+- Streamlined the Upscale quick-hold mini-menu into a single compact horizontal row of all five engines (`Auto / Anime4K / ArtCNN / FSR / SGSR`) with no wrapping on landscape screens.
+- Tightened preset row spacing and collapsed unused quality tiers when ArtCNN is selected so the Upscale popover stays cleanly above the bottom HUD bar and seekbar.
 
 ---
 
