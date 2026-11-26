@@ -3,7 +3,27 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
-> Older versions (v4.10.0 and earlier) are archived in `CHANGELOG_ARCHIVE.md`.
+> Older versions (v4.10.1 and earlier) are archived in `CHANGELOG_ARCHIVE.md`.
+
+## [v4.11.9]
+
+### 🇬🇧 English
+- Eliminated repeated per-frame graphics memory probes by caching display surface formats across the video surface lifetime.
+- Fixed jagged moving edges across optical flow and neural motion smoothing with full-distance warping, occlusion-aware blending, and clean contour synthesis.
+- Eliminated false smoothing skips during steady camera pans, static anime color fills, and character turns.
+- Tuned realistic neural auto-downscale frame budgets and accelerated Cinema ×2 precomputation at 48 fps to prevent missed frames.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.11.9)</b></summary>
+
+<br>
+
+- Устранены повторные системные запросы графической памяти на каждом кадре за счёт кэширования форматов экрана на всё время жизни видеоповерхности.
+- Убраны рваные края движущихся объектов в оптическом потоке и нейросетевом сглаживании за счёт полного хода векторов, учёта перекрытий и отказа от резких вырезов контуров.
+- Устранены ложные пропуски сглаживания на ровных панорамах, статичных аниме-заливках и поворотах персонажей.
+- Настроены реалистичный бюджет автоснижения разрешения нейросети и ускоренный предрасчёт в режиме Кино ×2 при 48 к/с без пропусков кадров.
+
+</details>
 
 ## [v4.11.8]
 
@@ -188,25 +208,5 @@
 - Добавлено расширение стереосцены в наушниках, сохранён бас динамиков и обновлена автоматическая маршрутизация объёма.
 - Ускорен нейросетевой апскейл аниме, сокращено время холодного запуска и добавлены адаптивные профили устройств.
 - Стабилизирован порядок кадров опережающего сглаживания, восстановлен предрасчёт нейросети и усилена защита оптического потока.
-
-</details>
-
-## [v4.10.1]
-
-### 🇬🇧 English
-- Restored crisp, delicate frosted glass texture on high-DPI screens with gentle attenuation on HD+ displays.
-- Kept frosted glass texture visible on popups, modals, and settings cards while suppressing double grain on small nested controls.
-- Streamlined the Upscale quick-hold mini-menu into a single compact row of all five engines without wrapping.
-- Tightened preset row spacing and collapsed unused quality presets when ArtCNN is selected so the menu stays clear of the seekbar.
-
-<details>
-<summary><b>🇷🇺 На русском (Что нового в v4.10.1)</b></summary>
-
-<br>
-
-- Возвращена чёткая деликатная фактура матового стекла на экранах высокого разрешения с мягким снижением на HD+-дисплеях.
-- Сохранена текстура матового стекла на всплывающих меню, модалках и карточках настроек при подавлении лишнего шума на мелких вложенных контролах.
-- Разгружен верх мини-меню «Апскейл»: все пять движков выстроены в одну компактную строку без переноса.
-- Уменьшены вертикальные отступы строк пресетов и свёрнуты неиспользуемые уровни качества при выборе ArtCNN, чтобы меню не перекрывало сикбар.
 
 </details>
