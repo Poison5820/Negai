@@ -3,7 +3,27 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
-> Older versions (v4.9.15 and earlier) are archived in `CHANGELOG_ARCHIVE.md`.
+> Older versions (v4.10.0 and earlier) are archived in `CHANGELOG_ARCHIVE.md`.
+
+## [v4.11.8]
+
+### 🇬🇧 English
+- Restored clear finger-drag highlight across in-window player mini-menus with haptic feedback and clean gesture cancellation.
+- Eliminated frosted and liquid glass flicker or stuck unblurred backgrounds when switching scaling filters while playing or paused.
+- Strengthened occlusion handling, thin anime lineart protection, and tiled motion-breakdown detection across neural and optical flow smoothing.
+- Added one-time hardware buffer format capability caching and cache-hit diagnostics to prevent unnecessary graphics probes.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.11.8)</b></summary>
+
+<br>
+
+- Восстановлена чёткая подсветка пункта под пальцем при скольжении по мини-меню плеера с тактильным откликом и корректной отменой жеста.
+- Устранено мигание и залипание матового и жидкого стекла без размытия при смене фильтра масштабирования на паузе и во время воспроизведения.
+- Усилена защита тонких аниме-контуров, зон перекрытия и плиточной оценки сбоев движения в нейросетевом сглаживании и оптическом потоке.
+- Добавлено однократное кэширование проверки форматов аппаратных буферов и диагностика попаданий в кэш для устранения лишних системных обращений.
+
+</details>
 
 ## [v4.11.7]
 
@@ -188,25 +208,5 @@
 - Сохранена текстура матового стекла на всплывающих меню, модалках и карточках настроек при подавлении лишнего шума на мелких вложенных контролах.
 - Разгружен верх мини-меню «Апскейл»: все пять движков выстроены в одну компактную строку без переноса.
 - Уменьшены вертикальные отступы строк пресетов и свёрнуты неиспользуемые уровни качества при выборе ArtCNN, чтобы меню не перекрывало сикбар.
-
-</details>
-
-## [v4.10.0]
-
-### 🇬🇧 English
-- Rebuilt MEMC motion smoothing around a 6-frame Lookahead ring with ahead-of-time decoder frame release and exact 1s / 2s / 3s anime cadence detection.
-- Added double-buffered RIFE neural flow calculation with 2-chunk scheduling at 85 Hz and above to eliminate high-refresh stutters and remove redundant pre-restore passes.
-- Upgraded Vulkan Compute optical flow to TV-style 3DRS predictive block search, multi-vector OBMC synthesis, and blurred soft artifact masks with a unified post-MEMC upscale path.
-- Added ArtCNN C4F16 neural anime upscaling, single-pass Qualcomm SGSR v1 cinema upscaling, and optional 16-bit Debanding before upscaling.
-
-<details>
-<summary><b>🇷🇺 На русском (Что нового в v4.10.0)</b></summary>
-
-<br>
-
-- Перестроен конвейер сглаживания движений MEMC на 6-кадровый Lookahead-буфер с опережающим выпуском кадров декодера и точным распознаванием темпа 1s / 2s / 3s в аниме.
-- Добавлена двойная буферизация нейросетевого потока RIFE с 2-чанковым разбиением на экранах 85 Гц и выше для устранения подёргиваний и холостых проходов GPU.
-- Оптический поток на Vulkan Compute переведён на TV-уровень алгоритмов: предиктивный поиск 3DRS, многовекторный синтез OBMC, сглаженные маски артефактов и единый тракт апскейла после MEMC.
-- Добавлены нейросетевой апскейлер ArtCNN C4F16 для аниме, быстрый однопроходный Qualcomm SGSR v1 для кино и отключаемый 16-битный Дебандинг градиентов перед апскейлом.
 
 </details>

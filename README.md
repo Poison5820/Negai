@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.11.7-FF80AB?style=flat-square" alt="Version 4.11.7" />
+  <img src="https://img.shields.io/badge/version-4.11.8-FF80AB?style=flat-square" alt="Version 4.11.8" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/GPU-Vulkan_1.1_%E2%80%A2_GLES_3.1_FP16-7C4DFF?style=flat-square" alt="GPU Compute" />
@@ -42,11 +42,11 @@ Install and update Negai automatically via **Obtainium** or download the univers
 
 ---
 
-## ✨ What's New in Release 4.11.7
+## ✨ What's New in Release 4.11.8
 
+- **Responsive Mini-Menu Drag Highlight, Flicker-Free Glass & Hardened MEMC (`v4.11.8`)**: Restored crisp finger-drag highlighting across in-window player mini-menus, retained last blurred video backdrop across scaling-filter switches with automatic pause-time retries, strengthened occlusion and anime lineart protection with tiled motion-breakdown detection, and cached hardware buffer format probes once per descriptor.
 - **Zero-Probe Hardware Buffer Cache, Native 1:1 High-Refresh Output & Crisp Scaling Filters (`v4.11.7`)**: Eliminated per-frame graphics memory probe overhead on cached hardware buffers, removed forced output resolution capping during high-refresh motion smoothing for crisp 1:1 presentation, calibrated single-pass final anti-ringing in FP16 scaling filters, and clarified in-player scaling filter active state.
 - **Direct Hardware Display Layer & On-Demand Glass Backdrop (`v4.11.6`)**: Switched Vulkan video output to a direct hardware `SurfaceView` layer for lower presentation latency and native refresh-rate voting, paired with an on-demand 3-slot `320×180` `AHardwareBuffer` glass backdrop tap that uses zero GPU work when HUD/modals are closed or in Flat themes.
-- **Media-Clock PLL & Reference MEMC Cleanup (`v4.11.4–4.11.5`)**: Sub-millisecond media-clock PLL pacing, strict two-step `×2` cadence, cleaned-up RIFE (`align_corners=True`, accurate GPU timestamps) and Optical Flow without translucent crossfade ghosting, and automatic full-frame fallback to a crisp original frame during flashes or chaotic motion.
 
 ---
 
