@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.11.0-FF80AB?style=flat-square" alt="Version 4.11.0" />
+  <img src="https://img.shields.io/badge/version-4.11.6-FF80AB?style=flat-square" alt="Version 4.11.6" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/GPU-Vulkan_1.1_%E2%80%A2_GLES_3.1_FP16-7C4DFF?style=flat-square" alt="GPU Compute" />
@@ -26,7 +26,7 @@
 
 ## Overview
 
-**Negai** is a modern, flagship-grade Android 4K video player engineered for anime enthusiasts and cinema purists. It combines a native **Vulkan 1.1 (`SPIR-V`)** and **OpenGL ES 3.1 (`FP16`)** compute video pipeline, **Anime4K** + **ArtCNN C4F16** + **AMD FSR 1.0** + **Qualcomm SGSR v1** + **16-bit Debanding**, **6-frame Lookahead MEMC** (**RIFE v4.22-lite** & **TV-style 3DRS/OBMC Optical Flow**), mobile **Adaptive Sync (`VRR / LFC`)**, natural **4K HDR10 / Dolby Vision**, zero-allocation **MIT KEMAR HRTF** spatial audio, refractive **Liquid & Frosted Glass** interfaces, **120+ world languages** for automatic track pairing, and direct **TorrServer P2P** streaming — with zero ads and zero tracking.
+**Negai** is a modern, flagship-grade Android 4K video player engineered for anime enthusiasts and cinema purists. It combines a native **Vulkan 1.1 (`SPIR-V`)** and **OpenGL ES 3.1 (`FP16`)** compute video pipeline, **Anime4K** + **ArtCNN C4F16** + **AMD FSR 1.0** + **Qualcomm SGSR v1** + **16-bit Debanding**, **10-frame Lookahead MEMC** (**RIFE v4.22-lite** & **3DRS L4–L1 Optical Flow**), mobile **Adaptive Sync (`VRR / LFC`)**, natural **4K HDR10 / Dolby Vision**, zero-allocation **MIT KEMAR HRTF** spatial audio, refractive **Liquid & Frosted Glass** interfaces, **120+ world languages** for automatic track pairing, and direct **TorrServer P2P** streaming — with zero ads and zero tracking.
 
 ---
 
@@ -42,12 +42,10 @@ Install and update Negai automatically via **Obtainium** or download the univers
 
 ---
 
-## ✨ What's New in Release 4.11.0
+## ✨ What's New in Release 4.11.4
 
-- Upgraded the internal audio DSP pipeline to **32-bit `PCM_FLOAT`** with low-latency output buffering (`100–250 ms`) and a unified soft-clip output limiter.
-- Added a built-in **10-band 32-bit float Biquad Equalizer** (`31 Hz – 16 kHz`) with genre presets, automatic headroom protection, and zipper-free real-time smoothing.
-- Introduced an independent **2.0 Stereo Virtualizer** for headphones, preserved low-end bass (`< 250 Hz`) in speaker **XTC**, and updated **Auto** spatial routing across multichannel HRTF, stereo widening, and speakers.
-- Accelerated **ArtCNN C4F16** with **Winograd `F(2×2, 3×3)` + UBO** shaders, sped up cold start with adaptive low-end device profiles, and stabilized **10-frame Lookahead MEMC**, RIFE precomputation hit rate, and Optical Flow artifact guards.
+- Refined **RIFE Neural** and **Optical Flow** motion smoothing for smoother character turns, even camera pans, accurate hardware GPU timing, zero translucent double-image ghosting, cohesive flat-region motion, and automatic full-frame fallback to a crisp original frame during flashes, chaotic motion, or high motion error.
+- Includes all **v4.11.0–4.11.3** upgrades: real-time **Audio Spectrum Inspector** (`36` bands, Pre/Post-DSP & A/B bypass), instant **2.0 Stereo Virtualizer (`Off / Soft / Wide`)**, in-window **120 Hz** player mini-menus, **32-bit `PCM_FLOAT`** audio DSP, **10-band Biquad Equalizer**, and **ArtCNN Winograd `F(2×2, 3×3)` + UBO**.
 
 ---
 
@@ -61,7 +59,7 @@ Install and update Negai automatically via **Obtainium** or download the univers
   - **ArtCNN C4F16 (`MIT`)**: Compact 2× neural anime upscaler running in FP16 on Vulkan 1.1 Compute with lazy GPU tensor allocation for crisp contour restoration.
   - **AMD FidelityFX Super Resolution 1.0 (`EASU + RCAS`) & Qualcomm SGSR v1 (`BSD-3-Clause`)**: Choose between 2-pass elliptical Lanczos2 + RCAS or ultra-fast single-pass 12-tap directional mobile upscaling for cinema, series, and 3D CGI.
   - **Asynchronous GPU Style Probe (`Auto`)**: Classifies cel-shaded animation vs live-action gradients on the GPU with zero pipeline stalls (`Auto → Anime4K / AMD FSR`).
-- **6-Frame Lookahead MEMC (`RIFE v4.22-lite` & `TV-Style 3DRS/OBMC Optical Flow`)**: Ahead-of-time decoder FIFO with exact `1s / 2s / 3s` anime cadence detection, double-buffered RIFE neural flow with 2-chunk scheduling at `>= 85 Hz`, and TV-style 3DRS predictive search + OBMC synthesis (`×2 / 60 FPS / Max Hz`), plus interactive **Split Compare** slider and **0ms instant live & paused redraws**.
+- **10-Frame Lookahead MEMC (`RIFE v4.22-lite` & `3DRS L4–L1 Optical Flow`)**: Ahead-of-time decoder FIFO with exact `1s / 2s / 3s` anime cadence detection, double-buffered RIFE neural flow with 2-chunk scheduling at `>= 85 Hz`, and 3DRS L4–L1 optical flow with zero-crossfade sharp fallback (`×2 / 60 FPS / Max Hz`), plus interactive **Split Compare** slider and **0ms instant live & paused redraws**.
 
 ### 2. Adaptive Display Sync (`VRR / LFC`), 4K HDR/DV & Transport Formats
 - **Mobile Adaptive Sync (`VRR / LFC`) & Hybrid `VFR` Tracking**: Classifies your screen panel (`LTPO ARR`, `Multi-Hz Seamless VRR`, `Multi-Hz LFC`, or `Fixed 60 Hz`), locks onto peak harmonic refresh containers (such as `120 Hz` `5×` for `23.976 fps`) to eliminate `3:2 pulldown` judder and OLED mode-switch gamma flicker, and tracks hybrid anime `VFR` transitions (`23.976 ↔ 59.94 ↔ 29.97 fps`) in real time.

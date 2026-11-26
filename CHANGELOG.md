@@ -3,7 +3,131 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
-> Older versions (v4.9.8 and earlier) are archived in `CHANGELOG_ARCHIVE.md`.
+> Older versions (v4.9.14 and earlier) are archived in `CHANGELOG_ARCHIVE.md`.
+
+## [v4.11.6]
+
+### 🇬🇧 English
+- Switched video playback to a direct hardware display layer for lower latency and native refresh-rate voting.
+- Added an on-demand lightweight backdrop for frosted and liquid glass that uses zero GPU work when hidden or in flat styles.
+- Smoothed pinch-zoom, panning, and predictive back gestures directly on the video surface without black trails.
+- Preserved clean screenshots, ambient edge lighting, and smoothness diagnostics on the direct video layer.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.11.6)</b></summary>
+
+<br>
+
+- Вывод видео переведён на прямой аппаратный слой дисплея для снижения задержки и точного управления частотой экрана.
+- Добавлена лёгкая подложка по требованию для матового и жидкого стекла, полностью отключающаяся при скрытом HUD и в плоских стилях.
+- Повышена плавность масштабирования, панорамирования и жеста «Назад» прямо на видеослое без чёрных шлейфов.
+- Сохранена корректная работа чистых скриншотов, внешней подсветки и диагностики плавности на прямом видеослое.
+
+</details>
+
+## [v4.11.5]
+
+### 🇬🇧 English
+- Smoothed media-clock timing to eliminate micro-jitter and single-tick phase freezes during camera pans.
+- Fixed two-step ×2 smoothing rhythm to prevent premature frame snapping and improved frame-capture reliability.
+- Eliminated frame-rate drops in neural Max Hz smoothing so playback stays smooth on 120 Hz screens.
+- Added live refresh-rate tracking with even 60 fps pacing on 120 Hz panels.
+- Updated benchmark jitter telemetry to measure actual displayed output cadence.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.11.5)</b></summary>
+
+<br>
+
+- Добавлено плавное сглаживание медиа-часов для устранения микродрожания фазы и залипаний на панорамах.
+- Исправлен строгий двухфазный ритм режима плавности ×2 без досрочного перескока и повышена стабильность захвата кадров.
+- Устранено падение частоты кадров в максимальном режиме нейросетевой плавности на экранах 120 Гц.
+- Подключён живой замер реальной частоты экрана и строго равномерный вывод 60 к/с на 120 Гц дисплеях.
+- Обновлён замер джиттера в бенчмарке для честного контроля ритма выводимых на экран кадров.
+
+</details>
+
+## [v4.11.4]
+
+### 🇬🇧 English
+- Cleaned up neural motion smoothing to follow reference blending for smoother character turns and even pans.
+- Fixed hardware GPU timing measurement and frame submission recovery for more reliable neural smoothness.
+- Eliminated translucent double-image ghosting and ragged island breakup across optical flow motion smoothing.
+- Improved cohesive motion across flat color regions and bright lights during camera pans.
+- Added full-frame fallback to a crisp original frame during flashes, chaotic motion, or high motion error.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.11.4)</b></summary>
+
+<br>
+
+- Очищено нейросетевое сглаживание движений до эталонного смешивания для плавных поворотов персонажей и ровных панорам.
+- Исправлен аппаратный замер времени GPU и безопасное восстановление состояния после ошибок отправки кадров.
+- Полностью убрано полупрозрачное двоение и рассыпание объектов на «островки» в оптическом потоке.
+- Улучшено цельное движение однотонных заливок и ярких объектов на панорамах камеры.
+- Добавлен полнокадровый откат к резкому исходному кадру при вспышках, резком хаосе и высоком проценте брака движения.
+
+</details>
+
+## [v4.11.3]
+
+### 🇬🇧 English
+- Added a real-time Audio Spectrum Inspector overlay comparing Pre-DSP and Post-DSP frequency response across 36 logarithmic bands with peak hold and smooth decay.
+- Added live stereo soundstage width (Side/Mid), phase correlation, L/R level meters, final limiter (CLIP/GR) indicator, and active audio pipeline badges.
+- Added a quick A/B (Pre / Post) button directly in the inspector header to bypass or restore all audio DSP on the fly, plus drag, pin, and compact/expanded modes.
+- Added Audio Spectrum Inspector toggles in Audio → Enhancements and Tools → HUD while keeping zero CPU usage when closed.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.11.3)</b></summary>
+
+<br>
+
+- Добавлен «Инспектор спектра аудио» в реальном времени с визуализацией спектра До и После DSP по 36 логарифмическим полосам с удержанием пиков и плавным спадом.
+- Добавлены индикаторы ширины стереосцены (Side/Mid), фазовой корреляции, уровней L/R, срабатывания финального лимитера (CLIP/GR) и бейджи активного аудиотракта.
+- Добавлена быстрая кнопка A/B («До / После») прямо в шапке инспектора для мгновенного обхода DSP на лету, а также перетаскивание, закрепление и компактный/расширенный режимы.
+- Добавлены переключатели «Инспектора спектра аудио» в «Звук → Улучшения» и «Инструменты → HUD» при нулевой нагрузке на CPU в закрытом состоянии.
+
+</details>
+
+## [v4.11.2]
+
+### 🇬🇧 English
+- Fixed instant on-the-fly switching for 2.0 stereo soundstage widening (Off / Soft / Wide) on headphones and speakers without restarting audio playback.
+- Widened the stereo soundstage in Soft and Wide modes while keeping centered dialogue clear and deep bass focused.
+- Cleaned up the Stereo 2.0 Volume card by removing duplicate titles and redundant switches and updating the description.
+- Unified the player audio button gesture so a short tap toggles sound enhancements on or off and a long press opens the Audio Enhancements menu.
+- Eliminated background glass stuttering behind the Audio modal sheet during live video playback.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.11.2)</b></summary>
+
+<br>
+
+- Исправлено мгновенное переключение расширения стереосцены 2.0 («Выкл / Мягкая / Широкая») на лету в наушниках и динамиках без перезапуска звука.
+- Усилена ощутимая ширина стереосцены в режимах «Мягкая» и «Широкая» при сохранении чётких голосов по центру и плотного баса.
+- Упрощена карточка «Объём для стерео 2.0»: убраны дублирующийся заголовок и лишний тумблер, обновлено описание.
+- Кнопка звука в панели плеера приведена к единому жесту: короткое нажатие включает или выключает улучшения, а удержание открывает меню «Звук → Улучшения».
+- Убраны рывки и отставание стеклянного фона под модальным окном «Звук» во время воспроизведения видео.
+
+</details>
+
+## [v4.11.1]
+
+### 🇬🇧 English
+- Moved all player quick-hold mini-menus (Smoothness, Upscale, speed, and audio) into an in-window overlay so frosted and liquid glass refresh synchronously with the video at full 120 Hz.
+- Added full-screen tap-to-dismiss and Back button support for active player mini-menus with safe-area positioning above the quick action bar.
+- Made the bottom floating navigation dock slide down smoothly whenever Quick Appearance or any other modal opens and return smoothly on close.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.11.1)</b></summary>
+
+<br>
+
+- Все быстрые мини-меню плеера («Плавность», «Апскейл», скорость и звук) переведены на отрисовку внутри основного окна без отставания матового и жидкого стекла при 120 Гц.
+- Сохранено закрытие мини-меню плеера по нажатию мимо и кнопкой «Назад» с точным позиционированием над панелью быстрых кнопок.
+- Нижний плавающий док навигации теперь плавно уезжает вниз при открытии окна «Быстрое оформление» и других модальных окон и плавно возвращается при их закрытии.
+
+</details>
 
 ## [v4.11.0]
 
@@ -82,127 +206,5 @@
 - Подключён точный пейсинг кадров через адаптивную сетку и тайминг дисплея с режимом 2× LTPO (48 / 96 Гц) для 24 к/с в обычном просмотре и сглаживании ×2 без рывков 3:2 и мигания экрана.
 - Исправлен аппаратный GPU-замер времени нейросети RIFE, возвращающий высокое разрешение 448×256 в режиме ×2.
 - Сужен ореол искажений на статичном фоне вокруг движущихся персонажей и объектов.
-
-</details>
-
-## [v4.9.14]
-
-### 🇬🇧 English
-- Accelerated neural motion smoothing on mobile GPUs for smoother high-refresh anime playback.
-- Eliminated jelly-like distortion on fast dark scenes in neural smoothing while keeping smooth pans.
-- Prevented fast-moving foreground objects from shattering in optical flow with cohesive sharp fallback.
-
-<details>
-<summary><b>🇷🇺 На русском (Что нового в v4.9.14)</b></summary>
-
-<br>
-
-- Ускорено нейросетевое сглаживание движений на мобильных видеоускорителях для плавного воспроизведения при высокой герцовке.
-- Устранено «желейное» искажение на быстрых тёмных сценах в нейросетевом сглаживании без потери плавности панорам.
-- Убрано рассыпание быстро движущихся объектов в оптическом потоке за счёт цельного резкого отката.
-
-</details>
-
-## [v4.9.13]
-
-### 🇬🇧 English
-- Eliminated RIFE neural motion smoothing stutters in ×2 and 60 Hz modes with non-blocking real-frame presentation, post-present flow scheduling, and dedicated flow-time tracking.
-- Fixed fast-moving object breakup in ×2 optical flow at mid-interval with deeper 3-stage coarse refinement and stricter sharp-background fallback.
-- Restored automatic RIFE neural activation for anime in Auto mode on native FP16 GPUs, with silent fallback to optical flow under sustained load or severe thermal throttling.
-
-<details>
-<summary><b>🇷🇺 На русском (Что нового в v4.9.13)</b></summary>
-
-<br>
-
-- Устранены рывки нейросетевого сглаживания RIFE в режимах ×2 и 60 Гц за счёт опережающего расчёта движения после показа реального кадра и точного контроля времени потока.
-- Убрано рассыпание быстро движущихся объектов в оптическом потоке ×2 на середине интервала за счёт расширенного многошагового поиска и более строгого отката к резкому фону.
-- Восстановлена автоматическая активация нейросети RIFE для аниме в режиме «Авто» на видеоускорителях с поддержкой FP16, с тихим переходом на оптический поток при нехватке запаса или перегреве.
-
-</details>
-
-## [v4.9.12]
-
-### 🇬🇧 English
-- Added Night Mode dialogue compression, low-volume loudness compensation, and instant original-sound bypass.
-- Combined all sound tools under the Audio Enhancement button and split Audio tab into Tracks and Enhancements.
-- Fixed Android 16 system volume popup conflicts and restored Bluetooth headset volume control.
-- Made the hold-to-speed badge compact and centered, and fixed slow playback sticking after closing Frame Inspector.
-- Reduced stair-stepping and harsh edges in Anime4K Ultra while simplifying the automatic motion smoothing label.
-
-<details>
-<summary><b>🇷🇺 На русском (Что нового в v4.9.12)</b></summary>
-
-<br>
-
-- Добавлены Ночной режим для чётких диалогов, тонкомпенсация на низкой громкости и мгновенный A/B-обход улучшений.
-- Объединены все звуковые фильтры в кнопке «Улучшение звука», а вкладка «Звук» разделена на «Дорожки» и «Улучшения».
-- Исправлено наложение системного окна громкости на Android 16 и восстановлена регулировка громкости с Bluetooth-наушников.
-- Капсула ускорения по удержанию стала компактной по центру, а также исправлено залипание скорости 0.5× после Инспектора.
-- Смягчены ступеньки и перешарп в режиме Anime4K Ultra, а подпись автоматического сглаживания упрощена до «Авто».
-
-</details>
-
-## [v4.9.11]
-
-### 🇬🇧 English
-- Kept fast-moving thin objects intact in optical flow and separated anime and cinema profiles.
-- Eliminated frame-time spikes at maximum refresh rate and made optical flow the default automatic engine.
-- Cleaned up neural frame blending to follow the model's native mask without extra artifacts.
-- Improved automatic anime versus cinema detection over longer clips and after dark intros.
-- Fixed the black left side in split comparison when enabled while playback is paused.
-
-<details>
-<summary><b>🇷🇺 На русском (Что нового в v4.9.11)</b></summary>
-
-<br>
-
-- Сохранена цельность тонких объектов в быстром движении и разделены профили оптического потока для аниме и кино.
-- Убраны пики времени кадра в режиме максимальной герцовки, а оптический поток стал движком по умолчанию в «Авто».
-- Очищено смешивание кадров нейросети от лишних правок для более ровной картинки без искажений.
-- Повышена точность автоопределения стиля «Аниме» и «Кино» на тёмных заставках и при смене настроек.
-- Исправлена чёрная левая половина шторки сравнения при её включении на паузе.
-
-</details>
-
-## [v4.9.10]
-
-### 🇬🇧 English
-- Fixed motion smoothing stutters across ×2, 60 fps, and maximum refresh rate modes.
-- Added background motion preparation on high-refresh screens to keep real frames instant.
-- Eliminated translucent double-image ghosts when optical flow falls back on fast motion.
-- Removed background jiggling on anime camera pans and dark jelly distortion in neural smoothing.
-
-<details>
-<summary><b>🇷🇺 На русском (Что нового в v4.9.10)</b></summary>
-
-<br>
-
-- Устранены рывки сглаживания движений в режимах ×2, 60 к/с и максимальной герцовки.
-- Добавлен фоновый предрасчёт движения на экранах 120 Гц для вывода кадров без задержки.
-- Убраны полупрозрачные дубли контуров при сбое оптического потока на быстрых сценах.
-- Исправлено подёргивание фона на панорамах аниме и тёмное «желе» при нейросетевом сглаживании.
-
-</details>
-
-## [v4.9.9]
-
-### 🇬🇧 English
-- Eliminated double-image ghosting on neural motion smoothing edges and sped up frame blending.
-- Stabilized smooth 48 fps ×2 anime playback on high-refresh screens without duplicate frames.
-- Locked the Frame Inspector slider in ×2 mode to three exact frame phases.
-- Tightened automatic intro and ending detection boundaries to trim extra dialogue seconds.
-- Updated remaining neural model labels to RIFE v4.26 and fixed benchmark text clipping.
-
-<details>
-<summary><b>🇷🇺 На русском (Что нового в v4.9.9)</b></summary>
-
-<br>
-
-- Устранено двоение контуров при сбое нейросетевого сглаживания и ускорен проход смешивания кадров.
-- Стабилизирована плавность 48 к/с в режиме ×2 на экранах 120 Гц без дублей.
-- Ползунок инспектора кадров в режиме ×2 закреплён на трёх реальных фазах кадра.
-- Повышена точность границ опенингов и эндингов с отсечением лишних секунд диалогов.
-- Обновлены подписи нейросетевой модели до RIFE v4.26 и убрана обрезка текста бенчмарка.
 
 </details>
