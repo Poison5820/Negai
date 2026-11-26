@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.11.6-FF80AB?style=flat-square" alt="Version 4.11.6" />
+  <img src="https://img.shields.io/badge/version-4.11.7-FF80AB?style=flat-square" alt="Version 4.11.7" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/GPU-Vulkan_1.1_%E2%80%A2_GLES_3.1_FP16-7C4DFF?style=flat-square" alt="GPU Compute" />
@@ -42,10 +42,11 @@ Install and update Negai automatically via **Obtainium** or download the univers
 
 ---
 
-## ✨ What's New in Release 4.11.4
+## ✨ What's New in Release 4.11.7
 
-- Refined **RIFE Neural** and **Optical Flow** motion smoothing for smoother character turns, even camera pans, accurate hardware GPU timing, zero translucent double-image ghosting, cohesive flat-region motion, and automatic full-frame fallback to a crisp original frame during flashes, chaotic motion, or high motion error.
-- Includes all **v4.11.0–4.11.3** upgrades: real-time **Audio Spectrum Inspector** (`36` bands, Pre/Post-DSP & A/B bypass), instant **2.0 Stereo Virtualizer (`Off / Soft / Wide`)**, in-window **120 Hz** player mini-menus, **32-bit `PCM_FLOAT`** audio DSP, **10-band Biquad Equalizer**, and **ArtCNN Winograd `F(2×2, 3×3)` + UBO**.
+- **Zero-Probe Hardware Buffer Cache, Native 1:1 High-Refresh Output & Crisp Scaling Filters (`v4.11.7`)**: Eliminated per-frame graphics memory probe overhead on cached hardware buffers, removed forced output resolution capping during high-refresh motion smoothing for crisp 1:1 presentation, calibrated single-pass final anti-ringing in FP16 scaling filters, and clarified in-player scaling filter active state.
+- **Direct Hardware Display Layer & On-Demand Glass Backdrop (`v4.11.6`)**: Switched Vulkan video output to a direct hardware `SurfaceView` layer for lower presentation latency and native refresh-rate voting, paired with an on-demand 3-slot `320×180` `AHardwareBuffer` glass backdrop tap that uses zero GPU work when HUD/modals are closed or in Flat themes.
+- **Media-Clock PLL & Reference MEMC Cleanup (`v4.11.4–4.11.5`)**: Sub-millisecond media-clock PLL pacing, strict two-step `×2` cadence, cleaned-up RIFE (`align_corners=True`, accurate GPU timestamps) and Optical Flow without translucent crossfade ghosting, and automatic full-frame fallback to a crisp original frame during flashes or chaotic motion.
 
 ---
 
@@ -68,7 +69,7 @@ Install and update Negai automatically via **Obtainium** or download the univers
 
 ### 3. Zero-Allocation 32-Bit Float Audio, 10-Band EQ & Spatial DSP
 - **32-Bit Float Audio Pipeline & 10-Band Biquad Equalizer**: Low-latency `PCM_FLOAT` internal signal path with a single final soft-clip limiter, paired with a 10-band ISO equalizer (`31 Hz – 16 kHz`), genre presets, automatic headroom compensation, and instant session A/B bypass.
-- **3D Spatial Audio (`MIT KEMAR HRTF`, `2.0 Stereo Virtualizer` & `XTC`)**: Real-time 5.1/7.1 binaural headphone convolution (`MIT Media Lab KEMAR HRTF`), dedicated 2.0 stereo headphone stage widening, and bass-protected stereo speaker **Crosstalk Cancellation (`XTC`)** with smart **Auto** output routing.
+- **3D Spatial Audio (`MIT KEMAR HRTF`, `2.0 Stereo Virtualizer` & `XTC`)**: Real-time 5.1/7.1 binaural headphone convolution (`MIT Media Lab KEMAR HRTF`), dedicated 2.0 stereo headphone stage widening, and `< 220 Hz` bass-protected stereo speaker **Crosstalk Cancellation (`XTC`)** with smart **Auto** output routing.
 - **Voice De-Artifact, 300% Volume Boost, Lossless Surround & Bluetooth Sync**: 4-mode zero-allocation voice restoration (`Off`, `Soft`, `Standard`, `BWE Upscale`), clipping-guarded volume amplification up to **300%**, **FFmpeg** multichannel decoding (`DTS`, `DTS-HD Master Audio 7.1`, `Dolby TrueHD + Atmos`, `EAC3`, `FLAC`, `Opus`), and **Bluetooth Audio Delay** compensation (`-5000 ms` to `+5000 ms`).
 
 ### 4. Multi-Engine Glass UI, Smart Playback, 120+ Languages & P2P Streaming
@@ -93,6 +94,35 @@ Install and update Negai automatically via **Obtainium** or download the univers
 | **Negai Premium (`HQ/Ultra` Upscale, `60/Max Hz` MEMC, `BWE` Audio, Glass Themes & Dual Palettes)** | Unlocked out of the box | Optional one-time **Negai Premium** unlock via Google Play Billing |
 | **Built-in P2P Indexer Search Catalog** | Included (configurable + custom APIs) | Omitted for Play Store policy compliance (user-configured endpoints only) |
 | **Ads & User Tracking** | None | None |
+
+---
+
+## 🗺️ Roadmap (Android)
+
+- **`v4.11.x` (Current — Core Polish, Audio Inspector & Scalers)**:
+  - Field validation of the direct `SurfaceView` + `AHardwareBuffer` glass backdrop, MEMC PLL pacing, live 2.0 Stereo Virtualizer toggle, and Audio Spectrum Inspector (Pre/Post-DSP + stereo width);
+  - High-quality 2-pass separable scaling filters (`Catmull-Rom`, `Mitchell-Netravali`, `Spline36 + AR`, `Lanczos3 + AR`) for upscaling and 4K downscaling while keeping zero-overhead direct hardware presentation on Bilinear;
+  - Optional 2-tier RIFE model selection (default Fast `v4.22-lite` 4-scale + downloadable Quality `v4.25-lite`/`v4.26` 5-scale for flagship GPUs).
+- **`v4.12.0` (Next-Gen Subtitles, Translation, Local TTS & Color Engine)**:
+  - Native NDK `libass` subtitle renderer for full ASS/SSA typesetting, vector drawings, animations, and embedded fonts;
+  - Dual subtitles (simultaneous two-track display);
+  - Subtitle auto-translation: offline on-device translation (`ML Kit` / `Bergamot` / `Opus-MT`) plus optional cached batch online API translation;
+  - Local neural subtitle voiceover (TTS) via `Sherpa-ONNX` with downloadable `Piper` / `Kokoro` voice models and automatic original-audio ducking;
+  - Real-time picture & color adjustments (brightness, contrast, saturation, gamma, color temperature, presets) and configurable `BT.2390` HDR→SDR target luminance.
+- **`v4.13.0` (Neural Audio Super-Resolution, Local Network & Media Servers)**:
+  - Neural Audio Super-Resolution (`NovaSR` / `LavaSR v2` via `ONNX Runtime` / `LiteRT`, MIT / Apache-2.0) for phase-coherent high-frequency reconstruction and low-bitrate compression artifact removal;
+  - Built-in SMB (v2/v3), WebDAV, and FTP/SFTP local network sources;
+  - Native Jellyfin, Emby, and Plex media server integration;
+  - Online subtitle search/download (OpenSubtitles / SubDL) and optional watch-progress scrobbling (Shikimori / AniList / MAL / Trakt).
+- **`v4.14.0` (Form Factors, Thermal Guard & Backup)**:
+  - Adaptive Tablet & Foldable multi-pane layouts;
+  - Full keyboard, mouse, gamepad, and D-Pad navigation;
+  - Automatic GPU thermal step-down profiles (graceful shader/MEMC scaling under sustained heat);
+  - JSON backup/restore for settings, EQ presets, audio/video profiles, and quick-action layouts.
+- **`v5.0` (Google Play Release & Cross-GPU Polish)**:
+  - Full Google Play (`com.negai.player`) release audit (Play Billing edge cases, strict store edition isolation, 16 KB page alignment, Android 15/16 compliance, clean open-source/commercial license verification);
+  - First-run onboarding wizard;
+  - Cross-vendor GPU verification matrix (Adreno, Mali, Xclipse).
 
 ---
 

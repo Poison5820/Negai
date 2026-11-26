@@ -3,7 +3,27 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
-> Older versions (v4.9.14 and earlier) are archived in `CHANGELOG_ARCHIVE.md`.
+> Older versions (v4.9.15 and earlier) are archived in `CHANGELOG_ARCHIVE.md`.
+
+## [v4.11.7]
+
+### 🇬🇧 English
+- Eliminated per-frame graphics memory probe overhead by resolving cached hardware video buffers directly.
+- Removed forced output resolution capping during high-refresh motion smoothing for crisp native 1:1 presentation.
+- Improved scaling filter sharpness by applying calibrated anti-ringing once on the final pass and removing redundant texture reads.
+- Dimmed the in-player scaling filter control with a clear status label whenever an active spatial upscaler overrides it.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.11.7)</b></summary>
+
+<br>
+
+- Устранены лишние системные запросы графической памяти на каждом кадре за счёт быстрого кэширования декодированных буферов.
+- Убрано принудительное снижение выходного разрешения при высокой частоте сглаживания движений для чёткого вывода пиксель в пиксель.
+- Повышена чёткость фильтров масштабирования за счёт однократного подавления звона только на финальном проходе и устранения лишних выборок.
+- Выбор фильтра масштабирования в плеере теперь наглядно отключается и показывает активный движок, когда его заменяет пространственный апскейлер.
+
+</details>
 
 ## [v4.11.6]
 
@@ -188,23 +208,5 @@
 - Добавлена двойная буферизация нейросетевого потока RIFE с 2-чанковым разбиением на экранах 85 Гц и выше для устранения подёргиваний и холостых проходов GPU.
 - Оптический поток на Vulkan Compute переведён на TV-уровень алгоритмов: предиктивный поиск 3DRS, многовекторный синтез OBMC, сглаженные маски артефактов и единый тракт апскейла после MEMC.
 - Добавлены нейросетевой апскейлер ArtCNN C4F16 для аниме, быстрый однопроходный Qualcomm SGSR v1 для кино и отключаемый 16-битный Дебандинг градиентов перед апскейлом.
-
-</details>
-
-## [v4.9.15]
-
-### 🇬🇧 English
-- Enabled precision frame pacing with display timing and 2× LTPO refresh rates (48 / 96 Hz) for 24 fps RAW playback and ×2 motion smoothing without 3:2 judder or screen blackouts.
-- Switched live RIFE flow timing to hardware GPU timestamps, restoring 448×256 working resolution in ×2 mode.
-- Tightened static-background distortion halos around moving characters and objects.
-
-<details>
-<summary><b>🇷🇺 На русском (Что нового в v4.9.15)</b></summary>
-
-<br>
-
-- Подключён точный пейсинг кадров через адаптивную сетку и тайминг дисплея с режимом 2× LTPO (48 / 96 Гц) для 24 к/с в обычном просмотре и сглаживании ×2 без рывков 3:2 и мигания экрана.
-- Исправлен аппаратный GPU-замер времени нейросети RIFE, возвращающий высокое разрешение 448×256 в режиме ×2.
-- Сужен ореол искажений на статичном фоне вокруг движущихся персонажей и объектов.
 
 </details>
