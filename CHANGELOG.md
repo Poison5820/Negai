@@ -3,7 +3,27 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
-> Older versions (v4.11.3 and earlier) are archived in `CHANGELOG_ARCHIVE.md`.
+> Older versions (v4.11.4 and earlier) are archived in `CHANGELOG_ARCHIVE.md`.
+
+## [v4.11.14]
+
+### 🇬🇧 English
+- Fixed glass button backgrounds getting stuck on old frames after seeking, pausing, or toggling smoothness.
+- Restored cohesive motion inside flat anime objects and sharp color boundaries during optical flow smoothing.
+- Boosted adaptive screens to full high refresh rate immediately when touching controls or scrubbing video.
+- Prevented false neural upscaler step-downs and startup buffer warnings after seeking or switching video modes.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.11.14)</b></summary>
+
+<br>
+
+- Устранено залипание старого кадра под стеклянными кнопками после перемотки, паузы и выключения плавности.
+- Восстановлено цельное движение плоских объектов и чёткие цветовые границы в сглаживании оптического потока.
+- Включён мгновенный подъём адаптивных экранов до максимальной герцовки при касании управления и перемотке.
+- Устранены ложные отключения нейросетевого апскейла и предупреждения буферов после перемотки и смены режимов.
+
+</details>
 
 ## [v4.11.13]
 
@@ -186,27 +206,5 @@
 - Устранено падение частоты кадров в максимальном режиме нейросетевой плавности на экранах 120 Гц.
 - Подключён живой замер реальной частоты экрана и строго равномерный вывод 60 к/с на 120 Гц дисплеях.
 - Обновлён замер джиттера в бенчмарке для честного контроля ритма выводимых на экран кадров.
-
-</details>
-
-## [v4.11.4]
-
-### 🇬🇧 English
-- Cleaned up neural motion smoothing to follow reference blending for smoother character turns and even pans.
-- Fixed hardware GPU timing measurement and frame submission recovery for more reliable neural smoothness.
-- Eliminated translucent double-image ghosting and ragged island breakup across optical flow motion smoothing.
-- Improved cohesive motion across flat color regions and bright lights during camera pans.
-- Added full-frame fallback to a crisp original frame during flashes, chaotic motion, or high motion error.
-
-<details>
-<summary><b>🇷🇺 На русском (Что нового в v4.11.4)</b></summary>
-
-<br>
-
-- Очищено нейросетевое сглаживание движений до эталонного смешивания для плавных поворотов персонажей и ровных панорам.
-- Исправлен аппаратный замер времени GPU и безопасное восстановление состояния после ошибок отправки кадров.
-- Полностью убрано полупрозрачное двоение и рассыпание объектов на «островки» в оптическом потоке.
-- Улучшено цельное движение однотонных заливок и ярких объектов на панорамах камеры.
-- Добавлен полнокадровый откат к резкому исходному кадру при вспышках, резком хаосе и высоком проценте брака движения.
 
 </details>
