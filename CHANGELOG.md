@@ -3,7 +3,27 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
-> Older versions (v4.11.1 and earlier) are archived in `CHANGELOG_ARCHIVE.md`.
+> Older versions (v4.11.2 and earlier) are archived in `CHANGELOG_ARCHIVE.md`.
+
+## [v4.11.12]
+
+### 🇬🇧 English
+- Upgraded optical flow smoothing with smooth wide motion diffusion and crisp bilinear frame synthesis.
+- Reduced graphics load during motion smoothing by removing redundant intermediate refinement passes.
+- Improved multichannel spatial audio routing, system spatializer handoff, and Bluetooth delay override accuracy.
+- Eliminated hardware graphics buffer leaks on exit and refreshed glass backgrounds during paused scrubbing.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.11.12)</b></summary>
+
+<br>
+
+- Обновлено сглаживание оптического потока за счёт мягкой диффузии движения и чистого билинейного синтеза.
+- Снижена нагрузка на видеочип при уплавнении за счёт удаления лишних промежуточных проходов.
+- Улучшена маршрутизация многоканального пространственного звука, передача системному пространственному звуку и точность задержки Bluetooth.
+- Устранены утечки графических буферов при выходе из плеера и ускорено обновление стеклянного фона на паузе.
+
+</details>
 
 ## [v4.11.11]
 
@@ -186,27 +206,5 @@
 - Добавлены индикаторы ширины стереосцены (Side/Mid), фазовой корреляции, уровней L/R, срабатывания финального лимитера (CLIP/GR) и бейджи активного аудиотракта.
 - Добавлена быстрая кнопка A/B («До / После») прямо в шапке инспектора для мгновенного обхода DSP на лету, а также перетаскивание, закрепление и компактный/расширенный режимы.
 - Добавлены переключатели «Инспектора спектра аудио» в «Звук → Улучшения» и «Инструменты → HUD» при нулевой нагрузке на CPU в закрытом состоянии.
-
-</details>
-
-## [v4.11.2]
-
-### 🇬🇧 English
-- Fixed instant on-the-fly switching for 2.0 stereo soundstage widening (Off / Soft / Wide) on headphones and speakers without restarting audio playback.
-- Widened the stereo soundstage in Soft and Wide modes while keeping centered dialogue clear and deep bass focused.
-- Cleaned up the Stereo 2.0 Volume card by removing duplicate titles and redundant switches and updating the description.
-- Unified the player audio button gesture so a short tap toggles sound enhancements on or off and a long press opens the Audio Enhancements menu.
-- Eliminated background glass stuttering behind the Audio modal sheet during live video playback.
-
-<details>
-<summary><b>🇷🇺 На русском (Что нового в v4.11.2)</b></summary>
-
-<br>
-
-- Исправлено мгновенное переключение расширения стереосцены 2.0 («Выкл / Мягкая / Широкая») на лету в наушниках и динамиках без перезапуска звука.
-- Усилена ощутимая ширина стереосцены в режимах «Мягкая» и «Широкая» при сохранении чётких голосов по центру и плотного баса.
-- Упрощена карточка «Объём для стерео 2.0»: убраны дублирующийся заголовок и лишний тумблер, обновлено описание.
-- Кнопка звука в панели плеера приведена к единому жесту: короткое нажатие включает или выключает улучшения, а удержание открывает меню «Звук → Улучшения».
-- Убраны рывки и отставание стеклянного фона под модальным окном «Звук» во время воспроизведения видео.
 
 </details>
