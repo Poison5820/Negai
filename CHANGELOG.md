@@ -3,7 +3,29 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
-> Older versions (v4.11.2 and earlier) are archived in `CHANGELOG_ARCHIVE.md`.
+> Older versions (v4.11.3 and earlier) are archived in `CHANGELOG_ARCHIVE.md`.
+
+## [v4.11.13]
+
+### 🇬🇧 English
+- Fixed audio crackling and slow playback on 7.1 tracks with instant spatial mode switching.
+- Eliminated frosted and liquid glass button flickering during pause, scrubbing, and smoothness transitions.
+- Improved optical flow motion smoothing across flat anime regions without double-contour ghosting.
+- Redesigned the Audio Spectrum Inspector with higher bass accuracy, delta view, and clean meters.
+- Removed interface micro-freezes when opening track menus, browsing episode thumbnails, and loading torrents.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.11.13)</b></summary>
+
+<br>
+
+- Устранены хрип и замедление звука на дорожках 7.1, добавлено бесшовное переключение режимов объёма.
+- Убрано мигание стеклянных кнопок на паузе, при перемотке и переключении сглаживания движений.
+- Улучшено сглаживание оптического потока на однотонных заливках аниме без двоения контуров.
+- Обновлён инспектор спектра звука с точным отображением баса, режимом разницы и чистыми шкалами.
+- Устранены микрофризы интерфейса при открытии меню дорожек, прокрутке превью серий и загрузке торрентов.
+
+</details>
 
 ## [v4.11.12]
 
@@ -186,25 +208,5 @@
 - Полностью убрано полупрозрачное двоение и рассыпание объектов на «островки» в оптическом потоке.
 - Улучшено цельное движение однотонных заливок и ярких объектов на панорамах камеры.
 - Добавлен полнокадровый откат к резкому исходному кадру при вспышках, резком хаосе и высоком проценте брака движения.
-
-</details>
-
-## [v4.11.3]
-
-### 🇬🇧 English
-- Added a real-time Audio Spectrum Inspector overlay comparing Pre-DSP and Post-DSP frequency response across 36 logarithmic bands with peak hold and smooth decay.
-- Added live stereo soundstage width (Side/Mid), phase correlation, L/R level meters, final limiter (CLIP/GR) indicator, and active audio pipeline badges.
-- Added a quick A/B (Pre / Post) button directly in the inspector header to bypass or restore all audio DSP on the fly, plus drag, pin, and compact/expanded modes.
-- Added Audio Spectrum Inspector toggles in Audio → Enhancements and Tools → HUD while keeping zero CPU usage when closed.
-
-<details>
-<summary><b>🇷🇺 На русском (Что нового в v4.11.3)</b></summary>
-
-<br>
-
-- Добавлен «Инспектор спектра аудио» в реальном времени с визуализацией спектра До и После DSP по 36 логарифмическим полосам с удержанием пиков и плавным спадом.
-- Добавлены индикаторы ширины стереосцены (Side/Mid), фазовой корреляции, уровней L/R, срабатывания финального лимитера (CLIP/GR) и бейджи активного аудиотракта.
-- Добавлена быстрая кнопка A/B («До / После») прямо в шапке инспектора для мгновенного обхода DSP на лету, а также перетаскивание, закрепление и компактный/расширенный режимы.
-- Добавлены переключатели «Инспектора спектра аудио» в «Звук → Улучшения» и «Инструменты → HUD» при нулевой нагрузке на CPU в закрытом состоянии.
 
 </details>

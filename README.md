@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.11.12-FF80AB?style=flat-square" alt="Version 4.11.12" />
+  <img src="https://img.shields.io/badge/version-4.11.13-FF80AB?style=flat-square" alt="Version 4.11.13" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/GPU-Vulkan_1.1_%E2%80%A2_GLES_3.1_FP16-7C4DFF?style=flat-square" alt="GPU Compute" />
@@ -42,11 +42,11 @@ Install and update Negai automatically via **Obtainium** or download the univers
 
 ---
 
-## ✨ What's New in Release 4.11.12
+## ✨ What's New in Release 4.11.13
 
+- **7.1 Spatial Audio Continuity, Flicker-Free Glass, Ghost-Free Optical Flow & 2048-FFT Spectrum Inspector (`v4.11.13`)**: Fixed 7.1 DTS-HD audio crackling and slow playback with live zero-restart switching between headphone HRTF and speaker spatial audio plus linear A/B bypass, eliminated glass button flickering on pause/scrubbing/mode switches, removed unwarped ghost contours in flat anime Optical Flow synthesis, redesigned the Audio Spectrum Inspector (`2048`-point FFT, `[RTA | Δ DSP]` transfer curve, calibrated L/R/GR/phase/stage meters), and eliminated main-thread UI micro-freezes.
 - **Hybrid L4–L2 Optical Flow, Spatial Audio Handoff & Glass Stability (`v4.11.12`)**: Upgraded Optical Flow to smooth wide L2 motion diffusion with direct hardware-bilinear Catmull-Rom synthesis while removing redundant JFA/L1 GPU passes, added clean multichannel passthrough and OS Spatializer handoff alongside accurate Bluetooth offset overrides, and eliminated exit buffer leaks while keeping glass backgrounds live during paused seeks.
 - **Crisp Direct Surface Overlap, Fast Glass Backdrop & Cohesive Optical Flow (`v4.11.11`)**: Replaced blurred low-resolution transition covers with clean direct Z-ordered `SurfaceView` overlap during hardware/shader switches, restored snappy low-overhead glass button backdrops without crossfade lag or periodic render-thread snapshots, and streamlined 3DRS Optical Flow into smooth, cohesive symmetric synthesis without contour tearing.
-- **Safe Surface Teardown, Atomic Quick Pills & Inspector Step Fix (`v4.11.10`)**: Synchronized surface teardown ordering with bounded safety latches, unified quick-pill settings into single-transaction atomic updates with smooth width animation, and fixed frozen frames and resolution drops while stepping in the smoothness frame inspector.
 
 ---
 
