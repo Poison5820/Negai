@@ -3,7 +3,27 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
-> Older versions (v4.11.0 and earlier) are archived in `CHANGELOG_ARCHIVE.md`.
+> Older versions (v4.11.1 and earlier) are archived in `CHANGELOG_ARCHIVE.md`.
+
+## [v4.11.11]
+
+### 🇬🇧 English
+- Eliminated blur and frame shifts when toggling smoothness or upscaling via clean direct overlap between hardware and shader video layers.
+- Restored fast, responsive frosted and liquid glass button backgrounds by removing crossfade lag and redundant frame copies.
+- Restored smooth, cohesive optical flow motion synthesis without contour tearing or excess GPU overhead.
+- Preserved crisp full-frame scene-cut snapping and high-resolution frame stepping in the smoothness inspector.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.11.11)</b></summary>
+
+<br>
+
+- Убрано размытие и сдвиг кадра при переключении плавности и апскейла за счёт прямого бесшовного перекрытия аппаратного и шейдерного видеослоёв.
+- Возвращён быстрый мгновенный отклик фона стеклянных кнопок и панелей без задержки затухания и лишнего копирования кадров.
+- Оптический поток переведён на целостный гладкий синтез без разрывов контуров и лишней нагрузки на графический процессор.
+- Сохранены мгновенная отсечка резких смен сцен и чёткая пошаговая работа инспектора плавности.
+
+</details>
 
 ## [v4.11.10]
 
@@ -188,23 +208,5 @@
 - Упрощена карточка «Объём для стерео 2.0»: убраны дублирующийся заголовок и лишний тумблер, обновлено описание.
 - Кнопка звука в панели плеера приведена к единому жесту: короткое нажатие включает или выключает улучшения, а удержание открывает меню «Звук → Улучшения».
 - Убраны рывки и отставание стеклянного фона под модальным окном «Звук» во время воспроизведения видео.
-
-</details>
-
-## [v4.11.1]
-
-### 🇬🇧 English
-- Moved all player quick-hold mini-menus (Smoothness, Upscale, speed, and audio) into an in-window overlay so frosted and liquid glass refresh synchronously with the video at full 120 Hz.
-- Added full-screen tap-to-dismiss and Back button support for active player mini-menus with safe-area positioning above the quick action bar.
-- Made the bottom floating navigation dock slide down smoothly whenever Quick Appearance or any other modal opens and return smoothly on close.
-
-<details>
-<summary><b>🇷🇺 На русском (Что нового в v4.11.1)</b></summary>
-
-<br>
-
-- Все быстрые мини-меню плеера («Плавность», «Апскейл», скорость и звук) переведены на отрисовку внутри основного окна без отставания матового и жидкого стекла при 120 Гц.
-- Сохранено закрытие мини-меню плеера по нажатию мимо и кнопкой «Назад» с точным позиционированием над панелью быстрых кнопок.
-- Нижний плавающий док навигации теперь плавно уезжает вниз при открытии окна «Быстрое оформление» и других модальных окон и плавно возвращается при их закрытии.
 
 </details>

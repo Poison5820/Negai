@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.11.10-FF80AB?style=flat-square" alt="Version 4.11.10" />
+  <img src="https://img.shields.io/badge/version-4.11.11-FF80AB?style=flat-square" alt="Version 4.11.11" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/GPU-Vulkan_1.1_%E2%80%A2_GLES_3.1_FP16-7C4DFF?style=flat-square" alt="GPU Compute" />
@@ -42,11 +42,11 @@ Install and update Negai automatically via **Obtainium** or download the univers
 
 ---
 
-## ✨ What's New in Release 4.11.10
+## ✨ What's New in Release 4.11.11
 
-- **Seamless Backend Transitions, Wide-Motion Optical Flow & Inspector Step Fix (`v4.11.10`)**: Eliminated black flashes, glass flicker, and pill width jumps when toggling smoothness or upscaling via a frozen-frame transition cover, safe surface teardown, and atomic settings updates; upgraded optical flow with wider motion search, midpoint vector splatting, and photometric occlusion gating for large fast-object displacements; and fixed frozen frames and resolution drops while stepping in the smoothness frame inspector.
-- **Zero-Spam Surface Format Cache, Clean MEMC Edges & 48 fps Cinema ×2 Precomp (`v4.11.9`)**: Cached display surface formats across the video surface lifetime to eliminate per-frame graphics memory probes, restored full-vector warping and one-sided occlusion synthesis without jagged contour cutouts across Optical Flow and RIFE, eliminated false smoothing skips on pans and flat anime fills, and tuned realistic neural auto-downscale budgets with 2-chunk 48 fps Cinema ×2 catch-up.
-- **Responsive Mini-Menu Drag Highlight, Flicker-Free Glass & Hardened MEMC (`v4.11.8`)**: Restored crisp finger-drag highlighting across in-window player mini-menus, retained last blurred video backdrop across scaling-filter switches with automatic pause-time retries, strengthened occlusion and anime lineart protection with tiled motion-breakdown detection, and cached hardware buffer format probes once per descriptor.
+- **Crisp Direct Surface Overlap, Fast Glass Backdrop & Cohesive Optical Flow (`v4.11.11`)**: Replaced blurred low-resolution transition covers with clean direct Z-ordered `SurfaceView` overlap during hardware/shader switches, restored snappy low-overhead glass button backdrops without crossfade lag or periodic render-thread snapshots, and streamlined 3DRS Optical Flow into smooth, cohesive symmetric synthesis without contour tearing.
+- **Safe Surface Teardown, Atomic Quick Pills & Inspector Step Fix (`v4.11.10`)**: Synchronized surface teardown ordering with bounded safety latches, unified quick-pill settings into single-transaction atomic updates with smooth width animation, and fixed frozen frames and resolution drops while stepping in the smoothness frame inspector.
+- **Zero-Spam Surface Format Cache, Clean MEMC Edges & 48 fps Cinema ×2 Precomp (`v4.11.9`)**: Cached display surface formats across the video surface lifetime to eliminate per-frame graphics memory probes, eliminated false smoothing skips on pans and flat anime fills, and tuned realistic neural auto-downscale budgets with 2-chunk 48 fps Cinema ×2 catch-up.
 
 ---
 
