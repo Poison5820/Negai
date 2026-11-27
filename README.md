@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.11.16-FF80AB?style=flat-square" alt="Version 4.11.16" />
+  <img src="https://img.shields.io/badge/version-4.11.17-FF80AB?style=flat-square" alt="Version 4.11.17" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/GPU-Vulkan_1.1_%E2%80%A2_GLES_3.1_FP16-7C4DFF?style=flat-square" alt="GPU Compute" />
@@ -26,7 +26,7 @@
 
 ## Overview
 
-**Negai** is a modern, flagship-grade Android 4K video player engineered for anime enthusiasts and cinema purists. It combines a native **Vulkan 1.1 (`SPIR-V`)** and **OpenGL ES 3.1 (`FP16`)** compute video pipeline, **Anime4K** + **ArtCNN C4F16** + **AMD FSR 1.0** + **Qualcomm SGSR v1** + **16-bit Debanding**, **10-frame Lookahead MEMC** (**RIFE v4.22-lite** & **Hybrid 3DRS L4–L2 Optical Flow**), mobile **Adaptive Sync (`VRR / LFC`)**, natural **4K HDR10 / Dolby Vision**, zero-allocation **MIT KEMAR HRTF** spatial audio, refractive **Liquid & Frosted Glass** interfaces, **120+ world languages** for automatic track pairing, and direct **TorrServer P2P** streaming — with zero ads and zero tracking.
+**Negai** is a modern, flagship-grade Android 4K video player engineered for anime enthusiasts and cinema purists. It combines a native **Vulkan 1.1 (`SPIR-V`)** and **OpenGL ES 3.1 (`FP16`)** compute video pipeline, **Anime4K** + **ArtCNN C4F16** + **AMD FSR 1.0** + **Qualcomm SGSR v1** + **16-bit Debanding**, **10-frame Lookahead MEMC** (**RIFE v4.22-lite** & **Symmetric 3DRS L4–L3 TV-MEMC Optical Flow**), mobile **Adaptive Sync (`VRR / LFC`)**, natural **4K HDR10 / Dolby Vision**, zero-allocation **MIT KEMAR HRTF** spatial audio, refractive **Liquid & Frosted Glass** interfaces, **120+ world languages** for automatic track pairing, and direct **TorrServer P2P** streaming — with zero ads and zero tracking.
 
 ---
 
@@ -42,11 +42,11 @@ Install and update Negai automatically via **Obtainium** or download the univers
 
 ---
 
-## ✨ What's New in Release 4.11.16
+## ✨ What's New in Release 4.11.17
 
-- **Dual-Field Smoothed Optical Flow & Fast Continuous Synthesis (`v4.11.16`)**: Smoothed both forward and backward L2 motion fields before frame synthesis to eliminate blocky edge cutouts, improved flat-object interior motion fill without leaking vectors across outlines, streamlined bidirectional synthesis with continuous smoothstep blending to reduce GPU frame time, and moved release publishing to manual dispatch with clean release notes and SHA-256 verification.
-- **Midpoint Optical Flow Synthesis, Cohesive Flat-Object Motion & Responsive Glass (`v4.11.15`)**: Eliminated motion holes inside flat-colored moving objects with color-guided coarse contour propagation, added symmetric bidirectional midpoint projection to keep leading object edges intact without clipping, calibrated RGB color-guided smoothing across soft shadow gradients, and improved glass backdrop updates when paused or right after scrolling open menus.
-- **Reliable Glass Backdrops, Reference Optical Flow JBU, 120 Hz Touch Boost & ArtCNN Stability (`v4.11.14`)**: Eliminated stale glass button frames after seeking, pausing, or switching out of shader playback, upgraded Optical Flow with Sundaram–Brox validation, color-bilateral lineart barriers, and 4-tap Joint Bilateral Upsampling for cohesive flat-object motion without boundary halos, boosted adaptive LTPO panels immediately to 120 Hz during touch/scrubbing while trimming HUD glass overhead, and prevented cold/post-seek GPU timestamp spikes from triggering false ArtCNN fallbacks.
+- **Symmetric 160×90 TV-MEMC Optical Flow & Order-Statistic Median Synthesis (`v4.11.17`)**: Replaced the dual-field 320×180 pipeline with a fast single-field De Haan symmetric 3DRS (`L4 → L3`, `160×90`) motion estimator, Astola vector-median + smooth flow regularization without hard color walls, and divergence-guided order-statistic median synthesis for tear-free moving silhouettes and much lower GPU load.
+- **Dual-Field Smoothed Optical Flow & Manual Release Workflow (`v4.11.16`)**: Streamlined release publishing to manual dispatch with clean release notes and SHA-256 verification alongside continuous optical flow synthesis improvements.
+- **Midpoint Optical Flow Synthesis & Responsive Glass (`v4.11.15`)**: Improved glass backdrop responsiveness when paused and immediately after scrolling open player menus (`48 ms` scroll tail with instant flush).
 
 ---
 
@@ -60,7 +60,7 @@ Install and update Negai automatically via **Obtainium** or download the univers
   - **ArtCNN C4F16 (`MIT`)**: Compact 2× neural anime upscaler running in FP16 on Vulkan 1.1 Compute with lazy GPU tensor allocation for crisp contour restoration.
   - **AMD FidelityFX Super Resolution 1.0 (`EASU + RCAS`) & Qualcomm SGSR v1 (`BSD-3-Clause`)**: Choose between 2-pass elliptical Lanczos2 + RCAS or ultra-fast single-pass 12-tap directional mobile upscaling for cinema, series, and 3D CGI.
   - **Asynchronous GPU Style Probe (`Auto`)**: Classifies cel-shaded animation vs live-action gradients on the GPU with zero pipeline stalls (`Auto → Anime4K / AMD FSR`).
-- **10-Frame Lookahead MEMC (`RIFE v4.22-lite` & `Hybrid 3DRS L4–L2 Optical Flow`)**: Ahead-of-time decoder FIFO with exact `1s / 2s / 3s` anime cadence detection, double-buffered RIFE neural flow with 2-chunk scheduling at `>= 85 Hz`, and hybrid 3DRS L4–L2 optical flow with diffuse validation and crisp scene-cut snapping (`×2 / 60 FPS / Max Hz`), plus interactive **Split Compare** slider and **0ms instant live & paused redraws**.
+- **10-Frame Lookahead MEMC (`RIFE v4.22-lite` & `Symmetric 3DRS L4–L3 TV-MEMC Optical Flow`)**: Ahead-of-time decoder FIFO with exact `1s / 2s / 3s` anime cadence detection, double-buffered RIFE neural flow with 2-chunk scheduling at `>= 85 Hz`, and symmetric De Haan 3DRS (`160×90`) optical flow with vector-median regularization, order-statistic median synthesis, and crisp scene-cut snapping (`×2 / 60 FPS / Max Hz`), plus interactive **Split Compare** slider and **0ms instant live & paused redraws**.
 
 ### 2. Adaptive Display Sync (`VRR / LFC`), 4K HDR/DV & Transport Formats
 - **Mobile Adaptive Sync (`VRR / LFC`) & Hybrid `VFR` Tracking**: Classifies your screen panel (`LTPO ARR`, `Multi-Hz Seamless VRR`, `Multi-Hz LFC`, or `Fixed 60 Hz`), locks onto peak harmonic refresh containers (such as `120 Hz` `5×` for `23.976 fps`) to eliminate `3:2 pulldown` judder and OLED mode-switch gamma flicker, and tracks hybrid anime `VFR` transitions (`23.976 ↔ 59.94 ↔ 29.97 fps`) in real time.
