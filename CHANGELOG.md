@@ -3,7 +3,27 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
-> Older versions (v4.11.4 and earlier) are archived in `CHANGELOG_ARCHIVE.md`.
+> Older versions (v4.11.5 and earlier) are archived in `CHANGELOG_ARCHIVE.md`.
+
+## [v4.11.15]
+
+### 🇬🇧 English
+- Eliminated motion holes inside large flat-colored objects during optical flow smoothing.
+- Added symmetric bidirectional midpoint projection so fast moving edges stay intact without front-edge clipping.
+- Calibrated color-guided motion smoothing across soft shadow gradients while keeping object outlines crisp.
+- Improved glass backdrop responsiveness when paused and immediately after scrolling open player menus.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.11.15)</b></summary>
+
+<br>
+
+- Устранены пустоты внутри крупных однотонных объектов при движении в оптическом потоке.
+- Добавлена точная двусторонняя проекция кадров в промежуточную точку времени без срезания переднего края.
+- Смягчён цветовой барьер сглаживания потока на плавных градиентах тени при сохранении чётких контуров.
+- Ускорено обновление фона стеклянных панелей на паузе и сразу после прокрутки списков меню.
+
+</details>
 
 ## [v4.11.14]
 
@@ -184,27 +204,5 @@
 - Добавлена лёгкая подложка по требованию для матового и жидкого стекла, полностью отключающаяся при скрытом HUD и в плоских стилях.
 - Повышена плавность масштабирования, панорамирования и жеста «Назад» прямо на видеослое без чёрных шлейфов.
 - Сохранена корректная работа чистых скриншотов, внешней подсветки и диагностики плавности на прямом видеослое.
-
-</details>
-
-## [v4.11.5]
-
-### 🇬🇧 English
-- Smoothed media-clock timing to eliminate micro-jitter and single-tick phase freezes during camera pans.
-- Fixed two-step ×2 smoothing rhythm to prevent premature frame snapping and improved frame-capture reliability.
-- Eliminated frame-rate drops in neural Max Hz smoothing so playback stays smooth on 120 Hz screens.
-- Added live refresh-rate tracking with even 60 fps pacing on 120 Hz panels.
-- Updated benchmark jitter telemetry to measure actual displayed output cadence.
-
-<details>
-<summary><b>🇷🇺 На русском (Что нового в v4.11.5)</b></summary>
-
-<br>
-
-- Добавлено плавное сглаживание медиа-часов для устранения микродрожания фазы и залипаний на панорамах.
-- Исправлен строгий двухфазный ритм режима плавности ×2 без досрочного перескока и повышена стабильность захвата кадров.
-- Устранено падение частоты кадров в максимальном режиме нейросетевой плавности на экранах 120 Гц.
-- Подключён живой замер реальной частоты экрана и строго равномерный вывод 60 к/с на 120 Гц дисплеях.
-- Обновлён замер джиттера в бенчмарке для честного контроля ритма выводимых на экран кадров.
 
 </details>
