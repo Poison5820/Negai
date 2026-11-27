@@ -3,7 +3,27 @@
 Все заметные изменения в каждом релизе **Negai — Anime & Cinema 4K Player** фиксируются в этом файле для формирования описаний релизов GitHub и Google Play.
 Шаблон версий: **`x.x.y`** (`x.x` меняется только вручную, `y` и `versionCode` увеличиваются автоматически при каждом изменении кода).
 
-> Older versions (v4.10.1 and earlier) are archived in `CHANGELOG_ARCHIVE.md`.
+> Older versions (v4.11.0 and earlier) are archived in `CHANGELOG_ARCHIVE.md`.
+
+## [v4.11.10]
+
+### 🇬🇧 English
+- Eliminated brief black video flashes, glass button flicker, and quick-pill width jumps when toggling smoothness or upscaling.
+- Fixed video surface teardown ordering for clean transitions between direct hardware and shader playback.
+- Improved fast-moving object tracking in optical flow with wider motion search, midpoint vector splatting, and cleaner occlusion filtering.
+- Fixed frozen frames and resolution drops when stepping forward or backward in the smoothness frame inspector.
+
+<details>
+<summary><b>🇷🇺 На русском (Что нового в v4.11.10)</b></summary>
+
+<br>
+
+- Устранены чёрная вспышка видео, мигание стеклянных кнопок и рывки ширины пилюль при переключении плавности и апскейла.
+- Исправлена гонка уничтожения видеоповерхности для плавного перехода между аппаратным и шейдерным выводом.
+- Улучшено сглаживание быстрых объектов в оптическом потоке за счёт широкого поиска, проекции векторов и точной фильтрации перекрытий.
+- Исправлено зависание кадра и падение резкости при пошаговом переходе вперёд и назад в инспекторе плавности.
+
+</details>
 
 ## [v4.11.9]
 
@@ -186,27 +206,5 @@
 - Все быстрые мини-меню плеера («Плавность», «Апскейл», скорость и звук) переведены на отрисовку внутри основного окна без отставания матового и жидкого стекла при 120 Гц.
 - Сохранено закрытие мини-меню плеера по нажатию мимо и кнопкой «Назад» с точным позиционированием над панелью быстрых кнопок.
 - Нижний плавающий док навигации теперь плавно уезжает вниз при открытии окна «Быстрое оформление» и других модальных окон и плавно возвращается при их закрытии.
-
-</details>
-
-## [v4.11.0]
-
-### 🇬🇧 English
-- Upgraded the internal sound engine to high-precision floating-point processing with lower output latency.
-- Added a ten-band graphic equalizer with genre presets, automatic headroom protection, and smooth transitions.
-- Introduced dedicated stereo headphone widening, cleaner speaker crosstalk bass, and smarter automatic spatial routing.
-- Accelerated neural anime upscaling, improved cold startup speed, and added adaptive low-end device profiles.
-- Stabilized lookahead motion smoothing frame order, neural precomputation hit rate, and optical flow guards.
-
-<details>
-<summary><b>🇷🇺 На русском (Что нового в v4.11.0)</b></summary>
-
-<br>
-
-- Звуковой тракт переведён на точную обработку с плавающей точкой и сниженную задержку вывода.
-- Добавлен десятиполосный эквалайзер с пресетами, защитой запаса громкости и плавным сглаживанием без щелчков.
-- Добавлено расширение стереосцены в наушниках, сохранён бас динамиков и обновлена автоматическая маршрутизация объёма.
-- Ускорен нейросетевой апскейл аниме, сокращено время холодного запуска и добавлены адаптивные профили устройств.
-- Стабилизирован порядок кадров опережающего сглаживания, восстановлен предрасчёт нейросети и усилена защита оптического потока.
 
 </details>
