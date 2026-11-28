@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-4.11.19-FF80AB?style=flat-square" alt="Version 4.11.19" />
+  <img src="https://img.shields.io/badge/version-4.11.20-FF80AB?style=flat-square" alt="Version 4.11.20" />
   <img src="https://img.shields.io/badge/package-app.negai.player-00B8D4?style=flat-square" alt="Package ID" />
   <img src="https://img.shields.io/badge/platform-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Platform" />
   <img src="https://img.shields.io/badge/GPU-Vulkan_1.1_%E2%80%A2_GLES_3.1_FP16-7C4DFF?style=flat-square" alt="GPU Compute" />
@@ -42,11 +42,11 @@ Install and update Negai automatically via **Obtainium** or download the univers
 
 ---
 
-## ✨ What's New in Release 4.11.19
+## ✨ What's New in Release 4.11.20
 
-- **OpenCV DIS Bidirectional Optical Flow & Continuous Bilinear Synthesis (`v4.11.19`)**: Replaced 3DRS block search and discrete 4-block OBMC with a reference-first OpenCV DIS (`L5 → L4 → L3`) inverse compositional Lucas-Kanade estimator, Charbonnier variational interior smoothing, pre-blurred forward-backward consistency artifact masking, and continuous bilinear synthesis with zero 8×8 silhouette block steps.
+- **True-Motion OpenCV DIS Midpoint Gathering & Synthesis (`v4.11.20`)**: Eliminated 50/50 crossfade fallback on moving limbs and edges via 29-tap midpoint trajectory gathering, unblurred vector pass-through with compact 3×3 mask-only feathering, full-distance warping across all smoothness strengths, and faster 2-iteration `L3` refinement.
+- **OpenCV DIS Bidirectional Optical Flow & Continuous Bilinear Synthesis (`v4.11.19`)**: Replaced 3DRS block search and discrete 4-block OBMC with a reference-first OpenCV DIS (`L5 → L4 → L3`) inverse compositional Lucas-Kanade estimator, Charbonnier variational interior smoothing, and continuous bilinear synthesis with zero 8×8 silhouette block steps.
 - **Optical Flow Cadence & Timestamp Polish (`v4.11.18`)**: Added `dupSpan`-aware temporal cache invalidation, pre-flow quality readback on 90–120 Hz screens, and post-transfer GPU timestamp brackets.
-- **Compact 160×90 Optical Flow Grid (`v4.11.17`)**: Standardized the fine Optical Flow working grid at `160×90` (`L3`) for fast mobile GPU throughput.
 
 ---
 
