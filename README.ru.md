@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/версия-4.11.18-FF80AB?style=flat-square" alt="Версия 4.11.18" />
+  <img src="https://img.shields.io/badge/версия-4.11.19-FF80AB?style=flat-square" alt="Версия 4.11.19" />
   <img src="https://img.shields.io/badge/пакет-app.negai.player-00B8D4?style=flat-square" alt="Пакет приложения" />
   <img src="https://img.shields.io/badge/платформа-Android_8.0%2B_(API_26%2B)-3DDC84?style=flat-square&logo=android" alt="Платформа" />
   <img src="https://img.shields.io/badge/GPU-Vulkan_1.1_%E2%80%A2_GLES_3.1_FP16-7C4DFF?style=flat-square" alt="GPU Compute" />
@@ -26,7 +26,7 @@
 
 ## О проекте
 
-**Negai** — флагманский высокопроизводительный 4K-видеоплеер для Android, созданный для ценителей аниме, фильмов и сериалов. Плеер объединяет нативный графический видеоконвейер **Vulkan 1.1 (`SPIR-V`)** и **OpenGL ES 3.1 (`FP16`)**, апскейлеры **Anime4K** + **ArtCNN C4F16** + **AMD FSR 1.0** + **Qualcomm SGSR v1** и **16-битный Дебандинг**, **10-кадровый Lookahead MEMC** (**RIFE v4.22-lite** и **симметричный Optical Flow 3DRS L4–L3 TV-MEMC**), мобильную **Адаптивную синхронизацию (`VRR / LFC`)**, естественный **4K HDR10 / Dolby Vision**, бинауральный звук **MIT KEMAR HRTF**, оптические темы **«Жидкое» и «Матовое стекло»**, поддержку **120+ языков мира** для автоподбора дорожек и прямой стриминг через **TorrServer** — полностью без рекламы и аналитических трекеров.
+**Negai** — флагманский высокопроизводительный 4K-видеоплеер для Android, созданный для ценителей аниме, фильмов и сериалов. Плеер объединяет нативный графический видеоконвейер **Vulkan 1.1 (`SPIR-V`)** и **OpenGL ES 3.1 (`FP16`)**, апскейлеры **Anime4K** + **ArtCNN C4F16** + **AMD FSR 1.0** + **Qualcomm SGSR v1** и **16-битный Дебандинг**, **10-кадровый Lookahead MEMC** (**RIFE v4.22-lite** и **двунаправленный Optical Flow OpenCV DIS L5–L3**), мобильную **Адаптивную синхронизацию (`VRR / LFC`)**, естественный **4K HDR10 / Dolby Vision**, бинауральный звук **MIT KEMAR HRTF**, оптические темы **«Жидкое» и «Матовое стекло»**, поддержку **120+ языков мира** для автоподбора дорожек и прямой стриминг через **TorrServer** — полностью без рекламы и аналитических трекеров.
 
 ---
 
@@ -42,11 +42,11 @@
 
 ---
 
-## ✨ Что нового в релизе 4.11.18
+## ✨ Что нового в релизе 4.11.19
 
-- **Адаптивный 4-блочный OBMC и исправления Optical Flow (`v4.11.18`)**: Синтез 160×90 переведён на дискретный 4-блочный цветовой OBMC с непрерывной маской артефактов SVP, исправлены нечётные сдвиги Census и плотные 3×3 патчи, восстановлена полная адвекция 3DRS со сбросом по `dupSpan` и чтение качества потока на экранах 90–120 Гц.
-- **Симметричный Optical Flow TV-MEMC 160×90 (`v4.11.17`)**: Двусторонний конвейер 320×180 заменён на быстрый однопольный симметричный De Haan 3DRS (`L4 → L3`, `160×90`) и векторную медиану Astola для снижения нагрузки на GPU.
-- **Оптимизация Optical Flow и ручная публикация релизов (`v4.11.16`)**: Публикация релизов переведена на ручной запуск с чистым описанием и SHA-256 контрольной суммой.
+- **Двунаправленный Optical Flow OpenCV DIS и непрерывный билинейный синтез (`v4.11.19`)**: Блочный поиск 3DRS и дискретный 4-блочный OBMC заменены на эталонный пирамидальный алгоритм OpenCV DIS (`L5 → L4 → L3`, обратный композиционный метод Лукаса — Канаде), вариационное сглаживание Шарбоннье внутри однотонных заливок, предварительно размытую маску прямого-обратного согласования и полностью непрерывный билинейный синтез без квадратных ступенек 8×8 на силуэтах.
+- **Каденс и тайминги Optical Flow (`v4.11.18`)**: Добавлен сброс временного кэша при смене `dupSpan`, чтение качества потока на экранах 90–120 Гц и замер GPU-таймстампов после копирования буферов.
+- **Рабочая сетка Optical Flow 160×90 (`v4.11.17`)**: Закреплена тонкая рабочая сетка `160×90` (`L3`) для высокой скорости на мобильных GPU.
 
 ---
 
@@ -60,7 +60,7 @@
   - **ArtCNN C4F16 (`MIT`)**: Компактная 2× нейросеть восстановления чётких контуров для аниме в FP16 на Vulkan 1.1 Compute с ленивым выделением тензоров GPU.
   - **AMD FidelityFX Super Resolution 1.0 (`EASU + RCAS`) и Qualcomm SGSR v1 (`BSD-3-Clause`)**: Выбор между двухпроходным эллиптическим Lanczos2 + RCAS и быстрым однопроходным 12-точечным направленным апскейлом для кино, сериалов и 3D-анимации.
   - **Асинхронный GPU-анализатор стиля (`Авто`)**: Без блокировки рендера распознаёт заливки 2D-аниме и полутона кино прямо на GPU (`Авто → Anime4K / AMD FSR`).
-- **10-кадровый Lookahead MEMC (`RIFE v4.22-lite` и `симметричный Optical Flow 3DRS L4–L3 TV-MEMC`)**: Опережающее FIFO-кольцо декодера с точным определением темпа `1s / 2s / 3s` в аниме, двойная буферизация нейропотока RIFE с 2-чанковым разбиением на `>= 85 Гц` и симметричный оптический поток De Haan 3DRS (`160×90`) с векторной медианой, адаптивным 4-блочным цветовым OBMC + маской артефактов SVP и мгновенной отсечкой смены сцен (`×2 / 60 к/с / Макс. Гц`), интерактивная шторка сравнения **«До / После»** и **мгновенный отклик 0 мс** даже на паузе.
+- **10-кадровый Lookahead MEMC (`RIFE v4.22-lite` и `двунаправленный Optical Flow OpenCV DIS L5–L3`)**: Опережающее FIFO-кольцо декодера с точным определением темпа `1s / 2s / 3s` в аниме, двойная буферизация нейропотока RIFE с 2-чанковым разбиением на `>= 85 Гц` и пирамидальный двунаправленный оптический поток OpenCV DIS (`L5 → L4 → L3`, `160×90`) с вариационным сглаживанием Шарбоннье, размытой маской согласования, непрерывным билинейным синтезом и мгновенной отсечкой смены сцен (`×2 / 60 к/с / Макс. Гц`), интерактивная шторка сравнения **«До / После»** и **мгновенный отклик 0 мс** даже на паузе.
 
 ### 2. Адаптивная синхронизация экрана (`VRR / LFC`), 4K HDR/DV и форматы
 - **Мобильная Адаптивная синхронизация (`VRR / LFC`) и трекинг `VFR`**: Определяет точный класс матрицы дисплея (`LTPO ARR`, `Multi-Hz Seamless VRR`, `Multi-Hz LFC` или `Fixed 60 Hz`), удерживает максимальный кратный контейнер обновления (например, `120 Гц` `5×` для `23.976 к/с`) без рывков `3:2 pulldown` и без мигания гаммы OLED при переключении режимов, а также в реальном времени отслеживает гибридный `VFR` (`23.976 ↔ 59.94 ↔ 29.97 к/с`).
@@ -158,7 +158,8 @@
 - **Negai Player**: Проприетарное программное обеспечение с закрытым исходным кодом. Copyright © 2026 Negai Player. Все права защищены. Публичный репозиторий используется исключительно для публикации официальных сборок, приёма обращений и уведомлений об открытых лицензиях. См. [`PRIVACY.md`](PRIVACY.md).
 - **Anime4K (MIT License)**: Шейдеры реконструкции линий аниме на базе [bloc97/Anime4K](https://github.com/bloc97/Anime4K) (Copyright © 2019–2021 bloc97). См. [`LICENSE_ANIME4K.txt`](LICENSE_ANIME4K.txt).
 - **ArtCNN C4F16 (MIT License)**: Компактная нейросеть 2× масштабирования аниме и веса модели, конвертированные из [Artoriuz/ArtCNN](https://github.com/Artoriuz/ArtCNN) (Copyright © 2024 Joao Chrisostomo, Kacper Michajłow). См. [`LICENSE_ARTCNN.txt`](LICENSE_ARTCNN.txt).
-- **AMD FidelityFX Optical Flow & Super Resolution 1.0 (MIT License)**: Иерархический 32-битный конвейер оценки оптического потока и эллиптический пространственный апскейлер (`EASU + RCAS`) на базе [AMD FidelityFX SDK](https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK) (Copyright © 2021–2026 Advanced Micro Devices, Inc.). См. [`LICENSE_AMD_FIDELITYFX.txt`](LICENSE_AMD_FIDELITYFX.txt).
+- **AMD FidelityFX Optical Flow & Super Resolution 1.0 (MIT License)**: Детектор статистики сцен и эллиптический пространственный апскейлер (`EASU + RCAS`) на базе [AMD FidelityFX SDK](https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK) (Copyright © 2021–2026 Advanced Micro Devices, Inc.). См. [`LICENSE_AMD_FIDELITYFX.txt`](LICENSE_AMD_FIDELITYFX.txt).
+- **OpenCV DIS Optical Flow (Apache License 2.0)**: Пирамидальный оптический поток Dense Inverse Search (`dis_flow.cpp`, Kroeger et al., ECCV 2016) с обратным композиционным поиском Лукаса — Канаде и вариационным сглаживанием на базе [opencv/opencv](https://github.com/opencv/opencv) (Copyright © 2000–2024 Intel Corporation, OpenCV Foundation, ETH Zurich). См. [`LICENSE_OPENCV_DIS.txt`](LICENSE_OPENCV_DIS.txt).
 - **Qualcomm Snapdragon Game Super Resolution v1 (BSD-3-Clause License)**: Однопроходный мобильный направленный апскейлер на базе [SnapdragonStudios/snapdragon-gsr](https://github.com/SnapdragonStudios/snapdragon-gsr) (Copyright © 2023 Qualcomm Innovation Center, Inc.). См. [`LICENSE_QUALCOMM_SGSR.txt`](LICENSE_QUALCOMM_SGSR.txt).
 - **RIFE / Practical-RIFE (MIT License)**: Архитектура нейросетевой интерполяции кадров на базе [megvii-research/ECCV2022-RIFE](https://github.com/megvii-research/ECCV2022-RIFE) и [hzwer/Practical-RIFE](https://github.com/hzwer/Practical-RIFE) (Copyright © 2020–2024 Megvii Research & Zhewei Huang). Конвертированные веса модели (`negai_rife_v422_lite_fp16.bin` и legacy `negai_rife_v426_fp16.bin`) распространяются по лицензии MIT в репозитории [Poison5820/Negai](https://github.com/Poison5820/Negai). См. [`LICENSE_RIFE.txt`](LICENSE_RIFE.txt).
 - **MIT KEMAR HRTF (MIT License)**: Бинауральные импульсные характеристики пространственного звука на базе набора [MIT Media Lab KEMAR HRTF](https://sound.media.mit.edu/resources/KEMAR.html) (Bill Gardner & Keith Martin). См. [`LICENSE_MIT_KEMAR_HRTF.txt`](LICENSE_MIT_KEMAR_HRTF.txt).
